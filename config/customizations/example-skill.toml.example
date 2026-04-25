@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/<skill-name>.toml — Layer 5 of the four-layer config model
+#
+# COMMITTED. Team-edited. Per-skill team override.
+#
+# Filename: customizations/<skill-name>.toml — the <skill-name> portion must
+# match a skill `canonicalId` from skill-manifest.csv exactly. The merger
+# loads each file's contents under skills.<skill-name> in the merged config.
+#
+# This example is for the (hypothetical) `bmad-create-prd` skill and
+# demonstrates ALL THREE merge behaviours that matter at this layer:
+#
+#   1. Scalar override:                   max_user_stories = 25
+#   2. Array-of-tables merge by `code`:   [[required_sections]]
+#   3. Suppress-from-base via _suppress:  the `competitive-positioning` entry
+#
+# A sibling `<skill-name>.user.toml` file (gitignored) can do the same things
+# at higher precedence for your personal overrides.
+#
+# Loaded layers and precedence (low → high):
+#   framework.toml → framework.user.toml → project.toml → project.user.toml
+#     → customizations/<skill-name>.toml → customizations/<skill-name>.user.toml
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+# These tune the skill's behaviour without touching its prompt.
+
+# Maximum number of user stories the skill will draft in a single PRD pass.
+# Framework default (in framework.toml) is 50. We want shorter PRDs.
+max_user_stories = 25
+
+# Free-form persona override. Whatever the skill's default agent persona is,
+# this string wins. Useful when one skill has multiple flavours and your
+# project consistently wants a particular one.
+preferred_persona = "john"
+
+# Toggle a skill-specific feature. Skill semantics define the meaning;
+# unknown keys are ignored, so this is forward-compatible.
+include_risk_section = true
+
+
+# ─── Table override ──────────────────────────────────────────────────────────
+# Tables recursive-merge: keys NOT mentioned here are inherited from lower
+# layers. So `output.format = "markdown"` (from framework.toml) is preserved
+# while we override `output.line_length` and add `output.front_matter`.
+
+[output]
+line_length = 100
+front_matter = true
+
+
+# ─── Array-of-tables — merge by `code` ───────────────────────────────────────
+# Each entry in `required_sections` carries a `code` key, so the merger
+# matches by `code` against the framework defaults:
+#
+#   • `executive-summary` (re-declared here) → fields recursive-merge with
+#     the framework default; we change `min_paragraphs` and add `tone_hint`,
+#     while inheriting any other fields from the lower-layer default.
+#
+#   • `compliance-callout` (new) → appended.
+#
+#   • `competitive-positioning` (suppressed) → DROPPED from the merged
+#     result entirely. See SCHEMAS.md § 1.4 for the suppression contract.
+
+[[required_sections]]
+code = "executive-summary"
+min_paragraphs = 2
+tone_hint = "decisive, no hedging"
+
+[[required_sections]]
+code = "compliance-callout"
+title = "Regulatory Considerations"
+template_block = "compliance-callout-block.md"
+optional = false
+
+# Suppress the framework-default "competitive-positioning" section.
+# Only the `code` and `_suppress = true` fields are needed; any other
+# fields here would be ignored. To re-introduce this section in a still
+# higher layer (e.g. <skill-name>.user.toml), declare it again WITHOUT
+# `_suppress` and the entry returns.
+[[required_sections]]
+code = "competitive-positioning"
+_suppress = true
+
+
+# ─── Array-of-scalars — replaces, does not append ────────────────────────────
+# Higher-layer arrays of scalars REPLACE rather than merge. Use this when
+# you want to fully redefine a list. If you need to add to a base list,
+# convert that list to an array-of-tables in the schema.
+banned_phrases = [
+  "leverage",
+  "synergy",
+  "best-in-class",
+]

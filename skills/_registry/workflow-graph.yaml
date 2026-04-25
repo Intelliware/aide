@@ -1,0 +1,133 @@
+# Workflow graph for theframework.
+#
+# Hand-authored companion to the generated `skills.csv` / `skills.json`. Captures
+# the parts of skill flow that cannot be inferred from SKILL.md frontmatter:
+#   - Stage groupings and ordering
+#   - Workflow edges (before / after between specific skills)
+#   - Required gates (which review skills block which transitions)
+#   - Mode-aware routing (greenfield / brownfield / quick-dev)
+#
+# Edit this file when:
+#   - A new stage is introduced or an existing stage is renamed/reordered.
+#   - The sequence of skills inside a flow changes.
+#   - A new gate is required (e.g. a new review skill blocks a transition).
+#   - A new flow is added.
+#
+# Skill names referenced below must match the `name` field of an existing
+# SKILL.md (which equals the folder name). Run `scripts/build-registry.py` and
+# the task #8 validation pass to confirm every reference resolves.
+
+version: 1
+
+stages:
+  - id: meta
+    description: "Cross-cutting orchestrators and utilities (start-project, customize-framework, framework-navigator, shared utilities)."
+    order: 0
+  - id: requirements
+    description: "Gather, analyze, write, and review functional and non-functional requirements."
+    order: 1
+  - id: design
+    description: "Translate approved requirements into a solution design package, including C4 diagrams and technology choices."
+    order: 2
+  - id: planning
+    description: "Decompose the approved design into increments conforming to the Canonical Increment Shape."
+    order: 3
+  - id: execution
+    description: "Execute increments with TDD, manage bugs, and create pull requests."
+    order: 4
+  - id: reverse-engineering
+    description: "Analyze and document existing code repositories (API, UI, DB, mobile, framework) into Part A/B docs that feed the knowledge base."
+    order: 5
+  - id: knowledge-base
+    description: "Build, navigate, update, and verify the cross-repository knowledge base."
+    order: 6
+  - id: quick-dev
+    description: "Lightweight scoped-change path: document-quick-change, plan-quick-change, execute-quick-change."
+    order: 7
+
+flows:
+  greenfield:
+    description: "Full SDLC from requirements through execution. Best for new projects with elaborate workflow."
+    sequence:
+      - skill: start-project
+      - skill: create-requirements-package
+        gates:
+          - skill: review-requirements-package
+            required: true
+      - skill: create-design-package
+        gates:
+          - skill: review-design-package
+            required: true
+      - skill: create-implementation-package
+        gates:
+          - skill: review-implementation-package
+            required: true
+      - skill: execute-increments
+        per-increment-closing-skill: update-knowledge-base
+      - skill: create-pr
+
+  brownfield:
+    description: "Existing codebase. Reverse-engineer first to populate the KB, then run an enhancement flow."
+    sequence:
+      - skill: start-project
+      - skill: analyze-repository
+      # analyze-repository selects ONE of the seven domain skills at runtime:
+      #   reverse-engineer-api, reverse-engineer-api-framework,
+      #   reverse-engineer-database, reverse-engineer-mobile-app,
+      #   reverse-engineer-mobile-framework, reverse-engineer-ui-framework,
+      #   reverse-engineer-web-app.
+      # The placeholder below is a dispatcher slot — validation skips it.
+      - skill: reverse-engineer-<dynamic>
+        dispatcher: analyze-repository
+      - skill: build-knowledge-base
+      - skill: verify-knowledge-base-coverage
+      - skill: create-requirements-package
+        # In brownfield mode this skill consumes the KB via navigate-knowledge-base.
+        gates:
+          - skill: review-requirements-package
+            required: true
+      - skill: create-design-package
+        gates:
+          - skill: review-design-package
+            required: true
+      - skill: create-implementation-package
+        gates:
+          - skill: review-implementation-package
+            required: true
+      - skill: execute-increments
+        per-increment-closing-skill: update-knowledge-base
+      - skill: create-pr
+
+  quick-dev:
+    description: "Small scoped change path. Skips full requirements/design/planning packages."
+    sequence:
+      - skill: start-project
+      - skill: document-quick-change
+      - skill: plan-quick-change
+      - skill: execute-quick-change
+        # update-knowledge-base runs in catalog-only scope after each increment.
+        per-increment-closing-skill: update-knowledge-base
+      - skill: create-pr
+
+# Skills that may be invoked at any time, regardless of the active flow.
+# These are cross-cutting utilities and KB consumers; they are intentionally
+# omitted from flow `sequence` blocks so a missing reference there is a real
+# error rather than an "anytime" misclassification.
+anytime:
+  - framework-navigator
+  - customize-framework
+  - shard-document
+  - track-change
+  - verify-source
+  - manage-bugs
+  - navigate-knowledge-base
+  - detect-knowledge-base-drift
+
+# Validation rules the registry generator (or task #8 validation) should enforce.
+# `every-flow-skill-must-resolve` skips dispatcher placeholders (any skill name
+# containing `<dynamic>`); `dispatcher:` should name the skill that performs
+# the runtime selection.
+validation:
+  every-flow-skill-must-resolve: true
+  every-gate-skill-must-resolve: true
+  every-anytime-skill-must-resolve: true

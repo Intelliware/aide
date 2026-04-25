@@ -1,0 +1,91 @@
+---
+name: reverse-engineer-api-framework
+description: "Use when the user asks to document a backend / API framework, server-side library, middleware framework, or reusable backend components. Produces Part A (internal framework docs) and Part B (implementer docs for API developers using the framework). Do NOT use for individual API repositories — use reverse-engineer-api instead."
+---
+
+# Reverse Engineer API Framework Documentation
+
+Drives a 5-stage extraction workflow that turns an existing API/backend framework into two documentation parts: Part A (full internals for framework maintainers) and Part B (implementer docs for API developers using the framework).
+
+## Overview
+
+API frameworks differ from API applications: they are consumed by other developers as a dependency rather than by end users via HTTP. Their value lives in their extension points, configuration surface, and request-pipeline contract. This skill captures both the framework's internals (Part A) and the strict subset that consumers need (Part B).
+
+## When to use
+
+- User asks to document an API framework, backend framework, server-side library
+- The codebase is published as a package (npm, NuGet, Maven) and consumed by other API repos
+- User has been routed here by `analyze-repository` after API-framework classification
+
+## When NOT to use
+
+- The repo is a single API service, not a framework — use `reverse-engineer-api`
+- The repo is a UI component library — use `reverse-engineer-ui-framework`
+- The repo is a generic shared library with no request-pipeline concept — consider whether `reverse-engineer-api-framework` truly fits or whether the domain is better captured elsewhere
+
+## Inputs
+
+- Path to the API framework repository
+- Source version being documented
+- Reference: `references/elicitation-patterns/repo-scope-discovery.md` for the scope-discovery elicitation
+- Optional: existing implementer documentation to verify against
+
+## Documentation Model
+
+| Part | Audience | Content | Destination |
+| --- | --- | --- | --- |
+| Part A | Framework maintainers | Full internals: architecture, middleware pipeline, DI, build, internal patterns | Stays in framework repo |
+| Part B | API developers using the framework | Public API, extension points, configuration, patterns, recipes | Knowledge base |
+
+**Rule:** Part B is always a strict subset of Part A.
+
+## Workflow
+
+### Stage 1: Discovery and Inventory
+- Inventory middleware, services, decorators, guards, interceptors, pipes, DI tokens, configuration options
+- Run `steps/scaffold.md` to establish file structure for Part A and Part B BEFORE any content extraction
+
+### Stage 2: Foundation
+- Framework architecture, request pipeline, DI system, configuration, error handling conventions
+
+### Stage 3: Component-by-Component Extraction
+- For each component: public API, configuration options, extension points, behavior
+- Distinguish between internal implementation (Part A only) and consumer-facing API (Part A + Part B)
+
+### Stage 4: Patterns, Recipes, and Migration
+- Common usage patterns, anti-patterns, testing utilities, migration guides
+
+### Stage 5: Verification and Finalization
+- Run `steps/verify.md` to execute the full extraction-verification gate
+- Validate the Part B subset rule (every Part B item must exist in Part A)
+- Log all changes using the `track-change` skill
+
+## Key Rules
+
+- **Document the request pipeline thoroughly** — this is the heart of an API framework
+- **Extension points are critical** — consumers need to know exactly how to customize behavior
+- **Configuration options need actual defaults verified against source code**
+- **Part B is a strict subset of Part A** — never put something in Part B that isn't in Part A
+
+## Compositions
+
+- `templates/compositions/re-api-framework-internal.yaml` — Part A blocks
+- `templates/compositions/re-api-framework-consumer.yaml` — Part B blocks (validation pass will surface coverage gaps)
+
+## Output
+
+- Part A: `<repo>/docs/api-framework-internal/` (stays in source repo)
+- Part B: `<KB>/source-docs/<repo-slug>/api-framework-consumer.md`
+- `extraction-status.md` and `CHANGE-TRACKER.md` inside the source repo
+
+## Next skill
+
+`build-knowledge-base` — aggregates Part B into the central KB index.
+
+## Common mistakes
+
+- Documenting internal implementation in Part B and leaking abstraction
+- Missing extension-point documentation — the most valuable Part B content
+- Inventing default configuration values without verifying against source
+- Skipping the Part B ⊆ Part A subset check during verification
+- Generating content during scaffolding — `steps/scaffold.md` produces structure-only

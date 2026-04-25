@@ -1,0 +1,46 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Editor / IDE
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Python build artifacts (scripts/build-registry.py, scripts/validate.py)
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Personal config layers — per the four-layer config design these are
+# gitignored by design (Layer 2 + Layer 4 + per-skill .user overrides).
+config/framework.user.toml
+config/project.user.toml
+config/customizations/*.user.toml
+
+# BMAD method — kept locally for reference / inspiration only;
+# not part of theframework.
+_bmad/
+_bmad-output/
+
+# Claude Code local settings
+.claude/

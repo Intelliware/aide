@@ -1,0 +1,219 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# framework.toml — Layer 1 of the four-layer config model
+#
+# This file is INSTALLER-MANAGED. It is regenerated on every install — treat
+# it as read-only. Direct edits will be overwritten on the next install.
+#
+# To change a value durably, choose the right layer:
+#   • For a personal/global preference  → framework.user.toml      (gitignored)
+#   • For a project-wide value          → project.toml             (committed)
+#   • For a personal project preference → project.user.toml        (gitignored)
+#   • For a per-skill team override     → customizations/<skill>.toml
+#   • For a per-skill personal override → customizations/<skill>.user.toml
+#
+# Merge rules (lowest precedence to highest):
+#   framework.toml → framework.user.toml → project.toml → project.user.toml
+#     → customizations/<skill>.toml → customizations/<skill>.user.toml
+#
+# Scalars override; tables recursive-merge; arrays-of-tables with `code`/`id`
+# merge by key (use `_suppress = true` to drop a base entry); other arrays
+# replace.
+#
+# Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── [core] ──────────────────────────────────────────────────────────────────
+# Framework-wide defaults that apply unless a higher layer overrides them.
+[core]
+
+# Language for all GENERATED ARTIFACTS (PRDs, architecture docs, KB entries…).
+# Free-form so dialect codes (e.g. "en-GB", "pt-BR") and non-English values
+# work. This is distinct from `user.communication_language` in
+# framework.user.toml — that one controls the chat language.
+output_language = "English"
+
+# Default flow when project.toml does not specify one.
+# Values: "greenfield" | "brownfield" | "quick-dev"
+default_flow = "greenfield"
+
+# Default root for non-KB stage outputs (requirements, design,
+# implementation packages). Per-stage overrides go in
+# project.toml's [project.paths].
+output_root = "{project-root}/.framework-output"
+
+# When true, agents fail loudly on terms that are not in the project glossary.
+# When false (default) they emit a warning and proceed. Off by default to
+# avoid blocking new vocabulary that arrives mid-stage.
+glossary_strict = false
+
+
+# ─── [stages.requirements] ───────────────────────────────────────────────────
+# Defaults for the requirements stage.
+[stages.requirements]
+
+# Whether the stage appears in the orchestrator menu. Setting false hides it.
+enabled = true
+
+# Default YAML composition for this stage. The orchestrator looks this up
+# under compositions/requirements/<name>.yaml. Override per-project in
+# project.toml or per-flow in customizations/<skill>.toml.
+default_composition = "greenfield-default"
+
+# Required artifacts for this stage. Each entry is keyed by `code`, which is
+# the merge key — a higher layer can override fields, suppress entries with
+# `_suppress = true`, or add new entries.
+[[stages.requirements.required_artifacts]]
+code = "product-brief"
+title = "Product Brief"
+template = "product-brief-template.md"
+optional = false
+
+[[stages.requirements.required_artifacts]]
+code = "prd"
+title = "Product Requirements Document"
+template = "prd-template.md"
+optional = false
+
+[[stages.requirements.required_artifacts]]
+code = "ux-design"
+title = "UX Design Specification"
+template = "ux-design-template.md"
+optional = true
+
+[[stages.requirements.required_artifacts]]
+code = "competitive-analysis"
+title = "Competitive Analysis"
+template = "competitive-analysis-template.md"
+optional = true
+
+# Stage-scoped elicitation defaults. Skills read these before starting their
+# own elicitation pass; user answers in project.toml or in-session override.
+[stages.requirements.elicitation]
+default_depth = "standard"  # "minimal" | "standard" | "deep"
+persona = "john"            # PM persona by default for requirements
+
+
+# ─── [stages.design] ─────────────────────────────────────────────────────────
+[stages.design]
+enabled = true
+default_composition = "greenfield-default"
+
+[[stages.design.required_artifacts]]
+code = "architecture"
+title = "Solution Architecture"
+template = "architecture-template.md"
+optional = false
+
+[[stages.design.required_artifacts]]
+code = "epics-and-stories"
+title = "Epics and Stories"
+template = "epics-and-stories-template.md"
+optional = false
+
+[[stages.design.required_artifacts]]
+code = "implementation-readiness-check"
+title = "Implementation Readiness Checklist"
+template = "implementation-readiness-template.md"
+optional = false
+
+[stages.design.elicitation]
+default_depth = "standard"
+persona = "winston"
+
+
+# ─── [stages.implementation] ─────────────────────────────────────────────────
+[stages.implementation]
+enabled = true
+default_composition = "greenfield-default"
+
+[[stages.implementation.required_artifacts]]
+code = "story-files"
+title = "Per-story implementation files"
+template = "story-template.md"
+optional = false
+
+[[stages.implementation.required_artifacts]]
+code = "code-review"
+title = "Code Review Findings"
+template = "code-review-template.md"
+optional = false
+
+[[stages.implementation.required_artifacts]]
+code = "retrospective"
+title = "Epic Retrospective"
+template = "retrospective-template.md"
+optional = true
+
+[stages.implementation.elicitation]
+default_depth = "minimal"
+persona = "amelia"
+
+
+# ─── [stages.knowledge-base] ─────────────────────────────────────────────────
+# The KB stage runs in brownfield (extract from existing source) and after
+# every story (refresh affected components). It is enabled in all flows.
+[stages.knowledge-base]
+enabled = true
+default_composition = "build-and-maintain"
+
+[[stages.knowledge-base.required_artifacts]]
+code = "architecture-md"
+title = "ARCHITECTURE.md root index"
+template = "kb-architecture.template.md"
+optional = false
+
+[[stages.knowledge-base.required_artifacts]]
+code = "graph-json"
+title = "graph.json dependency graph"
+template = "kb-graph.example.json"
+optional = false
+
+[[stages.knowledge-base.required_artifacts]]
+code = "component-docs"
+title = "Per-component component_id.md files"
+template = "kb-component-frontmatter.example.yaml"
+optional = false
+
+[stages.knowledge-base.elicitation]
+default_depth = "minimal"
+persona = "paige"
+
+
+# ─── [knowledge_base] ────────────────────────────────────────────────────────
+# Default KB conventions. Most projects accept these unchanged.
+[knowledge_base]
+
+# Default KB location relative to the project root. The KB is its own repo,
+# so this almost always lives outside {project-root}. Overridden per project
+# in project.toml's `[project.paths] knowledge_base_path`.
+default_path = "{project-root}/../knowledge-base"
+
+# Filenames the build- and verify-knowledge-base skills look for.
+architecture_filename = "ARCHITECTURE.md"
+graph_filename = "graph.json"
+components_dirname = "components"
+
+# Default verification signal applied to newly authored components.
+# Values: "openapi-diff" | "exported-symbols-diff" | "route-inventory-diff"
+#       | "schema-diff" | "manual"
+default_verification_signal = "openapi-diff"
+
+# Components whose `last_verified_against_commit` corresponds to a commit
+# older than this many days raise a staleness warning when the KB is read.
+staleness_warning_days = 30
+
+
+# ─── [registry] ──────────────────────────────────────────────────────────────
+# Skill-registry regeneration triggers. The registry is the CSV the
+# orchestrator and help router consume to know what skills exist.
+[registry]
+
+# Regenerate skill-manifest.csv at the end of every installer run.
+regenerate_on_install = true
+
+# Watch SKILL.md frontmatter and regenerate when descriptions change.
+regenerate_on_skill_change = true
+
+# Where the registry generator writes its output.
+manifest_path = "{framework-root}/_config/skill-manifest.csv"

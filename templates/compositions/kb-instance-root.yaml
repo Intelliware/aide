@@ -1,0 +1,44 @@
+# Composition: Knowledge Base — Instance Root (ARCHITECTURE.md)
+#
+# Composes the root index of a knowledge-base instance: an ARCHITECTURE.md
+# that pulls in the architecture-index trunk plus a capability-index section.
+# This is the entry document a reader hits first when exploring the KB.
+#
+# Source: templates/blocks/knowledge-base/
+
+name: kb-instance-root
+description: Knowledge-base root index (ARCHITECTURE.md) — architecture index + capability index.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-root
+
+default-output-path: "{paths.knowledge_base_path}/ARCHITECTURE.md"
+
+blocks:
+  - slug: knowledge-base/architecture-index
+    optional: false
+    order: 1
+  - slug: knowledge-base/capability-index
+    optional: false
+    order: 2
+
+elicitation:
+  - prompt: references/elicitation-patterns/kb-root-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/capability-mapping.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  This composition is the canonical KB root. It is invariably composed of
+  exactly two blocks (architecture-index as trunk, capability-index as
+  embedded section). Per-component leaf docs are produced via
+  kb-component.yaml; per-decision ADRs are produced via the adr-template
+  block (one ADR per file under paths.knowledge_base_path/adr/).
+
+  Note: the architecture-index block declares applies-to: [kb-instance-root]
+  while capability-index, repo-summary, component, shared-entity, and
+  adr-template all declare applies-to: [kb-instance]. Pulling capability-index
+  into kb-instance-root is intentional — it is the only kb-instance-scoped
+  block we promote into the root composition because its purpose IS to act
+  as a directory for the root index.

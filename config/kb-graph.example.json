@@ -1,0 +1,68 @@
+{
+  "_comment": "kb-graph.example.json — example graph.json for the order-checkout-flow component cluster, spanning api-orders, api-billing, and web-portal. Demonstrates all four edge `kind` values: calls, consumes, depends-on, derives-from. Schema: { nodes: [{id, repo, type, doc}], edges: [{from, to, kind}] }. The _comment field is ignored by readers and is here only because JSON has no comment syntax.",
+  "_schema_version": "1.0",
+  "nodes": [
+    {
+      "id": "order-checkout-flow",
+      "repo": "api-orders",
+      "type": "api-feature",
+      "doc": "components/api-orders/order-checkout-flow.md"
+    },
+    {
+      "id": "billing-payment-authorization",
+      "repo": "api-billing",
+      "type": "api-feature",
+      "doc": "components/api-billing/billing-payment-authorization.md"
+    },
+    {
+      "id": "billing-refund-processor",
+      "repo": "api-billing",
+      "type": "api-feature",
+      "doc": "components/api-billing/billing-refund-processor.md"
+    },
+    {
+      "id": "settlement-projection",
+      "repo": "api-billing",
+      "type": "database-schema",
+      "doc": "components/api-billing/settlement-projection.md"
+    },
+    {
+      "id": "web-portal-checkout-page",
+      "repo": "web-portal",
+      "type": "ui-feature",
+      "doc": "components/web-portal/web-portal-checkout-page.md"
+    }
+  ],
+  "edges": [
+    {
+      "from": "web-portal-checkout-page",
+      "to": "order-checkout-flow",
+      "kind": "calls"
+    },
+    {
+      "from": "order-checkout-flow",
+      "to": "billing-payment-authorization",
+      "kind": "calls"
+    },
+    {
+      "from": "billing-refund-processor",
+      "to": "billing-payment-authorization",
+      "kind": "depends-on"
+    },
+    {
+      "from": "settlement-projection",
+      "to": "billing-payment-authorization",
+      "kind": "derives-from"
+    },
+    {
+      "from": "settlement-projection",
+      "to": "order-checkout-flow",
+      "kind": "derives-from"
+    },
+    {
+      "from": "billing-refund-processor",
+      "to": "order-checkout-flow",
+      "kind": "consumes"
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+# Composition: Reverse-Engineering — Mobile App (Internal Part)
+#
+# Documents the INTERNAL implementation of a mobile-app codebase: app
+# overview, project structure, architecture, navigation, state, networking,
+# auth, persistence, native-module integration, platform specifics, build
+# variants, signing, CI/CD, testing, common patterns, anti-patterns, etc.
+#
+# Source: templates/blocks/reverse-eng/mobile-app/internal/
+
+name: re-mobile-app-internal
+description: Reverse-engineering KB for the internal implementation of a mobile-app codebase.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/mobile-app-internal.md"
+
+blocks:
+  - slug: reverse-eng/mobile-app/internal/application-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/mobile-app/internal/platform-support-and-requirements
+    optional: false
+    order: 120
+  - slug: reverse-eng/mobile-app/internal/project-structure-and-organization
+    optional: false
+    order: 130
+  - slug: reverse-eng/mobile-app/internal/build-configuration-variants-and-schemes
+    optional: false
+    order: 140
+  - slug: reverse-eng/mobile-app/internal/application-architecture
+    optional: false
+    order: 150
+  - slug: reverse-eng/mobile-app/internal/navigation-structure
+    optional: false
+    order: 160
+  - slug: reverse-eng/mobile-app/internal/deep-linking-and-url-schemes
+    optional: false
+    order: 170
+    include-if: "project.elicitation.has_deep_links == true"
+  - slug: reverse-eng/mobile-app/internal/state-management
+    optional: false
+    order: 180
+  - slug: reverse-eng/mobile-app/internal/dependency-injection-and-service-locators
+    optional: false
+    order: 190
+  - slug: reverse-eng/mobile-app/internal/local-storage-and-persistence
+    optional: false
+    order: 200
+  - slug: reverse-eng/mobile-app/internal/api-integration-and-networking
+    optional: false
+    order: 210
+  - slug: reverse-eng/mobile-app/internal/authentication-and-authorization
+    optional: false
+    order: 220
+  - slug: reverse-eng/mobile-app/internal/push-notifications
+    optional: false
+    order: 230
+    include-if: "project.elicitation.has_push_notifications == true"
+  - slug: reverse-eng/mobile-app/internal/feature-inventory
+    optional: false
+    order: 240
+  - slug: reverse-eng/mobile-app/internal/shared-components-and-patterns
+    optional: false
+    order: 250
+  - slug: reverse-eng/mobile-app/internal/platform-specific-concerns
+    optional: false
+    order: 260
+  - slug: reverse-eng/mobile-app/internal/permissions-and-capabilities
+    optional: false
+    order: 270
+  - slug: reverse-eng/mobile-app/internal/platform-specific-ui-patterns
+    optional: false
+    order: 280
+  - slug: reverse-eng/mobile-app/internal/native-module-integration
+    optional: false
+    order: 290
+    include-if: "project.elicitation.has_native_modules == true"
+  - slug: reverse-eng/mobile-app/internal/testing-strategy-and-infrastructure
+    optional: false
+    order: 300
+  - slug: reverse-eng/mobile-app/internal/application-signing-and-distribution
+    optional: false
+    order: 310
+  - slug: reverse-eng/mobile-app/internal/ci-cd-integration-and-deployment
+    optional: false
+    order: 320
+  - slug: reverse-eng/mobile-app/internal/performance-patterns-and-optimization
+    optional: false
+    order: 330
+  - slug: reverse-eng/mobile-app/internal/common-patterns-and-recipes
+    optional: false
+    order: 340
+  - slug: reverse-eng/mobile-app/internal/anti-patterns-and-gotchas
+    optional: false
+    order: 350
+  - slug: reverse-eng/mobile-app/internal/glossary
+    optional: false
+    order: 360
+  - slug: reverse-eng/mobile-app/internal/quick-reference
+    optional: false
+    order: 370
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/mobile-app/internal/deep-linking-and-url-schemes
+    include-if: "project.elicitation.has_deep_links == true"
+  - block: reverse-eng/mobile-app/internal/push-notifications
+    include-if: "project.elicitation.has_push_notifications == true"
+  - block: reverse-eng/mobile-app/internal/native-module-integration
+    include-if: "project.elicitation.has_native_modules == true"
+
+notes: |
+  Block order follows order-hint values 110..370. Conditional gates exist
+  for capabilities not every mobile app uses (deep links, push, native modules).

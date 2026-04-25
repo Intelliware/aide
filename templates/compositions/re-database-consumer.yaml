@@ -1,0 +1,53 @@
+# Composition: Reverse-Engineering — Database (Consumer Part)
+#
+# Documents how to QUERY/use a database as an application developer (the
+# consumer view) — query patterns, transactions, error handling, performance
+# tips, working with stored procedures.
+#
+# Source: templates/blocks/reverse-eng/database/consumer/
+
+name: re-database-consumer
+description: Reverse-engineering KB for consuming a database as an application developer.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/database-consumer.md"
+
+blocks:
+  - slug: reverse-eng/database/consumer/how-to-query-this-database
+    optional: false
+    order: 290
+  - slug: reverse-eng/database/consumer/common-query-patterns
+    optional: false
+    order: 300
+  - slug: reverse-eng/database/consumer/working-with-stored-procedures
+    optional: false
+    order: 310
+    include-if: "project.elicitation.has_stored_procedures == true"
+  - slug: reverse-eng/database/consumer/transactions-and-concurrency
+    optional: false
+    order: 320
+  - slug: reverse-eng/database/consumer/error-handling-and-recovery
+    optional: false
+    order: 330
+  - slug: reverse-eng/database/consumer/performance-guidelines-for-developers
+    optional: false
+    order: 340
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/database/consumer/working-with-stored-procedures
+    include-if: "project.elicitation.has_stored_procedures == true"
+
+notes: |
+  Block order follows order-hint values 290..340 (this part picks up where
+  re-database-internal leaves off; ordering is shared with re-database-internal
+  so both files compose into one continuous DB knowledge base if rendered
+  together).
+
+  For richer context, application teams should typically read both
+  re-database-internal (schema, constraints, indexes) and this consumer
+  composition (how to write queries against that schema).

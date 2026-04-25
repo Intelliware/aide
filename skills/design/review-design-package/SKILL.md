@@ -1,0 +1,73 @@
+---
+name: review-design-package
+description: "Use when the user asks to review, validate, or check readiness of an assembled design package; says 'review the design package', 'review the solution design', 'validate the design', 'check design readiness', 'architecture review', 'security posture review', 'is the design ready for implementation', 'solution readiness', 'implementation handoff'. Independently invocable; assumes the design package is already assembled."
+---
+
+# Review Design Package
+
+## Overview
+
+Runs the formal review sequence and final readiness gate against an already-assembled design package. Produces findings and a verdict per review (PASS / PASS WITH OBSERVATIONS / FAIL or, for readiness, GO / CONDITIONAL GO / NO-GO), ending with `review-solution-readiness` as the gate before planning handoff. Independently invocable: the user can run this skill against any existing design package without re-running creation.
+
+The review sequence is strict — three reviews in fixed order (architecture, security-posture, readiness), no parallel execution. A NO-GO or blocking finding halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. Folder name is `review-design-package` (renamed from the legacy `solution-review` to drop the "solution-" prefix and align with the new stage name "design").
+
+## When to use
+
+- An assembled design package exists and validation is wanted before planning handoff
+- User says: "review the design package", "review the solution design", "validate the design", "architecture review", "security posture review", "is the design ready for implementation", "implementation handoff"
+- Re-validating after a downstream skill flagged a design gap
+- Re-validating after the design change tracker recorded amendments
+
+## When NOT to use
+
+- The design package is not yet assembled — run `create-design-package` first
+- The user wants validation of a requirements or implementation package — `review-requirements-package` or future `review-implementation-package`
+- The user wants to create or amend the design — `create-design-package`
+
+## Inputs
+
+| Name | Required? |
+|---|---|
+| Assembled design package (`solution-package.md` alias or `{paths.design_path}/{feature-id}-design.md`) | yes |
+| Design `change-tracker.md` | yes |
+| Architecture baseline (when present) | conditional |
+| Approved requirements package + readiness verdict | yes |
+| `project.toml` | yes |
+
+See `references/INPUTS-OUTPUTS.md` for the full table.
+
+## Workflow
+
+Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any NO-GO or blocking finding until resolved.
+
+| Order | Review | What it validates |
+|---|---|---|
+| 1 | review-architecture | Structural soundness, scalability, resilience, maintainability |
+| 2 | review-security-posture | Security vulnerabilities, authn/authz, data protection, compliance posture |
+| 3 | review-solution-readiness | Final GO / CONDITIONAL GO / NO-GO gate for planning handoff |
+
+The detailed instructions, halt conditions, and verdict templates live in `references/review-workflow.md`.
+
+## Output
+
+| Artifact | Path | Format |
+|---|---|---|
+| Per-review findings | `docs/<feature>/solutions-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Final readiness verdict | `docs/<feature>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `docs/<feature>/solutions-package/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+
+## Next skill
+
+- If readiness verdict = GO or CONDITIONAL GO (user-accepted) → `create-implementation-package`
+- If readiness verdict = NO-GO → back to `create-design-package` to address the failing area, then re-run this skill
+
+## Common mistakes
+
+- Running reviews in parallel. Sequence depends on earlier verdicts being settled before later reviews run.
+- Skipping ahead. Every review depends on the verdict of the one before it.
+- Treating CONDITIONAL GO as GO. Conditions must be logged and explicitly accepted.
+- Forgetting to re-run an earlier review when a fix materially changes its checked content.
+- Authoring design during review. This skill validates only — fixes are deferred to `create-design-package` (or done with this skill's help in a clearly bracketed fix-then-re-validate cycle).
+- Skipping the readiness gate. `review-solution-readiness` is the last review; without GO or accepted CONDITIONAL GO, planning handoff is blocked.
+- Not appending `Review finding` rows to the change tracker for every fix.
+- Reviewing without the requirements readiness verdict. The design must reference an APPROVED requirements package; if requirements are not approved, halt and route back.

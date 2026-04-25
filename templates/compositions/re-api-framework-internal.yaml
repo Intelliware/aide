@@ -1,0 +1,110 @@
+# Composition: Reverse-Engineering — API Framework (Internal Part)
+#
+# Documents the INTERNAL implementation of a framework that other teams use
+# to build APIs (i.e. the framework maintainer's view). Mirrors
+# re-api-framework-consumer in domain but inverts perspective.
+#
+# Source: templates/blocks/reverse-eng/api-framework/internal/
+
+name: re-api-framework-internal
+description: Reverse-engineering KB for the internal implementation of an API framework.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/api-framework-internal.md"
+
+blocks:
+  - slug: reverse-eng/api-framework/internal/architecture-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/api-framework/internal/source-layout
+    optional: false
+    order: 120
+  - slug: reverse-eng/api-framework/internal/routing-internals
+    optional: false
+    order: 130
+  - slug: reverse-eng/api-framework/internal/middleware-pipeline
+    optional: false
+    order: 140
+  - slug: reverse-eng/api-framework/internal/request-parsing-and-validation
+    optional: false
+    order: 150
+  - slug: reverse-eng/api-framework/internal/response-serialization
+    optional: false
+    order: 160
+  - slug: reverse-eng/api-framework/internal/error-handling-pipeline
+    optional: false
+    order: 170
+  - slug: reverse-eng/api-framework/internal/configuration-system
+    optional: false
+    order: 180
+  - slug: reverse-eng/api-framework/internal/logging-architecture
+    optional: false
+    order: 190
+  - slug: reverse-eng/api-framework/internal/plugin-extension-system
+    optional: false
+    order: 200
+  - slug: reverse-eng/api-framework/internal/dependency-injection
+    optional: true
+    order: 210
+    include-if: "project.elicitation.framework_provides_di == true"
+  - slug: reverse-eng/api-framework/internal/auth-extension-points
+    optional: false
+    order: 220
+  - slug: reverse-eng/api-framework/internal/database-and-orm-integration
+    optional: true
+    order: 230
+    include-if: "project.elicitation.framework_provides_data_access == true"
+  - slug: reverse-eng/api-framework/internal/testing-harness
+    optional: false
+    order: 240
+  - slug: reverse-eng/api-framework/internal/cli-and-scaffolding
+    optional: true
+    order: 250
+    include-if: "project.elicitation.framework_ships_cli == true"
+  - slug: reverse-eng/api-framework/internal/build-and-packaging
+    optional: false
+    order: 260
+  - slug: reverse-eng/api-framework/internal/release-process
+    optional: false
+    order: 270
+  - slug: reverse-eng/api-framework/internal/performance-tuning
+    optional: false
+    order: 280
+  - slug: reverse-eng/api-framework/internal/security-model
+    optional: false
+    order: 290
+  - slug: reverse-eng/api-framework/internal/observability-hooks
+    optional: false
+    order: 300
+  - slug: reverse-eng/api-framework/internal/compatibility-strategy
+    optional: false
+    order: 310
+  - slug: reverse-eng/api-framework/internal/conventions-and-idioms
+    optional: false
+    order: 320
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/api-framework/internal/dependency-injection
+    include-if: "project.elicitation.framework_provides_di == true"
+  - block: reverse-eng/api-framework/internal/database-and-orm-integration
+    include-if: "project.elicitation.framework_provides_data_access == true"
+  - block: reverse-eng/api-framework/internal/cli-and-scaffolding
+    include-if: "project.elicitation.framework_ships_cli == true"
+
+notes: |
+  Block order follows order-hint values from each block's frontmatter
+  (110..320). Three blocks are gated because not every framework includes
+  them: dependency-injection (some frameworks intentionally avoid DI),
+  database-and-orm-integration (many API frameworks delegate persistence),
+  and cli-and-scaffolding (minimalist frameworks ship as a library only).
+  Set the corresponding flags in the project's elicitation/project.toml.
+
+  This composition produces a single api-framework-internal.md per
+  framework. For framework families that share a kernel but ship as
+  multiple packages (core + plugins), run once for the whole monorepo and
+  treat plugins as subsystems within source-layout / plugin-extension-system.

@@ -1,0 +1,110 @@
+# Composition: Reverse-Engineering — Database (Internal Part)
+#
+# Documents the INTERNAL implementation of a database / data store: schema,
+# constraints, indexes, views, stored procedures, triggers, migrations,
+# auth, security, retention, monitoring, etc. (the DBA/owner view).
+#
+# Source: templates/blocks/reverse-eng/database/internal/
+
+name: re-database-internal
+description: Reverse-engineering KB for the internal implementation of a database.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/database-internal.md"
+
+blocks:
+  - slug: reverse-eng/database/internal/database-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/database/internal/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/database/internal/schema-overview-and-erd
+    optional: false
+    order: 130
+  - slug: reverse-eng/database/internal/naming-conventions
+    optional: false
+    order: 140
+  - slug: reverse-eng/database/internal/tables-detailed-documentation
+    optional: false
+    order: 150
+  - slug: reverse-eng/database/internal/constraints-and-integrity
+    optional: false
+    order: 160
+  - slug: reverse-eng/database/internal/indexes-and-performance
+    optional: false
+    order: 170
+  - slug: reverse-eng/database/internal/views
+    optional: false
+    order: 180
+    include-if: "project.elicitation.has_views == true"
+  - slug: reverse-eng/database/internal/materialization-and-refresh-strategy
+    optional: false
+    order: 190
+    include-if: "project.elicitation.has_materialized_views == true"
+  - slug: reverse-eng/database/internal/stored-procedures-and-functions
+    optional: false
+    order: 200
+    include-if: "project.elicitation.has_stored_procedures == true"
+  - slug: reverse-eng/database/internal/triggers
+    optional: false
+    order: 210
+    include-if: "project.elicitation.has_triggers == true"
+  - slug: reverse-eng/database/internal/security-and-access-control
+    optional: false
+    order: 220
+  - slug: reverse-eng/database/internal/authentication-and-connection
+    optional: false
+    order: 230
+  - slug: reverse-eng/database/internal/reference-and-seed-data
+    optional: false
+    order: 240
+  - slug: reverse-eng/database/internal/migrations-and-versioning
+    optional: false
+    order: 250
+  - slug: reverse-eng/database/internal/backup-and-recovery
+    optional: false
+    order: 260
+  - slug: reverse-eng/database/internal/data-retention-and-archival
+    optional: false
+    order: 270
+  - slug: reverse-eng/database/internal/monitoring-and-performance-baselines
+    optional: false
+    order: 280
+  - slug: reverse-eng/database/internal/anti-patterns-and-pitfalls
+    optional: false
+    order: 350
+  - slug: reverse-eng/database/internal/new-table-checklist
+    optional: false
+    order: 360
+  - slug: reverse-eng/database/internal/glossary-and-data-definitions
+    optional: false
+    order: 370
+  - slug: reverse-eng/database/internal/code-examples
+    optional: false
+    order: 380
+  - slug: reverse-eng/database/internal/faq-and-troubleshooting
+    optional: false
+    order: 390
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/database/internal/views
+    include-if: "project.elicitation.has_views == true"
+  - block: reverse-eng/database/internal/materialization-and-refresh-strategy
+    include-if: "project.elicitation.has_materialized_views == true"
+  - block: reverse-eng/database/internal/stored-procedures-and-functions
+    include-if: "project.elicitation.has_stored_procedures == true"
+  - block: reverse-eng/database/internal/triggers
+    include-if: "project.elicitation.has_triggers == true"
+
+notes: |
+  Block order follows order-hint values 110..390 (note: gap between 280 and
+  350 is intentional and matches block frontmatter; consumer-stage content
+  lives in re-database-consumer.yaml). DB feature gates (views, mat-views,
+  stored procs, triggers) are all conditional because not every database
+  uses them.

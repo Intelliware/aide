@@ -1,0 +1,104 @@
+# Composition: Reverse-Engineering — Mobile Framework (Internal Part)
+#
+# Documents the INTERNAL architecture of a mobile framework / cross-platform
+# toolkit (e.g., React Native, Flutter, NativeScript, Kotlin Multiplatform):
+# runtime engine, native bridge, module system, rendering pipeline, gesture
+# system, layout solver, state primitives, navigation internals, asset
+# pipeline, network/storage/notification/permissions stacks, performance
+# scheduler, devtools, testing harness, OTA, build system, compatibility
+# strategy, source layout, conventions.
+#
+# Source: templates/blocks/reverse-eng/mobile-framework/internal/
+
+name: re-mobile-framework-internal
+description: Reverse-engineering KB for the internal implementation of a mobile framework.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/mobile-framework-internal.md"
+
+blocks:
+  - slug: reverse-eng/mobile-framework/internal/architecture-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/mobile-framework/internal/runtime-engine
+    optional: false
+    order: 120
+  - slug: reverse-eng/mobile-framework/internal/native-bridge
+    optional: false
+    order: 130
+  - slug: reverse-eng/mobile-framework/internal/module-system
+    optional: false
+    order: 140
+  - slug: reverse-eng/mobile-framework/internal/ui-rendering-pipeline
+    optional: false
+    order: 150
+  - slug: reverse-eng/mobile-framework/internal/gesture-and-event-system
+    optional: false
+    order: 160
+  - slug: reverse-eng/mobile-framework/internal/layout-engine-internals
+    optional: true
+    order: 170
+    include-if: "project.elicitation.framework_owns_layout == true"
+  - slug: reverse-eng/mobile-framework/internal/state-and-data-flow
+    optional: false
+    order: 180
+  - slug: reverse-eng/mobile-framework/internal/navigation-and-routing-internals
+    optional: false
+    order: 190
+  - slug: reverse-eng/mobile-framework/internal/asset-pipeline
+    optional: false
+    order: 200
+  - slug: reverse-eng/mobile-framework/internal/network-stack
+    optional: false
+    order: 210
+  - slug: reverse-eng/mobile-framework/internal/storage-internals
+    optional: false
+    order: 220
+  - slug: reverse-eng/mobile-framework/internal/notification-internals
+    optional: false
+    order: 230
+  - slug: reverse-eng/mobile-framework/internal/permissions-system
+    optional: false
+    order: 240
+  - slug: reverse-eng/mobile-framework/internal/performance-pipeline
+    optional: false
+    order: 250
+  - slug: reverse-eng/mobile-framework/internal/debugging-and-devtools
+    optional: false
+    order: 260
+  - slug: reverse-eng/mobile-framework/internal/testing-harness
+    optional: false
+    order: 270
+  - slug: reverse-eng/mobile-framework/internal/release-channel-and-codepush-or-ota
+    optional: true
+    order: 280
+    include-if: "project.elicitation.has_ota_updates == true"
+  - slug: reverse-eng/mobile-framework/internal/build-system
+    optional: false
+    order: 290
+  - slug: reverse-eng/mobile-framework/internal/compatibility-strategy
+    optional: false
+    order: 300
+  - slug: reverse-eng/mobile-framework/internal/source-layout
+    optional: false
+    order: 310
+  - slug: reverse-eng/mobile-framework/internal/conventions-and-idioms
+    optional: false
+    order: 320
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/mobile-framework/internal/layout-engine-internals
+    include-if: "project.elicitation.framework_owns_layout == true"
+  - block: reverse-eng/mobile-framework/internal/release-channel-and-codepush-or-ota
+    include-if: "project.elicitation.has_ota_updates == true"
+
+notes: |
+  Block order follows order-hint values 110..320. Two conditional gates:
+  layout-engine-internals (only relevant when the framework owns layout
+  rather than deferring to the host platform) and release-channel-and-
+  codepush-or-ota (only if the framework supports OTA bundle updates).

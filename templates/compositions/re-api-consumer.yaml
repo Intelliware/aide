@@ -1,0 +1,97 @@
+# Composition: Reverse-Engineering — API (Consumer Part)
+#
+# Documents how to CONSUME an existing API (i.e. integrate against it as a
+# client). Distinct from re-api-internal (which documents the API's internal
+# implementation) and re-api-framework-consumer (which documents an API
+# framework used to BUILD APIs).
+#
+# Source: templates/blocks/reverse-eng/api/consumer/
+
+name: re-api-consumer
+description: Reverse-engineering KB for consuming an external/internal API as a client.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/api-consumer.md"
+
+blocks:
+  - slug: reverse-eng/api/consumer/quickstart
+    optional: false
+    order: 110
+  - slug: reverse-eng/api/consumer/authentication
+    optional: false
+    order: 120
+  - slug: reverse-eng/api/consumer/base-url-and-environments
+    optional: false
+    order: 130
+  - slug: reverse-eng/api/consumer/endpoint-catalog
+    optional: false
+    order: 140
+  - slug: reverse-eng/api/consumer/endpoint-detail-template
+    optional: false
+    order: 150
+  - slug: reverse-eng/api/consumer/request-format
+    optional: false
+    order: 160
+  - slug: reverse-eng/api/consumer/response-format
+    optional: false
+    order: 170
+  - slug: reverse-eng/api/consumer/pagination
+    optional: false
+    order: 180
+  - slug: reverse-eng/api/consumer/filtering-sorting-search
+    optional: false
+    order: 190
+  - slug: reverse-eng/api/consumer/rate-limits
+    optional: false
+    order: 200
+  - slug: reverse-eng/api/consumer/error-handling
+    optional: false
+    order: 210
+  - slug: reverse-eng/api/consumer/webhooks-and-events
+    optional: true
+    order: 220
+    include-if: "project.elicitation.api_emits_webhooks == true"
+  - slug: reverse-eng/api/consumer/sdks-and-code-samples
+    optional: true
+    order: 230
+    include-if: "project.elicitation.api_has_sdks == true"
+  - slug: reverse-eng/api/consumer/versioning
+    optional: false
+    order: 240
+  - slug: reverse-eng/api/consumer/changelog-and-deprecation
+    optional: false
+    order: 250
+  - slug: reverse-eng/api/consumer/status-and-sla
+    optional: true
+    order: 260
+    include-if: "project.elicitation.api_publishes_sla == true"
+  - slug: reverse-eng/api/consumer/support-and-contact
+    optional: true
+    order: 270
+    include-if: "project.elicitation.api_has_support_channels == true"
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/api/consumer/webhooks-and-events
+    include-if: "project.elicitation.api_emits_webhooks == true"
+  - block: reverse-eng/api/consumer/sdks-and-code-samples
+    include-if: "project.elicitation.api_has_sdks == true"
+  - block: reverse-eng/api/consumer/status-and-sla
+    include-if: "project.elicitation.api_publishes_sla == true"
+  - block: reverse-eng/api/consumer/support-and-contact
+    include-if: "project.elicitation.api_has_support_channels == true"
+
+notes: |
+  Block order follows order-hint values from each block's frontmatter
+  (110..270). Webhooks, SDKs, status/SLA, and support blocks are gated
+  because not every API exposes them — pull-only APIs, raw-HTTP-only APIs,
+  internal APIs without an SLA, etc. Set the corresponding flags in the
+  project's elicitation/project.toml to include them.
+
+  This composition produces a single api-consumer.md per consumed API. For
+  consumers that integrate against multiple distinct APIs, run the
+  composition once per API and parameterize {repo-slug} per integration.

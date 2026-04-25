@@ -1,0 +1,154 @@
+# Composition: Reverse-Engineering — API (Internal Part)
+#
+# Documents the INTERNAL implementation of an API codebase: layered
+# architecture, DI/middleware, request validation, error handling, service
+# layer, repository patterns, ORM/migrations, etc.
+#
+# Source: templates/blocks/reverse-eng/api/internal/
+
+name: re-api-internal
+description: Reverse-engineering KB for the internal implementation of an API codebase.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/api-internal.md"
+
+blocks:
+  - slug: reverse-eng/api/internal/api-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/api/internal/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/api/internal/mapping-openapi-contract-internal-implementation
+    optional: false
+    order: 130
+    include-if: "project.elicitation.has_openapi_contract == true"
+  - slug: reverse-eng/api/internal/layered-architecture
+    optional: false
+    order: 140
+  - slug: reverse-eng/api/internal/project-structure-and-conventions
+    optional: false
+    order: 150
+  - slug: reverse-eng/api/internal/dependency-injection-and-service-registration
+    optional: false
+    order: 160
+  - slug: reverse-eng/api/internal/middleware-and-request-pipeline
+    optional: false
+    order: 170
+  - slug: reverse-eng/api/internal/authentication-and-authorization-internals
+    optional: false
+    order: 180
+  - slug: reverse-eng/api/internal/request-validation-and-transformation
+    optional: false
+    order: 190
+  - slug: reverse-eng/api/internal/error-handling-and-problem-details
+    optional: false
+    order: 200
+  - slug: reverse-eng/api/internal/service-layer-patterns
+    optional: false
+    order: 210
+  - slug: reverse-eng/api/internal/domain-models-and-business-rules
+    optional: false
+    order: 220
+  - slug: reverse-eng/api/internal/cross-cutting-concerns
+    optional: false
+    order: 230
+  - slug: reverse-eng/api/internal/database-and-orm
+    optional: false
+    order: 240
+    include-if: "project.elicitation.has_persistence == true"
+  - slug: reverse-eng/api/internal/repository-data-access-patterns
+    optional: false
+    order: 250
+    include-if: "project.elicitation.has_persistence == true"
+  - slug: reverse-eng/api/internal/migrations-and-schema-management
+    optional: false
+    order: 260
+    include-if: "project.elicitation.has_persistence == true"
+  - slug: reverse-eng/api/internal/caching
+    optional: true
+    order: 270
+    include-if: "project.elicitation.has_caching == true"
+  - slug: reverse-eng/api/internal/background-jobs-and-async-processing
+    optional: true
+    order: 280
+    include-if: "project.elicitation.has_background_jobs == true"
+  - slug: reverse-eng/api/internal/inter-service-communication
+    optional: true
+    order: 290
+    include-if: "project.elicitation.has_inter_service_communication == true"
+  - slug: reverse-eng/api/internal/file-storage-and-external-integrations
+    optional: true
+    order: 300
+    include-if: "project.elicitation.has_external_integrations == true"
+  - slug: reverse-eng/api/internal/observability-logging-metrics-tracing
+    optional: false
+    order: 310
+  - slug: reverse-eng/api/internal/testing
+    optional: false
+    order: 320
+  - slug: reverse-eng/api/internal/security-implementation
+    optional: false
+    order: 330
+  - slug: reverse-eng/api/internal/performance-patterns-and-constraints
+    optional: false
+    order: 340
+  - slug: reverse-eng/api/internal/build-deploy-and-runtime
+    optional: false
+    order: 350
+  - slug: reverse-eng/api/internal/feature-flags-and-toggles
+    optional: true
+    order: 360
+    include-if: "project.elicitation.has_feature_flags == true"
+  - slug: reverse-eng/api/internal/anti-patterns
+    optional: false
+    order: 370
+  - slug: reverse-eng/api/internal/new-endpoint-feature-checklist
+    optional: false
+    order: 380
+  - slug: reverse-eng/api/internal/internal-types-and-shared-models
+    optional: false
+    order: 390
+  - slug: reverse-eng/api/internal/glossary
+    optional: false
+    order: 400
+  - slug: reverse-eng/api/internal/appendix-a-complete-feature-implementation-walkthrough
+    optional: false
+    order: 410
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/api/internal/mapping-openapi-contract-internal-implementation
+    include-if: "project.elicitation.has_openapi_contract == true"
+  - block: reverse-eng/api/internal/database-and-orm
+    include-if: "project.elicitation.has_persistence == true"
+  - block: reverse-eng/api/internal/repository-data-access-patterns
+    include-if: "project.elicitation.has_persistence == true"
+  - block: reverse-eng/api/internal/migrations-and-schema-management
+    include-if: "project.elicitation.has_persistence == true"
+  - block: reverse-eng/api/internal/caching
+    include-if: "project.elicitation.has_caching == true"
+  - block: reverse-eng/api/internal/background-jobs-and-async-processing
+    include-if: "project.elicitation.has_background_jobs == true"
+  - block: reverse-eng/api/internal/inter-service-communication
+    include-if: "project.elicitation.has_inter_service_communication == true"
+  - block: reverse-eng/api/internal/file-storage-and-external-integrations
+    include-if: "project.elicitation.has_external_integrations == true"
+  - block: reverse-eng/api/internal/feature-flags-and-toggles
+    include-if: "project.elicitation.has_feature_flags == true"
+
+notes: |
+  Block order follows order-hint values from each block's frontmatter
+  (110..410). Persistence-related blocks are gated; APIs that delegate
+  persistence to a downstream service should set has_persistence=false in
+  their project.toml. Several Part 6 / Part 8 blocks (caching, background
+  jobs, inter-service communication, external integrations, feature flags)
+  are also conditional and gated via project.elicitation flags.
+
+  This composition produces a single api-internal.md per repo. For multi-API
+  monorepos, run the composition once per API service and parameterize
+  {repo-slug} per service.

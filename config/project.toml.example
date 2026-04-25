@@ -1,0 +1,135 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# project.toml — Layer 3 of the four-layer config model
+#
+# COMMITTED. Team-edited. This is the project's super-context — the answers
+# every skill on every flow can rely on without re-asking the user.
+#
+# This example demonstrates a multi-repo SaaS checkout product:
+#   • api-orders     — order placement and lifecycle service
+#   • api-billing    — payment, invoicing, refunds service
+#   • web-portal     — admin and merchant-facing React app
+# with a sibling Knowledge Base repository at ../checkout-knowledge-base.
+#
+# Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
+# Relative paths resolve under {project-root}.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── [project] — identity, default flow, top-level metadata ──────────────────
+[project]
+
+# Human-readable name. Appears in headings and audit fields.
+name = "Acme Checkout Platform"
+
+# Stable short identifier. Lowercase, kebab-case, no spaces. Used as the
+# merge key when this project appears in cross-project tooling.
+code = "acme-checkout"
+
+# One-line domain description. Feeds glossary disambiguation and persona
+# priming (so "Order" means the right thing for this project, not a generic
+# definition).
+domain = "B2B SaaS checkout, billing, and refunds for marketplace merchants"
+
+# Few-sentence project summary. Free-form Markdown allowed.
+description = """
+Multi-tenant checkout platform serving marketplace merchants. Provides
+hosted checkout pages, recurring billing, refunds, and merchant admin
+tooling. PCI-DSS Level 1 compliance is in scope.
+"""
+
+# Default flow when the orchestrator cannot infer one from context.
+# Values: "greenfield" | "brownfield" | "quick-dev"
+# This project is in maintenance mode, so brownfield is the default.
+default_flow = "brownfield"
+
+
+# ─── [project.paths] — output paths ──────────────────────────────────────────
+[project.paths]
+
+# Stage outputs. {project-root} is the directory containing this file.
+requirements_package    = "{project-root}/.framework-output/requirements"
+design_package          = "{project-root}/.framework-output/design"
+implementation_package  = "{project-root}/.framework-output/implementation"
+
+# Knowledge-base path. The KB is a SEPARATE git repository — this path
+# almost always points outside {project-root}. Sibling-repo layout shown
+# here; absolute paths (e.g. "/srv/kb/checkout-knowledge-base") are also
+# valid. If unset, KB-stage skills error early with a helpful message.
+knowledge_base_path     = "{project-root}/../checkout-knowledge-base"
+
+
+# ─── [project.glossary] — terms used across the project ──────────────────────
+[project.glossary]
+
+# Files that contribute glossary entries. Loaded in declared order; later
+# files override earlier ones on identical terms.
+references = [
+  "{project-root}/docs/glossary.md",
+  "{project-root}/../checkout-knowledge-base/_meta/glossary.md",
+]
+
+# Inline entries override the reference files.
+[[project.glossary.entries]]
+term = "Order"
+definition = "A merchant's record of a buyer purchase intent, from cart submission through fulfillment or cancellation."
+aliases = ["Purchase", "Sale"]
+domain_specific = true
+
+[[project.glossary.entries]]
+term = "Refund"
+definition = "Any post-charge return of funds to the buyer, full or partial. Distinct from `Void` (pre-capture cancellation)."
+aliases = []
+domain_specific = true
+
+[[project.glossary.entries]]
+term = "Settlement"
+definition = "The end-of-day batch reconciliation that moves authorized funds from the payment processor's holding account to the merchant's payout account."
+domain_specific = true
+
+
+# ─── [project.elicitation] — pre-answered decision-table questions ───────────
+# Question codes match the codes used in the framework's decision tables.
+# Skills consult these answers before re-prompting the user. Unknown codes
+# are tolerated, so adding new questions to the framework does not break
+# old project.toml files.
+[project.elicitation]
+
+compliance_regime          = "pci-dss"
+team_size                  = "10-25"
+user_facing                = true
+deployment_model           = "saas-multi-tenant"
+data_residency             = "us-eu-split"
+release_cadence            = "weekly"
+testing_strategy           = "tdd-required"
+observability_stack        = "datadog"
+identity_provider          = "auth0"
+primary_database           = "postgres"
+event_bus                  = "kafka"
+
+
+# ─── [[project.repos]] — multi-repo enumeration ──────────────────────────────
+# Array-of-table; the merge key is `code`. Order does not matter.
+# Exactly one entry MAY set primary = true; that repo becomes the project's
+# "home" for ambiguous operations.
+
+[[project.repos]]
+code    = "api-orders"
+name    = "Orders Service"
+path    = "{project-root}/../api-orders"
+role    = "api"
+type    = "node-typescript-nest"
+primary = true
+
+[[project.repos]]
+code = "api-billing"
+name = "Billing Service"
+path = "{project-root}/../api-billing"
+role = "api"
+type = "dotnet-8-aspnet"
+
+[[project.repos]]
+code = "web-portal"
+name = "Merchant Web Portal"
+path = "{project-root}/../web-portal"
+role = "ui"
+type = "react-vite-typescript"

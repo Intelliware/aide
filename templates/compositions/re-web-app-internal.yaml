@@ -1,0 +1,107 @@
+# Composition: Reverse-Engineering — Web App (Internal Part)
+#
+# Documents the INTERNAL implementation of a web-app codebase: project
+# structure, architecture & patterns, routing, state, components, API
+# integration, auth, error handling, styling, forms, feature modules,
+# i18n, a11y, performance, security, testing, build/deploy, anti-patterns,
+# troubleshooting, glossary, quick-reference, appendices.
+#
+# Source: templates/blocks/reverse-eng/web-app/internal/
+
+name: re-web-app-internal
+description: Reverse-engineering KB for the internal implementation of a web-app codebase.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/web-app-internal.md"
+
+blocks:
+  - slug: reverse-eng/web-app/internal/application-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/web-app/internal/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/web-app/internal/project-structure
+    optional: false
+    order: 130
+  - slug: reverse-eng/web-app/internal/architecture-and-design-patterns
+    optional: false
+    order: 140
+  - slug: reverse-eng/web-app/internal/routing-and-navigation
+    optional: false
+    order: 150
+  - slug: reverse-eng/web-app/internal/state-management
+    optional: false
+    order: 160
+  - slug: reverse-eng/web-app/internal/component-architecture
+    optional: false
+    order: 170
+  - slug: reverse-eng/web-app/internal/api-integration
+    optional: false
+    order: 180
+  - slug: reverse-eng/web-app/internal/authentication-and-authorization
+    optional: false
+    order: 190
+  - slug: reverse-eng/web-app/internal/error-handling-and-logging
+    optional: false
+    order: 200
+  - slug: reverse-eng/web-app/internal/styling-and-design-system
+    optional: false
+    order: 210
+  - slug: reverse-eng/web-app/internal/forms-and-validation
+    optional: false
+    order: 220
+    include-if: "project.elicitation.has_forms == true"
+  - slug: reverse-eng/web-app/internal/feature-modules
+    optional: false
+    order: 230
+  - slug: reverse-eng/web-app/internal/internationalization-i18n
+    optional: false
+    order: 240
+    include-if: "project.elicitation.has_i18n == true"
+  - slug: reverse-eng/web-app/internal/accessibility
+    optional: false
+    order: 250
+  - slug: reverse-eng/web-app/internal/performance-patterns
+    optional: false
+    order: 260
+  - slug: reverse-eng/web-app/internal/security-implementation
+    optional: false
+    order: 270
+  - slug: reverse-eng/web-app/internal/testing-strategy
+    optional: false
+    order: 280
+  - slug: reverse-eng/web-app/internal/build-and-deployment
+    optional: false
+    order: 290
+  - slug: reverse-eng/web-app/internal/anti-patterns
+    optional: false
+    order: 300
+  - slug: reverse-eng/web-app/internal/troubleshooting
+    optional: false
+    order: 310
+  - slug: reverse-eng/web-app/internal/glossary
+    optional: false
+    order: 320
+  - slug: reverse-eng/web-app/internal/quick-reference
+    optional: false
+    order: 330
+  - slug: reverse-eng/web-app/internal/appendix-a-architecture-diagram
+    optional: false
+    order: 340
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/web-app/internal/forms-and-validation
+    include-if: "project.elicitation.has_forms == true"
+  - block: reverse-eng/web-app/internal/internationalization-i18n
+    include-if: "project.elicitation.has_i18n == true"
+
+notes: |
+  Block order follows order-hint values 110..340. forms-and-validation and
+  i18n are gated because some web apps (read-only dashboards, single-locale
+  apps) genuinely don't have them.

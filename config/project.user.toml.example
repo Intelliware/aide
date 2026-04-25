@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# project.user.toml — Layer 4 of the four-layer config model
+#
+# GITIGNORED. Personal, machine-local. Edited freely by you alone.
+#
+# Same schema as project.toml, but every field is optional. Use this file to
+# pin personal preferences that override the team-committed project.toml on
+# YOUR machine only.
+#
+# Typical use cases:
+#   • Override knowledge_base_path because your KB clone lives elsewhere.
+#   • Pin a different default_flow because you are doing brownfield work
+#     while the team is in greenfield mode.
+#   • Pre-answer elicitation questions you are tired of being asked.
+#
+# Higher-precedence than project.toml; lower-precedence than the
+# customizations/<skill>.user.toml files. See SCHEMAS.md § 1.1.
+#
+# Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# Override the KB path because your local clone lives in ~/work/kb.
+[project.paths]
+knowledge_base_path = "{home}/work/kb/checkout-knowledge-base"
+
+
+# You're hot-fixing in production this week, so quick-dev is your default.
+[project]
+default_flow = "quick-dev"
+
+
+# Skip the testing-strategy question — you always want TDD on personally
+# even when the team has not standardized.
+[project.elicitation]
+testing_strategy = "tdd-required"

@@ -1,0 +1,109 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# kb-component-frontmatter.example.yaml
+#
+# This is the YAML FRONTMATTER that opens every
+# components/<repo>/<component-id>.md file in a theframework knowledge base.
+# It is shown here as a standalone YAML document for reference; in practice
+# it appears between two `---` lines at the top of a Markdown file:
+#
+#     ---
+#     <these fields>
+#     ---
+#
+#     # Order Checkout Flow
+#
+#     <free-form Markdown body>
+#
+# Component below is realistic: an "Order Checkout Flow" that genuinely
+# spans api-orders (the order-placement HTTP API) and api-billing (the
+# payment authorization call). The repo-prefixed glob in `paths`
+# illustrates how cross-repo components are expressed.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Stable kebab-case identifier. Unique across the entire KB. Survives
+# renames; never changes once published.
+component_id: order-checkout-flow
+
+# The PRIMARY repo for this component (the `code` of one [[project.repos]]
+# entry in project.toml). For cross-repo components, additional repos
+# appear in `paths` via repo-prefixed globs.
+repo: api-orders
+
+# One of: api-feature | ui-feature | framework | mobile-feature
+#       | database-schema | shared-library
+type: api-feature
+
+# REQUIRED: single sentence in "Use when …" form. Skill-routing matches
+# against this phrasing, so the leading literal "Use when " is non-negotiable.
+description: >-
+  Use when a buyer submits a cart and the system must place an order, authorize
+  payment, and return a confirmation in a single synchronous request.
+
+# Short keyword phrases the orchestrator matches against the user's story
+# to select this component. Flat array (no grouping) by design — see
+# SCHEMAS.md § 3.2 for the rationale.
+triggers:
+  - place order
+  - submit cart
+  - checkout
+  - capture payment
+  - authorize payment
+  - order confirmation
+  - cart submit
+
+# Globs identifying the source files that constitute this component.
+# Repo-prefixed entries (`<repo-code>:<glob>`) name a different repo from
+# the primary `repo` above; un-prefixed entries are relative to the primary
+# repo's root.
+paths:
+  - src/features/checkout/**
+  - src/features/orders/checkout-controller.ts
+  - src/features/orders/checkout-service.ts
+  - src/shared/dto/checkout-*.ts
+  - api-billing:src/Authorization/CheckoutAuthorizationHandler.cs
+  - api-billing:src/Authorization/AuthorizeCheckoutCommand.cs
+
+# Other component_ids this component CALLS or IMPORTS. Mirrors outgoing
+# edges of kind `calls` / `depends-on` in graph.json.
+depends_on:
+  - billing-payment-authorization
+  - inventory-reservation
+  - tax-calculation
+
+# Inverse: component_ids that call this one. The build-knowledge-base-index
+# skill keeps depends_on/consumed_by in sync; humans write whichever side
+# is easier to remember.
+consumed_by:
+  - web-portal-checkout-page
+  - mobile-app-checkout-screen
+
+# Domain entities this component reads or writes. Joins to the aggregated
+# data dictionary in the KB.
+data_entities:
+  - Order
+  - OrderItem
+  - PaymentAuthorization
+  - InventoryReservation
+  - Cart
+
+# Full 40-char SHA of the source commit that backed the last verified
+# extraction. NEVER a short hash — full SHAs only.
+last_verified_against_commit: 8f3c1a2b9e7d4c6f5b8a1d2e9c0f7a6b3d4e5f12
+
+# Identifier of the most recent feature/story whose implementation touched
+# this component. Lets retrospectives jump to the docs that need refresh.
+# Optional — empty/missing means "no feature has touched this since
+# initial extraction."
+last_feature_id: ACME-1247
+
+# Path (relative to the source repo's root) to the canonical Part A or
+# Part B doc this component is derived from. Empty string is NOT permitted —
+# every component has a source.
+source_doc: docs/part-b/checkout-consumer-guide.md
+
+# One of: openapi-diff | exported-symbols-diff | route-inventory-diff
+#       | schema-diff | manual
+# Tells `verify-knowledge-base` which automated drift check to run.
+# `manual` is allowed but flags the component for human review on every
+# staleness sweep.
+verification_signal: openapi-diff

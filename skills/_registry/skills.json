@@ -1,0 +1,261 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "canonical_id": "create-design-package",
+      "name": "create-design-package",
+      "description": "Use when the user asks to create, build, write, or assemble a design package; says 'create the design package', 'design the solution', 'build the technical blueprint', 'create the architecture', 'how should we build this', 'start the design stage', 'choose the technology stack', 'design the API/database/frontend/backend'. Drives the full design stage: optional architecture-baseline discovery (brownfield), 11-step design assembly with C4 diagrams, technology pinning, traceability back to requirements \u2014 handing off to review-design-package.",
+      "stage": "design",
+      "package": "",
+      "path": "skills/design/create-design-package/SKILL.md"
+    },
+    {
+      "canonical_id": "review-design-package",
+      "name": "review-design-package",
+      "description": "Use when the user asks to review, validate, or check readiness of an assembled design package; says 'review the design package', 'review the solution design', 'validate the design', 'check design readiness', 'architecture review', 'security posture review', 'is the design ready for implementation', 'solution readiness', 'implementation handoff'. Independently invocable; assumes the design package is already assembled.",
+      "stage": "design",
+      "package": "",
+      "path": "skills/design/review-design-package/SKILL.md"
+    },
+    {
+      "canonical_id": "create-pr",
+      "name": "create-pr",
+      "description": "Use when the user asks to create a PR, prepare a pull request, package the diff into commits, review the working-tree diff before committing, generate a PR description, or hand off implementation work for merge. Reviews uncommitted changes, creates atomic conventional commits, and produces a PR description with summary and test plan.",
+      "stage": "execution",
+      "package": "",
+      "path": "skills/execution/create-pr/SKILL.md"
+    },
+    {
+      "canonical_id": "execute-increments",
+      "name": "execute-increments",
+      "description": "Use when the user asks to execute the implementation plan, run an increment, ship INC-XXX, work the next increment, run the AI gate, run the human gate, or turn an approved implementation package into working code. Executes one increment at a time with TDD, AI Gate, Human Gate, and increment-status updates.",
+      "stage": "execution",
+      "package": "",
+      "path": "skills/execution/execute-increments/SKILL.md"
+    },
+    {
+      "canonical_id": "manage-bugs",
+      "name": "manage-bugs",
+      "description": "Use when the user asks to log a bug, capture an issue, review open bugs, triage bugs for the current increment, close a bug, or manage the bugs-and-issues log. Independently invocable: works whether or not an increment is being executed. Operates on bugs-and-issues-log.md in the implementation package.",
+      "stage": "execution",
+      "package": "",
+      "path": "skills/execution/manage-bugs/SKILL.md"
+    },
+    {
+      "canonical_id": "build-knowledge-base",
+      "name": "build-knowledge-base",
+      "description": "Use when initialising a project's knowledge base for the first time, scaffolding the KB after reverse-engineering Part A/B docs land, building the KB on a brownfield onboarding, populating an empty knowledge_base_path, or generating ARCHITECTURE.md plus components/ plus graph.json from RE outputs. Replaces the legacy build-knowledge-repository-phase aggregator.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": "skills/knowledge-base/build-knowledge-base/SKILL.md"
+    },
+    {
+      "canonical_id": "detect-knowledge-base-drift",
+      "name": "detect-knowledge-base-drift",
+      "description": "Use when source repos may have changed without the KB being updated, when running a PR-gate freshness check, or for the scheduled (cron / weekly) drift sweep. Performs cheap-to-expensive layered detection (commit-stamp / structural diff / LLM contradiction / coverage sweep) and reports drift with per-component severity and recommended actions.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": "skills/knowledge-base/detect-knowledge-base-drift/SKILL.md"
+    },
+    {
+      "canonical_id": "navigate-knowledge-base",
+      "name": "navigate-knowledge-base",
+      "description": "Use when any stage skill (requirements, design, planning, execution, quick-dev) needs to load grounding context from the KB before starting work, or when a feature description / change scope arrives and only a minimal component subset must be selected to read. Returns the ranked component file list for the agent to load \u2014 the agent must NOT read the whole KB.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": "skills/knowledge-base/navigate-knowledge-base/SKILL.md"
+    },
+    {
+      "canonical_id": "update-knowledge-base",
+      "name": "update-knowledge-base",
+      "description": "Use when a feature has just shipped and the KB must be brought back into sync \u2014 invoked as the closing step of execute-increments or execute-quick-change. Updates only the components matched by the diff, appends to change-tracker, emits an ADR if a threshold is crossed, and incrementally regenerates graph.json and the capability index. Never re-runs a full build.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": "skills/knowledge-base/update-knowledge-base/SKILL.md"
+    },
+    {
+      "canonical_id": "verify-knowledge-base-coverage",
+      "name": "verify-knowledge-base-coverage",
+      "description": "Use when running the scheduled coverage sweep (baseline on first build, delta on subsequent runs), confirming every public artifact in source repos maps to \u22651 component, finding KB entries with no source backing, or validating the freshly built KB after build-knowledge-base ran. Emits orphan + stale + warning reports; never modifies the KB.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": "skills/knowledge-base/verify-knowledge-base-coverage/SKILL.md"
+    },
+    {
+      "canonical_id": "customize-framework",
+      "name": "customize-framework",
+      "description": "Use when the user says \"customize the framework\", \"override a skill\", \"change a skill default\", \"suppress this artifact\", \"pin this elicitation answer\", \"make this project-specific\", \"author a customization\", or anytime they want to change behavior without editing the framework's shipped files. Walks the user through writing overrides under the right config layer (framework.user.toml, project.toml, project.user.toml, customizations/<skill>.toml or .user.toml) without hand-TOML editing. Covers scalar override, table merge, array-of-tables merge by code/id, and the _suppress: true marker.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/customize-framework/SKILL.md"
+    },
+    {
+      "canonical_id": "framework-navigator",
+      "name": "framework-navigator",
+      "description": "Use when the user asks \"where do I start\", \"what skill do I use for X\", \"help me document my project\", \"what should I do next\", \"how does this framework work\", or otherwise seems lost about which skill to invoke. Default entry point when intent is unclear. Routes to the right skill, explains the workflow sequence, and emits the exact trigger phrase to use next. Lifted as-is in task #6; goal-mode and catalog-mode upgrades land in task #12.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/framework-navigator/SKILL.md"
+    },
+    {
+      "canonical_id": "scaffold-documentation",
+      "name": "scaffold-documentation",
+      "description": "Use when the user says \"scaffold the docs\", \"set up the doc structure\", \"propose the file structure\", \"create the documentation skeleton\", or after completing an inventory/discovery phase and needing to organize findings into a file structure before extraction or authoring begins. Cross-stage utility \u2014 works for RE, requirements, design, and KB packages. Enforces the \"structure before content\" principle.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/scaffold-documentation/SKILL.md"
+    },
+    {
+      "canonical_id": "shard-document",
+      "name": "shard-document",
+      "description": "Use when a markdown document has grown too large to navigate (architecture doc, big requirements package, monolithic design file) or when the user says \"shard this doc\", \"split this markdown\", \"break this file into sections\". Splits a single .md at H2 boundaries into a folder of smaller files and resolves what to do with the original.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/shard-document/SKILL.md"
+    },
+    {
+      "canonical_id": "start-project",
+      "name": "start-project",
+      "description": "Use when the user says \"start a new project\", \"set up theframework\", \"bootstrap the project\", \"initialize the framework\", \"start the framework\", \"begin a new product\", \"begin a brownfield analysis\", \"start a quick fix\", or whenever the user is invoking theframework for the first time on a repository (or wants to re-bootstrap an existing one). Single entry point that elicits flow choice, captures project super-context, writes project.toml (and optionally project.user.toml), and hands off to the first skill of the chosen flow.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/start-project/SKILL.md"
+    },
+    {
+      "canonical_id": "track-change",
+      "name": "track-change",
+      "description": "Use when the user says \"log a change\", \"update the change tracker\", \"record this update\", \"track this edit\", \"add to the change log\", or after finishing any documentation, requirements, design, or code change that touches a tracked package. Logs the change in a standardized CHANGE-TRACKER.md with Parts Affected, source version, and verification status.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/track-change/SKILL.md"
+    },
+    {
+      "canonical_id": "verify-source",
+      "name": "verify-source",
+      "description": "Use when the user says \"verify the docs\", \"check this against source\", \"are these claims source-verified\", \"audit the package\", \"validate the spec\", or after assembling any requirements / design / RE / KB package and before declaring it done. Generic content-vs-source verifier \u2014 runs completeness, accuracy, consistency, and change-tracking checks against the cited source artifacts (code, tickets, prior packages) for any package type.",
+      "stage": "meta",
+      "package": "",
+      "path": "skills/meta/verify-source/SKILL.md"
+    },
+    {
+      "canonical_id": "create-implementation-package",
+      "name": "create-implementation-package",
+      "description": "Use when the user asks to create an implementation plan, set up coding increments, build the implementation package, decompose a design into INC-XXX increments, start the planning stage, or break a solution design into independently executable units. Produces an implementation package whose increments conform to the Canonical Increment Shape.",
+      "stage": "planning",
+      "package": "",
+      "path": "skills/planning/create-implementation-package/SKILL.md"
+    },
+    {
+      "canonical_id": "review-implementation-package",
+      "name": "review-implementation-package",
+      "description": "Use when the user asks to review the implementation package, validate the implementation plan before coding starts, run the pre-execution gate, check increment readiness, verify increments conform to the Canonical Increment Shape, or confirm INC-XXX coverage. Produces a GO/NO-GO verdict with per-increment findings.",
+      "stage": "planning",
+      "package": "",
+      "path": "skills/planning/review-implementation-package/SKILL.md"
+    },
+    {
+      "canonical_id": "document-quick-change",
+      "name": "document-quick-change",
+      "description": "Use when the user says \"quick change\", \"small change\", \"fast-track this\", \"expedited spec\", \"write a change spec\", or \"document a small fix/feature\" and the change does not warrant a full requirements + design package. Captures one combined lightweight spec (mini-requirements + mini-design in a single artifact) per `templates/compositions/quick-dev-spec.yaml`. First of three quick-dev skills.",
+      "stage": "quick-dev",
+      "package": "",
+      "path": "skills/quick-dev/document-quick-change/SKILL.md"
+    },
+    {
+      "canonical_id": "execute-quick-change",
+      "name": "execute-quick-change",
+      "description": "Use when a quick-dev plan exists and the user says \"execute the quick change\", \"implement the quick plan\", \"run the increments\", or \"do the work and PR it\". Implements each increment with TDD and 3-dimension verification, runs adversarial PR review, creates atomic commits, and closes by handing off to `update-knowledge-base --scope=catalog-only`. Third of three quick-dev skills.",
+      "stage": "quick-dev",
+      "package": "",
+      "path": "skills/quick-dev/execute-quick-change/SKILL.md"
+    },
+    {
+      "canonical_id": "plan-quick-change",
+      "name": "plan-quick-change",
+      "description": "Use when a quick-dev spec has been agreed and the user says \"plan this\", \"create the quick plan\", \"plan the quick change\", \"break this into increments\", or wants to set up the lightweight implementation plan before coding. Authors a small set of increments (typically 1\u20133) using a reduced increment shape and runs a clarity gate before execution. Second of three quick-dev skills.",
+      "stage": "quick-dev",
+      "package": "",
+      "path": "skills/quick-dev/plan-quick-change/SKILL.md"
+    },
+    {
+      "canonical_id": "create-requirements-package",
+      "name": "create-requirements-package",
+      "description": "Use when the user asks to create, gather, build, write, or assemble a requirements package; says 'create requirements', 'gather requirements', 'document business requirements', 'start the requirements stage', 'write functional requirements', 'build the requirements package', or wants to begin a new feature/project from a clean slate. Drives the full requirements stage end-to-end: discovery (brownfield), analysis, writing, and assembly into the requirements package \u2014 handing off to review-requirements-package.",
+      "stage": "requirements",
+      "package": "",
+      "path": "skills/requirements/create-requirements-package/SKILL.md"
+    },
+    {
+      "canonical_id": "review-requirements-package",
+      "name": "review-requirements-package",
+      "description": "Use when the user asks to review, validate, or check readiness of an assembled requirements package; says 'review the requirements package', 'validate requirements', 'check requirements readiness', 'requirements review', 'check scope/completeness/consistency/measurability/testability', 'requirements handoff readiness', 'is the requirements package ready for the architect'. Independently invocable; assumes the package is already assembled.",
+      "stage": "requirements",
+      "package": "",
+      "path": "skills/requirements/review-requirements-package/SKILL.md"
+    },
+    {
+      "canonical_id": "analyze-repository",
+      "name": "analyze-repository",
+      "description": "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/analyze-repository/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-api",
+      "name": "reverse-engineer-api",
+      "description": "Use when the user asks to document an API repository, reverse-engineer API docs, extract API documentation from source code, create OpenAPI specs from existing code, or build API consumer guides. Produces Part A (internal docs), Part B1 (OpenAPI spec), and Part B2 (consumer companion guide).",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-api/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-api-framework",
+      "name": "reverse-engineer-api-framework",
+      "description": "Use when the user asks to document a backend / API framework, server-side library, middleware framework, or reusable backend components. Produces Part A (internal framework docs) and Part B (implementer docs for API developers using the framework). Do NOT use for individual API repositories \u2014 use reverse-engineer-api instead.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-api-framework/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-database",
+      "name": "reverse-engineer-database",
+      "description": "Use when the user asks to document a database (schema, stored procedures, triggers, views), reverse-engineer a schema, extract database docs, create a data dictionary, or generate ERDs from existing database code. Produces Part A (internal DB docs for DBAs), Part B1 (data dictionary & ERD), and Part B2 (database consumer guide for application developers).",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-database/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-mobile-app",
+      "name": "reverse-engineer-mobile-app",
+      "description": "Use when the user asks to document a mobile application, Android app, iOS app, React Native app, or any mobile application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for mobile frameworks/libraries \u2014 use reverse-engineer-mobile-framework instead.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-mobile-app/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-mobile-framework",
+      "name": "reverse-engineer-mobile-framework",
+      "description": "Use when the user asks to document a mobile framework or library, mobile SDK, Android AAR library, iOS pod / SPM package, or React Native npm module. Produces Part A (internal framework docs) and Part B (implementer docs for app developers). Do NOT use for mobile applications \u2014 use reverse-engineer-mobile-app instead.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-mobile-framework/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-ui-framework",
+      "name": "reverse-engineer-ui-framework",
+      "description": "Use when the user asks to document a UI framework, component library, design system codebase, Angular/React/Vue library, or reusable UI components. Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-ui-framework/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-web-app",
+      "name": "reverse-engineer-web-app",
+      "description": "Use when the user asks to document a web application, front-end app, SPA, React/Angular/Vue/Svelte app, or any user-facing web application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": "skills/reverse-engineering/reverse-engineer-web-app/SKILL.md"
+    }
+  ]
+}

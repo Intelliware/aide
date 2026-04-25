@@ -1,0 +1,83 @@
+# Composition: Greenfield Implementation Package
+#
+# Implementation plan composed of the 8 canonical planning blocks (the
+# "increment shape") wrapped with shared overview, glossary, and change-log.
+# This composition produces ONE increment per file. The set of all increments
+# for a project lives under paths.planning_path/.
+#
+# Canonical increment shape:
+#   1. increment-identity     (id, title, status, owners, version)
+#   2. goal                   (why)
+#   3. dependencies           (what this depends on)
+#   4. plan                   (how — steps, owners, estimates)
+#   5. outcome                (artefacts produced)
+#   6. automated-verification (AI gate — must pass before human review)
+#   7. human-verification     (human gate — sign-off)
+#   8. success-criteria       (definition of done)
+
+name: greenfield-implementation-package
+description: Implementation plan for a single increment using the canonical 8-block shape.
+applies-to-flow: greenfield
+package-type: implementation
+
+default-output-path: "{paths.planning_path}/{increment-id}.md"
+
+blocks:
+  # ---- Wrapper: framing ----
+  - slug: shared/overview
+    optional: false
+    order: 1
+
+  # ---- Canonical increment shape (order matches order-hint 1..8) ----
+  - slug: planning/increment-identity
+    optional: false
+    order: 2
+  - slug: planning/goal
+    optional: false
+    order: 3
+  - slug: planning/dependencies
+    optional: false
+    order: 4
+  - slug: planning/plan
+    optional: false
+    order: 5
+  - slug: planning/outcome
+    optional: false
+    order: 6
+  - slug: planning/automated-verification
+    optional: false
+    order: 7
+  - slug: planning/human-verification
+    optional: false
+    order: 8
+  - slug: planning/success-criteria
+    optional: false
+    order: 9
+
+  # ---- Wrapper: glossary + change-log ----
+  - slug: shared/glossary
+    optional: false
+    order: 10
+  - slug: shared/change-log
+    optional: false
+    order: 11
+
+elicitation:
+  - prompt: references/elicitation-patterns/increment-scoping.md
+    required: true
+  - prompt: references/elicitation-patterns/dependency-mapping.md
+    required: true
+  - prompt: references/elicitation-patterns/verification-gate-design.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  Each increment file is one composition output. Project-level rollup (sprint
+  plan, backlog, sequencing) is produced by a separate sprint-planning skill,
+  not by this composition.
+
+  All eight planning blocks are required (no optional gates) — that's the
+  point of the canonical shape: every increment has the same skeleton so the
+  AI gate (automated-verification) and human gate (human-verification) are
+  always well-defined.

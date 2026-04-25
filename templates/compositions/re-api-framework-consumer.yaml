@@ -1,0 +1,94 @@
+# Composition: Reverse-Engineering — API Framework (Consumer Part)
+#
+# Documents how to USE an API framework as a downstream consumer (i.e. a team
+# building APIs on top of someone else's framework). Source:
+# templates/blocks/reverse-eng/api-framework/consumer/
+
+name: re-api-framework-consumer
+description: Reverse-engineering KB for consuming an API framework as a downstream developer.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/api-framework-consumer.md"
+
+blocks:
+  - slug: reverse-eng/api-framework/consumer/framework-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/api-framework/consumer/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/api-framework/consumer/project-structure-and-conventions
+    optional: false
+    order: 130
+  - slug: reverse-eng/api-framework/consumer/request-pipeline-and-middleware
+    optional: false
+    order: 140
+  - slug: reverse-eng/api-framework/consumer/base-controllers-and-handlers
+    optional: false
+    order: 150
+  - slug: reverse-eng/api-framework/consumer/dependency-injection-and-service-registration
+    optional: false
+    order: 160
+  - slug: reverse-eng/api-framework/consumer/service-layer-patterns
+    optional: false
+    order: 170
+  - slug: reverse-eng/api-framework/consumer/data-access-and-database-utilities
+    optional: false
+    order: 180
+    include-if: "project.elicitation.framework_provides_data_access == true"
+  - slug: reverse-eng/api-framework/consumer/validation-and-transformation
+    optional: false
+    order: 190
+  - slug: reverse-eng/api-framework/consumer/error-handling
+    optional: false
+    order: 200
+  - slug: reverse-eng/api-framework/consumer/authentication-and-authorization
+    optional: false
+    order: 210
+  - slug: reverse-eng/api-framework/consumer/logging-and-observability
+    optional: false
+    order: 220
+  - slug: reverse-eng/api-framework/consumer/configuration-management
+    optional: false
+    order: 230
+  - slug: reverse-eng/api-framework/consumer/health-checks-and-monitoring
+    optional: false
+    order: 240
+  - slug: reverse-eng/api-framework/consumer/testing-utilities
+    optional: false
+    order: 250
+  - slug: reverse-eng/api-framework/consumer/recipes-and-common-patterns
+    optional: false
+    order: 260
+  - slug: reverse-eng/api-framework/consumer/anti-patterns
+    optional: false
+    order: 270
+  - slug: reverse-eng/api-framework/consumer/migration-and-upgrade-notes
+    optional: false
+    order: 280
+  - slug: reverse-eng/api-framework/consumer/shared-types-and-interfaces
+    optional: false
+    order: 290
+  - slug: reverse-eng/api-framework/consumer/glossary
+    optional: false
+    order: 300
+  - slug: reverse-eng/api-framework/consumer/quick-reference-cheat-sheet
+    optional: false
+    order: 310
+  - slug: reverse-eng/api-framework/consumer/appendix-a-complete-reference-application
+    optional: false
+    order: 320
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/api-framework/consumer/data-access-and-database-utilities
+    include-if: "project.elicitation.framework_provides_data_access == true"
+
+notes: |
+  All blocks except data-access are unconditionally included; data-access is
+  gated because some API frameworks intentionally do not opine on persistence.
+  Block order follows order-hint values 110..320.

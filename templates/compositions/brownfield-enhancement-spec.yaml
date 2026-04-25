@@ -1,0 +1,124 @@
+# Composition: Brownfield Enhancement Spec
+#
+# A SINGLE-document spec that spans requirements + design + planning. Used for
+# enhancements to an existing system where producing three separate packages
+# is overkill. Picks the leanest essential blocks from each stage.
+#
+# Total block count: ~16 (deliberately tight).
+
+name: brownfield-enhancement-spec
+description: Combined req+design+plan spec in one artifact for enhancing an existing system.
+applies-to-flow: brownfield
+package-type: enhancement-spec
+
+default-output-path: "{paths.requirements_path}/{feature-id}-enhancement-spec.md"
+
+blocks:
+  # ---- Framing ----
+  - slug: shared/overview
+    optional: false
+    order: 1
+  - slug: requirements/executive-summary-business-context
+    optional: false
+    order: 2
+
+  # ---- Requirements core (lean) ----
+  - slug: requirements/functional-requirements
+    optional: false
+    order: 3
+  - slug: requirements/business-logic-rules
+    optional: false
+    order: 4
+    include-if: "project.elicitation.has_business_rules == true"
+  - slug: requirements/data-requirements
+    optional: false
+    order: 5
+    include-if: "project.elicitation.touches_data == true"
+  - slug: requirements/non-functional-requirements
+    optional: true
+    order: 6
+    include-if: "project.elicitation.changes_nfrs == true"
+  - slug: requirements/assumptions-constraints-out-of-scope
+    optional: false
+    order: 7
+  - slug: requirements/acceptance-criteria
+    optional: false
+    order: 8
+
+  # ---- Design core (lean) ----
+  - slug: design/solution-architecture
+    optional: false
+    order: 9
+  - slug: design/api-design
+    optional: true
+    order: 10
+    include-if: "project.elicitation.changes_api == true"
+  - slug: design/database-design
+    optional: true
+    order: 11
+    include-if: "project.elicitation.changes_schema == true"
+  - slug: design/security-design
+    optional: true
+    order: 12
+    include-if: "project.elicitation.changes_security_boundary == true"
+  - slug: design/testing-strategy
+    optional: false
+    order: 13
+
+  # ---- Planning (canonical increment shape, single increment) ----
+  - slug: planning/increment-identity
+    optional: false
+    order: 14
+  - slug: planning/plan
+    optional: false
+    order: 15
+  - slug: planning/automated-verification
+    optional: false
+    order: 16
+  - slug: planning/human-verification
+    optional: false
+    order: 17
+  - slug: planning/success-criteria
+    optional: false
+    order: 18
+
+  # ---- Wrappers ----
+  - slug: shared/glossary
+    optional: false
+    order: 19
+  - slug: shared/traceability
+    optional: false
+    order: 20
+  - slug: shared/change-log
+    optional: false
+    order: 21
+
+elicitation:
+  - prompt: references/elicitation-patterns/change-scope-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/impact-assessment.md
+    required: true
+
+decision-gates:
+  - block: requirements/business-logic-rules
+    include-if: "project.elicitation.has_business_rules == true"
+  - block: requirements/data-requirements
+    include-if: "project.elicitation.touches_data == true"
+  - block: requirements/non-functional-requirements
+    include-if: "project.elicitation.changes_nfrs == true"
+  - block: design/api-design
+    include-if: "project.elicitation.changes_api == true"
+  - block: design/database-design
+    include-if: "project.elicitation.changes_schema == true"
+  - block: design/security-design
+    include-if: "project.elicitation.changes_security_boundary == true"
+
+notes: |
+  This composition collapses the three-package forward-engineering flow into
+  a single document for enhancements. Planning section uses a SINGLE increment;
+  if the change spans multiple increments use greenfield-implementation-package
+  per increment instead.
+
+  Brownfield projects must already have a knowledge-base instance under
+  paths.knowledge_base_path so traceability can link new increments back to
+  existing components. If KB is missing, run reverse-eng compositions first.

@@ -1,0 +1,98 @@
+# Composition: Reverse-Engineering — Mobile Framework (Consumer Part)
+#
+# Documents how to USE a mobile framework / cross-platform toolkit as a
+# downstream developer (i.e. the team building apps on top).
+#
+# Source: templates/blocks/reverse-eng/mobile-framework/consumer/
+
+name: re-mobile-framework-consumer
+description: Reverse-engineering KB for consuming a mobile framework as a downstream developer.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/mobile-framework-consumer.md"
+
+blocks:
+  - slug: reverse-eng/mobile-framework/consumer/framework-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/mobile-framework/consumer/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/mobile-framework/consumer/installation-and-setup
+    optional: false
+    order: 130
+  - slug: reverse-eng/mobile-framework/consumer/design-tokens-theming-and-styling
+    optional: false
+    order: 140
+  - slug: reverse-eng/mobile-framework/consumer/components-and-ui-elements
+    optional: false
+    order: 150
+  - slug: reverse-eng/mobile-framework/consumer/services-and-utilities
+    optional: false
+    order: 160
+  - slug: reverse-eng/mobile-framework/consumer/shared-types-interfaces-and-enums
+    optional: false
+    order: 170
+  - slug: reverse-eng/mobile-framework/consumer/platform-integration-and-lifecycle
+    optional: false
+    order: 180
+  - slug: reverse-eng/mobile-framework/consumer/permissions-and-capabilities
+    optional: false
+    order: 190
+  - slug: reverse-eng/mobile-framework/consumer/common-patterns-and-recipes
+    optional: false
+    order: 200
+  - slug: reverse-eng/mobile-framework/consumer/anti-patterns-and-pitfalls
+    optional: false
+    order: 210
+  - slug: reverse-eng/mobile-framework/consumer/error-handling-and-debugging
+    optional: false
+    order: 220
+  - slug: reverse-eng/mobile-framework/consumer/performance-patterns
+    optional: false
+    order: 230
+  - slug: reverse-eng/mobile-framework/consumer/security-best-practices
+    optional: false
+    order: 240
+  - slug: reverse-eng/mobile-framework/consumer/native-bridge-and-module-documentation
+    optional: false
+    order: 250
+    include-if: "project.elicitation.framework_has_native_bridge == true"
+  - slug: reverse-eng/mobile-framework/consumer/linking-and-configuration
+    optional: false
+    order: 260
+  - slug: reverse-eng/mobile-framework/consumer/testing
+    optional: false
+    order: 270
+  - slug: reverse-eng/mobile-framework/consumer/accessibility
+    optional: false
+    order: 280
+  - slug: reverse-eng/mobile-framework/consumer/migration-and-upgrade-notes
+    optional: false
+    order: 290
+  - slug: reverse-eng/mobile-framework/consumer/compatibility-matrix
+    optional: false
+    order: 300
+  - slug: reverse-eng/mobile-framework/consumer/glossary
+    optional: false
+    order: 310
+  - slug: reverse-eng/mobile-framework/consumer/quick-reference-cheat-sheet
+    optional: false
+    order: 320
+  - slug: reverse-eng/mobile-framework/consumer/appendix-a-sample-projects
+    optional: false
+    order: 330
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/mobile-framework/consumer/native-bridge-and-module-documentation
+    include-if: "project.elicitation.framework_has_native_bridge == true"
+
+notes: |
+  Block order follows order-hint values 110..330. Native-bridge block is
+  gated because pure-managed frameworks (e.g. Flutter without platform
+  channels) may not need it.

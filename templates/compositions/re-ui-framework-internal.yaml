@@ -1,0 +1,109 @@
+# Composition: Reverse-Engineering — UI Framework (Internal Part)
+#
+# Documents the INTERNAL implementation of a UI framework / component
+# library — for the framework's own maintainers (e.g., React internals,
+# Vue internals, Angular internals). Mirrors re-ui-framework-consumer.
+#
+# Source: templates/blocks/reverse-eng/ui-framework/internal/
+
+name: re-ui-framework-internal
+description: Reverse-engineering KB for the internal implementation of a UI framework.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/ui-framework-internal.md"
+
+blocks:
+  - slug: reverse-eng/ui-framework/internal/architecture-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/ui-framework/internal/component-model
+    optional: false
+    order: 120
+  - slug: reverse-eng/ui-framework/internal/reactivity-system
+    optional: false
+    order: 130
+  - slug: reverse-eng/ui-framework/internal/render-pipeline
+    optional: false
+    order: 140
+  - slug: reverse-eng/ui-framework/internal/state-management-internals
+    optional: false
+    order: 150
+  - slug: reverse-eng/ui-framework/internal/template-or-jsx-compilation
+    optional: false
+    order: 160
+  - slug: reverse-eng/ui-framework/internal/directives-and-pipes
+    optional: true
+    order: 170
+    include-if: "project.elicitation.framework_has_directives_or_pipes == true"
+  - slug: reverse-eng/ui-framework/internal/routing-internals
+    optional: false
+    order: 180
+    include-if: "project.elicitation.framework_provides_routing == true"
+  - slug: reverse-eng/ui-framework/internal/forms-and-validation-internals
+    optional: true
+    order: 190
+    include-if: "project.elicitation.framework_provides_forms == true"
+  - slug: reverse-eng/ui-framework/internal/dependency-injection-or-context
+    optional: false
+    order: 200
+  - slug: reverse-eng/ui-framework/internal/event-system
+    optional: false
+    order: 210
+  - slug: reverse-eng/ui-framework/internal/slot-projection-and-content-distribution
+    optional: false
+    order: 220
+  - slug: reverse-eng/ui-framework/internal/styling-architecture
+    optional: false
+    order: 230
+  - slug: reverse-eng/ui-framework/internal/internationalization-internals
+    optional: true
+    order: 240
+    include-if: "project.elicitation.framework_provides_i18n == true"
+  - slug: reverse-eng/ui-framework/internal/performance-optimization-pipeline
+    optional: false
+    order: 250
+  - slug: reverse-eng/ui-framework/internal/error-boundary-system
+    optional: false
+    order: 260
+  - slug: reverse-eng/ui-framework/internal/testing-harness
+    optional: false
+    order: 270
+  - slug: reverse-eng/ui-framework/internal/tooling-and-cli
+    optional: false
+    order: 280
+  - slug: reverse-eng/ui-framework/internal/build-output-and-tree-shaking
+    optional: false
+    order: 290
+  - slug: reverse-eng/ui-framework/internal/compatibility-strategy
+    optional: false
+    order: 300
+  - slug: reverse-eng/ui-framework/internal/source-layout
+    optional: false
+    order: 310
+  - slug: reverse-eng/ui-framework/internal/conventions-and-idioms
+    optional: false
+    order: 320
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/ui-framework/internal/directives-and-pipes
+    include-if: "project.elicitation.framework_has_directives_or_pipes == true"
+  - block: reverse-eng/ui-framework/internal/routing-internals
+    include-if: "project.elicitation.framework_provides_routing == true"
+  - block: reverse-eng/ui-framework/internal/forms-and-validation-internals
+    include-if: "project.elicitation.framework_provides_forms == true"
+  - block: reverse-eng/ui-framework/internal/internationalization-internals
+    include-if: "project.elicitation.framework_provides_i18n == true"
+
+notes: |
+  Block order follows order-hint values 110..320. Twenty-two blocks total.
+  Conditional gates exist because UI frameworks vary widely in scope — Angular
+  has DI/directives/pipes/forms/router as core; React mostly delegates these
+  to companion libs; Solid/Svelte differ again. Same gate flags as the
+  consumer-side composition, plus directives-and-pipes / forms-and-validation
+  / i18n are explicitly marked optional in their frontmatter so removing the
+  gate still drops cleanly.

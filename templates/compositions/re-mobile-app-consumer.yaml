@@ -1,0 +1,69 @@
+# Composition: Reverse-Engineering — Mobile App (Consumer Part)
+#
+# Documents how external parties INTEGRATE WITH or EXTEND a mobile app:
+# distribution channels, deep links arriving from outside, push from a
+# backend, embedded webviews, partner SDKs, analytics events emitted to
+# downstream consumers, OS permissions, MDM-driven config, OS-version
+# compatibility, and partner support contacts.
+#
+# Source: templates/blocks/reverse-eng/mobile-app/consumer/
+
+name: re-mobile-app-consumer
+description: Reverse-engineering KB for consuming/operating a mobile app (integrator view).
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/mobile-app-consumer.md"
+
+blocks:
+  - slug: reverse-eng/mobile-app/consumer/distribution-channels
+    optional: false
+    order: 110
+  - slug: reverse-eng/mobile-app/consumer/deep-linking-from-outside
+    optional: false
+    order: 120
+  - slug: reverse-eng/mobile-app/consumer/push-integration-from-backend
+    optional: false
+    order: 130
+    include-if: "project.elicitation.has_push_notifications == true"
+  - slug: reverse-eng/mobile-app/consumer/webview-and-embedding
+    optional: true
+    order: 140
+    include-if: "project.elicitation.has_webview_or_embedding == true"
+  - slug: reverse-eng/mobile-app/consumer/partner-sdks-consumed
+    optional: false
+    order: 150
+  - slug: reverse-eng/mobile-app/consumer/analytics-and-attribution-events
+    optional: false
+    order: 160
+  - slug: reverse-eng/mobile-app/consumer/app-permissions-from-os
+    optional: false
+    order: 170
+  - slug: reverse-eng/mobile-app/consumer/app-config-via-mdm
+    optional: true
+    order: 180
+    include-if: "project.elicitation.is_distributed_via_mdm == true"
+  - slug: reverse-eng/mobile-app/consumer/version-compatibility-and-os-support
+    optional: false
+    order: 190
+  - slug: reverse-eng/mobile-app/consumer/support-and-contact
+    optional: true
+    order: 200
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/mobile-app/consumer/push-integration-from-backend
+    include-if: "project.elicitation.has_push_notifications == true"
+  - block: reverse-eng/mobile-app/consumer/webview-and-embedding
+    include-if: "project.elicitation.has_webview_or_embedding == true"
+  - block: reverse-eng/mobile-app/consumer/app-config-via-mdm
+    include-if: "project.elicitation.is_distributed_via_mdm == true"
+
+notes: |
+  Block order follows order-hint values 110..200. Conditional gates exist
+  for capabilities not every mobile-app integration story uses (push from
+  a backend, embedded webviews, MDM-managed config). The optional support
+  block is for apps that publish a partner-facing support surface.

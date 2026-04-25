@@ -1,0 +1,117 @@
+# Composition: Reverse-Engineering — UI Framework (Consumer Part)
+#
+# Documents how to USE a UI framework / component library as a downstream
+# developer (i.e. the team that imports the library to build apps).
+#
+# Source: templates/blocks/reverse-eng/ui-framework/consumer/
+
+name: re-ui-framework-consumer
+description: Reverse-engineering KB for consuming a UI framework / component library.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/ui-framework-consumer.md"
+
+blocks:
+  - slug: reverse-eng/ui-framework/consumer/framework-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/ui-framework/consumer/environment-and-configuration
+    optional: false
+    order: 120
+  - slug: reverse-eng/ui-framework/consumer/project-scaffolding-and-structure
+    optional: false
+    order: 130
+  - slug: reverse-eng/ui-framework/consumer/theming-styling-and-responsive-design
+    optional: false
+    order: 140
+  - slug: reverse-eng/ui-framework/consumer/components
+    optional: false
+    order: 150
+  - slug: reverse-eng/ui-framework/consumer/services
+    optional: false
+    order: 160
+  - slug: reverse-eng/ui-framework/consumer/directives-and-pipes
+    optional: false
+    order: 170
+    include-if: "project.elicitation.framework_has_directives_or_pipes == true"
+  - slug: reverse-eng/ui-framework/consumer/shared-types-interfaces-and-enums
+    optional: false
+    order: 180
+  - slug: reverse-eng/ui-framework/consumer/dependency-injection-tokens-and-providers
+    optional: false
+    order: 190
+    include-if: "project.elicitation.framework_uses_di == true"
+  - slug: reverse-eng/ui-framework/consumer/inter-component-communication
+    optional: false
+    order: 200
+  - slug: reverse-eng/ui-framework/consumer/routing-and-navigation
+    optional: false
+    order: 210
+    include-if: "project.elicitation.framework_provides_routing == true"
+  - slug: reverse-eng/ui-framework/consumer/forms-and-validation
+    optional: false
+    order: 220
+    include-if: "project.elicitation.framework_provides_forms == true"
+  - slug: reverse-eng/ui-framework/consumer/data-fetching-and-api-integration
+    optional: false
+    order: 230
+  - slug: reverse-eng/ui-framework/consumer/internationalization-i18n
+    optional: false
+    order: 240
+    include-if: "project.elicitation.framework_provides_i18n == true"
+  - slug: reverse-eng/ui-framework/consumer/performance-patterns
+    optional: false
+    order: 250
+  - slug: reverse-eng/ui-framework/consumer/security-conventions
+    optional: false
+    order: 260
+  - slug: reverse-eng/ui-framework/consumer/common-patterns-recipes
+    optional: false
+    order: 270
+  - slug: reverse-eng/ui-framework/consumer/anti-patterns
+    optional: false
+    order: 280
+  - slug: reverse-eng/ui-framework/consumer/error-handling
+    optional: false
+    order: 290
+  - slug: reverse-eng/ui-framework/consumer/testing
+    optional: false
+    order: 300
+  - slug: reverse-eng/ui-framework/consumer/accessibility
+    optional: false
+    order: 310
+  - slug: reverse-eng/ui-framework/consumer/migration-and-upgrade-notes
+    optional: false
+    order: 320
+  - slug: reverse-eng/ui-framework/consumer/glossary
+    optional: false
+    order: 330
+  - slug: reverse-eng/ui-framework/consumer/quick-reference-cheat-sheet
+    optional: false
+    order: 340
+  - slug: reverse-eng/ui-framework/consumer/appendix-a-complete-reference-app
+    optional: true
+    order: 350
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/ui-framework/consumer/directives-and-pipes
+    include-if: "project.elicitation.framework_has_directives_or_pipes == true"
+  - block: reverse-eng/ui-framework/consumer/dependency-injection-tokens-and-providers
+    include-if: "project.elicitation.framework_uses_di == true"
+  - block: reverse-eng/ui-framework/consumer/routing-and-navigation
+    include-if: "project.elicitation.framework_provides_routing == true"
+  - block: reverse-eng/ui-framework/consumer/forms-and-validation
+    include-if: "project.elicitation.framework_provides_forms == true"
+  - block: reverse-eng/ui-framework/consumer/internationalization-i18n
+    include-if: "project.elicitation.framework_provides_i18n == true"
+
+notes: |
+  Block order follows order-hint values 110..350. Conditional gates exist
+  because UI frameworks vary widely in scope (Angular has DI/directives/
+  pipes; React mostly does not; some frameworks ship routing & forms,
+  others delegate to companion libs).

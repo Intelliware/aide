@@ -1,0 +1,51 @@
+# Composition: Quick-Dev Spec
+#
+# Minimal spec for a small change/feature. The MOST lightweight composition
+# over the same trunk used by greenfield-requirements-package: only the four
+# blocks that absolutely must be answered before code is written.
+#
+# Total block count: 6 (4 content blocks + 2 shared wrappers).
+
+name: quick-dev-spec
+description: Minimal spec — overview, FRs, acceptance criteria, glossary.
+applies-to-flow: quick-dev
+package-type: quick-dev-spec
+
+default-output-path: "{paths.requirements_path}/{feature-id}-quick-dev-spec.md"
+
+blocks:
+  - slug: shared/overview
+    optional: false
+    order: 1
+  - slug: requirements/executive-summary-business-context
+    optional: false
+    order: 2
+  - slug: requirements/functional-requirements
+    optional: false
+    order: 3
+  - slug: requirements/acceptance-criteria
+    optional: false
+    order: 4
+  - slug: shared/glossary
+    optional: false
+    order: 5
+  - slug: shared/change-log
+    optional: false
+    order: 6
+
+elicitation:
+  - prompt: references/elicitation-patterns/change-scope-discovery.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  Deliberately tight. Many requirements blocks declare applies-to: quick-dev-spec
+  (functional-specifications, business-logic-rules, user-journeys, data-requirements,
+  business-objectives-success-criteria, assumptions-constraints-out-of-scope,
+  index, executive-summary-business-context). We pick only the four that block
+  code authoring; the rest stay out unless the dev escalates to a brownfield
+  enhancement spec or full requirements package.
+
+  If an item turns out to need richer elicitation, switch the composition —
+  do not bolt blocks onto quick-dev-spec.

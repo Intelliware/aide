@@ -1,0 +1,44 @@
+# Composition: Knowledge Base — Component Leaf
+#
+# Composes a single component leaf document for the knowledge base. One block,
+# one composition — declared explicitly so build/update skills have a stable
+# handle (e.g. "compose a kb-component for {component-slug}") and so the
+# registry/workflow-graph can name this output type.
+#
+# Source: templates/blocks/knowledge-base/component.md
+
+name: kb-component
+description: Single component leaf document in the knowledge base.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-component
+
+default-output-path: "{paths.knowledge_base_path}/components/{component-slug}.md"
+
+blocks:
+  - slug: knowledge-base/component
+    optional: false
+    order: 1
+
+elicitation:
+  - prompt: references/elicitation-patterns/component-discovery.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  Single-block composition by design. The component block contains the
+  full structure (purpose, responsibilities, public surface, dependencies,
+  invariants, ownership, etc.). One file per component; one composition
+  invocation per file.
+
+  Related KB compositions / outputs (NOT covered here):
+    - kb-instance-root.yaml          → ARCHITECTURE.md
+    - knowledge-base/repo-summary    → one repo-summary.md per repo
+    - knowledge-base/shared-entity   → one file per shared domain entity
+    - knowledge-base/adr-template    → one file per architectural decision
+
+  Those are handled either by a sibling composition (kb-instance-root) or
+  by direct block invocation from the KB-stage skills (no composition wrapper
+  needed for one-file-per-instance outputs other than this one — declared
+  explicitly here because component leaves are the most frequently composed
+  KB artifact and benefit from a registry handle).

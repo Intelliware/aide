@@ -1,0 +1,34 @@
+# Inputs and Outputs — document-quick-change
+
+## Inputs
+
+| Name | Required? | Source | Example |
+|---|---|---|---|
+| developer description | yes | conversation | "Add a 'mark as read' button to notification cards" |
+| existing artifacts | no — but always asked about | tickets, incident notes, screenshots, PRs, ADRs | Linear ticket NOT-142, Slack screenshot |
+| feature folder | yes — inferred or provided | reuse existing `docs/<feature>/` or kebab-case from description | `docs/notification-mark-as-read/` |
+| `templates/compositions/quick-dev-spec.yaml` | yes | framework | structural template for the spec |
+| project paths | yes | `project.toml` `[project.paths]` | `requirements_path` |
+
+## Outputs
+
+| Artifact path | Format | Downstream consumer |
+|---|---|---|
+| `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (small/medium) OR inline (trivial) | markdown — populated four-block composition | `plan-quick-change` |
+| `<feature-folder>/CHANGE-TRACKER.md` (created if missing) | markdown — initialized | `track-change` |
+| Glossary additions (when new terms appear) | markdown table inside the spec | downstream skills, glossary linter |
+
+## Side effects
+
+- Creates the feature folder if it does not exist
+- Initializes the change tracker if missing
+- Writes the spec to disk (unless trivial, in which case the spec stays inline in the conversation)
+
+## Validation rules
+
+- All `[NEEDS CLARIFICATION]` markers must be resolved before the spec is finalized
+- Each acceptance criterion must be independently verifiable (no compound ACs, no "should" wording)
+- "Out of Scope" must be explicit — empty is not acceptable on small/medium specs
+- For brownfield changes, delta (ADDED/MODIFIED/REMOVED) must be filled
+- User must explicitly confirm before the skill returns success
+- The skill cannot return success while the rigor classification is unresolved

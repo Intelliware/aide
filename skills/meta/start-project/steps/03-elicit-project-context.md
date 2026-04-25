@@ -1,0 +1,106 @@
+---
+slug: elicit-project-context
+sequence: 3
+depends-on-prior: true
+---
+
+# Step 3 — Elicit project context
+
+Build the body of `[project]`, `[project.paths]`, `[project.glossary]`,
+and `[project.elicitation]`. Each sub-section is a discrete elicitation
+pass — do not collapse them into one mega-prompt.
+
+## Purpose
+
+Capture every field the schema in `config/project.toml.example`
+declares, anchored on the example as the prompt's reference point. The
+user sees the example value alongside each prompt so the format is
+unambiguous.
+
+## Sub-steps (run in order)
+
+| # | Section | Required fields | Optional fields |
+|---|---|---|---|
+| 1 | `[project]` | `name`, `code`, `domain` | `description`, `default_flow` (set from step 02) |
+| 2 | `[project.paths]` | `knowledge_base_path` (greenfield/brownfield only) | `requirements_package`, `design_package`, `implementation_package` (defaults are fine) |
+| 3 | `[project.glossary]` | (none) | `references[]`, `entries[]` (term/definition/aliases/domain_specific) |
+| 4 | `[project.elicitation]` | (none) | answers to known decision-table codes — see list below |
+
+### Sub-step 1 — `[project]`
+
+Ask for `name` (free-form), `code` (validate against `^[a-z][a-z0-9-]*$`
+in real time), `domain` (one line), and optionally `description`
+(multi-paragraph; can be empty). The `default_flow` value is already
+known from step 02 — do not re-ask.
+
+### Sub-step 2 — `[project.paths]`
+
+For each of the four paths, present the schema default and let the user
+keep or override. Validate that any `{...}` token is one of the four in
+`config/SCHEMAS.md` § 1.5.
+
+For `knowledge_base_path`: required for greenfield and brownfield;
+suppressed for quick-dev. Suggest `{project-root}/../<project-code>-knowledge-base`
+as the default sibling-repo layout.
+
+### Sub-step 3 — `[project.glossary]`
+
+Two parallel sub-prompts:
+
+- "Any glossary files to reference?" — list of paths.
+- "Any inline terms to capture now?" — loop on `term`, `definition`,
+  optional `aliases`, optional `domain_specific`.
+
+Both are optional. Skip on `done`.
+
+### Sub-step 4 — `[project.elicitation]`
+
+Pre-answers for decision-table codes used by composition gates. The
+canonical list (mirroring `project.toml.example`):
+
+- `compliance_regime` — none / pci-dss / hipaa / gdpr / soc2 / other
+- `team_size` — solo / 2-5 / 5-10 / 10-25 / 25-100 / 100+
+- `user_facing` — boolean
+- `deployment_model` — saas-multi-tenant / saas-single-tenant / on-prem / mobile-app / desktop-app / library
+- `data_residency` — single-region / multi-region / us-eu-split / sovereign
+- `release_cadence` — continuous / weekly / biweekly / monthly / quarterly / on-demand
+- `testing_strategy` — tdd-required / tests-after / minimal / none
+- `observability_stack` — datadog / new-relic / elastic / prometheus-grafana / cloudwatch / none
+- `identity_provider` — auth0 / okta / cognito / azure-ad / custom / none
+- `primary_database` — postgres / mysql / mssql / mongodb / dynamodb / other
+- `event_bus` — kafka / rabbit / sqs / sns / eventbridge / none
+- `has_ui` — boolean (for composition gates)
+- `has_authn` — boolean
+- `has_external_integrations` — boolean
+
+Treat unknown codes the user volunteers as forward-compat — write them
+through. Treat skipped codes as "no answer recorded."
+
+## Elicitation patterns referenced
+
+- `references/elicitation-patterns/project-bootstrap.md` § identity
+- `references/elicitation-patterns/project-bootstrap.md` § paths
+- `references/elicitation-patterns/project-bootstrap.md` § glossary-seed
+- `references/elicitation-patterns/project-bootstrap.md` § decision-table-prefill
+
+(These section anchors do not exist yet — referenced by path so the
+runner knows where to load them when authored.)
+
+## Hard gates
+
+- `project.code` validation is live (re-prompt on regex failure).
+- `knowledge_base_path` MUST be supplied for greenfield/brownfield
+  before this step exits.
+
+## Exit criteria
+
+- [ ] `[project]` required fields collected.
+- [ ] `[project.paths]` finalized (with KB path when applicable).
+- [ ] Glossary sub-step run to its `done` exit.
+- [ ] Decision-table sub-step run; user offered the chance to skip
+      remaining codes.
+
+## Next
+
+Step 04 — elicit-repos. Skip directly to step 05 if the user confirms
+single-repo and the project root is the only repo.

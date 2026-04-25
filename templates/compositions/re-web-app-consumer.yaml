@@ -1,0 +1,68 @@
+# Composition: Reverse-Engineering — Web App (Consumer Part)
+#
+# Documents how external parties EXTEND, EMBED, or INTEGRATE WITH a web app.
+# This is NOT how to use the app as an end user — it's the integrator's view:
+# embedding modes, theming, extension points, data integration, identity,
+# events, accessibility, localization, performance, version compatibility,
+# deprecation policy, and support.
+#
+# Source: templates/blocks/reverse-eng/web-app/consumer/
+
+name: re-web-app-consumer
+description: Reverse-engineering KB for embedding / extending / integrating with a web app.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/{repo-slug}/web-app-consumer.md"
+
+blocks:
+  - slug: reverse-eng/web-app/consumer/embedding-options
+    optional: false
+    order: 110
+  - slug: reverse-eng/web-app/consumer/theming-and-branding
+    optional: false
+    order: 120
+  - slug: reverse-eng/web-app/consumer/customization-extension-points
+    optional: false
+    order: 130
+  - slug: reverse-eng/web-app/consumer/data-integration
+    optional: false
+    order: 140
+  - slug: reverse-eng/web-app/consumer/authentication-integration
+    optional: false
+    order: 150
+  - slug: reverse-eng/web-app/consumer/event-and-callback-api
+    optional: false
+    order: 160
+  - slug: reverse-eng/web-app/consumer/accessibility-considerations
+    optional: false
+    order: 170
+  - slug: reverse-eng/web-app/consumer/localization-integration
+    optional: false
+    order: 180
+  - slug: reverse-eng/web-app/consumer/performance-considerations
+    optional: false
+    order: 190
+  - slug: reverse-eng/web-app/consumer/version-compatibility
+    optional: false
+    order: 200
+  - slug: reverse-eng/web-app/consumer/deprecation-policy
+    optional: false
+    order: 210
+  - slug: reverse-eng/web-app/consumer/support-and-contact
+    optional: true
+    order: 220
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  Block order follows order-hint values 110..220. Twelve blocks total; all
+  but support-and-contact are required. The set is closer in spirit to the
+  api-framework/consumer pattern (extending / integrating) than to the
+  ui-framework/consumer pattern (using a library) — the reader is an
+  integrator who already knows the business case and now needs the contract
+  for embedding the web app inside another product.

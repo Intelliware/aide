@@ -1,0 +1,61 @@
+---
+name: document-quick-change
+description: "Use when the user says \"quick change\", \"small change\", \"fast-track this\", \"expedited spec\", \"write a change spec\", or \"document a small fix/feature\" and the change does not warrant a full requirements + design package. Captures one combined lightweight spec (mini-requirements + mini-design in a single artifact) per `templates/compositions/quick-dev-spec.yaml`. First of three quick-dev skills."
+---
+
+# Document Quick Change
+
+## Overview
+
+Captures a small-to-medium change as a single combined lightweight spec — mini-requirements + mini-design in one artifact — so the developer can move to a lightweight plan and execution without authoring a full requirements package and design package. The spec is the source of truth for the rest of the quick-dev flow.
+
+Derived from the legacy `expedited-implementation-package`'s change-spec step and built against `templates/compositions/quick-dev-spec.yaml` (overview, FRs, ACs, glossary, change log).
+
+## When to use
+
+- Small-to-medium change that does not need separate requirements + design packages
+- Developer can describe the change in a few sentences
+- No new data models, complex API endpoints, or architectural decisions
+- No cross-team coordination needed
+- The user asked for "expedited", "quick", "fast-track", or "small change"
+
+## When NOT to use
+
+- Change touches many files across module boundaries — switch to the full pipeline (`create-requirements-package` → `create-design-package` → `create-implementation-package`)
+- Requires new data models or new API endpoints — full pipeline
+- Needs architectural decisions or BSA/architect input — full pipeline
+- High risk or high ambiguity — full pipeline
+- A change spec already exists — use `plan-quick-change` directly
+
+## Inputs
+
+See `references/INPUTS-OUTPUTS.md`.
+
+## Workflow
+
+1. **Determine feature folder** — reuse an existing `docs/<feature>/` if one exists, otherwise infer a kebab-case name from the user's description and confirm. Create `docs/<feature>/quick-dev-package/` if needed.
+2. **Listen** — capture the user's description: what they want, why, where, what done looks like, what's explicitly out of scope.
+3. **Existing-artifact intake** — ask whether the user has tickets, incident notes, screenshots, prior PRs, ADRs, or other artifacts to seed the spec. Read them if provided; reconcile conflicts before drafting.
+4. **Classify rigor** — trivial (one sentence + 1 AC, inline) / small (short spec on disk) / medium (full template). Confirm with the user.
+5. **Structure against the composition** — populate the four blocks from `templates/compositions/quick-dev-spec.yaml`: overview, executive-summary-business-context (the "Why"), functional requirements (the "What" + delta), acceptance criteria. Add glossary entries if any new term appears.
+6. **Mark uncertainty** — insert `[NEEDS CLARIFICATION: …]` for any ambiguity that affects implementation. Resolve markers one at a time with the user.
+7. **Finalize and confirm** — write to `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (or stay inline for trivial). Get explicit user confirmation before handoff.
+
+Detailed marker-resolution rules and rigor decision logic are not separately stepped — the workflow is short enough to keep inline.
+
+## Output
+
+See `references/INPUTS-OUTPUTS.md`. A single combined spec at `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (small/medium) or inline (trivial), plus an initialized `CHANGE-TRACKER.md` if it didn't exist.
+
+## Next skill
+
+`plan-quick-change`
+
+## Common mistakes
+
+- Writing code or planning before the spec is agreed (no code before clarity gate)
+- Vague ACs ("notifications work correctly") — each AC must be a specific trigger + observable outcome
+- Bundling multiple questions in one `[NEEDS CLARIFICATION]` marker
+- Skipping "Out of Scope" — the explicit boundary prevents downstream scope creep
+- Using the full template for a trivial config rename — match rigor to scope
+- Failing to ask about existing artifacts (tickets, PRs) — the user usually has more than they volunteered

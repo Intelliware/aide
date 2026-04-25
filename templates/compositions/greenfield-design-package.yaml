@@ -1,0 +1,139 @@
+# Composition: Greenfield Design Package
+#
+# Full design package for a new (greenfield) build. Composes every design-stage
+# block, plus shared wrappers (overview, glossary, change-log, traceability),
+# plus the ADR template (one ADR per significant decision is appended outside
+# this composition; the block here defines the canonical structure).
+
+name: greenfield-design-package
+description: Full design package for a greenfield project (all elaborate design blocks).
+applies-to-flow: greenfield
+package-type: design
+
+default-output-path: "{paths.design_path}/{feature-id}-design.md"
+
+blocks:
+  # ---- Front matter / framing ----
+  - slug: shared/overview
+    optional: false
+    order: 1
+  - slug: design/solution-overview
+    optional: false
+    order: 2
+  - slug: design/technology-stack
+    optional: false
+    order: 3
+  - slug: design/solution-architecture
+    optional: false
+    order: 4
+
+  # ---- Tier-specific designs (gated by project shape) ----
+  - slug: design/frontend-design
+    optional: true
+    order: 5
+    include-if: "project.elicitation.has_ui == true"
+  - slug: design/backend-design
+    optional: true
+    order: 6
+    include-if: "project.elicitation.has_backend == true"
+  - slug: design/api-design
+    optional: true
+    order: 7
+    include-if: "project.elicitation.exposes_api == true"
+  - slug: design/database-design
+    optional: true
+    order: 8
+    include-if: "project.elicitation.has_persistence == true"
+  - slug: design/security-design
+    optional: false
+    order: 9
+  - slug: design/integration-design
+    optional: true
+    order: 10
+    include-if: "project.elicitation.has_external_integrations == true"
+  - slug: design/workflow-business-rules-design
+    optional: true
+    order: 11
+    include-if: "project.elicitation.has_complex_workflows == true"
+  - slug: design/dashboard-reporting-design
+    optional: true
+    order: 12
+    include-if: "project.elicitation.has_dashboards == true"
+  - slug: design/ux-design
+    optional: true
+    order: 13
+    include-if: "project.elicitation.has_ui == true"
+
+  # ---- Cross-cutting / NFR ----
+  - slug: design/deployment-devops
+    optional: false
+    order: 14
+  - slug: design/observability-operations
+    optional: false
+    order: 15
+  - slug: design/testing-strategy
+    optional: false
+    order: 16
+  - slug: design/non-functional-requirements-technical
+    optional: false
+    order: 17
+  - slug: design/risk-assessment
+    optional: true
+    order: 18
+
+  # ---- ADRs, glossary, traceability, change log ----
+  - slug: knowledge-base/adr-template
+    optional: false
+    order: 19
+  - slug: design/glossary-acronyms
+    optional: true
+    order: 20
+  - slug: shared/glossary
+    optional: false
+    order: 21
+  - slug: shared/traceability
+    optional: false
+    order: 22
+  - slug: shared/change-log
+    optional: false
+    order: 23
+
+elicitation:
+  - prompt: references/elicitation-patterns/architecture-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/technology-stack-selection.md
+    required: true
+  - prompt: references/elicitation-patterns/integration-discovery.md
+    required: false
+  - prompt: references/elicitation-patterns/nfr-translation.md
+    required: true
+
+decision-gates:
+  - block: design/frontend-design
+    include-if: "project.elicitation.has_ui == true"
+  - block: design/backend-design
+    include-if: "project.elicitation.has_backend == true"
+  - block: design/api-design
+    include-if: "project.elicitation.exposes_api == true"
+  - block: design/database-design
+    include-if: "project.elicitation.has_persistence == true"
+  - block: design/integration-design
+    include-if: "project.elicitation.has_external_integrations == true"
+  - block: design/workflow-business-rules-design
+    include-if: "project.elicitation.has_complex_workflows == true"
+  - block: design/dashboard-reporting-design
+    include-if: "project.elicitation.has_dashboards == true"
+  - block: design/ux-design
+    include-if: "project.elicitation.has_ui == true"
+  - block: design/risk-assessment
+    include-if: "project.policies.requires_risk_assessment == true"
+  - block: design/glossary-acronyms
+    include-if: "project.elicitation.domain_terms_present == true"
+
+notes: |
+  ADR template included as the canonical structure for individual ADR files.
+  Per-decision ADRs are produced as separate documents (one ADR per file under
+  paths.knowledge_base_path/adr/) — this composition defines the template, not
+  the ADR-per-file outputs. Tier-specific design blocks are all optional and
+  gated; a small project may resolve to only solution-overview + architecture +
+  security + ops/test + NFR + change-log.

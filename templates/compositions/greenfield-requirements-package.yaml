@@ -1,0 +1,116 @@
+# Composition: Greenfield Requirements Package
+#
+# Full requirements package for a new (greenfield) build. Composes every
+# requirements-stage block plus the shared overview / glossary / change-log /
+# traceability wrappers. This is the heaviest forward-engineering composition;
+# use `quick-dev-spec.yaml` for the lightweight path.
+
+name: greenfield-requirements-package
+description: Full requirements package for a greenfield project (all elaborate blocks).
+applies-to-flow: greenfield
+package-type: requirements
+
+default-output-path: "{paths.requirements_path}/{feature-id}-requirements.md"
+
+blocks:
+  # ---- Front matter / framing ----
+  - slug: requirements/index
+    optional: false
+    order: 0
+  - slug: requirements/executive-summary-business-context
+    optional: false
+    order: 1
+  - slug: shared/overview
+    optional: false
+    order: 2
+  - slug: requirements/business-objectives-success-criteria
+    optional: false
+    order: 3
+  - slug: requirements/stakeholders-personas
+    optional: false
+    order: 4
+
+  # ---- Functional core ----
+  - slug: requirements/functional-requirements
+    optional: false
+    order: 5
+  - slug: requirements/functional-specifications
+    optional: false
+    order: 6
+  - slug: requirements/business-logic-rules
+    optional: false
+    order: 7
+  - slug: requirements/user-journeys
+    optional: false
+    order: 8
+  - slug: requirements/views-dashboards
+    optional: true
+    order: 9
+    include-if: "project.elicitation.has_ui == true"
+  - slug: requirements/data-requirements
+    optional: false
+    order: 10
+  - slug: requirements/permissions-access-control
+    optional: false
+    order: 11
+    include-if: "project.elicitation.has_authn_authz == true"
+  - slug: requirements/non-functional-requirements
+    optional: false
+    order: 12
+  - slug: requirements/assumptions-constraints-out-of-scope
+    optional: false
+    order: 13
+  - slug: requirements/acceptance-criteria
+    optional: false
+    order: 14
+
+  # ---- Glossary, traceability, change log, completeness ----
+  - slug: requirements/glossary
+    optional: true
+    order: 15
+  - slug: shared/glossary
+    optional: false
+    order: 16
+  - slug: requirements/traceability-matrix
+    optional: true
+    order: 17
+  - slug: shared/traceability
+    optional: false
+    order: 18
+  - slug: shared/change-log
+    optional: false
+    order: 19
+  - slug: requirements/completeness-tracker
+    optional: true
+    order: 20
+
+elicitation:
+  - prompt: references/elicitation-patterns/stakeholder-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/business-objectives.md
+    required: true
+  - prompt: references/elicitation-patterns/functional-requirements-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/non-functional-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/data-and-permissions-discovery.md
+    required: false
+
+decision-gates:
+  - block: requirements/views-dashboards
+    include-if: "project.elicitation.has_ui == true"
+  - block: requirements/permissions-access-control
+    include-if: "project.elicitation.has_authn_authz == true"
+  - block: requirements/glossary
+    include-if: "project.elicitation.domain_terms_present == true"
+  - block: requirements/traceability-matrix
+    include-if: "project.policies.requires_traceability_matrix == true"
+  - block: requirements/completeness-tracker
+    include-if: "project.policies.track_completeness == true"
+
+notes: |
+  Composition rationale: covers every requirements-stage block plus shared
+  wrappers. Two glossaries (requirements-local + shared) and two traceability
+  artifacts (matrix + shared section) are intentional — the requirements
+  versions are richer; the shared versions stitch into multi-package projects.
+  TODO: elicitation prompts referenced above will land in a later task.
