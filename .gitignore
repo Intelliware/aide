@@ -40,7 +40,6 @@ config/customizations/*.user.toml
 # BMAD method — kept locally for reference / inspiration only;
 # not part of theframework.
 _bmad/
-_bmad-output/
 
 # Claude Code local settings
 .claude/

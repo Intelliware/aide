@@ -17,7 +17,7 @@ overrides (`<skill-name>.toml`, committed) and personal per-skill overrides
 
 Files match a skill's `name` exactly (the `name:` value from its
 `SKILL.md` frontmatter — also the first column of
-`skills/_registry/skills.csv`). The `customize-framework` skill writes
+`.agents/skills/_registry/skills.csv`). The `customize-framework` skill writes
 files for you, but if hand-authoring:
 
 - Team file: `<skill-name>.toml` (committed)

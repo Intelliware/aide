@@ -72,7 +72,7 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
   - **Goal mode** — user describes a goal; router asks up to 2 clarifying questions; recommends a single skill plus the exact trigger phrase to type.
   - **Catalog mode** — user asks "show me what's here"; router renders a stage-grouped table of all skills.
 - **FR8.3.** Goal mode shall **probe workspace state** (artifacts on disk, flow in `project.toml`, KB presence) before recommending.
-- **FR8.4.** The router shall consume a **generated skill registry** (`skills/_registry/skills.csv`) plus a **hand-authored workflow graph** (`skills/_registry/workflow-graph.yaml`).
+- **FR8.4.** The router shall consume a **generated skill registry** (`.agents/skills/_registry/skills.csv`) plus a **hand-authored workflow graph** (`.agents/skills/_registry/workflow-graph.yaml`).
 
 ### FR9. Global knowledge base
 - **FR9.1.** The framework shall support a multi-repository knowledge base that:
@@ -95,6 +95,12 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 - **FR10.1.** The framework shall use the vocabulary: **stage** (SDLC-level grouping), **increment** (implementation chunk conforming to the canonical 8-section shape), **package** (artifact produced by a stage).
 - **FR10.2.** The framework shall **not** use: "phase" (overloaded), "epic", "story", or other agile-method vocabulary.
 - **FR10.3.** Implementation chunks shall use IDs `INC-XXX` (replacing legacy `PHASE-XXX`).
+
+### FR12. Framework-level always-on orientation
+- **FR12.1.** Theframework shall ship an `AGENTS.md` file at its repo root containing AI-agent orientation: skill discovery path, slash-invocation convention, framework vocabulary (stage / increment / package), the `project.toml` and knowledge-base conventions (phrased folder-agnostically because the framework cannot know sibling folder names), and a guard rail clarifying that the framework's own folder is not the user's project.
+- **FR12.2.** The shipped `AGENTS.md` shall be auto-attached to every chat by both supported hosts (Copilot and Cursor read `AGENTS.md` universally) when theframework is opened as a workspace folder. No project-side configuration shall be required for framework orientation.
+- **FR12.3.** Project-side always-on context (the user's own `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, or `.cursor/rules/*.mdc`) shall remain **optional** and scoped to **project-specific** guidance only — codebase conventions, path-scoped rules, etc. The framework shall not require users to copy framework-orientation content into their project.
+- **FR12.4.** The shipped `AGENTS.md` shall be tight (orientation, not documentation) so its always-attached cost is small even in chats unrelated to active framework use.
 
 ### FR11. Reorganization & migration
 - **FR11.1.** The seven legacy folders (`_shared`, `implementation-execution`, `implementation-planning`, `model-2-sdlc-skills`, `requirements-package`, `reverse-engineering`, `solution-design-package`) shall be consolidated and archived under `_archive/`.
@@ -122,16 +128,16 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 - Destructive operations (folder moves, deletions) shall require user confirmation unless pre-approved.
 
 ### NFR5. Host portability
-- **NFR5.1.** Skills shall execute correctly in any AI host that conforms to the agentskills.io specification. The framework shall be runnable, at minimum, in:
-  - **Claude Code** (the spec's reference host),
+- **NFR5.1.** Skills shall execute correctly in any AI host that conforms to the agentskills.io specification. The framework's currently-supported hosts are:
   - **VSCode + GitHub Copilot agent mode** (formal spec adoption shipped 2025-12-18), and
   - **Cursor IDE** (native agentskills.io support from ~v2.3.x).
+  - Claude Code support is **parked** as of 2026-04-26 — the skills remain spec-conformant, so future re-enablement is a documentation-only change, but no current installation guidance targets Claude Code.
 - **NFR5.2.** No host-specific transformation of `SKILL.md`, `references/`, `steps/`, `scripts/`, or `assets/` shall be required at install time. Compositions (`templates/compositions/*.yaml`) and `project.toml` are framework-internal — skills consume them directly and the host is not asked to parse them.
 - **NFR5.3.** The framework shall ship per-host installation guidance in `README.md` covering:
-  - Skill discovery (path configuration or directory placement against the host's expected roots)
-  - Always-on context wiring (`.github/copilot-instructions.md` / `AGENTS.md` for Copilot; `.cursor/rules/*.mdc` with `alwaysApply: true` / `AGENTS.md` for Cursor; `CLAUDE.md` hierarchy for Claude Code)
-  - Optional MCP server configuration where the host supports it (`.vscode/mcp.json` with root key `servers`; `.cursor/mcp.json` with root key `mcpServers`)
-- **NFR5.4.** Adding support for a new spec-conformant host shall require only README guidance — no changes to `skills/`, `references/`, `templates/`, `scripts/`, or `config/` that are specific to one host.
+  - Skill discovery — both supported hosts list `.agents/skills/` among their default `chat.agentSkillsLocations` (Copilot) / fixed discovery roots (Cursor), so opening theframework as a workspace folder alongside the target project is sufficient; no settings.json edits, symlinks, or overlays.
+  - Framework orientation — automatic via theframework's shipped `AGENTS.md` (per FR12); no project-side wiring required.
+  - Optional project-side guidance: `.github/copilot-instructions.md` / project-root `AGENTS.md` / `.github/instructions/*.instructions.md` for Copilot; project-root `AGENTS.md` / `.cursor/rules/*.mdc` (with `alwaysApply: true` / `globs:`) for Cursor — scoped to project-specific rules; compounds with theframework's `AGENTS.md`.
+- **NFR5.4.** Adding support for a new spec-conformant host shall require only README guidance — no changes to `.agents/skills/`, `references/`, `templates/`, `scripts/`, or `config/` that are specific to one host.
 
 ---
 
@@ -140,10 +146,10 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 ### Inspirations to draw from
 - **BMAD method**: four-layer config, phase-grouping UX, elicitation-first conversational discovery, `customize-framework` pattern, greenfield-vs-brownfield as first-class entry points, two-tier registry pattern
 - **Superpowers**: description = trigger conditions only (not workflow summary), skill-to-skill handoff by name, durable artifact paths as the durable handoff between stages, multi-stage workflow with hard gates
-- **agentskills.io**: required frontmatter, progressive disclosure, `references/` convention. Adopted natively by Claude Code (reference host), by GitHub Copilot in VSCode (from 2025-12-18), and by Cursor IDE (~v2.3.x); the same `SKILL.md` files run in all three.
-- **Claude Code**: CLAUDE.md hierarchy for auto-load on cwd, agentic search over RAG, slash-command discovery
+- **agentskills.io**: required frontmatter, progressive disclosure, `references/` convention. Adopted natively by Claude Code (reference host, currently parked as a target host), by GitHub Copilot in VSCode (from 2025-12-18), and by Cursor IDE (~v2.3.x); the same `SKILL.md` files run in all three.
+- **Claude Code**: CLAUDE.md hierarchy for auto-load on cwd, agentic search over RAG, slash-command discovery (kept as design inspiration even though Claude Code is not a currently-supported runtime host)
 - **GitHub Copilot (VSCode)**: `.github/copilot-instructions.md` / `AGENTS.md` for always-on orientation; `.github/instructions/*.instructions.md` with `applyTo:` glob for path-scoped rules; `chat.agentSkillsLocations` workspace setting for custom skill roots
-- **Cursor IDE**: `.cursor/rules/*.mdc` (with `alwaysApply: true` for project-wide rules, `globs:` for path-scoped); `.cursor/skills/` and `.agents/skills/` as primary discovery roots (with `.claude/skills/` backward-compat); `.cursor/mcp.json` for MCP servers (note: `mcpServers` root key, not `servers`)
+- **Cursor IDE**: `.cursor/rules/*.mdc` (with `alwaysApply: true` for project-wide rules, `globs:` for path-scoped); `.cursor/skills/` and `.agents/skills/` as primary discovery roots (with `.claude/skills/` backward-compat)
 - **Microsoft GraphRAG**: community-summary hierarchy (root → repo → component) for selective KB retrieval
 - **Aider**: separate `graph.json` sidecar for machine-readable component edges
 - **GitHub spec-kit**: spec as source of truth feedback loop ("production reality informs specifications")
@@ -167,7 +173,7 @@ These are answers to design questions raised during the conversation, captured a
 1. **Authoritative DNA**: model-2-sdlc-skills carries the rapid-dev DNA; the domain folders (requirements-package, solution-design-package, implementation-planning) carry the greenfield-elaborate DNA. Quick-dev derives from the former; greenfield from the latter, with model-2's granularity folded in where it adds value.
 2. **Skill granularity**: one skill per **independently-invocable trigger**. Internal sequential steps that are never invoked alone become `steps/<NN>-<name>.md` files inside a parent skill.
 3. **Composition format**: YAML.
-4. **Skill folder grouping**: by stage (`skills/requirements/`, `skills/design/`, …), not by flow.
+4. **Skill folder grouping**: by stage (`.agents/skills/requirements/`, `.agents/skills/design/`, …), not by flow.
 5. **RE skill count**: keep 7 separate domain skills + a thin `analyze-repository` dispatcher (instead of one skill that elicits domain).
 6. **Vocabulary rename**: phase → stage (outer); phase → increment (inner implementation chunk); package retained for artifacts.
 7. **KB location**: lives in its own repo, not inside theframework. Multi-repo workspaces or shared parent directory.
@@ -176,6 +182,16 @@ These are answers to design questions raised during the conversation, captured a
 10. **Self-documenting standard**: 3-file `references/` minimum (OVERVIEW + INPUTS-OUTPUTS + EXAMPLE) for every skill.
 
 ---
+
+## Decisions made (2026-04-26)
+
+These supersede or extend the 2026-04-25 decisions above:
+
+11. **Skill location**: skills relocated from `skills/` to `.agents/skills/`. Rationale: `.agents/skills/` is a default discovery root in both currently-supported hosts (VSCode + GitHub Copilot per `chat.agentSkillsLocations` defaults; Cursor per its built-in roots), so a multi-root workspace with theframework as a sibling folder gives zero-configuration skill discovery — no `chat.agentSkillsLocations` edits, no symlinks (Windows-fragile), and no overlay/install step.
+12. **Repo deployment model**: theframework remains its own repository, opened alongside target project repos in a single multi-root VSCode / Cursor workspace. The framework is *not* installed into target projects; templates/, config/, scripts/, and references/ stay at theframework's repo root and are accessed by skills as part of the same workspace.
+13. **Claude Code support parked (2026-04-26)**: native installation guidance for Claude Code is removed from `README.md`. Skills remain agentskills.io-conformant, so re-enabling Claude Code support in future is a documentation-only change.
+14. **Internal documentation directory**: framework-internal documentation (this `requirements.md`) lives under `_docs/`, following the existing `_<name>/` underscore convention used by `_archive/` and `_bmad/` to signal "not part of any shippable artifact."
+15. **Framework-shipped AGENTS.md**: theframework ships its own `AGENTS.md` at the repo root (FR12), auto-attached by both Copilot and Cursor when theframework is opened as a workspace folder. Rationale: zero-setup orientation, stays in sync with framework versions via `git pull`, eliminates the need for users to copy framework-orientation content into every project. Project-side always-on context becomes optional and scoped to project-specific rules only.
 
 ## Status (as of 2026-04-25)
 

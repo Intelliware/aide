@@ -4,12 +4,12 @@ build-registry.py — Generate the skill registry artifacts for theframework.
 
 Purpose
 -------
-Walks every `skills/**/SKILL.md` file under the repo root, parses each file's
-YAML frontmatter, validates a small set of structural invariants, and emits two
-machine-readable artifacts the rest of the framework consumes:
+Walks every `.agents/skills/**/SKILL.md` file under the repo root, parses each
+file's YAML frontmatter, validates a small set of structural invariants, and
+emits two machine-readable artifacts the rest of the framework consumes:
 
-    skills/_registry/skills.csv     (header + one row per skill)
-    skills/_registry/skills.json    (same data, JSON shape)
+    .agents/skills/_registry/skills.csv     (header + one row per skill)
+    .agents/skills/_registry/skills.json    (same data, JSON shape)
 
 When to run
 -----------
@@ -19,13 +19,13 @@ After ANY of the following:
   - Editing SKILL.md frontmatter (`name` or `description` changed)
   - Adding/removing the references/ trio (OVERVIEW / INPUTS-OUTPUTS / EXAMPLE)
 
-The companion `skills/_registry/workflow-graph.yaml` is hand-authored and is
-NOT touched by this script.
+The companion `.agents/skills/_registry/workflow-graph.yaml` is hand-authored
+and is NOT touched by this script.
 
 Output paths
 ------------
-  skills/_registry/skills.csv
-  skills/_registry/skills.json
+  .agents/skills/_registry/skills.csv
+  .agents/skills/_registry/skills.json
 
 Both are repo-relative; the script resolves them against the repo root, which
 is computed as the parent of this script's directory.
@@ -63,7 +63,7 @@ REFERENCE_FILES = ("OVERVIEW.md", "INPUTS-OUTPUTS.md", "EXAMPLE.md")
 MAX_SKILL_LINES = 200
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_ROOT = REPO_ROOT / "skills"
+SKILLS_ROOT = REPO_ROOT / ".agents" / "skills"
 REGISTRY_DIR = SKILLS_ROOT / "_registry"
 CSV_PATH = REGISTRY_DIR / "skills.csv"
 JSON_PATH = REGISTRY_DIR / "skills.json"
@@ -134,17 +134,17 @@ def _unquote(value: str) -> str:
 
 
 def discover_skills(verbose: bool = False) -> list[dict[str, object]]:
-    """Walk skills/**/SKILL.md and return one record per skill."""
+    """Walk .agents/skills/**/SKILL.md and return one record per skill."""
     if not SKILLS_ROOT.is_dir():
         sys.stderr.write(f"ERROR: skills directory not found at {SKILLS_ROOT}\n")
         sys.exit(1)
     records: list[dict[str, object]] = []
     for skill_md in sorted(SKILLS_ROOT.rglob("SKILL.md")):
         rel = skill_md.relative_to(REPO_ROOT)
-        parts = rel.parts  # ("skills", "<stage>", "<skill>", "SKILL.md")
-        if len(parts) < 4 or parts[0] != "skills":
+        parts = rel.parts  # (".agents", "skills", "<stage>", "<skill>", "SKILL.md")
+        if len(parts) < 5 or parts[0] != ".agents" or parts[1] != "skills":
             continue
-        stage = parts[1]
+        stage = parts[2]
         if stage.startswith("_"):
             continue  # skip _registry/, _archive/, etc.
         folder = parts[-2]

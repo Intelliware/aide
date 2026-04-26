@@ -12,7 +12,7 @@ domain skill conforms to. It guarantees:
   ends up cited in at least one Part A and one Part B section.
 
 This document is the framework-level specification. The seven domain skills
-under `skills/reverse-engineering/` implement it; per-domain compositions
+under `.agents/skills/reverse-engineering/` implement it; per-domain compositions
 under `templates/compositions/re-<domain>-{internal,consumer}.yaml` assemble
 the actual section blocks.
 

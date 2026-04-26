@@ -37,7 +37,7 @@ Ask **one question at a time**. Prefer multiple-choice when applicable. Allow "s
 
 2. **For skill-specific scope: which skill?**
    - **Format:** free-text with autocomplete from the skill catalog
-   - **Validation:** must exist in `skills/_registry/skills.csv` (re-prompt on miss)
+   - **Validation:** must exist in `.agents/skills/_registry/skills.csv` (re-prompt on miss)
    - **Maps to:** `customization.target_skill`
 
 3. **What field path inside the layer do you want to change?** (e.g. `project.elicitation.testing_strategy`, `[[project.repos]] code = "api-orders" path`, `requirements.max_user_stories`)
@@ -83,7 +83,7 @@ Ask **one question at a time**. Prefer multiple-choice when applicable. Allow "s
 Answers drive the file written by `customize-framework`. The file path is determined by `customization.scope`. The file contents include a managed-header, the override itself, and an inline `# intent: ...` comment.
 
 ```toml
-# Managed by skills/meta/customize-framework.
+# Managed by .agents/skills/meta/customize-framework.
 # Override layer: project-team. Schema: config/project.toml.example.
 # Edit via the skill or by hand; both are supported.
 
@@ -95,7 +95,7 @@ testing_strategy = "tdd-required"
 For an array-of-tables suppression:
 
 ```toml
-# Managed by skills/meta/customize-framework.
+# Managed by .agents/skills/meta/customize-framework.
 # Override layer: skill-specific-team. Schema: config/customizations/example-skill.toml.example.
 
 [[skill.create-requirements-package.gates]]
@@ -109,7 +109,7 @@ _suppress = true
 - `framework.toml` is installer-managed — never write to it. Framework-global scope must write to `framework.user.toml`.
 - `_suppress = true` is meaningful only inside an array-of-tables merged by `code`/`id`. Reject on scalars and plain tables.
 - Plain arrays REPLACE; only `code`/`id`-keyed arrays of tables merge. Warn if the user picks `append` on a plain array (offer `replace-array` instead).
-- For skill-specific scope, the target skill must exist in `skills/_registry/skills.csv` — re-prompt on miss.
+- For skill-specific scope, the target skill must exist in `.agents/skills/_registry/skills.csv` — re-prompt on miss.
 - For project scopes, `project.toml` must already exist; suggest `start-project` if not.
 - `*.user.toml` files appear in `.gitignore` (the skill patches if missing) so personal overrides never leak to the team.
 - The merge-preview step is mandatory; the skill cannot write without it.

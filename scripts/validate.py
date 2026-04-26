@@ -10,7 +10,7 @@ task #8 -> task #9):
   A. Composition / block cross-references.
   B. Workflow-graph resolution against the skill registry.
   C. Description discipline (front-loaded triggers, no workflow tells).
-  D. Stale "phase" language under skills/, templates/blocks/, compositions/.
+  D. Stale "phase" language under .agents/skills/, templates/blocks/, compositions/.
   E. Block frontmatter integrity.
   F. Re-run of build-registry.py for sanity.
   G. Elicitation-pattern resolution (composition + skill citations resolve;
@@ -34,7 +34,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SKILLS_ROOT = REPO_ROOT / "skills"
+SKILLS_ROOT = REPO_ROOT / ".agents" / "skills"
 TEMPLATES_ROOT = REPO_ROOT / "templates"
 BLOCKS_ROOT = TEMPLATES_ROOT / "blocks"
 COMPOSITIONS_ROOT = TEMPLATES_ROOT / "compositions"
@@ -48,10 +48,10 @@ ELICITATION_REF_RE = re.compile(
 
 # Legacy/archive folders excluded from the phase-language sweep.
 EXCLUDED_TOPLEVEL = {
-    "_archive", "_bmad", "_bmad-output", "_shared",
+    "_archive", "_bmad", "_shared",
     "implementation-execution", "implementation-planning",
     "model-2-sdlc-skills", "requirements-package",
-    "reverse-engineering",       # legacy top-level (NOT skills/reverse-engineering)
+    "reverse-engineering",       # legacy top-level (NOT .agents/skills/reverse-engineering)
     "solution-design-package",
 }
 
@@ -78,12 +78,12 @@ PHASE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("Phase N header (RE)", re.compile(r"^\s{0,3}#{1,6}\s+Phase\s+\d+\b")),  # RE-only
     # Catches "Phase 0/1/2/N" used in body text outside RE folders. RE blocks
     # legitimately discuss "Phase N" of an analyzed system's lifecycle, so
-    # this pattern is suppressed under skills/reverse-engineering/ and
+    # this pattern is suppressed under .agents/skills/reverse-engineering/ and
     # templates/blocks/reverse-eng/ in check_d().
     ("Phase N (non-RE)", re.compile(r"\bPhase\s+\d+\b")),
 ]
 
-# PHASE_PATTERNS labels that must skip RE folders (skills/reverse-engineering/
+# PHASE_PATTERNS labels that must skip RE folders (.agents/skills/reverse-engineering/
 # and templates/blocks/reverse-eng/). Other labels apply project-wide.
 RE_SUPPRESSED_PHASE_LABELS = {"Phase N header (RE)", "Phase N (non-RE)"}
 
@@ -176,7 +176,12 @@ def discover_skills() -> list[dict[str, object]]:
     for skill_md in sorted(SKILLS_ROOT.rglob("SKILL.md")):
         rel = skill_md.relative_to(REPO_ROOT)
         parts = rel.parts
-        if len(parts) < 4 or parts[0] != "skills" or parts[1].startswith("_"):
+        if (
+            len(parts) < 5
+            or parts[0] != ".agents"
+            or parts[1] != "skills"
+            or parts[2].startswith("_")
+        ):
             continue
         out.append({"path": str(rel), "frontmatter": parse_frontmatter(skill_md.read_text(encoding="utf-8"))})
     return out
@@ -304,12 +309,12 @@ def check_d() -> tuple[list[str], list[str]]:
         lines = text.splitlines()
         rel_str = str(rel)
         in_re_folder = (
-            rel_str.startswith("skills/reverse-engineering/")
+            rel_str.startswith(".agents/skills/reverse-engineering/")
             or rel_str.startswith("templates/blocks/reverse-eng/")
         )
         for i, line in enumerate(lines):
             for label, pat in PHASE_PATTERNS:
-                if label == "Phase N header (RE)" and not rel_str.startswith("skills/reverse-engineering/"):
+                if label == "Phase N header (RE)" and not rel_str.startswith(".agents/skills/reverse-engineering/"):
                     continue
                 if label in RE_SUPPRESSED_PHASE_LABELS and label == "Phase N (non-RE)" and in_re_folder:
                     continue
@@ -383,7 +388,7 @@ def check_g() -> tuple[list[str], list[str]]:
     """G — elicitation-pattern resolution.
 
     For every YAML composition under templates/compositions/ and every *.md
-    file under skills/ (SKILL.md, steps/, references/), find every
+    file under .agents/skills/ (SKILL.md, steps/, references/), find every
     `references/elicitation-patterns/<name>.md` reference. Verify the file
     exists on disk; flag missing files as ERRORS. Then flag patterns that
     exist on disk but are referenced by nothing as WARNINGS (orphans).
@@ -571,9 +576,9 @@ def main() -> int:
             "",
             "- Six RE compositions ship with `blocks: []` by design (re-api-consumer, re-api-framework-internal, re-mobile-app-consumer, re-mobile-framework-internal, re-ui-framework-internal, re-web-app-consumer); blocks for these compositions are TBD and the corresponding source block subdirectories are intentionally empty.",
             "- The `kb-instance` value used in several KB block `applies-to` fields is an alias for the actual composition `kb-instance-root` (intentional — see `kb-instance-root.yaml` notes). Aliased automatically by the validator.",
-            "- All Check D findings (if any) under `skills/planning/**/canonical-increment-shape*.md`, `skills/planning/**/review-workflow.md`, `skills/planning/create-implementation-package/references/OVERVIEW.md`, and `templates/blocks/planning/README.md` are intentional historical references documenting the PHASE→INC migration mapping; they are accepted as soft warnings.",
+            "- All Check D findings (if any) under `.agents/skills/planning/**/canonical-increment-shape*.md`, `.agents/skills/planning/**/review-workflow.md`, `.agents/skills/planning/create-implementation-package/references/OVERVIEW.md`, and `templates/blocks/planning/README.md` are intentional historical references documenting the PHASE→INC migration mapping; they are accepted as soft warnings.",
             "- Description discipline (Check C) is heuristic; flagged items merit human judgement, not automatic rejection.",
-            "- The phase-language sweep (Check D) skips legacy folders (`_archive/`, `_bmad/`, `_bmad-output/`, `_shared/`, `implementation-execution/`, `implementation-planning/`, `model-2-sdlc-skills/`, `requirements-package/`, top-level `reverse-engineering/`, `solution-design-package/`) which task #9 will archive.",
+            "- The phase-language sweep (Check D) skips legacy folders (`_archive/`, `_bmad/`, `_shared/`, `implementation-execution/`, `implementation-planning/`, `model-2-sdlc-skills/`, `requirements-package/`, top-level `reverse-engineering/`, `solution-design-package/`) which task #9 will archive.",
             "",
             "## Recommendation",
             "",

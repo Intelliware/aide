@@ -47,7 +47,7 @@ decision-gates:
     description: User has explicitly authorized PR creation; the composition is rendered to chat first and only written / posted on approval.
 
 notes: |
-  This composition is consumed by `skills/execution/create-pr` after the
+  This composition is consumed by `.agents/skills/execution/create-pr` after the
   diff review and commit-creation steps. The PR body is rendered to chat
   for user review BEFORE `gh pr create` is invoked — never auto-posted.
 

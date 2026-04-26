@@ -18,7 +18,7 @@ optional: false
 …template content with `{{placeholder}}` markers…
 ```
 
-Blocks are content-stable; compositions choose which blocks to include and in what order. Subdirectory naming mirrors `skills/<stage>/` for traceability.
+Blocks are content-stable; compositions choose which blocks to include and in what order. Subdirectory naming mirrors `.agents/skills/<stage>/` for traceability.
 
 ## Stage coverage
 
