@@ -121,6 +121,17 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 - Agents working on the framework shall read/write only within the project directory tree.
 - Destructive operations (folder moves, deletions) shall require user confirmation unless pre-approved.
 
+### NFR5. Host portability
+- **NFR5.1.** Skills shall execute correctly in any AI host that conforms to the agentskills.io specification. The framework shall be runnable, at minimum, in:
+  - **Claude Code** (the spec's reference host), and
+  - **VSCode + GitHub Copilot agent mode** (formal spec adoption shipped 2025-12-18).
+- **NFR5.2.** No host-specific transformation of `SKILL.md`, `references/`, `steps/`, `scripts/`, or `assets/` shall be required at install time. Compositions (`templates/compositions/*.yaml`) and `project.toml` are framework-internal — skills consume them directly and the host is not asked to parse them.
+- **NFR5.3.** The framework shall ship per-host installation guidance in `README.md` covering:
+  - Skill discovery (path configuration or directory placement against the host's expected roots)
+  - Always-on context wiring (`.github/copilot-instructions.md` / `AGENTS.md` for Copilot; `CLAUDE.md` hierarchy for Claude Code)
+  - Optional MCP server configuration where the host supports it
+- **NFR5.4.** Adding support for a new spec-conformant host shall require only README guidance — no changes to `skills/`, `references/`, `templates/`, `scripts/`, or `config/` that are specific to one host.
+
 ---
 
 ## Constraints & Influences
@@ -128,8 +139,9 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 ### Inspirations to draw from
 - **BMAD method**: four-layer config, phase-grouping UX, elicitation-first conversational discovery, `customize-framework` pattern, greenfield-vs-brownfield as first-class entry points, two-tier registry pattern
 - **Superpowers**: description = trigger conditions only (not workflow summary), skill-to-skill handoff by name, durable artifact paths as the durable handoff between stages, multi-stage workflow with hard gates
-- **agentskills.io**: required frontmatter, progressive disclosure, `references/` convention
+- **agentskills.io**: required frontmatter, progressive disclosure, `references/` convention. Adopted natively by Claude Code (reference host) and by GitHub Copilot in VSCode (from 2025-12-18); the same `SKILL.md` files run in both.
 - **Claude Code**: CLAUDE.md hierarchy for auto-load on cwd, agentic search over RAG, slash-command discovery
+- **GitHub Copilot (VSCode)**: `.github/copilot-instructions.md` / `AGENTS.md` for always-on orientation; `.github/instructions/*.instructions.md` with `applyTo:` glob for path-scoped rules; `chat.agentSkillsLocations` workspace setting for custom skill roots
 - **Microsoft GraphRAG**: community-summary hierarchy (root → repo → component) for selective KB retrieval
 - **Aider**: separate `graph.json` sidecar for machine-readable component edges
 - **GitHub spec-kit**: spec as source of truth feedback loop ("production reality informs specifications")

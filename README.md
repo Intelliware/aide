@@ -12,10 +12,90 @@ Includes a global **knowledge-base** capability for multi-repo, large solutions:
 ## Getting started
 
 1. Open this repo and your target project repo(s) in one VSCode workspace (or a common parent directory).
-2. Invoke the `start-project` skill (`skills/meta/start-project/`) to choose a flow and write your `project.toml`.
-3. Follow the recommended next skill at each stage handoff.
+2. Wire the framework into your AI host (see "Running in …" sections below).
+3. Invoke the `start-project` skill to choose a flow and write your `project.toml`.
+4. Follow the recommended next skill at each stage handoff.
 
-If unsure where to start, invoke `framework-navigator` (`skills/meta/framework-navigator/`) — it routes you based on a goal in plain English (or shows the catalog).
+If unsure where to start, invoke `framework-navigator` — it routes you based on a goal in plain English (or shows the catalog).
+
+## Running in VSCode + GitHub Copilot
+
+GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specification natively on 2025-12-18, and theframework's skills conform to that spec. No transformation, transpile, or build step is required — Copilot reads `SKILL.md` files directly. Only the **discovery path** needs to be wired up.
+
+### Prerequisites
+
+- VSCode with the GitHub Copilot extension installed and signed in
+- Copilot in **agent mode** (Chat view → switch from "Ask" to "Agent"). Agent mode is required for skills that read multiple files or run scripts.
+
+### Step 1 — make the framework's skills discoverable
+
+Pick one of three options:
+
+| Option | Setup | Best for |
+|---|---|---|
+| **A. Workspace setting** | Open `.vscode/settings.json` in your **target project** and add `"chat.agentSkillsLocations": ["${workspaceFolder}/../theframework/skills"]` (adjust the relative path to where you cloned theframework). | Multi-repo workspaces where theframework lives next to your project repos. |
+| **B. Symlink into the project** | From your project root: `ln -s ../theframework/skills .claude/skills`. Copilot reads `.claude/skills/` natively. | Single-repo projects; cross-tool support (Claude Code reads the same path). |
+| **C. Direct clone** | Clone theframework directly into `.claude/skills/` of your project. | Pinning a framework version per project. |
+
+Verify by opening Chat and typing `/` — every framework skill (32 of them) should appear in the picker with its description.
+
+### Step 2 — wire the always-on framework orientation (recommended)
+
+Copilot auto-attaches `.github/copilot-instructions.md` (or `AGENTS.md` at repo root) to every chat. Create one of these in your **target project** with a brief framework orientation, e.g.:
+
+```markdown
+# Project AI guidance
+
+This project uses theframework (https://…) — a skills-based SDLC framework.
+
+- Skill catalog: `.claude/skills/` (or wherever you wired it in Step 1)
+- Invoke skills via `/<skill-name>` in Copilot Chat
+- Project flow + super-context: `project.toml` at this repo's root
+- If unsure which skill to use, invoke `/framework-navigator`
+- Vocabulary: stage / increment / package — avoid "phase", "epic", "story"
+```
+
+Without this file, Copilot still works — but the model has to discover the framework's conventions on first use rather than being told them upfront.
+
+### Step 3 — configure MCP servers (optional)
+
+If any skills you'll use depend on MCP tools, add a `.vscode/mcp.json` in your project:
+
+```json
+{
+  "servers": {
+    "<server-name>": { "command": "...", "args": ["..."] }
+  }
+}
+```
+
+Note the root key is `servers` (not `mcpServers`). See [VSCode MCP docs](https://code.visualstudio.com/docs/copilot/customization/mcp-servers).
+
+### Step 4 — path-scoped rules (optional)
+
+For rules that should apply only to specific paths (e.g., "in `frontend/`, prefer functional components"), use `.github/instructions/<name>.instructions.md` with an `applyTo:` glob in the frontmatter. These are loaded only when files matching the glob are in scope.
+
+### Compositions and Copilot
+
+Copilot has no native equivalent of theframework's YAML compositions. Skills that consume compositions still work — the skill itself reads the YAML from disk. If you want a composition exposed as a one-shot Copilot agent (e.g. "run the whole greenfield-requirements-package flow"), wrap it as a custom agent at `.github/agents/<flow-name>.agent.md`. This is optional and not required for any skill to function.
+
+### Known differences from Claude Code
+
+| Capability | Claude Code | Copilot agent mode |
+|---|---|---|
+| Skill discovery via frontmatter | ✓ | ✓ (identical) |
+| Slash invocation `/skill-name` | ✓ | ✓ (identical) |
+| Progressive disclosure (`references/` loaded on demand) | ✓ | ✓ (identical) |
+| Always-on context | `CLAUDE.md` hierarchy | `.github/copilot-instructions.md` / `AGENTS.md` |
+| Path-scoped instructions | `CLAUDE.md` per directory | `.github/instructions/*.instructions.md` with `applyTo:` |
+| TOML config schema validation | (skill-driven) | (skill-driven) |
+| Composition manifests (YAML) | (skill-driven) | (skill-driven) |
+
+The skills themselves are identical across hosts — host-specific files (above) live outside `skills/`.
+
+## Running in Claude Code
+
+Claude Code reads `.claude/skills/` and `~/.claude/skills/` natively. Use Step 1 option B or C from the Copilot section to wire the framework's `skills/` directory in. Always-on context lives in `CLAUDE.md` (project-scoped) or `~/.claude/CLAUDE.md` (user-scoped) instead of `.github/copilot-instructions.md`. Otherwise, the skill experience is identical.
 
 ## Top-level layout
 
