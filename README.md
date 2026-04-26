@@ -24,8 +24,8 @@ If unsure where to start, invoke `framework-navigator` (`skills/meta/framework-n
 | `config/` | Schemas + example files for the four-layer config (framework + project + user overrides + per-skill customizations). See `config/SCHEMAS.md`. |
 | `skills/` | All capabilities, grouped by stage. Each skill is `SKILL.md` + `references/` + optional `steps/`. |
 | `skills/_registry/` | Generated `skills.csv` + `skills.json` from frontmatter; hand-authored `workflow-graph.yaml` |
-| `templates/blocks/` | Reusable section blocks per stage (~219 blocks total) |
-| `templates/compositions/` | YAML manifests assembling blocks into artifacts (21 compositions) |
+| `templates/blocks/` | Reusable section blocks, grouped by stage |
+| `templates/compositions/` | YAML manifests assembling blocks into artifacts |
 | `references/` | Cross-cutting framework references loaded by skills on demand |
 | `scripts/` | Build tools: `build-registry.py`, `validate.py` |
 | `_archive/` | Frozen snapshot of pre-unification legacy folders + audit + validation report |
@@ -53,6 +53,26 @@ The KB **lives in its own repo**, separate from theframework. `project.toml`'s `
 The KB is markdown-first. Agents traverse it via `read + grep + glob` over per-component frontmatter (`description`, `triggers`, `paths`, `depends_on`, `consumed_by`, …) — **no vector DB**, no embeddings. The root `ARCHITECTURE.md` (5–15 KB) loads first; `navigate-knowledge-base` selects the minimal component set for a given feature.
 
 See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `skills/knowledge-base/README.md` for the 5 KB skills.
+
+## Reverse engineering
+
+Reverse engineering produces, per repo, a **Part A** (internal implementation docs) and a **Part B** (consumer-facing docs) artifact set. RE outputs are the primary input to `build-knowledge-base`, but they are also useful standalone — e.g., onboarding a new maintainer to an unfamiliar service.
+
+Entry point is `analyze-repository`: a thin dispatcher that classifies the repo (handling monorepos and hybrids) and names the next skill to invoke. The seven domain skills:
+
+| Domain | Skill | Typical target |
+|---|---|---|
+| `api` | `reverse-engineer-api` | A specific API service (REST, GraphQL, RPC) |
+| `api-framework` | `reverse-engineer-api-framework` | A framework for *building* APIs (e.g., Express, FastAPI) |
+| `web-app` | `reverse-engineer-web-app` | A specific web application (SPA, SSR, hybrid) |
+| `ui-framework` | `reverse-engineer-ui-framework` | A framework for *building* UIs (e.g., React, Vue, design systems) |
+| `database` | `reverse-engineer-database` | A schema, data model, or DB-layer service |
+| `mobile-app` | `reverse-engineer-mobile-app` | A specific mobile application (iOS, Android, cross-platform) |
+| `mobile-framework` | `reverse-engineer-mobile-framework` | A framework for *building* mobile apps (e.g., React Native, Flutter) |
+
+Each domain ships paired compositions in `templates/compositions/`: `re-<domain>-internal.yaml` (Part A) and `re-<domain>-consumer.yaml` (Part B).
+
+See `skills/reverse-engineering/README.md` for the full domain catalog and `templates/blocks/reverse-eng/` for the per-domain block libraries.
 
 ## Vocabulary
 

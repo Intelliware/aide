@@ -68,9 +68,10 @@ committing or creating the PR.
 3. **Commit creation** — atomic commits with conventional commit messages;
    each commit traces to an INC ID or FR where applicable; only after the
    user explicitly approves
-4. **PR description** — generated from the commit history and diff;
-   includes summary, changes, test plan, and traceability links to
-   requirements / design / increments
+4. **PR description** — rendered from the `pr-description` composition
+   (`templates/compositions/pr-description.yaml`); blocks cover summary,
+   change-list, test plan, traceability, and optionally breaking-changes
+   and rollout-notes when the diff warrants them
 5. **PR creation** — only with explicit user approval; reports the PR URL
 6. **Changelog entry** — conditional, only if the project maintains a
    changelog

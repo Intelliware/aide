@@ -46,7 +46,7 @@ Sequenced phases. Run one step at a time. Each phase is a discrete elicitation; 
 4. `steps/04-author-override.md` — gather the new value(s); preview the rendered TOML and the predicted merged result; confirm.
 5. `steps/05-verify-merge.md` — read the file back from disk, simulate the full merge against the lower layers, show the user what now applies, and exit.
 
-Use elicitation prompts referenced from `references/elicitation-patterns/customization.md` (file does not exist yet — referenced by path so the runner knows where to load it when authored).
+Use elicitation prompts referenced from `references/elicitation-patterns/customization.md`.
 
 ## Output
 

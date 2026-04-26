@@ -1,0 +1,62 @@
+# Composition: PR Description
+#
+# Assembles the PR body produced by the create-pr skill at the end of the
+# execution stage. Sections are ordered for the reviewer's reading flow:
+# why → what → how-verified → traceability → consumer impact → ops impact.
+#
+# Two of the six blocks (breaking-changes, rollout-notes) are optional —
+# they are emitted only when the change actually has consumer or
+# deploy-time impact. Internal-only refactors and additive features omit
+# them.
+#
+# Total block count: 6 (4 required + 2 optional).
+
+name: pr-description
+description: PR body produced by create-pr — summary, changes, test plan, traceability, plus optional breaking-changes / rollout-notes.
+applies-to-flow: any
+package-type: pr-description
+
+default-output-path: "{paths.execution_path}/pr-{change-id}.md"
+
+blocks:
+  - slug: execution/pr/summary
+    optional: false
+    order: 1
+  - slug: execution/pr/change-list
+    optional: false
+    order: 2
+  - slug: execution/pr/test-plan
+    optional: false
+    order: 3
+  - slug: execution/pr/traceability
+    optional: false
+    order: 4
+  - slug: execution/pr/breaking-changes
+    optional: true
+    order: 5
+  - slug: execution/pr/rollout-notes
+    optional: true
+    order: 6
+
+elicitation: []
+
+decision-gates:
+  - name: review-clean
+    description: All Critical and Important diff-review findings have been addressed before the PR description is rendered.
+  - name: user-approval
+    description: User has explicitly authorized PR creation; the composition is rendered to chat first and only written / posted on approval.
+
+notes: |
+  This composition is consumed by `skills/execution/create-pr` after the
+  diff review and commit-creation steps. The PR body is rendered to chat
+  for user review BEFORE `gh pr create` is invoked — never auto-posted.
+
+  Optional blocks (breaking-changes, rollout-notes) follow the FR4-style
+  rule: omit the section entirely if it does not apply, do not emit a
+  "None." placeholder. The skill decides inclusion based on the diff
+  contents (schema migrations, env-var additions, contract changes).
+
+  This composition does NOT cover the increment-status state file or the
+  bug-log entry — those are runtime / append-only artifacts authored
+  inline by their owning skills. See `_archive/skill-disposition.md` for
+  the rationale.

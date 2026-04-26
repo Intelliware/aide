@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# framework.user.toml — Layer 2 of the four-layer config model
+#
+# GITIGNORED. Personal, machine-local. Edited freely by you alone.
+#
+# This layer sits between the installer-managed `framework.toml` (Layer 1)
+# and any project-level config. Use it to pin personal preferences that
+# apply across EVERY project on this machine — independent of which repo
+# you're working in.
+#
+# Same schema as `framework.toml`, but every field is optional. Only set
+# the keys you want to override; everything else inherits from Layer 1.
+#
+# Typical use cases:
+#   • Switch the chat language without changing what gets WRITTEN to artifacts.
+#   • Pick personal defaults for elicitation depth or persona ("always go deep
+#     in design, never minimal" — even on projects where the team default is
+#     standard).
+#   • Override path tokens or staleness thresholds when your local working
+#     style differs from the team default.
+#   • Pre-answer recurring questions you don't want re-asked on every project.
+#
+# DO NOT put project-specific values here. Those belong in `project.toml`
+# (committed) or `project.user.toml` (personal, project-scoped).
+#
+# Higher-precedence than `framework.toml`; lower-precedence than `project.toml`.
+# See SCHEMAS.md § 1 for the full merge model.
+#
+# Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── [user] ──────────────────────────────────────────────────────────────────
+# Personal identity and chat-side preferences. None of these flow into
+# generated artifacts — for output language see [core].output_language below.
+[user]
+
+# The language the agent speaks to YOU in chat (questions, summaries,
+# acknowledgements). Distinct from `core.output_language`, which controls
+# the language of generated artifacts (PRDs, KB entries, etc.).
+communication_language = "English"
+
+# Free-form name used when an agent addresses the user directly.
+# Leave unset to fall back to OS-level identity.
+display_name = "Mike"
+
+
+# ─── [core] ──────────────────────────────────────────────────────────────────
+# Personal overrides on framework-wide defaults. Anything not set here
+# inherits from `framework.toml`.
+[core]
+
+# Override the default flow on YOUR machine only. The team-level default
+# stays whatever `framework.toml` ships with; this lets you start every
+# new repo in, e.g., quick-dev mode without editing project files.
+# Values: "greenfield" | "brownfield" | "quick-dev"
+# default_flow = "quick-dev"
+
+# Personal preference: fail loudly on glossary drift instead of warning.
+# glossary_strict = true
+
+
+# ─── [stages.<name>.elicitation] ─────────────────────────────────────────────
+# Personal elicitation defaults. Use sparingly — overriding the team's
+# default depth or persona on every project can hide signal the team
+# expects you to surface.
+#
+# [stages.requirements.elicitation]
+# default_depth = "deep"
+#
+# [stages.design.elicitation]
+# persona = "winston"
+
+
+# ─── [knowledge_base] ────────────────────────────────────────────────────────
+# Personal KB conventions. These apply when a project does not pin its
+# own KB path / staleness window in `project.toml`.
+#
+# [knowledge_base]
+# default_path = "{home}/work/knowledge-base"
+# staleness_warning_days = 14

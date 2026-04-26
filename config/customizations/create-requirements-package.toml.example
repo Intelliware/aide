@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/create-requirements-package.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `create-requirements-package`
+# skill (a stage-driver skill — kicks off the whole requirements stage).
+#
+# This example expresses a team that:
+#   • runs in brownfield mode by default (so the skill should pick the
+#     brownfield-enhancement-spec composition, not greenfield),
+#   • wants deeper elicitation than the framework default ("standard"),
+#   • does not need a competitive-analysis artifact (the project is internal),
+#   • adds a project-specific compliance-callout block to every requirements
+#     package.
+#
+# A sibling `create-requirements-package.user.toml` file (gitignored) can do
+# the same things at higher precedence for your personal overrides.
+#
+# Companion to the comprehensive merge-behaviour reference at
+# `customizations/example-skill.toml.example`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Pick the brownfield composition by default. The framework default
+# (in framework.toml) is "greenfield-default", which resolves to
+# `templates/compositions/greenfield-requirements-package.yaml`. We want
+# `brownfield-enhancement-spec.yaml` because every project this team
+# touches is an enhancement to an existing system.
+default_composition = "brownfield-enhancement-spec"
+
+# Deepen elicitation. The framework default is "standard"; we want every
+# requirements run to ask the deeper questions (regulatory context, third-
+# party data flows, accessibility commitments).
+elicitation_depth = "deep"
+
+# Persona pin. The framework allows the user to switch personas mid-run;
+# we always want John (the PM persona) for requirements work.
+preferred_persona = "john"
+
+
+# ─── Table recursive-merge ───────────────────────────────────────────────────
+# Tables recursive-merge: keys NOT mentioned here are inherited.
+
+[output]
+# Override only the artifact filename pattern; output path / format / front-
+# matter all inherit from framework defaults.
+filename_pattern = "{feature-id}-requirements-v{version}.md"
+
+
+# ─── Array-of-tables — merge by `code` ───────────────────────────────────────
+# `required_artifacts` defaults are declared in framework.toml under
+# [stages.requirements]. We make three changes:
+#
+#   1. `prd` → recursive-merge to add a project-specific override
+#      (mandate the executive-summary block be ≥3 paragraphs).
+#   2. `compliance-callout` → new artifact appended.
+#   3. `competitive-analysis` → suppressed entirely (we don't ship
+#      competitive analyses for internal-only systems).
+
+[[required_artifacts]]
+code = "prd"
+min_executive_summary_paragraphs = 3
+
+[[required_artifacts]]
+code = "compliance-callout"
+title = "Regulatory and Compliance Considerations"
+template = "compliance-callout-template.md"
+optional = false
+
+[[required_artifacts]]
+code = "competitive-analysis"
+_suppress = true
+
+
+# ─── Composition resolution overrides ────────────────────────────────────────
+# When the project's flow value does not exactly match a known composition,
+# fall back to this composition rather than failing. Useful while the team
+# experiments with hybrid flows.
+[composition]
+fallback = "brownfield-enhancement-spec"

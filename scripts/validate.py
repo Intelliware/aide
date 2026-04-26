@@ -13,12 +13,15 @@ task #8 -> task #9):
   D. Stale "phase" language under skills/, templates/blocks/, compositions/.
   E. Block frontmatter integrity.
   F. Re-run of build-registry.py for sanity.
+  G. Elicitation-pattern resolution (composition + skill citations resolve;
+     orphan patterns flagged).
 
 Hard errors fail the run (exit 1):
   - Composition references a non-existent block (A).
   - Unresolved workflow-graph reference (B).
   - Missing required block frontmatter field, missing/unclosed frontmatter,
     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
+  - Composition or skill cites an elicitation pattern that does not exist (G).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 """
@@ -38,6 +41,10 @@ COMPOSITIONS_ROOT = TEMPLATES_ROOT / "compositions"
 SKILLS_CSV = SKILLS_ROOT / "_registry" / "skills.csv"
 WORKFLOW_GRAPH = SKILLS_ROOT / "_registry" / "workflow-graph.yaml"
 BUILD_REGISTRY_SCRIPT = REPO_ROOT / "scripts" / "build-registry.py"
+ELICITATION_PATTERNS_DIR = REPO_ROOT / "references" / "elicitation-patterns"
+ELICITATION_REF_RE = re.compile(
+    r"references/elicitation-patterns/([A-Za-z0-9][A-Za-z0-9_-]*)\.md"
+)
 
 # Legacy/archive folders excluded from the phase-language sweep.
 EXCLUDED_TOPLEVEL = {
@@ -69,7 +76,16 @@ PHASE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("Canonical Phase Shape", re.compile(r"Canonical Phase Shape", re.IGNORECASE)),
     ("Phase Identity header", re.compile(r"^\s{0,3}#{1,6}\s+Phase Identity\b")),
     ("Phase N header (RE)", re.compile(r"^\s{0,3}#{1,6}\s+Phase\s+\d+\b")),  # RE-only
+    # Catches "Phase 0/1/2/N" used in body text outside RE folders. RE blocks
+    # legitimately discuss "Phase N" of an analyzed system's lifecycle, so
+    # this pattern is suppressed under skills/reverse-engineering/ and
+    # templates/blocks/reverse-eng/ in check_d().
+    ("Phase N (non-RE)", re.compile(r"\bPhase\s+\d+\b")),
 ]
+
+# PHASE_PATTERNS labels that must skip RE folders (skills/reverse-engineering/
+# and templates/blocks/reverse-eng/). Other labels apply project-wide.
+RE_SUPPRESSED_PHASE_LABELS = {"Phase N header (RE)", "Phase N (non-RE)"}
 
 REQUIRED_BLOCK_FIELDS = ("slug", "title", "applies-to", "requires-decision-from", "optional", "order-hint")
 
@@ -286,11 +302,26 @@ def check_d() -> tuple[list[str], list[str]]:
         except (UnicodeDecodeError, OSError):
             continue
         lines = text.splitlines()
+        rel_str = str(rel)
+        in_re_folder = (
+            rel_str.startswith("skills/reverse-engineering/")
+            or rel_str.startswith("templates/blocks/reverse-eng/")
+        )
         for i, line in enumerate(lines):
             for label, pat in PHASE_PATTERNS:
-                if label == "Phase N header (RE)" and not str(rel).startswith("skills/reverse-engineering/"):
+                if label == "Phase N header (RE)" and not rel_str.startswith("skills/reverse-engineering/"):
                     continue
-                if pat.search(line):
+                if label in RE_SUPPRESSED_PHASE_LABELS and label == "Phase N (non-RE)" and in_re_folder:
+                    continue
+                m = pat.search(line)
+                if m and label == "Phase N (non-RE)":
+                    # Skip pedagogical / historical citations that quote
+                    # "Phase N" as a negative example or refer to a legacy
+                    # source by its original section title.
+                    start = m.start()
+                    if start > 0 and line[start - 1] in ("\"", "'"):
+                        continue
+                if m:
                     if _in_code_fence(lines, i):
                         continue
                     snippet = line.strip()
@@ -332,6 +363,63 @@ def check_e() -> tuple[list[str], list[str]]:
             for a in applies:
                 if KNOWN_APPLIES_TO_ALIASES.get(a, a) not in composition_names:
                     warnings.append(f"{rel}: applies-to entry '{a}' is not a known composition")
+    return errors, warnings
+
+
+def _scan_elicitation_refs(path: Path) -> list[tuple[str, int]]:
+    """Return [(pattern_stem, line_number), ...] for elicitation refs in path."""
+    refs: list[tuple[str, int]] = []
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError):
+        return refs
+    for idx, line in enumerate(text.splitlines(), start=1):
+        for m in ELICITATION_REF_RE.finditer(line):
+            refs.append((m.group(1), idx))
+    return refs
+
+
+def check_g() -> tuple[list[str], list[str]]:
+    """G — elicitation-pattern resolution.
+
+    For every YAML composition under templates/compositions/ and every *.md
+    file under skills/ (SKILL.md, steps/, references/), find every
+    `references/elicitation-patterns/<name>.md` reference. Verify the file
+    exists on disk; flag missing files as ERRORS. Then flag patterns that
+    exist on disk but are referenced by nothing as WARNINGS (orphans).
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    referenced: set[str] = set()
+    sources: list[Path] = []
+    sources.extend(p for p in COMPOSITIONS_ROOT.glob("*.yaml") if p.is_file())
+    if SKILLS_ROOT.is_dir():
+        for p in SKILLS_ROOT.rglob("*.md"):
+            if p.is_file() and not p.name.upper().startswith("README"):
+                sources.append(p)
+
+    for src in sorted(sources):
+        rel = src.relative_to(REPO_ROOT)
+        for stem, line_no in _scan_elicitation_refs(src):
+            referenced.add(stem)
+            target = ELICITATION_PATTERNS_DIR / f"{stem}.md"
+            if not target.is_file():
+                errors.append(
+                    f"{rel}:{line_no}: cites missing elicitation pattern "
+                    f"'references/elicitation-patterns/{stem}.md'"
+                )
+
+    if ELICITATION_PATTERNS_DIR.is_dir():
+        on_disk = {
+            p.stem for p in ELICITATION_PATTERNS_DIR.glob("*.md")
+            if p.is_file() and p.name.upper() != "README.MD"
+        }
+        for stem in sorted(on_disk - referenced):
+            warnings.append(
+                f"references/elicitation-patterns/{stem}.md: orphan pattern "
+                "(no composition or skill references it)"
+            )
     return errors, warnings
 
 
@@ -398,6 +486,7 @@ def main() -> int:
     c_err, c_warn = check_c()
     d_err, d_warn = check_d()
     e_err, e_warn = check_e()
+    g_err, g_warn = check_g()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -406,9 +495,13 @@ def main() -> int:
         "Check C — description discipline",
         "Check D — stale 'phase' language",
         "Check E — block frontmatter integrity",
+        "Check G — elicitation-pattern resolution",
         "Check F — build-registry.py output",
     ]
-    bundles = [(a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn), (e_err, e_warn), (f_err, f_warn)]
+    bundles = [
+        (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
+        (e_err, e_warn), (g_err, g_warn), (f_err, f_warn),
+    ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
 
@@ -432,7 +525,8 @@ def main() -> int:
             for label, (e, w) in zip(
                 ["A — composition/block cross-references", "B — workflow-graph resolution",
                  "C — description discipline", "D — stale 'phase' language",
-                 "E — block frontmatter integrity", "F — build-registry sanity"],
+                 "E — block frontmatter integrity",
+                 "G — elicitation-pattern resolution", "F — build-registry sanity"],
                 bundles,
             )
         )
@@ -456,6 +550,7 @@ def main() -> int:
             _md(titles[2], c_err, c_warn),
             _md(titles[3], d_err, d_warn),
             _md(titles[4], e_err, e_warn),
+            _md(titles[5], g_err, g_warn),
             "## Check F — build-registry.py output",
             "",
         ]

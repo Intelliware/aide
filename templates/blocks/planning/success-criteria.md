@@ -44,7 +44,7 @@ Part of the **Canonical Increment Shape**.
 
 ### Common Mistake — FR mappings are implicit
 
-- Bad: "This phase implements authentication"
+- Bad: "This increment implements authentication"
 - Good: "FR Mapping: FR1.9.1 Single Sign-On support, FR1.9.2 Microsoft Entra ID integration"
 
 ### Worked Example

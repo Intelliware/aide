@@ -28,7 +28,7 @@ order-hint: 12
 | Constraint Type | Constraint | Impact |
 |----------------|-----------|--------|
 | Budget | [e.g., Fixed budget of $X] | [e.g., Limits scope to core features] |
-| Time | [e.g., Must launch by Q3 2026] | [e.g., Phased delivery approach] |
+| Time | [e.g., Must launch by Q3 2026] | [e.g., Staged delivery approach] |
 | Technology | [e.g., Must use approved corporate tech stack] | [e.g., Limits framework choices] |
 | Regulatory | [e.g., Must comply with data residency requirements] | [e.g., Hosting region restricted] |
 | Organizational | [e.g., Must integrate with existing HR system] | [e.g., API dependency] |
@@ -46,6 +46,6 @@ order-hint: 12
 
 <!-- Items explicitly deferred but acknowledged for future stages. -->
 
-- [e.g., Mobile app — Phase 2]
-- [e.g., AI-powered skill matching — Phase 3]
+- [e.g., Mobile app — deferred to a later release]
+- [e.g., AI-powered skill matching — deferred to a later release]
 - [e.g., Multi-tenant support — if business requires]

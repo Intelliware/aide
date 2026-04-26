@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/analyze-repository.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `analyze-repository` skill
+# (a dispatcher — classifies a repo and recommends the right
+# reverse-engineer-* skill).
+#
+# This example expresses a team that:
+#   • requires a higher confidence threshold before the dispatcher
+#     auto-recommends (their codebase has many hybrids that should
+#     halt and elicit rather than guess),
+#   • wants the dispatcher to prefer `reverse-engineer-web-app` for
+#     ambiguous monorepos (their default project shape),
+#   • doubles the scan-time budget to cover larger repos than the
+#     framework default,
+#   • skips the framework default's "single-Python-file" classification
+#     short-circuit (their team's repos always have build files).
+#
+# Companion to the comprehensive merge-behaviour reference at
+# `customizations/example-skill.toml.example`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Require >= 0.85 confidence before the dispatcher emits a single
+# recommendation. Below this, the dispatcher halts and asks the user to
+# pick. The framework default is 0.70.
+classification_confidence_threshold = 0.85
+
+# Default domain for ambiguous monorepos. When the dispatcher cannot
+# classify cleanly and the user does not disambiguate, fall back to this
+# domain. Framework default is "halt-and-elicit"; we pre-pick web-app.
+ambiguous_monorepo_default_domain = "web-app"
+
+# Maximum scan duration in seconds before the dispatcher gives up on
+# auto-classification and falls back to a quick file-count heuristic.
+# Framework default: 30s. We have larger monorepos.
+scan_timeout_seconds = 60
+
+
+# ─── Table recursive-merge ───────────────────────────────────────────────────
+
+[heuristics]
+# Disable the framework's "single Python file → likely script, not
+# project" short-circuit. All our repos have build files, and the
+# short-circuit was producing false negatives on small CLIs.
+single_file_shortcircuit = false
+
+# Tighten the package.json detection: framework default treats any
+# `package.json` as evidence of a Node project. We require it to also
+# carry a `main` or `module` field (rules out config-only repos that
+# happen to vendor a package.json).
+require_node_entrypoint = true
+
+
+# ─── Array-of-tables — merge by `code` ───────────────────────────────────────
+# `classification_signals` is the framework's default rule list (declared
+# in framework.toml under [skills.analyze-repository.heuristics]). We:
+#
+#   1. Recursive-merge `react-imports` to raise its weight.
+#   2. Add a new `internal-monorepo-marker` rule we use for repos that
+#      ship our team's `MONOREPO.md` convention.
+#   3. Suppress the `flask-app` signal — none of our projects use Flask;
+#      keeping it active was producing false positives for non-Flask
+#      Python projects that happened to import `flask` as a transitive
+#      dep.
+
+[[classification_signals]]
+code = "react-imports"
+weight = 0.4
+
+[[classification_signals]]
+code = "internal-monorepo-marker"
+matches_path = "MONOREPO.md"
+maps_to_domain = "web-app"
+weight = 0.5
+
+[[classification_signals]]
+code = "flask-app"
+_suppress = true
+
+
+# ─── Array-of-scalars — replaces ─────────────────────────────────────────────
+# Lock down the recommendable domains. The framework allows all 7 by default;
+# we've never shipped a mobile-framework or ui-framework project, so dropping
+# them prevents the dispatcher from ever recommending one in error. (To
+# re-enable later, add the value back to this array; arrays-of-scalars
+# replace at merge.)
+recommendable_domains = [
+  "api",
+  "api-framework",
+  "web-app",
+  "database",
+  "mobile-app",
+]

@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/review-implementation-package.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `review-implementation-package`
+# skill (a review skill — pre-execution gate against the canonical 8-section
+# increment shape).
+#
+# This example expresses a team that:
+#   • treats traceability `gap_unverified` as a hard error (framework default
+#     is warning),
+#   • requires a second reviewer for any increment touching the auth or
+#     billing modules,
+#   • adds a project-specific "data-classification check" lens on top of the
+#     framework's 4-lens review,
+#   • turns OFF the framework's "stale-language" lens (they use a custom
+#     linter for that and don't want duplicate findings).
+#
+# Companion to the comprehensive merge-behaviour reference at
+# `customizations/example-skill.toml.example`.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Elevate the unverified-coverage gap from warning to hard error. The
+# framework default is "warning"; some teams want this strict from the
+# start.
+gap_unverified_severity = "error"
+
+# Minimum required reviewer count before the review can be marked
+# "ready". Framework default is 1; we require 2 for high-risk
+# increments (see [reviewer_requirements] below).
+default_required_reviewers = 1
+
+# Maximum number of Critical findings the review will surface in a
+# single pass before halting and asking the user to address them.
+# Framework default 10; ours is lower so we don't drown the author.
+max_critical_findings_per_pass = 5
+
+
+# ─── Table recursive-merge ───────────────────────────────────────────────────
+
+[reviewer_requirements]
+# For increments whose `Plan` section touches auth/* or billing/*, demand
+# 2 reviewers and one of them must hold the architect role. Framework
+# default has no per-path rules.
+[[reviewer_requirements.path_rules]]
+matches_path = "auth/**"
+required_reviewers = 2
+required_roles = ["architect"]
+
+[[reviewer_requirements.path_rules]]
+matches_path = "billing/**"
+required_reviewers = 2
+required_roles = ["architect", "compliance"]
+
+
+# ─── Array-of-tables — merge by `code` ───────────────────────────────────────
+# `review_lenses` is the framework's default 4-lens set (blind, spec,
+# standards, integration). We:
+#
+#   1. Add a new `data-classification` lens specific to our domain.
+#   2. Suppress the `stale-language` lens — we run a separate linter
+#      and don't want duplicate findings from this skill.
+
+[[review_lenses]]
+code = "data-classification"
+title = "Data Classification Check"
+description = "Confirm every new data field declared in the increment's Outcome carries a classification label (public / internal / confidential / restricted)."
+severity_default = "important"
+applies_to_sections = ["outcome", "plan"]
+
+[[review_lenses]]
+code = "stale-language"
+_suppress = true
+
+
+# ─── Array-of-scalars — replaces ─────────────────────────────────────────────
+# Restrict the increment statuses that count as "complete" for review
+# purposes. Framework default includes "verified" and "implemented";
+# we want only "verified" — the team has been historically too generous
+# with marking things "implemented" before tests existed.
+review_complete_statuses = ["verified"]
+
+
+# ─── Output overrides ────────────────────────────────────────────────────────
+
+[output]
+# Render a project-specific findings header with our review template's
+# section ordering. The framework default uses the generic header.
+findings_header_template = "review-findings-header.md"
+
+# Persist findings to a per-feature folder rather than the framework
+# default of `.framework-output/reviews/`. Lets us co-locate findings
+# with the implementation package they review.
+findings_path_pattern = "{paths.implementation_path}/{feature-id}-review/findings.md"

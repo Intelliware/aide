@@ -33,7 +33,7 @@ in the table below.
 | Artifact type | {{artifact_type}} |
 | Current source version | {{current_source_version}} |
 | Current artifact version | {{current_artifact_version}} |
-| Phase / Skill of record | {{phase_or_skill_of_record}} |
+| Stage / Skill of record | {{stage_or_skill_of_record}} |
 
 ---
 
@@ -70,7 +70,7 @@ values that apply, then reference them in change rows.
 | Multiple | When more than two values apply, list them |
 
 > **Where these values come from.** Each artifact type ships with a
-> canonical Parts Affected vocabulary in its phase or skill document
+> canonical Parts Affected vocabulary in its stage or skill document
 > (e.g., requirements packages list Executive Summary / Functional
 > Requirements / Business Rules / …; KB instances list Architecture /
 > Component Catalog / Capability Index / Cross-Cutting Concerns / ADRs /

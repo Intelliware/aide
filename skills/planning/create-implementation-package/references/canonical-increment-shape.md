@@ -1,4 +1,11 @@
-# Canonical Increment Shape — Reference
+# Canonical Increment Shape — Skill Reference
+
+> **Cross-cutting source of truth.** The framework-level specification of
+> the Canonical Increment Shape lives at
+> `references/canonical-shapes/canonical-increment-shape.md` and is also
+> consumed by `skills/design/`. The content below is the same document
+> kept here for skill-local convenience; if the two ever diverge, the
+> cross-cutting copy under `references/canonical-shapes/` wins.
 
 The Canonical Increment Shape is the standardized 8-section structure every
 increment in an implementation package must conform to. It guarantees:

@@ -11,18 +11,24 @@
 |---|---|
 | `SCHEMAS.md` | This document — full design rationale for the four-layer config model and KB schemas. |
 | `framework.toml.example` | Annotated example of the installer-managed shipped defaults (read-only by users). |
+| `framework.user.toml.example` | Annotated example of the gitignored personal global preferences layer. |
 | `project.toml.example` | Annotated example of the committed project super-context for a 3-repo setup with a sibling KB repo. |
 | `project.user.toml.example` | Annotated example of the gitignored personal project preferences layer. |
-| `customizations/example-skill.toml.example` | Per-skill team override example demonstrating deep-merge, array-by-key merge, and `_suppress: true`. |
+| `customizations/README.md` | Layer-5 directory orientation: file-naming rules, precedence inside Layer 5, when-to-use-which-layer guide, and how `customize-framework` interacts with this folder. |
+| `customizations/example-skill.toml.example` | Comprehensive merge-behaviour reference for a hypothetical skill: scalar override, array-of-tables merge by `code`, `_suppress: true`, array-of-scalars replacement. |
+| `customizations/create-requirements-package.toml.example` | Worked example for a stage-driver skill (composition pin, deepened elicitation, suppressed optional artifact, custom block). |
+| `customizations/analyze-repository.toml.example` | Worked example for a dispatcher skill (classification thresholds, default domain for ambiguous monorepos, signal additions / suppressions). |
+| `customizations/review-implementation-package.toml.example` | Worked example for a review skill (per-path reviewer requirements, custom review lens, severity elevation). |
 | `kb-architecture.template.md` | The root `ARCHITECTURE.md` template every KB carries; uses `{{placeholders}}` filled by the build-knowledge-base-index skill. |
 | `kb-component-frontmatter.example.yaml` | Realistic component frontmatter for an `order-checkout-flow` component spanning api-orders + api-billing. |
 | `kb-graph.example.json` | `graph.json` example with 5 nodes and 6 edges across multiple repos and edge `kind` values. |
 
-There is no `framework.user.toml.example` file in this directory by design — its
-shape is identical to a subset of `framework.toml` and it is documented inline
-in this schema doc (§ Layer 2). Producing a misleading "personal answers"
-example before the installer is built would invite confusion. The skeleton task
-will generate it from the installer's prompt set.
+All four config layers ship an annotated `.example` file so users have a
+template for any layer they choose to author. Layer 2 (`framework.user.toml`)
+is a subset of Layer 1's schema; the example shows the fields that most
+commonly belong at the personal-global layer (chat language, personal flow
+default, elicitation depth/persona overrides) without duplicating the full
+Layer 1 surface.
 
 ---
 

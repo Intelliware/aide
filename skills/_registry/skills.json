@@ -92,7 +92,7 @@
     {
       "canonical_id": "framework-navigator",
       "name": "framework-navigator",
-      "description": "Use when the user asks \"where do I start\", \"what skill do I use for X\", \"help me document my project\", \"what should I do next\", \"how does this framework work\", or otherwise seems lost about which skill to invoke. Default entry point when intent is unclear. Routes to the right skill, explains the workflow sequence, and emits the exact trigger phrase to use next. Lifted as-is in task #6; goal-mode and catalog-mode upgrades land in task #12.",
+      "description": "Use when the user asks for help choosing or finding a skill, says 'help', 'what's next', 'what should I do next', 'what's my best option', 'how do I\u2026', 'where do I start', 'I'm not sure which skill', 'what skills are available', 'show me the catalog', 'list all the skills', or describes a goal in plain English instead of invoking a specific skill (e.g. 'I want a quick change to this project', 'I want to RE this API into the global KB', 'help me write requirements'). Routes to the right skill based on workspace state and goal description; supports goal mode (state probe + match + recommend) and catalog mode (stage-grouped listing). Reads project.toml and on-disk artifacts, then names exactly one downstream skill and the trigger phrase to invoke it. Never performs the work itself.",
       "stage": "meta",
       "package": "",
       "path": "skills/meta/framework-navigator/SKILL.md"

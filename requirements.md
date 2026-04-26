@@ -165,7 +165,7 @@ These are answers to design questions raised during the conversation, captured a
 
 ## Status (as of 2026-04-25)
 
-All requirements above and all deferred items are addressed. The framework reports `0 errors, 20 advisory warnings` from `scripts/validate.py` (the warnings are 2 KB blocks awaiting their first KB instance, 16 intentional historical "phase" references in migration-mapping docs, and 2 tracking blocks with empty `requires-decision-from` by design).
+All requirements above and all deferred items are addressed. `scripts/validate.py` reports **0 errors**; remaining warnings are all intentional (orphan KB blocks awaiting their first KB instance, historical "phase" references in migration-mapping docs, tracking blocks with empty `requires-decision-from` by design). The live breakdown is in `_archive/validation-report.md` and re-rendered on each `validate.py --summary-md` run.
 
 ### Deferred items completed in follow-up tasks #13–#15
 

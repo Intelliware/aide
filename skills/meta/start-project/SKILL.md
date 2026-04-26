@@ -45,7 +45,7 @@ Sequenced phases. Run one step at a time. Read each `steps/<n>.md` only when abo
 5. `steps/05-write-project-toml.md` — render `project.toml` (committed) and optionally `project.user.toml` (gitignored personal preferences); pre-populate `.gitignore` for the user-layer file.
 6. `steps/06-handoff.md` — invoke the first skill of the chosen flow by name.
 
-Use elicitation prompts referenced from `references/elicitation-patterns/project-bootstrap.md` (file does not exist yet — referenced by path so the runner knows where to load it when authored).
+Use elicitation prompts referenced from `references/elicitation-patterns/project-bootstrap.md`.
 
 ## Output
 
