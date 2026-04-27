@@ -308,6 +308,9 @@ def _in_code_fence(lines: list[str], idx: int) -> bool:
     return fences % 2 == 1
 
 
+PHASE_VOCAB_ALLOW_PRAGMA = "validate: allow-phase-vocab"
+
+
 def check_d() -> tuple[list[str], list[str]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -322,6 +325,12 @@ def check_d() -> tuple[list[str], list[str]]:
         try:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
+            continue
+        # F-001: per-file pragma. Files documenting the legacy "phase" → "increment"
+        # migration must reference the old vocabulary; opt them out by adding
+        # `<!-- validate: allow-phase-vocab -->` somewhere in the file (typically
+        # near the top). Honour for both .md (HTML comment) and .yaml (#-comment).
+        if PHASE_VOCAB_ALLOW_PRAGMA in text:
             continue
         lines = text.splitlines()
         rel_str = str(rel)

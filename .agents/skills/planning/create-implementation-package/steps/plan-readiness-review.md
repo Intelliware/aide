@@ -4,6 +4,8 @@ sequence: 6
 depends-on-prior: true
 ---
 
+<!-- validate: allow-phase-vocab -->
+
 # Step 6 — Plan-Readiness Review (self-check GO / NO-GO)
 
 ## Purpose

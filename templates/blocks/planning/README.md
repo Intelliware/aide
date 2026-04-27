@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Planning Blocks — Canonical Increment Shape
 
 These eight blocks together form the **Canonical Increment Shape** — the standardized structure that every increment in a forward-engineering implementation plan must contain. Each block holds the format spec, rules, and examples for one section of the shape.

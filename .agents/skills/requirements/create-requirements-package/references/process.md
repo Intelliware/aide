@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Process — create-requirements-package
 
 The deep how-to for the skill's macro workflow. Lifted and adapted from `requirements-package/skills/create-requirements-package/SKILL.md` and its embedded 9-step gathering process.

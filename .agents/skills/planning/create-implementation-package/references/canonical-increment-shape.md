@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Canonical Increment Shape — Skill Reference
 
 > **Cross-cutting source of truth.** The framework-level specification of

@@ -3,6 +3,8 @@ name: review-implementation-package
 description: "Use when the user asks to review the implementation package, validate the implementation plan before coding starts, run the pre-execution gate, check increment readiness, verify increments conform to the Canonical Increment Shape, or confirm INC-XXX coverage. Produces a GO/NO-GO verdict with per-increment findings."
 ---
 
+<!-- validate: allow-phase-vocab -->
+
 # Review Implementation Package
 
 The pre-execution gate for the planning stage. Validates an assembled

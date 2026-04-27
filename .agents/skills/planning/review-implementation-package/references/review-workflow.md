@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Review Workflow
 
 Sequential procedure the skill follows when validating an assembled

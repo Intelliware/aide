@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Canonical Increment Shape — Spec (read-only reference)
 
 This file points the review skill at the authoritative shape spec. The shape

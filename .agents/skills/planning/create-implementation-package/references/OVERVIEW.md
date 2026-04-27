@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # create-implementation-package — Overview
 
 ## Purpose

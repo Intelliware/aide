@@ -1,3 +1,5 @@
+<!-- validate: allow-phase-vocab -->
+
 # Execution stage
 
 Skills for executing implementation increments, managing bugs, and creating PRs.
