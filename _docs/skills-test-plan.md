@@ -98,11 +98,21 @@ We pause for Mike's verdict at the end of each step.
 ### A.2  Validator  —  cross-references + workflow graph
 **Trigger:** `python3 scripts/validate.py`
 **Inputs:** Registry, `workflow-graph.yaml`, all SKILL.md frontmatter, all `templates/compositions/*.yaml`.
-**Expected outputs:** `OK` summary; every flow skill resolves; every gate resolves; no orphaned compositions; no stale "phase" terminology.
+**Expected outputs:** Clean run — 0 errors and ≤ 2 pre-existing warnings (the empty-`requires-decision-from` notes on `templates/blocks/requirements/{completeness-tracker,index}.md`, both legitimate and well-known). All 8 checks (A–H) report `(no findings)` or only the known noise.
+
+The validator's checks of interest for this step:
+- **Check A** (post-F-002): orphan-block detection counts both composition `blocks:` lists AND direct `templates/blocks/<slug>.md` references inside skill markdown. Should produce no orphan warnings.
+- **Check D** (post-F-001): stale `phase` vocabulary check honours per-file `<!-- validate: allow-phase-vocab -->` pragmas. The 9 known migration-doc files carry the pragma; new files without it that introduce phase-vocab will be flagged.
+- **Check H** (post-F-005): every `reverse-engineer-*/SKILL.md` cites both compositions by name AND contains the mandatory `## Output structure (mandatory)` section. New RE skills without these will be flagged.
+
 **Pass criteria:**
-- [ ] Exit code 0
-- [ ] No "stale terminology" findings
-- [ ] No unresolved skill references in workflow-graph
+- [ ] Exit code 0 (no hard errors)
+- [ ] Exactly 0 Check D phase-vocab warnings (the 9 pragma-bearing files mask their own; new violations would surface here)
+- [ ] Check A reports no orphan blocks (post-F-002 wider lookup)
+- [ ] Check H reports no missing-sentinel or missing-composition findings (post-F-005)
+- [ ] Total warnings ≤ 2, all on the known empty-`requires-decision-from` block frontmatter
+- [ ] No unresolved skill references in workflow-graph (Check B)
+
 **Rollback:** none — read-only.
 
 ### A.3  Self-documenting standard  —  every skill has the trio
@@ -271,6 +281,22 @@ This step is **mandatory before C.9** — `build-knowledge-base/steps/01-validat
 
 > **Note on running RE skills inside Claude Code:** the framework declares Claude Code "currently not supported" in `README.md`. We exercise the skills here by treating the assistant as the agent and reading each `SKILL.md` + `steps/*` as the playbook — exactly what a Cursor / Copilot agent would do. If a step relies on `/`-discovery in the host (e.g., elicitation prompts), we simulate it inline.
 
+### Universal Phase-C pass criteria (post-F-005)
+
+These criteria apply to **every** `reverse-engineer-*` invocation in C.2–C.8. They reflect the post-F-005 framework state where each RE skill's `SKILL.md` carries a mandatory `## Output structure (mandatory)` section binding output to the composition's block list.
+
+For every C.2–C.8 step, the per-skill pass criteria below must be checked **in addition to** these universal criteria:
+
+- [ ] **Part A** rendered as a tree under `<source-repo-path>/docs/<re-domain>-internal/`, **not** consolidated into a single `.md`.
+- [ ] **Part B** rendered as a tree under `<knowledge_base_path>/source-docs/<repo-slug>/<re-domain>-consumer/`, also tree-shaped.
+- [ ] **File naming follows `<NN>-<bare-slug>.md`** — `<NN>` is the 1-based zero-padded sort index after sorting blocks by their `order` value; `<bare-slug>` is the block slug with the `reverse-eng/<re-domain>/internal/` (or `…/consumer/`) prefix stripped.
+- [ ] **Gated-out blocks are absent** from disk (no empty placeholder file). A block whose `decision-gates: include-if:` evaluates false is omitted entirely.
+- [ ] **No ad-hoc deep-dive files** outside the `<NN>-<bare-slug>.md` scheme. The composition's block list is canonical.
+- [ ] **Subset rule for Part B** preserved — every Part B claim traces back to a fact in Part A; Part B is internal-detail-free.
+- [ ] **Supplementary artifacts** (e.g., `openapi.yaml` for API; `data-dictionary.md` + `erd.mmd` for database) live at the **Part-B directory root** alongside the consumer/ tree, not inside it.
+
+Validator Check H enforces the SKILL.md side; the on-disk shape of the produced artifacts is the operator's adjudication during the test pass.
+
 ### C.1  analyze-repository  —  classify all 7 candidate repos
 **Trigger phrase per repo:** "What kind of project is `<repo>`? Which RE skill should I run?"
 **Inputs:** A clone of each candidate at `~/Dev/framework-tests/oss-clones/<repo>/`.
@@ -283,66 +309,96 @@ This step is **mandatory before C.9** — `build-knowledge-base/steps/01-validat
 **Rollback:** none.
 
 ### C.2  reverse-engineer-api  —  RealWorld Express backend
-**Trigger phrase:** "Reverse-engineer this API repo at `~/Dev/framework-tests/oss-clones/node-express-realworld-example-app`."
-**Expected outputs:** Part A internal docs + Part B1 OpenAPI + Part B2 consumer guide under `recipes-kb/source-docs/realworld-api/`.
-**Pass criteria:**
-- [ ] Part A covers controllers, models, middleware
-- [ ] Part B1 OpenAPI validates (use `npx @redocly/cli lint`)
-- [ ] Part B2 has at least one end-to-end consumer flow
-**Rollback:** `rm -rf recipes-kb/source-docs/realworld-api`.
+**Trigger phrase:** "Reverse-engineer this API repo at `~/Dev/framework-tests/oss-clones/realworld-api`."
+**Expected outputs:**
+- **Part A** (internal): tree at `<repo>/docs/api-internal/<NN>-<bare-slug>.md` per `re-api-internal.yaml`'s block list (~25 blocks rendered, depending on elicitation gates).
+- **Part B** (consumer): tree at `recipes-kb/source-docs/realworld-api/api-consumer/<NN>-<bare-slug>.md` per `re-api-consumer.yaml` (~13 blocks).
+- **Supplementary** (API-skill specific): `recipes-kb/source-docs/realworld-api/openapi.yaml` at the Part-B directory root, sibling to the consumer/ tree.
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Part A's filled blocks cover controllers, models, and middleware (e.g., `01-api-overview`, `05-project-structure-and-conventions`, `07-middleware-and-request-pipeline`, `08-authentication-and-authorization-internals`, `12-domain-models-and-business-rules`).
+- [ ] Supplementary `openapi.yaml` validates (use `npx @redocly/cli lint`).
+- [ ] Part B's `04-endpoint-catalog.md` (or equivalent) carries at least one end-to-end consumer flow.
+
+**Rollback:** `rm -rf recipes-kb/source-docs/realworld-api && rm -rf <oss-clones>/realworld-api/docs/api-internal`.
 
 ### C.3  reverse-engineer-api-framework  —  Hono
 **Trigger:** "Reverse-engineer the API framework at `~/Dev/framework-tests/oss-clones/hono`."
-**Expected outputs:** Part A framework docs + Part B implementer docs under `recipes-kb/source-docs/hono/`.
-**Pass criteria:**
-- [ ] Part B explains: install, write a route, add middleware, deploy targets
-- [ ] Internal vs implementer split is clean (no implementer-detail leakage in Part B)
-**Rollback:** `rm -rf recipes-kb/source-docs/hono`.
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/api-framework-internal/<NN>-<bare-slug>.md` per `re-api-framework-internal.yaml` (~22 blocks; some gated by `framework_provides_di` / `framework_provides_data_access` / `framework_ships_cli`).
+- **Part B**: tree at `recipes-kb/source-docs/hono/api-framework-consumer/<NN>-<bare-slug>.md` per `re-api-framework-consumer.yaml` (~22 blocks).
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Part B's filled blocks explain install, write a route, add middleware, and deploy targets (e.g., `02-environment-and-configuration`, `04-request-pipeline-and-middleware`, `16-recipes-and-common-patterns`).
+- [ ] Internal vs implementer split is clean — Part A's `04-middleware-pipeline` documents `compose.ts` internals; Part B's equivalent block defers internals to Part A.
+
+**Rollback:** `rm -rf recipes-kb/source-docs/hono && rm -rf <oss-clones>/hono/docs/api-framework-internal`.
 
 ### C.4  reverse-engineer-web-app  —  vercel/commerce
 **Trigger:** "Reverse-engineer the web app at `~/Dev/framework-tests/oss-clones/commerce`."
-**Expected outputs:** Part A internal docs + Part B app overview & integration guide.
-**Pass criteria:**
-- [ ] App-Router page structure documented
-- [ ] Server vs client component split called out
-- [ ] Cart / product / checkout flows traced
-**Rollback:** `rm -rf recipes-kb/source-docs/commerce`.
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/web-app-internal/<NN>-<bare-slug>.md` per `re-web-app-internal.yaml` (~24 blocks; `12-forms-and-validation` gated by `has_forms`, `14-internationalization-i18n` by `has_i18n`).
+- **Part B**: tree at `recipes-kb/source-docs/commerce/web-app-consumer/<NN>-<bare-slug>.md` per `re-web-app-consumer.yaml` (12 blocks).
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Part A `05-routing-and-navigation` documents the App-Router page structure with rendering strategy per route.
+- [ ] Part A `07-component-architecture` calls out the server vs client component split with concrete file names.
+- [ ] Part A `13-feature-modules` traces the cart / product / checkout flows with file maps + flow diagrams.
+
+**Rollback:** `rm -rf recipes-kb/source-docs/commerce && rm -rf <oss-clones>/commerce/docs/web-app-internal`.
 
 ### C.5  reverse-engineer-ui-framework  —  shadcn-ui/ui
-**Trigger:** "Reverse-engineer the UI framework at `~/Dev/framework-tests/oss-clones/ui`."
-**Expected outputs:** Part A full framework docs + Part B implementer docs (component catalog, theming, install model).
-**Pass criteria:**
-- [ ] At least 5 component pages produced
-- [ ] Theming / dark-mode story documented
-- [ ] `peerDependencies` model called out
-**Rollback:** `rm -rf recipes-kb/source-docs/shadcn-ui`.
+**Trigger:** "Reverse-engineer the UI framework at `~/Dev/framework-tests/oss-clones/shadcn-ui`."
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/ui-framework-internal/<NN>-<bare-slug>.md` per `re-ui-framework-internal.yaml` (~22 blocks; some gated by `framework_has_directives_or_pipes` / `framework_provides_routing` / `framework_provides_i18n`).
+- **Part B**: tree at `recipes-kb/source-docs/shadcn-ui/ui-framework-consumer/<NN>-<bare-slug>.md` per `re-ui-framework-consumer.yaml` (~25 blocks).
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Part B's `05-components` lists the component catalog (≥5 components per family or a representative sample).
+- [ ] Theming / dark-mode story documented (Part A `13-styling-architecture` + Part B `04-theming-styling-and-responsive-design`).
+- [ ] `peerDependencies` framework-vs-application model explicitly called out — for shadcn/ui the unusual answer is "scaffold-and-conventions framework, not a runtime npm dependency".
+
+**Rollback:** `rm -rf recipes-kb/source-docs/shadcn-ui && rm -rf <oss-clones>/shadcn-ui/docs/ui-framework-internal`.
 
 ### C.6  reverse-engineer-database  —  documenso Prisma schema
 **Trigger:** "Reverse-engineer the database under `~/Dev/framework-tests/oss-clones/documenso/packages/prisma`."
-**Expected outputs:** Part A internal DB docs + Part B1 data dictionary & ERD + Part B2 consumer guide.
-**Pass criteria:**
-- [ ] Every model from `schema.prisma` has a data-dictionary entry
-- [ ] FK edges form a coherent ERD
-- [ ] Migration history acknowledged
-**Rollback:** `rm -rf recipes-kb/source-docs/documenso-db`.
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/database-internal/<NN>-<bare-slug>.md` per `re-database-internal.yaml` (~23 blocks; gated by `has_views`, `has_materialized_views`, `has_stored_procedures`, `has_triggers`).
+- **Part B**: tree at `recipes-kb/source-docs/documenso/database-consumer/<NN>-<bare-slug>.md` per `re-database-consumer.yaml` (6 blocks; `03-working-with-stored-procedures` gated).
+- **Supplementary** (database-skill specific): `recipes-kb/source-docs/documenso/data-dictionary.md` + `erd.mmd` at the Part-B directory root.
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Every model from `schema.prisma` has a data-dictionary entry in the supplementary `data-dictionary.md`.
+- [ ] Supplementary `erd.mmd` parses as a Mermaid ER diagram with edges for every FK in the schema.
+- [ ] Part A `15-migrations-and-versioning` acknowledges the migration history (count + key inflection points).
+
+**Rollback:** `rm -rf recipes-kb/source-docs/documenso && rm -rf <oss-clones>/documenso/packages/prisma/docs/database-internal`.
 
 ### C.7  reverse-engineer-mobile-app  —  bluesky/social-app
-**Trigger:** "Reverse-engineer the mobile app at `~/Dev/framework-tests/oss-clones/social-app`."
-**Expected outputs:** Part A internal app docs + Part B app overview & integration guide.
-**Pass criteria:**
-- [ ] iOS + Android entry points documented
-- [ ] Navigation graph captured
-- [ ] State-management approach identified
-**Rollback:** `rm -rf recipes-kb/source-docs/bluesky`.
+**Trigger:** "Reverse-engineer the mobile app at `~/Dev/framework-tests/oss-clones/bluesky-social`."
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/mobile-app-internal/<NN>-<bare-slug>.md` per `re-mobile-app-internal.yaml` (~27 blocks; gated by `has_deep_links`, `has_push_notifications`, `has_native_modules`).
+- **Part B**: tree at `recipes-kb/source-docs/bluesky-social/mobile-app-consumer/<NN>-<bare-slug>.md` per `re-mobile-app-consumer.yaml` (~10 blocks; `04-webview-and-embedding` gated by `has_webview_or_embedding`, `08-app-config-via-mdm` by `is_distributed_via_mdm`).
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] Part A `01-application-overview` + `03-project-structure-and-organization` document iOS + Android (and web, when applicable) entry points.
+- [ ] Part A `06-navigation-structure` captures the navigation graph (tabs + per-tab native stacks).
+- [ ] Part A `11-api-integration-and-networking` (or `08-state-management`) identifies the state-management approach.
+
+**Rollback:** `rm -rf recipes-kb/source-docs/bluesky-social && rm -rf <oss-clones>/bluesky-social/docs/mobile-app-internal`.
 
 ### C.8  reverse-engineer-mobile-framework  —  nativewind
 **Trigger:** "Reverse-engineer the mobile framework at `~/Dev/framework-tests/oss-clones/nativewind`."
-**Expected outputs:** Part A internal framework docs + Part B implementer docs.
-**Pass criteria:**
-- [ ] `peerDependencies` framework signal classification confirmed
-- [ ] Public API surface documented
-- [ ] Setup-in-an-Expo-app walk-through included
-**Rollback:** `rm -rf recipes-kb/source-docs/nativewind`.
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/mobile-framework-internal/<NN>-<bare-slug>.md` per `re-mobile-framework-internal.yaml` (~22 blocks; gated by `framework_owns_layout`, `has_ota_updates`).
+- **Part B**: tree at `recipes-kb/source-docs/nativewind/mobile-framework-consumer/<NN>-<bare-slug>.md` per `re-mobile-framework-consumer.yaml` (~23 blocks; `15-native-bridge-and-module-documentation` gated by `framework_has_native_bridge`).
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] `peerDependencies` framework-vs-application classification confirmed in Part A `01-architecture-overview` + Part B `01-framework-overview`.
+- [ ] Public API surface documented — Part A `21-source-layout` enumerates the `package.json` `exports` map; Part B `06-services-and-utilities` documents the runtime API.
+- [ ] Setup-in-an-Expo-app walk-through included in Part B `03-installation-and-setup` (install + 3 config files + entry CSS + verify).
+
+**Rollback:** `rm -rf recipes-kb/source-docs/nativewind && rm -rf <oss-clones>/nativewind/docs/mobile-framework-internal`.
 
 ### C.9  build-knowledge-base  —  scaffold the KB
 **Trigger:** "Build the knowledge base from the source-docs we just produced."
@@ -493,11 +549,21 @@ git init -q
 
 ### D.10  create-pr  —  package the diff
 **Trigger:** "Create a PR for INC-001."
-**Expected outputs:** Atomic conventional commits (one per logical change) + PR description with summary + test plan.
+**Expected outputs:** Atomic conventional commits (one per logical change) + PR description with summary + test plan + (post-F-007) a CHANGELOG.md entry when `[project.change_log]` is enabled.
+
+The skill walks 6 steps: (1) diff review, (2) fix cycle, (3) atomic commits, (4) PR description, (5) PR creation, (6) changelog entry.
+
+**Mode flag — local sandbox vs. real GitHub remote.** The Recipes greenfield sandbox has no GitHub remote, so step 5 is **simulated**: produce the exact `gh pr create --title ... --body-file ...` command in a `pr-create-command.md` file and skip the actual push. Steps 1–4 + 6 run for real. If you re-run this test with a project that has a real remote, run step 5 live.
+
 **Pass criteria:**
-- [ ] Commit messages are conventional
+- [ ] Commit messages are conventional (`<type>(<scope>): <subject>`); each commit traces to the INC-XXX or FR it addresses
 - [ ] No "WIP" or noise commits
-- [ ] PR body has both Summary and Test plan sections
+- [ ] PR body has both Summary and Test plan sections (use `templates/compositions/pr-description.yaml`)
+- [ ] **F-007 changelog gate** — verify create-pr step 6 reads `[project.change_log]` from `project.toml`:
+    - When **`enabled = true`**: a new entry is prepended to the configured `path` (default `CHANGELOG.md`) under an `Unreleased` section, formatted per `versioning_strategy` + `format`. The block content uses the project-level `parts_affected_vocabulary`.
+    - When **`enabled = false` (or table absent)**: step 6 silently skips with no `CHANGELOG.md` write. The skill must NOT silently no-op for some other reason — silent-skip is reserved for the explicit `enabled = false` case.
+- [ ] If running against the local sandbox: a `pr-create-command.md` file documents the would-be `gh pr create` invocation; no actual push occurred.
+
 **Rollback:** `git reset --soft <pre-d10-sha>` to un-commit; do **not** push.
 
 ---
