@@ -45,6 +45,7 @@ ELICITATION_PATTERNS_DIR = REPO_ROOT / "references" / "elicitation-patterns"
 ELICITATION_REF_RE = re.compile(
     r"references/elicitation-patterns/([A-Za-z0-9][A-Za-z0-9_-]*)\.md"
 )
+BLOCK_PATH_REF_RE = re.compile(r"templates/blocks/([A-Za-z0-9][\w/-]*)\.md")
 
 # Legacy/archive folders excluded from the phase-language sweep.
 EXCLUDED_TOPLEVEL = {
@@ -242,9 +243,25 @@ def check_a() -> tuple[list[str], list[str]]:
                 errors.append(f"{rel}:{lineno}: composition references missing block '{slug}' (expected at {target.relative_to(REPO_ROOT)})")
             else:
                 referenced.add(target.resolve())
+    # Direct path references inside skills (SKILL.md, steps/, references/).
+    # The framework uses a "no composition wrapper for one-file-per-instance
+    # outputs" pattern (see kb-component.yaml notes) — those blocks are
+    # rendered directly by KB-stage skills, not via a composition manifest.
+    if SKILLS_ROOT.is_dir():
+        for md in SKILLS_ROOT.rglob("*.md"):
+            if not md.is_file():
+                continue
+            try:
+                text = md.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+            for slug in BLOCK_PATH_REF_RE.findall(text):
+                target = BLOCKS_ROOT / f"{slug}.md"
+                if target.exists():
+                    referenced.add(target.resolve())
     for bf in discover_block_files():
         if bf.resolve() not in referenced:
-            warnings.append(f"{bf.relative_to(REPO_ROOT)}: orphan block (no composition references it)")
+            warnings.append(f"{bf.relative_to(REPO_ROOT)}: orphan block (no composition or skill references it)")
     return errors, warnings
 
 
