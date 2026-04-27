@@ -38,7 +38,7 @@ config/project.user.toml
 config/customizations/*.user.toml
 
 # BMAD method — committed as a versioned methodology input so the exact
-# version that informed theframework is reproducible. Installer-generated
+# version that informed A.I.D.E. is reproducible. Installer-generated
 # personal answers stay gitignored, mirroring the project's own *.user.toml
 # convention.
 _bmad/**/*.user.toml

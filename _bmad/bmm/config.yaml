@@ -3,7 +3,7 @@
 # Version: 6.4.0
 # Date: 2026-04-25T17:42:09.240Z
 
-project_name: theframework
+project_name: AIDE
 user_skill_level: intermediate
 planning_artifacts: "{project-root}/_bmad-output/planning-artifacts"
 implementation_artifacts: "{project-root}/_bmad-output/implementation-artifacts"

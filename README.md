@@ -39,7 +39,7 @@ To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and con
 
 ### Step 2 — framework orientation (automatic)
 
-Theframework ships an `AGENTS.md` at its repo root. Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
+A.I.D.E. ships an `AGENTS.md` at its repo root. Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
 
 Project-side guidance is **optional** and scoped to project-specific rules — codebase conventions, path-scoped style preferences, etc. Add any of:
 
@@ -69,7 +69,7 @@ To verify: open the Agent panel and type `/` — all 32 framework skills should 
 
 ### Step 2 — framework orientation (automatic)
 
-Theframework ships an `AGENTS.md` at its repo root. Cursor reads `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
+A.I.D.E. ships an `AGENTS.md` at its repo root. Cursor reads `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
 
 Project-side guidance is **optional** and scoped to project-specific rules. Add any of:
 
