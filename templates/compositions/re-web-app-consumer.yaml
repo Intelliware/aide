@@ -13,8 +13,12 @@ description: Reverse-engineering KB for embedding / extending / integrating with
 applies-to-flow: reverse-eng
 package-type: re-consumer
 
-default-output-path: "{paths.knowledge_base_path}/{repo-slug}/web-app-consumer.md"
-
+default-output-path: "{paths.knowledge_base_path}/source-docs/{repo-slug}/web-app-consumer/"
+default-output-shape: tree
+# Path is rooted at the knowledge_base_path declared in project.toml.
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/web-app/consumer/" prefix stripped.
 blocks:
   - slug: reverse-eng/web-app/consumer/embedding-options
     optional: false

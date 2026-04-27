@@ -445,6 +445,63 @@ def check_g() -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def check_h() -> tuple[list[str], list[str]]:
+    """H — RE skill output-structure binding.
+
+    For every `reverse-engineer-*/SKILL.md` under .agents/skills/reverse-engineering/
+    (excluding the dispatcher `analyze-repository`), verify that the file:
+
+      1. Cites BOTH of its matched compositions by name (re-<domain>-internal.yaml
+         and re-<domain>-consumer.yaml).
+      2. Contains the mandatory sentinel section heading
+         `## Output structure (mandatory)`.
+      3. The two cited compositions exist on disk and have non-empty `blocks:` lists.
+
+    Without this binding, agents are free to invent ad-hoc structures (see F-005).
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    re_dir = SKILLS_ROOT / "reverse-engineering"
+    if not re_dir.is_dir():
+        return errors, warnings
+
+    sentinel = "## Output structure (mandatory)"
+    for skill_md in sorted(re_dir.rglob("SKILL.md")):
+        rel = skill_md.relative_to(REPO_ROOT)
+        # Skip the dispatcher.
+        if "analyze-repository" in skill_md.parts:
+            continue
+        # Domain is everything after "reverse-engineer-" in the parent folder name.
+        parent = skill_md.parent.name
+        if not parent.startswith("reverse-engineer-"):
+            continue
+        domain = parent[len("reverse-engineer-"):]
+        text = skill_md.read_text(encoding="utf-8")
+
+        if sentinel not in text:
+            errors.append(f"{rel}: missing mandatory '{sentinel}' section — RE skill must bind output to its compositions")
+
+        for part in ("internal", "consumer"):
+            comp_name = f"re-{domain}-{part}.yaml"
+            if comp_name not in text:
+                errors.append(f"{rel}: does not cite the matched composition '{comp_name}' by name")
+            comp_path = COMPOSITIONS_ROOT / comp_name
+            if not comp_path.is_file():
+                errors.append(f"{rel}: cited composition '{comp_name}' does not exist on disk at {comp_path.relative_to(REPO_ROOT)}")
+                continue
+            comp_text = comp_path.read_text(encoding="utf-8")
+            # Composition must declare default-output-shape and non-empty blocks list.
+            if "default-output-shape:" not in comp_text:
+                warnings.append(f"{comp_path.relative_to(REPO_ROOT)}: missing `default-output-shape` field (expected for RE compositions)")
+            block_count = len([
+                line for line in comp_text.splitlines()
+                if re.match(r"^\s*-\s+slug:\s*", line)
+            ])
+            if block_count == 0:
+                warnings.append(f"{comp_path.relative_to(REPO_ROOT)}: empty `blocks:` list (intentional stub?)")
+    return errors, warnings
+
+
 def check_f() -> tuple[list[str], list[str], str]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -509,6 +566,7 @@ def main() -> int:
     d_err, d_warn = check_d()
     e_err, e_warn = check_e()
     g_err, g_warn = check_g()
+    h_err, h_warn = check_h()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -518,11 +576,12 @@ def main() -> int:
         "Check D — stale 'phase' language",
         "Check E — block frontmatter integrity",
         "Check G — elicitation-pattern resolution",
+        "Check H — RE skill output-structure binding",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
-        (e_err, e_warn), (g_err, g_warn), (f_err, f_warn),
+        (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -548,7 +607,9 @@ def main() -> int:
                 ["A — composition/block cross-references", "B — workflow-graph resolution",
                  "C — description discipline", "D — stale 'phase' language",
                  "E — block frontmatter integrity",
-                 "G — elicitation-pattern resolution", "F — build-registry sanity"],
+                 "G — elicitation-pattern resolution",
+                 "H — RE skill output-structure binding",
+                 "F — build-registry sanity"],
                 bundles,
             )
         )
@@ -573,6 +634,7 @@ def main() -> int:
             _md(titles[3], d_err, d_warn),
             _md(titles[4], e_err, e_warn),
             _md(titles[5], g_err, g_warn),
+            _md(titles[6], h_err, h_warn),
             "## Check F — build-registry.py output",
             "",
         ]

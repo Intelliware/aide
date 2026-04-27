@@ -72,11 +72,23 @@ API frameworks differ from API applications: they are consumed by other develope
 - `templates/compositions/re-api-framework-internal.yaml` — Part A blocks
 - `templates/compositions/re-api-framework-consumer.yaml` — Part B blocks (validation pass will surface coverage gaps)
 
-## Output
+## Output structure (mandatory)
 
-- Part A: `<repo>/docs/api-framework-internal/` (stays in source repo)
-- Part B: `<KB>/source-docs/<repo-slug>/api-framework-consumer.md`
-- `extraction-status.md` and `CHANGE-TRACKER.md` inside the source repo
+Output is **bound to the composition's block list** — do not invent file names, do not rearrange order, do not consolidate multiple blocks into a single deep-dive.
+
+**Part A (internal)** renders as a tree under `<source-repo-path>/docs/api-framework-internal/`, against `templates/compositions/re-api-framework-internal.yaml`.
+
+**Part B (consumer)** renders as a tree under `<knowledge_base_path>/source-docs/<repo-slug>/api-framework-consumer/`, against `templates/compositions/re-api-framework-consumer.yaml`.
+
+Per-block file naming (applies to BOTH parts): `<NN>-<bare-slug>.md`, where:
+- `<NN>` is the 1-based, zero-padded sort index after sorting blocks by their `order` value (first block → `01`, second → `02`, etc.).
+- `<bare-slug>` is the block slug with the `reverse-eng/api-framework/internal/` (or `…/consumer/`) prefix stripped.
+- Block content shape comes from `templates/blocks/reverse-eng/api-framework/<part>/<bare-slug>.md`. Extracted source content fills the rendered block; the block's structural shape is preserved.
+- A block whose `decision-gates: include-if:` evaluates false is **omitted entirely** — do not author an empty placeholder.
+
+Side artifacts at the Part-A directory root:
+- `extraction-status.md` — RE-pass tracking
+- `CHANGE-TRACKER.md` — initialised from `templates/blocks/shared/change-log.md`
 
 ## Next skill
 

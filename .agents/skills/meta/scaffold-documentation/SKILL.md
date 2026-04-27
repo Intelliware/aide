@@ -32,8 +32,8 @@ See `references/INPUTS-OUTPUTS.md`.
 ## Workflow
 
 1. **Gather inventory** — read `extraction-status.md` (RE), the requirements file-relevance recommendation, the design template, or the user's list of artifacts.
-2. **Identify package type and template** — pick the matching template from `templates/compositions/<slug>.yaml` and load its block list.
-3. **Propose file structure** — generate the directory tree with file names, section headers from the template, mapping of inventory items to sections, and recommended fill order.
+2. **Identify package type and template** — pick the matching template from `templates/compositions/<slug>.yaml` and load its block list, its `default-output-path`, and its `default-output-shape` (defaults to `tree` for RE compositions).
+3. **Propose file structure** — generate the directory tree with file names, section headers from the template, mapping of inventory items to sections, and recommended fill order. **The directory and file names MUST match the composition's `default-output-path` and the per-block naming rule (`<NN>-<bare-slug>.md`); do not invent names.** For RE compositions specifically, scaffold under the canonical RE location (`<source-repo-path>/docs/<re-domain>-internal/` for Part A, `<knowledge_base_path>/source-docs/<repo-slug>/<re-domain>-consumer/` for Part B), not at any project-side path.
 4. **Approval gate** — present the proposal as a tree. Do NOT create files yet. Wait for explicit user approval.
 5. **Create the files** — make all directories; create each file with header, section headers, and `<!-- TODO: extract from <source> -->` placeholders. Initialize `CHANGE-TRACKER.md` from the canonical change-log block at `templates/blocks/shared/change-log.md`.
 6. **Confirm readiness** — summarize files created, suggest the first section to fill, and emit the trigger phrase for the next skill (the matching authoring or extraction skill).

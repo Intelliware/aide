@@ -10,8 +10,12 @@ description: Reverse-engineering KB for consuming a UI framework / component lib
 applies-to-flow: reverse-eng
 package-type: re-consumer
 
-default-output-path: "{paths.knowledge_base_path}/{repo-slug}/ui-framework-consumer.md"
-
+default-output-path: "{paths.knowledge_base_path}/source-docs/{repo-slug}/ui-framework-consumer/"
+default-output-shape: tree
+# Path is rooted at the knowledge_base_path declared in project.toml.
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/ui-framework/consumer/" prefix stripped.
 blocks:
   - slug: reverse-eng/ui-framework/consumer/framework-overview
     optional: false

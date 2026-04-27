@@ -11,8 +11,12 @@ description: Reverse-engineering KB for the internal implementation of a databas
 applies-to-flow: reverse-eng
 package-type: re-internal
 
-default-output-path: "{paths.knowledge_base_path}/{repo-slug}/database-internal.md"
-
+default-output-path: "docs/database-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/database/internal/" prefix stripped.
 blocks:
   - slug: reverse-eng/database/internal/database-overview
     optional: false

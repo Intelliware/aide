@@ -11,8 +11,12 @@ description: Reverse-engineering KB for the internal implementation of an API fr
 applies-to-flow: reverse-eng
 package-type: re-internal
 
-default-output-path: "{paths.knowledge_base_path}/{repo-slug}/api-framework-internal.md"
-
+default-output-path: "docs/api-framework-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/api-framework/internal/" prefix stripped.
 blocks:
   - slug: reverse-eng/api-framework/internal/architecture-overview
     optional: false
