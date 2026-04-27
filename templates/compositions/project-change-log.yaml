@@ -1,0 +1,56 @@
+# Composition: Project-level CHANGELOG.md
+#
+# Wraps the canonical change-log block at project scope. Audience is
+# end users / downstream developers — not internal SDLC participants
+# (those use per-package CHANGE-TRACKER.md, also rendered from the
+# same block).
+#
+# The `Parts Affected` reference table inside the block is populated
+# with project-level feature areas (auth / cart / search / etc.) at
+# project bootstrap time, distinct from per-artifact populations.
+#
+# Source: templates/blocks/shared/change-log.md (block re-used; not a new block)
+
+name: project-change-log
+description: Project-level CHANGELOG.md (release-stream change log; audience = end users).
+applies-to-flow: any
+package-type: project-change-log
+
+default-output-path: "{project-root}/CHANGELOG.md"
+default-output-shape: consolidated
+
+blocks:
+  - slug: shared/change-log
+    optional: false
+    order: 1
+
+elicitation:
+  - prompt: references/elicitation-patterns/project-change-log.md
+    required: false
+
+decision-gates: []
+
+notes: |
+  This composition is conditional. It runs ONLY when project.toml has
+  [project.change_log] enabled = true. The condition is read by:
+    - start-project (asks the user at bootstrap; writes the table)
+    - create-pr step 6 (renders a new entry per release if enabled)
+
+  Versioning convention is set by [project.change_log].versioning_strategy
+  (semver | calver | none). The first time the composition runs, an
+  "Unreleased" section is created at the top.
+
+  Format alignment: the block's change-type taxonomy
+  (Initial Extraction / Source Update / Correction / Restructure /
+  Addition / Deprecation / Removal) is a strict superset of
+  Keep-a-Changelog's (Added / Changed / Deprecated / Removed / Fixed /
+  Security). Mapping for project-level use:
+    - Addition → Added
+    - Source Update → Changed
+    - Correction → Fixed
+    - Deprecation → Deprecated
+    - Removal → Removed
+    - (Security findings) → Security
+  The block's per-artifact "Parts Affected" reference table doubles as
+  the place where project-level feature-area vocabulary is declared
+  ("auth", "cart", "search", etc.).

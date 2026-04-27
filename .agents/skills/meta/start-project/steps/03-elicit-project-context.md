@@ -24,7 +24,8 @@ unambiguous.
 | 1 | `[project]` | `name`, `code`, `domain` | `description`, `default_flow` (set from step 02) |
 | 2 | `[project.paths]` | `knowledge_base_path` (greenfield/brownfield only) | `requirements_package`, `design_package`, `implementation_package` (defaults are fine) |
 | 3 | `[project.glossary]` | (none) | `references[]`, `entries[]` (term/definition/aliases/domain_specific) |
-| 4 | `[project.elicitation]` | (none) | answers to known decision-table codes — see list below |
+| 4 | `[project.change_log]` | (none — `enabled` defaulted by flow) | `enabled`, `path`, `versioning_strategy`, `format`, `parts_affected_vocabulary` |
+| 5 | `[project.elicitation]` | (none) | answers to known decision-table codes — see list below |
 
 ### Sub-step 1 — `[project]`
 
@@ -53,7 +54,29 @@ Two parallel sub-prompts:
 
 Both are optional. Skip on `done`.
 
-### Sub-step 4 — `[project.elicitation]`
+### Sub-step 4 — `[project.change_log]`
+
+Conditional. Asks whether the project will maintain a release-stream
+`CHANGELOG.md`. Distinct from per-package `CHANGE-TRACKER.md` (those
+ship automatically with each authored package).
+
+Defaults by flow:
+- **greenfield** / **brownfield** → `enabled = true` (most projects benefit from a user-facing changelog)
+- **quick-dev** → `enabled = false` (small scoped changes don't usually warrant project-level changelogs)
+
+Prompt the user with the flow-appropriate default, accept yes/no.
+
+If `enabled = true`, ask the four follow-ups (each with a sensible
+default; offer to skip and accept all defaults):
+
+1. `path` — default `{project-root}/CHANGELOG.md`. Override only when there's a strong reason.
+2. `versioning_strategy` — `semver` (default) | `calver` | `none`.
+3. `format` — `keep-a-changelog` (default) | `plain`.
+4. `parts_affected_vocabulary` — list of project-level feature areas (`auth`, `cart`, `search`, `api`, `ui`, etc.). The user can supply now, or accept the framework's eight-item starter list (`api`, `ui`, `auth`, `data`, `config`, `build`, `infra`, `docs`).
+
+Carry the resolved table forward to step 05.
+
+### Sub-step 5 — `[project.elicitation]`
 
 Pre-answers for decision-table codes used by composition gates. The
 canonical list (mirroring `project.toml.example`):

@@ -73,8 +73,16 @@ committing or creating the PR.
    change-list, test plan, traceability, and optionally breaking-changes
    and rollout-notes when the diff warrants them
 5. **PR creation** — only with explicit user approval; reports the PR URL
-6. **Changelog entry** — conditional, only if the project maintains a
-   changelog
+6. **Changelog entry** — read `[project.change_log]` from `project.toml`.
+   - If the table is absent or `enabled = false`: silently skip (no changelog declared).
+   - If `enabled = true`: render an entry against
+     `templates/compositions/project-change-log.yaml` and prepend it to
+     the configured `path` (default `{project-root}/CHANGELOG.md`),
+     under an `Unreleased` section if no released version is being cut,
+     or under the new version's section if a release is being tagged.
+     Use the `versioning_strategy` and `format` fields to shape the
+     header. Map the working-tree diff's affected areas to the
+     `parts_affected_vocabulary` from the same table.
 
 For step-by-step procedure, see `references/implementation-pr-workflow.md`.
 

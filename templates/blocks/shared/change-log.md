@@ -1,7 +1,7 @@
 ---
 slug: change-log
 title: "Change Log"
-applies-to: [greenfield-requirements-package, greenfield-design-package, greenfield-implementation-package, brownfield-enhancement-spec, quick-dev-spec, kb-instance]
+applies-to: [greenfield-requirements-package, greenfield-design-package, greenfield-implementation-package, brownfield-enhancement-spec, quick-dev-spec, kb-instance, project-change-log]
 requires-decision-from: [architect, qa]
 optional: false
 order-hint: 95

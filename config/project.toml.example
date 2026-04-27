@@ -87,6 +87,30 @@ definition = "The end-of-day batch reconciliation that moves authorized funds fr
 domain_specific = true
 
 
+# ─── [project.change_log] — release-stream changelog (CHANGELOG.md) ──────────
+# Conditional. When `enabled = true`, `create-pr` step 6 appends a new
+# entry to the configured CHANGELOG.md per merged PR; `start-project`
+# scaffolds the file. When `enabled = false` (or this section is omitted),
+# the framework treats the project as having no changelog and create-pr
+# silently skips step 6.
+#
+# Distinct from per-package CHANGE-TRACKER.md: those are per-artifact,
+# audience = SDLC participants. This is per-release-stream, audience =
+# end users / downstream developers. Same canonical block underneath
+# (`templates/blocks/shared/change-log.md`).
+[project.change_log]
+
+enabled              = true                    # default for greenfield; quick-dev usually false
+path                 = "{project-root}/CHANGELOG.md"
+versioning_strategy  = "semver"                # semver | calver | none
+format               = "keep-a-changelog"      # keep-a-changelog | plain (project-block default)
+
+# Project-level "Parts Affected" vocabulary. Populates the same-named
+# table inside the canonical change-log block when rendered as the
+# project-level changelog. Different from per-package vocabularies.
+parts_affected_vocabulary = ["api", "ui", "auth", "data", "config", "build", "infra", "docs"]
+
+
 # ─── [project.elicitation] — pre-answered decision-table questions ───────────
 # Question codes match the codes used in the framework's decision tables.
 # Skills consult these answers before re-prompting the user. Unknown codes

@@ -240,6 +240,7 @@ This is the single richest layer. Sections:
 [project]                  # identity, default flow, top-level metadata
 [project.paths]            # output paths for stage packages and the KB
 [project.glossary]         # references to glossary files + inline entries
+[project.change_log]       # release-stream CHANGELOG.md (conditional)
 [project.elicitation]      # answers to decision-table questions
 [[project.repos]]          # one entry per repository in this project
 ```
@@ -272,6 +273,28 @@ All paths may use the tokens in § 1.5. Relative paths resolve under
 |---|---|---|
 | `references` | array<path> | Files (Markdown, CSV, YAML) that contribute glossary entries. Loaded in order; later files override earlier on identical terms. |
 | `[[project.glossary.entries]]` | array<table> | Inline entries. Each: `term` (string, required), `definition` (string, required), `aliases` (array<string>, optional), `domain_specific` (bool, default `false`). |
+
+#### `[project.change_log]`
+
+Conditional. Declares whether the project maintains a release-stream
+CHANGELOG.md and how `create-pr` should write to it. Distinct from the
+per-package CHANGE-TRACKER.md files (those are per-artifact, audience =
+SDLC participants); both are rendered from the same canonical block at
+`templates/blocks/shared/change-log.md` — what differs is scope, audience,
+and granularity.
+
+| Field | Type | Default | Purpose |
+|---|---|---|---|
+| `enabled` | bool | `true` for greenfield/brownfield projects; `false` for quick-dev | Master switch. When `false`, `create-pr` step 6 silently skips. |
+| `path` | path | `"{project-root}/CHANGELOG.md"` | Where the changelog lives. |
+| `versioning_strategy` | enum | `"semver"` | `semver` \| `calver` \| `none`. Drives the version-header convention. |
+| `format` | enum | `"keep-a-changelog"` | `keep-a-changelog` \| `plain`. Plain uses the canonical block's section structure as-is; keep-a-changelog adopts the (Added / Changed / Deprecated / Removed / Fixed / Security) header style. |
+| `parts_affected_vocabulary` | array<string> | `[]` | Project-level "Parts Affected" values populated into the canonical block's reference table. Different from per-artifact populations. |
+
+The composition is `templates/compositions/project-change-log.yaml`,
+which wraps the canonical block. `start-project` step 03 elicits this
+table at bootstrap; `create-pr` step 6 reads it to decide whether to
+append.
 
 #### `[project.elicitation]`
 
