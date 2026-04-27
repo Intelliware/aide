@@ -35,7 +35,7 @@ See `references/INPUTS-OUTPUTS.md`.
 2. **Identify package type and template** — pick the matching template from `templates/compositions/<slug>.yaml` and load its block list.
 3. **Propose file structure** — generate the directory tree with file names, section headers from the template, mapping of inventory items to sections, and recommended fill order.
 4. **Approval gate** — present the proposal as a tree. Do NOT create files yet. Wait for explicit user approval.
-5. **Create the files** — make all directories; create each file with header, section headers, and `<!-- TODO: extract from <source> -->` placeholders. Initialize `CHANGE-TRACKER.md` from `skills/meta/track-change/references/change-tracker-template.md`.
+5. **Create the files** — make all directories; create each file with header, section headers, and `<!-- TODO: extract from <source> -->` placeholders. Initialize `CHANGE-TRACKER.md` from the canonical change-log block at `templates/blocks/shared/change-log.md`.
 6. **Confirm readiness** — summarize files created, suggest the first section to fill, and emit the trigger phrase for the next skill (the matching authoring or extraction skill).
 
 ## Output

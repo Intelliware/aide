@@ -21,7 +21,7 @@ Used by every stage — RE, requirements, design, planning, execution, and KB up
 
 ## When NOT to use
 
-- The package has no `CHANGE-TRACKER.md` yet — initialize one first by reading `references/change-tracker-template.md`
+- The package has no `CHANGE-TRACKER.md` yet — initialize one first from the canonical change-log block at `templates/blocks/shared/change-log.md`
 - Trivial conversational edits with no artifact changes — skip the log
 - Untracked scratch files outside any package — no tracker to update
 - Bulk migration / one-shot regeneration — use a higher-level migration log instead
@@ -33,7 +33,7 @@ See `references/INPUTS-OUTPUTS.md`.
 ## Workflow
 
 1. **Determine context** — ask the user (or infer): which package/repo, what changed, which Parts Affected, source version, verification approach, cross-impact.
-2. **Locate or create the tracker** — find `CHANGE-TRACKER.md` in the package; if missing, create it from `references/change-tracker-template.md` and pre-populate Parts Affected from the package's own conventions.
+2. **Locate or create the tracker** — find `CHANGE-TRACKER.md` in the package; if missing, create it from the canonical change-log block at `templates/blocks/shared/change-log.md` and pre-populate Parts Affected from the package's own conventions.
 3. **Log the change** — append a summary row to the Change Log table and a detailed entry below using the framework's row+detail format.
 4. **Version check** — if this corresponds to a new source version, update "Current Source Version" at the top, open a new section header, and increment the documentation version (`X.Y.Z-doc.N`).
 
