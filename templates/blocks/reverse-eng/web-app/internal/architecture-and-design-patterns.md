@@ -11,67 +11,74 @@ order-hint: 140
 
 ### 4.1 High-Level Architecture
 
-<!-- ASCII diagram showing how major components connect. -->
+<!-- ASCII diagram showing how major components connect. Replace bracketed labels
+with the codebase's actual framework / store / router. -->
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        Browser / SPA                         │
+│                  Browser / SPA / SSR runtime                 │
 │                                                              │
 │  ┌─────────────────────────────────────────────────────┐   │
-│  │              React / App Component                  │   │
+│  │     [UI Framework] App Root                         │   │
+│  │     (e.g., React / Vue / Angular / Svelte / Solid)  │   │
 │  │                                                     │   │
 │  │  ┌──────────────────────────────────────────────┐   │   │
-│  │  │         Redux Store (Global State)           │   │   │
+│  │  │     [State Container] (Global State)         │   │   │
+│  │  │     (e.g., Redux / Pinia / NgRx / Zustand /  │   │   │
+│  │  │      MobX / Svelte stores / Solid signals)   │   │   │
 │  │  │  ├── auth (user, token, permissions)         │   │   │
-│  │  │  ├── users (list, selected, filters)         │   │   │
-│  │  │  ├── tickets (list, detail, form state)      │   │   │
+│  │  │  ├── [domain entity 1] (list, selected...)   │   │   │
+│  │  │  ├── [domain entity 2] (list, detail...)     │   │   │
 │  │  │  └── ui (modals, notifications, theme)       │   │   │
 │  │  └──────────────────────────────────────────────┘   │   │
 │  │                      ▲                               │   │
-│  │                      │ (dispatch actions)            │   │
+│  │                      │ (state updates)               │   │
 │  │                      │                               │   │
 │  │  ┌──────────────────────────────────────────────┐   │   │
-│  │  │       Router (React Router v6)               │   │   │
+│  │  │     [Router] (e.g., React Router /           │   │   │
+│  │  │      Vue Router / Angular Router /           │   │   │
+│  │  │      SvelteKit / Solid Router / Next.js)     │   │   │
 │  │  │  ├── /dashboard                              │   │   │
-│  │  │  ├── /tickets (protected)                    │   │   │
-│  │  │  ├── /users (admin only)                     │   │   │
+│  │  │  ├── /[entity] (protected)                   │   │   │
+│  │  │  ├── /admin/* (role-gated)                   │   │   │
 │  │  │  └── /login                                  │   │   │
 │  │  └──────────────────────────────────────────────┘   │   │
 │  │           │                                          │   │
 │  │           ▼                                          │   │
 │  │  ┌──────────────────────────────────────────────┐   │   │
-│  │  │   Feature Components (Dashboard, Tickets)    │   │   │
-│  │  │   ├── Connect to Redux via hooks             │   │   │
-│  │  │   ├── Call services for API requests         │   │   │
-│  │  │   └── Dispatch actions on user interaction   │   │   │
+│  │  │     Feature Views / Components               │   │   │
+│  │  │     ├── Read state via framework primitive   │   │   │
+│  │  │     ├── Call services for API requests       │   │   │
+│  │  │     └── Trigger state updates on interaction │   │   │
 │  │  └──────────────────────────────────────────────┘   │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                      ▲                                      │
-│                      │ (HTTP API calls)                     │
+│                      │ (HTTP / GraphQL / WebSocket)         │
 └──────────────────────┼──────────────────────────────────────┘
                        │
                        ▼
            ┌──────────────────────────┐
            │    Backend API Server    │
-           │  (REST endpoints)        │
+           │  (REST / GraphQL / RPC)  │
            └──────────────────────────┘
 ```
 
 ### 4.2 Data Flow
 
-<!-- Describe how data flows through the app, from API to UI. -->
+<!-- Describe how data flows through the app, from API to UI. The shape is
+universal; only the names change per stack. -->
 
 **Typical User Action → API Call → State Update → UI Rerender:**
 
-1. **User interaction** (e.g., clicks "Create Ticket" button)
-2. **Component dispatches Redux action** (e.g., `fetchTickets()`)
-3. **Action creator calls API service** (e.g., `ticketService.createTicket()`)
-4. **HTTP client sends request** (authenticated via interceptor)
+1. **User interaction** (e.g., clicks "Create [Entity]" button)
+2. **View / component invokes a state action** [e.g., Redux `dispatch(fetchTickets())`, Pinia `useTicketStore().fetch()`, NgRx `store.dispatch(...)`, Zustand `useStore.getState().fetch()`, Svelte store `tickets.fetch()`, Solid signal setter]
+3. **Action / store calls an API service** (e.g., `ticketService.createTicket()`)
+4. **HTTP client sends request** (authenticated via interceptor / middleware)
 5. **API response received** by HTTP client
-6. **HTTP interceptor handles** response (check for 401, format response, etc.)
-7. **Redux reducer updates state** with new ticket
-8. **Component re-renders** with updated state
-9. **UI shows new ticket** in the list
+6. **HTTP interceptor handles** response (check for 401, normalise errors, format payload)
+7. **State container updates** with new data [reducer / mutation / setter / signal write]
+8. **Reactive subscribers re-render** with updated state
+9. **UI shows new entity** in the list
 
 ### 4.3 Key Design Patterns
 

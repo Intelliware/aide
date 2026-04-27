@@ -1,5 +1,7 @@
 # reverse-engineer-web-app — Worked Example
 
+> **Stack-agnostic note.** The workflow below is illustrated with one concrete stack (React + Vite + Redux Toolkit + React Router) so the artefacts are tangible. The same five-stage flow applies unchanged for any other web-app stack — Vue + Pinia + Vue Router, Svelte + SvelteKit, Angular + NgRx, Solid + Solid Router, Astro + islands, Next.js / Nuxt / Remix, server-rendered Rails / Django / Laravel, etc. Stage 1 discovery simply finds different values and Stage 2–4 fill the same blocks with the technologies the code actually uses.
+
 ## Scenario
 
 User has a React 18 + Vite + Redux Toolkit + React Router 6 app at `~/code/orderhub-web` that consumes the OrderHub backend API.

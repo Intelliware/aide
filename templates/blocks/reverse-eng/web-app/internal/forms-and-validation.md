@@ -11,13 +11,15 @@ order-hint: 220
 
 ### 12.1 Form Handling Approach
 
-<!-- How forms are structured and submitted. -->
+<!-- How forms are structured and submitted. Discover and record the actual library
+in use — the pattern (controlled vs uncontrolled, schema-driven validation, async
+submit with loading + error states) is universal; the specific library is not. -->
 
-- **Form Library:** [e.g., "React Hook Form", "Formik", "custom useState"]
-- **Validation:** [e.g., "Zod schema validation", "manual validation", "server-side validation"]
-- **Approach:** [Uncontrolled / controlled components, how data flows]
+- **Form Library:** [e.g., React Hook Form, Formik, TanStack Form, native `<form>` + `useState`; Vue VeeValidate, FormKit, vee-validate + `<form>`; Angular Reactive Forms, Template-driven Forms; Svelte `superforms`, `felte`, native bindings; Solid `solid-form`; SvelteKit form actions; Remix actions]
+- **Validation:** [e.g., Zod, Yup, Valibot, AJV, Joi schema validation; class-validator (decorators); Angular Validators; manual validation; server-side validation]
+- **Approach:** [Uncontrolled / controlled inputs, how data flows from input → state → submit]
 
-**Form Structure:**
+**Form Structure (illustrative — React Hook Form + Zod):**
 
 ```typescript
 // Example form using React Hook Form

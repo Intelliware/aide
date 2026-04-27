@@ -9,21 +9,25 @@ order-hint: 300
 
 ## 20. Testing Strategy and Infrastructure
 
+<!-- Replace each [bracketed example] with the tooling actually used in this app's
+codebase. Mobile testing varies sharply by platform and cross-platform approach
+— the rows below cover common stacks but are not exhaustive. -->
+
 ### 20.1 Testing Pyramid
 
 ```
         /\
-       /  \        UI Tests (Espresso, XCTest, Detox)
+       /  \        UI / E2E Tests   [e.g., Espresso, XCUITest, Detox, Maestro, Appium, Patrol, integration_test]
       /----\       Integration Tests
-     /      \      Unit Tests
+     /      \      Unit Tests        [e.g., JUnit5, XCTest, Jest, Vitest, flutter_test, KotlinTest]
     /--------\
 ```
 
 ### 20.2 Unit Testing
 
-**Framework:** [e.g., "JUnit for Android, XCTest for iOS, Jest for RN"]
+**Framework:** [discover from the codebase — e.g., "JUnit5 / MockK on Android (Kotlin)", "XCTest on iOS (Swift)", "Jest / Vitest on React Native (TypeScript)", "flutter_test on Flutter (Dart)", "Kotlin Multiplatform `kotlin.test`", ".NET MAUI MSTest / xUnit / NUnit", "Xamarin NUnit"]
 
-**Example:**
+**Example (illustrative — Android / Kotlin / JUnit + MockK):**
 ```kotlin
 @Test
 fun testLogin_success() {
@@ -39,27 +43,47 @@ fun testLogin_success() {
 }
 ```
 
+The Arrange-Act-Assert structure is universal; only the syntax changes. Equivalent shapes:
+- **iOS / Swift / XCTest:** `func testLogin_success() { ... XCTAssertEqual(...) }` with a stubbed dependency.
+- **React Native / Jest:** `test('login success', async () => { ... expect(...).toBe(...) })` with `jest.fn()` mocks.
+- **Flutter / Dart:** `test('login success', () async { ... expect(actual, equals(expected)); })` with `Mockito` / `mocktail`.
+
 ### 20.3 Integration Testing
 
-[Document integration tests between layers]
+[Document integration tests between layers — e.g., ViewModel ↔ Repository ↔ data source — using the codebase's actual harness (Robolectric, instrumented tests, EarlGrey, Detox, integration_test, etc.).]
 
 ### 20.4 UI Testing
 
-**Framework:** [e.g., "Espresso for Android, XCUITest for iOS, Detox for RN"]
+**Framework:** [discover — e.g., "Espresso / Compose UI Test on Android", "XCUITest on iOS", "Detox / Maestro on React Native", "flutter_test integration_test on Flutter", "Appium for cross-platform black-box", ".NET MAUI Appium / Xamarin.UITest"]
 
-[Document UI test structure and examples]
+[Document UI test structure and examples in the language and framework actually used.]
 
 ### 20.5 Running Tests
 
+<!-- Replace with the commands this codebase actually exposes (Makefile / fastlane
+lanes / CI scripts often consolidate these). -->
+
 ```bash
-# Android
-./gradlew test                    # Unit tests
-./gradlew connectedAndroidTest   # Instrumentation tests
+# Android (Gradle)
+./gradlew test                    # Unit tests (JVM)
+./gradlew connectedAndroidTest    # Instrumentation tests on a device/emulator
 
-# iOS
-xcodebuild test -scheme [AppName]
+# iOS (Xcode)
+xcodebuild test -scheme [SchemeName] -destination 'platform=iOS Simulator,name=iPhone 15'
+# Or via fastlane:
+fastlane scan
 
-# React Native
-npm test                          # Unit tests
-detox test e2e/firstTest.e2e.js # E2E tests
+# React Native (npm / pnpm / yarn)
+<pm> test                         # Unit tests
+<pm> run e2e                      # E2E (Detox/Maestro), often `detox test` or `maestro test flows/`
+
+# Flutter
+flutter test                      # Unit + widget tests
+flutter test integration_test/    # Integration / E2E
+
+# Kotlin Multiplatform Mobile (KMM)
+./gradlew :shared:test            # Common + platform unit tests
+
+# .NET MAUI / Xamarin
+dotnet test                       # All unit / integration test projects
 ```

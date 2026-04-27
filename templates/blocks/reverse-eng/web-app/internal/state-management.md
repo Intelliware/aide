@@ -13,7 +13,7 @@ order-hint: 160
 
 <!-- Describe the state management approach and structure. -->
 
-**Approach:** [Redux / Vuex / Context / Zustand / MobX / other]
+**Approach:** [e.g., Redux / Redux Toolkit (RTK) / Zustand / MobX / Recoil / Jotai / Valtio / React Context + reducers — for React; Pinia / Vuex — for Vue; NgRx / NGXS / Akita — for Angular; Svelte stores / Svelte 5 runes — for Svelte; Solid signals / stores — for Solid; or "no central store: server-state library only" (e.g., TanStack Query / SWR / RTK Query / Apollo / urql)]
 
 **Explanation:** [Why this was chosen, benefits, trade-offs]
 

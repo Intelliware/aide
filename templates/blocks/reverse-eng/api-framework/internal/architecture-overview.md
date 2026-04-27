@@ -11,7 +11,7 @@ order-hint: 110
 
 This block captures the framework's internal architecture from a maintainer's perspective: what subsystems exist, how a request flows from network entry to handler dispatch and back, and what cross-cutting machinery sits alongside that path. Read it before any deeper subsystem block — every later block assumes this skeleton. Verify by tracing a real request through the source: start at the network listener, follow it through routing, middleware, and the handler, and confirm the diagram matches reality.
 
-For a framework like Express, FastAPI, or Spring Boot, the internal view differs sharply from the consumer view. The consumer sees decorators, route handlers, and DI hooks; the maintainer sees the parser, dispatcher, lifecycle manager, plugin registry, and integration with the runtime. This block surfaces that internal anatomy and names the subsystems so subsequent blocks can refer to them precisely.
+For an API framework (e.g., Express, Fastify, NestJS, Koa, Hapi, FastAPI, Flask, Django REST, Spring Boot, ASP.NET Core, Rails, Phoenix, Gin, Echo, Axum, Actix), the internal view differs sharply from the consumer view. The consumer sees decorators / route handlers / DI hooks (under whatever names the framework uses); the maintainer sees the parser, dispatcher, lifecycle manager, plugin registry, and integration with the runtime. This block surfaces that internal anatomy and names the subsystems so subsequent blocks can refer to them precisely. Use the framework's own terminology — if the framework calls them "filters" rather than "middleware", record that.
 
 ### Suggested template content
 

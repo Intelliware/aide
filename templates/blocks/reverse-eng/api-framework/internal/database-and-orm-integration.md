@@ -11,11 +11,11 @@ order-hint: 230
 
 If the framework provides built-in database support or ORM integration, document the integration layer here. Mark optional — many API frameworks intentionally avoid coupling to a database. Cover: connection pool management, transaction propagation, request-scoped sessions, and the ORM hooks (event listeners, query interceptors) that are exposed to plugins or user code.
 
-If the framework merely exposes hooks for a third-party ORM (TypeORM, Prisma, SQLAlchemy, GORM), document the adapter layer and what guarantees the framework adds (e.g., automatic per-request transaction binding, error translation). Verify by tracing one request that performs a write, especially around error handling — does a thrown error roll back automatically, or is it the user's responsibility?
+If the framework merely exposes hooks for a third-party ORM / data-access layer (e.g., TypeORM, Prisma, Sequelize, MikroORM, Drizzle, Knex, Mongoose, SQLAlchemy, Django ORM, Hibernate / JPA, Entity Framework Core, Dapper, GORM, Diesel, Active Record, Ecto, etc.), document the adapter layer and what guarantees the framework adds (e.g., automatic per-request transaction binding, error translation). Verify by tracing one request that performs a write, especially around error handling — does a thrown error roll back automatically, or is it the user's responsibility?
 
 ### Suggested template content
 
-**Integration mode:** {{mode — e.g. "Adapter for TypeORM", "Built-in query builder", "Bring your own"}}
+**Integration mode:** {{mode — e.g. "Adapter for [ORM/data-access library]", "Built-in query builder", "Bring your own"}}
 
 **Connection pool management:**
 

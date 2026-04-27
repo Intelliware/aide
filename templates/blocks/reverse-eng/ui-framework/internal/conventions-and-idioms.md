@@ -15,15 +15,19 @@ back in code review. -->
 
 ### 22.1 Coding Style
 
-- **Language level:** [e.g., "TypeScript strict mode; ES2022 syntax; no decorators in core."]
-- **Modules:** ESM; no default exports for runtime helpers; named exports only.
-- **Formatting:** Prettier (project config); enforced in CI.
-- **Linting:** ESLint with framework-specific rules (cycle detection, internal-import boundaries, sideEffects discipline).
+<!-- Capture the framework's actual rules. Values below are illustrative — different
+ecosystems land on different conventions, so replace each row with what the repo
+enforces, not what's typical elsewhere. -->
+
+- **Language / language level:** [e.g., "TypeScript strict mode, ES2022", "Swift 5.9, strict concurrency", "Kotlin 1.9 with explicit-API mode", "Dart 3.x null-safe", "Rust edition 2021"]
+- **Module system:** [e.g., "ESM only; named exports only", "CommonJS interop allowed at boundaries", "Swift modules", "Kotlin packages", "Dart libraries", "Rust crates with `pub(crate)` internals"]
+- **Formatting:** [e.g., "Prettier", "Biome", "rustfmt", "gofmt", "ktlint", "swift-format", "dart format", "Black + isort"] — enforced in CI.
+- **Linting / static checks:** [e.g., "ESLint with framework-specific rules", "clippy", "detekt", "SwiftLint", "analyzer + custom_lint", "Ruff"] — typically with rules covering cycle detection, internal-import boundaries, side-effect discipline.
 - **Naming:**
-  - Files: `camelCase.ts`.
-  - Types: `PascalCase`.
-  - Constants: `SCREAMING_SNAKE` only for true compile-time constants.
-  - Internal symbols: prefix with `_`.
+  - Files: [convention — e.g., `camelCase.ts`, `snake_case.py`, `PascalCase.swift`, `kebab-case.dart`]
+  - Types / classes: [e.g., `PascalCase`]
+  - Constants: [e.g., `SCREAMING_SNAKE` for compile-time constants only]
+  - Internal symbols: [e.g., `_underscore` prefix, `internal` modifier, `pub(crate)` visibility]
 
 ### 22.2 Performance-First Patterns
 
@@ -40,9 +44,14 @@ back in code review. -->
 
 ### 22.4 Type Patterns
 
-- **Generic constraints:** prefer `extends object` over `extends Record<string, unknown>` for prop types — better inference.
-- **Branded types** for IDs and tokens that must not mix (e.g., `type ScopeId = number & { __brand: 'ScopeId' }`).
-- **Readonly contract types** for any data structure exposed to consumers.
+<!-- Capture the actual type-system idioms the framework relies on. Examples below are
+TypeScript-flavoured because that's the most common UI-framework language, but the
+principles apply with each language's own primitives — replace with the codebase's
+actual idioms. -->
+
+- **Generic / parametric type constraints:** [e.g., TS: `extends object` over `extends Record<string, unknown>` for prop types; Swift: `where T: Hashable`; Kotlin: `<T : Any>`; Rust: trait bounds; Dart: bound type parameters]
+- **Nominal / branded / phantom types** for IDs and tokens that must not mix [e.g., TS: `type ScopeId = number & { __brand: 'ScopeId' }`; Swift: dedicated wrapper struct; Kotlin: value class; Rust: newtype pattern].
+- **Readonly / immutable contract types** for any data structure exposed to consumers [e.g., TS `Readonly<T>`, Swift `let`, Kotlin `val` + immutable collections, Rust shared references, Dart `final`/`const`].
 
 ### 22.5 Error Messages
 
@@ -52,7 +61,7 @@ back in code review. -->
 
 ### 22.6 Documentation Conventions
 
-- Public APIs have a JSDoc with: short description, `@param`s, `@returns`, `@example`, `@since`, `@see` cross-refs.
+- Public APIs have inline doc-comments [e.g., JSDoc / TSDoc, Swift documentation comments, KDoc, Rustdoc, Dartdoc, JavaDoc, Python docstrings] with: short description, parameter descriptions, return value, example, `since`/`available` info, cross-references.
 - Internal helpers comment WHY, not WHAT.
 - Architecture-relevant comments link to the corresponding internals doc section by anchor.
 
@@ -71,10 +80,15 @@ back in code review. -->
 
 ### 22.9 Idioms to Prefer
 
+<!-- Capture the framework's actual house-preferred patterns. Examples below mix
+language-agnostic principles with language-specific tactics — adjust the
+language-specific rows to whatever this codebase actually uses. -->
+
 - **Early returns** over deep nesting.
-- **Iteration with explicit indices** in hot paths over `for…of`.
-- **`is*` predicates** and **`assert*` helpers** in `shared` over inline checks.
-- **`PatchFlags & FLAG`** rather than `(patchFlag >> bit) & 1`.
+- **Iteration with explicit indices** in hot paths over higher-level iterators (when the language allows the optimisation).
+- **Predicate / assertion helpers** [e.g., `is*` / `assert*` functions] in a shared module over inline checks.
+- **Bitmask flag tests** [e.g., `Flags & FLAG` over `(flags >> bit) & 1`] in patch and codegen helpers.
+- [Other framework-specific idiom — record what you find in the codebase]
 
 ### 22.10 Idioms to Avoid
 

@@ -1,6 +1,6 @@
 ---
 name: reverse-engineer-web-app
-description: "Use when the user asks to document a web application, front-end app, SPA, React/Angular/Vue/Svelte app, or any user-facing web application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries — use reverse-engineer-ui-framework instead."
+description: "Use when the user asks to document a web application, front-end app, SPA, MPA, or any user-facing web application repository — regardless of stack (e.g., React, Vue, Angular, Svelte, Solid, Astro, Next.js, Nuxt, SvelteKit, Remix, Rails, Django, Laravel, ASP.NET MVC). Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries — use reverse-engineer-ui-framework instead."
 ---
 
 # Reverse Engineer Web Application Documentation
