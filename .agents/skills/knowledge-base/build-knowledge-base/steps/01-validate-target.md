@@ -40,6 +40,26 @@ proceed otherwise. This step performs no writes.
      will be preserved. (y/N)". On anything other than `y`, stop and
      suggest `update-knowledge-base` instead.
 6. **Verify required inputs.**
+   - **F-006 fail-loud:** if `[[project.repos]]` is empty (or absent),
+     **halt with a copyable error**:
+
+     ```
+     project.toml has no [[project.repos]] entries. The KB build needs
+     each repo enumerated with code/name/path/role.
+
+     For brownfield onboarding, populate the array now:
+       1. Run `customize-framework` (scope = project-team) and add one
+          [[project.repos]] block per source repo, OR
+       2. Re-run `start-project` with multi-repo mode if the project
+          was bootstrapped as single-repo by mistake.
+
+     The build-knowledge-base skill DOES NOT scan source-docs/ as a
+     fallback; the repo list is required.
+     ```
+
+     Stop. Do NOT guess from `<knowledge_base_path>/source-docs/*`
+     subdirectories — the dir-scanning fallback was a silent-failure
+     mode (F-006) and is explicitly disallowed.
    - For each `[[project.repos]]` entry: confirm a directory exists at
      `<knowledge_base_path>/source-docs/<repo.code>/`. If any repo lacks
      RE source docs, error: "Reverse-engineering output for repo
@@ -58,6 +78,8 @@ proceed otherwise. This step performs no writes.
 - `project.toml` parses and contains `[project.paths] knowledge_base_path`.
 - The resolved KB path exists and is either empty (modulo `source-docs/`)
   or the user has confirmed overwrite.
+- **`[[project.repos]]` has at least one entry** (per F-006 — the
+  fail-loud guard above).
 - RE source docs are present for every `[[project.repos]]` entry.
 - A full SHA is captured for every repo.
 
