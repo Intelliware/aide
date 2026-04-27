@@ -1,6 +1,6 @@
 # Knowledge-base stage
 
-Skills for building, navigating, updating, and verifying the global knowledge base. **The KB lives in its own repo** (separate from theframework); these skills operate against the path declared in `project.toml`'s `[project.paths] knowledge_base_path`.
+Skills for building, navigating, updating, and verifying the global knowledge base. **The KB lives in its own repo** (separate from A.I.D.E.); these skills operate against the path declared in `project.toml`'s `[project.paths] knowledge_base_path`.
 
 The KB is markdown-first and traversed by agentic search (`read + grep + glob`) — no vector DB, no embeddings.
 

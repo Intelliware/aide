@@ -7,7 +7,7 @@ description: "Use when the user asks for help choosing or finding a skill, says 
 
 ## Overview
 
-Help router for theframework. Two operating modes:
+Help router for A.I.D.E. Two operating modes:
 
 - **Goal mode** — user states a goal in plain English; navigator probes workspace state, matches against the skill catalog, asks at most two disambiguating questions, and recommends exactly one downstream skill plus the trigger phrase to invoke it.
 - **Catalog mode** — user asks "show me what's here"; navigator renders a stage-grouped table of every skill plus the canonical flow sequences.
@@ -74,7 +74,7 @@ Side effects: **none.** Navigator never writes files or invokes other skills.
 
 Common targets and the trigger phrase the navigator emits to the user:
 
-- `start-project` — "Start a new project with theframework."
+- `start-project` — "Start a new project with A.I.D.E."
 - `analyze-repository` — "Analyze the repo at `<path>` and tell me which RE skill to run."
 - `create-requirements-package` — "Create the requirements package for `<feature>`."
 - `document-quick-change` — "Document a quick change for `<scope>`."

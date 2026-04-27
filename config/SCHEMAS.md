@@ -1,4 +1,4 @@
-# theframework — Configuration & Knowledge-Base Schemas
+# A.I.D.E. — Configuration & Knowledge-Base Schemas
 
 > **Status:** Design draft. The artifacts in this directory are schemas, templates,
 > and `.example` files. They are NOT live runtime configuration. The skeleton task
@@ -36,11 +36,11 @@ Layer 1 surface.
 
 ### 1.1 Concept
 
-theframework borrows BMAD's two-axis configuration model and extends it with a
+A.I.D.E. borrows BMAD's two-axis configuration model and extends it with a
 **suppression marker**. The two axes are:
 
 - **Scope axis:** _global_ (per-installation, applies to everything the user
-  does with theframework on this machine) vs. _project_ (this repository / this
+  does with A.I.D.E. on this machine) vs. _project_ (this repository / this
   product).
 - **Sharing axis:** _team_ (committed, version-controlled) vs. _personal_
   (gitignored, machine-local).
@@ -62,7 +62,7 @@ That gives four base layers, with a fifth slot for per-skill overrides:
 `customizations/<skill>.user.toml`. Higher layers override lower layers via the
 deep-merge rules in § 1.3.
 
-**Key design rule:** every layer is _optional_. theframework runs from
+**Key design rule:** every layer is _optional_. A.I.D.E. runs from
 `framework.toml` alone if the user has done nothing else. Each higher layer
 supplies _refinements_, never required values.
 
@@ -72,10 +72,10 @@ BMAD's split between installer-managed (`config.toml`, `config.user.toml`) and
 custom (`custom/config.toml`, `custom/config.user.toml`) works well in
 practice: it lets the installer regenerate its own files freely without
 clobbering user intent, because user intent lives in a sibling tree the
-installer never touches. theframework keeps that separation but renames the
+installer never touches. A.I.D.E. keeps that separation but renames the
 layers along the scope+sharing axes because:
 
-1. theframework's "project" notion is first-class (greenfield/brownfield/quick-dev
+1. A.I.D.E.'s "project" notion is first-class (greenfield/brownfield/quick-dev
    flows are project-level, KB lives at project granularity), so promoting
    `project.toml` to a peer of `framework.toml` is more honest than nesting it
    under a `[modules.bmm]` section.
@@ -103,7 +103,7 @@ edited, but stable keys must survive renames.
 ### 1.4 The `_suppress: true` marker
 
 BMAD lacks any way to _remove_ a base entry from a higher layer — you can only
-override a value or add an entry. theframework adds:
+override a value or add an entry. A.I.D.E. adds:
 
 ```toml
 [[stages.requirements.required_artifacts]]
@@ -358,7 +358,7 @@ This is the layer where `_suppress: true` is most useful — see
 
 ## 3. KB Schemas
 
-A theframework Knowledge Base is a **separate Git repository** owned by the
+A A.I.D.E. Knowledge Base is a **separate Git repository** owned by the
 team, pointed at via `project.paths.knowledge_base_path`. It is read by every
 flow (greenfield uses it for context, brownfield builds and updates it,
 quick-dev consults the relevant components) and is structured as:

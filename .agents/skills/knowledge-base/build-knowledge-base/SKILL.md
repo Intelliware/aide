@@ -16,7 +16,7 @@ This skill replaces and extends `reverse-engineering/phases/build-knowledge-repo
 
 ## Overview
 
-The KB lives in **its own repo** (separate from theframework). Its location is
+The KB lives in **its own repo** (separate from A.I.D.E.). Its location is
 declared by `project.toml`'s `[project.paths] knowledge_base_path`, typically
 `"../my-project-kb"` for a sibling-repo layout. This skill is the canonical
 way to populate that path on day one.

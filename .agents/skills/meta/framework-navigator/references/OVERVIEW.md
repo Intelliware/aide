@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The framework-navigator is theframework's help router. It listens for vague,
+The framework-navigator is A.I.D.E.'s help router. It listens for vague,
 goal-shaped, or "I'm lost" utterances, probes the workspace to see what state
 the project is in, and emits a single downstream-skill recommendation plus the
 exact trigger phrase to invoke that skill. It is the safe default whenever the
@@ -39,7 +39,7 @@ the work itself — it points and steps aside.
   elicitation answers) — route to `customize-framework`.
 - The user is bootstrapping a brand-new project — `start-project` is the entry
   point; the navigator may recommend it but should not initialize anything.
-- The user is asking a generic coding question unrelated to theframework.
+- The user is asking a generic coding question unrelated to A.I.D.E.
 
 ## Position in workflow
 

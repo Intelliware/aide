@@ -5,7 +5,7 @@
 | Name | Required? | Source | Example |
 |---|---|---|---|
 | `project_root` | yes | inferred from `{cwd}` at invocation | `/Users/mike/work/acme-checkout` |
-| `framework_root` | yes (when scope = framework-global) | from environment / installer | `/opt/theframework` |
+| `framework_root` | yes (when scope = framework-global) | from environment / installer | `/opt/A.I.D.E.` |
 | `scope` | yes | user input — one of `framework-global`, `project-team`, `project-personal`, `skill-specific` | `skill-specific` |
 | `is_personal` | yes when scope = skill-specific | user input — boolean. `true` → write `<skill>.user.toml`; `false` → write `<skill>.toml` | `true` |
 | `target_skill` | yes when scope = skill-specific | user input — kebab-case, must exist in catalog | `create-requirements-package` |

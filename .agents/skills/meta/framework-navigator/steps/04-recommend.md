@@ -78,7 +78,7 @@ Examples:
 
 | Skill | Recommended trigger phrase |
 |---|---|
-| `start-project` | "Start a new project with theframework." |
+| `start-project` | "Start a new project with A.I.D.E." |
 | `analyze-repository` | "Analyze the repo at `<path>` and tell me which RE skill to use." |
 | `reverse-engineer-api` | "Reverse-engineer the API repository at `<path>`." |
 | `build-knowledge-base` | "Build the knowledge base from the RE outputs." |

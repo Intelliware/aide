@@ -1,4 +1,4 @@
-# theframework — Skills Test Plan
+# A.I.D.E. — Skills Test Plan
 
 **Owner:** mike.moerman@electricmind.com
 **Authored:** 2026-04-26
@@ -22,7 +22,7 @@
 
 | Item | Value |
 |---|---|
-| Framework repo | `~/Dev/theframework` (this repo, `main` branch) |
+| Framework repo | `~/Dev/A.I.D.E.` (this repo, `main` branch) |
 | Test sandbox root | `~/Dev/framework-tests/` (created during Phase A) |
 | Greenfield sandbox project | `~/Dev/framework-tests/recipes-app/` |
 | Knowledge-base repo | `~/Dev/framework-tests/recipes-kb/` (sibling repo, separate from the sandbox app) |

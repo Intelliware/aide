@@ -1,19 +1,19 @@
 ---
 name: start-project
-description: "Use when the user says \"start a new project\", \"set up theframework\", \"bootstrap the project\", \"initialize the framework\", \"start the framework\", \"begin a new product\", \"begin a brownfield analysis\", \"start a quick fix\", or whenever the user is invoking theframework for the first time on a repository (or wants to re-bootstrap an existing one). Single entry point that elicits flow choice, captures project super-context, writes project.toml (and optionally project.user.toml), and hands off to the first skill of the chosen flow."
+description: "Use when the user says \"start a new project\", \"set up A.I.D.E.\", \"bootstrap the project\", \"initialize the framework\", \"start the framework\", \"begin a new product\", \"begin a brownfield analysis\", \"start a quick fix\", or whenever the user is invoking A.I.D.E. for the first time on a repository (or wants to re-bootstrap an existing one). Single entry point that elicits flow choice, captures project super-context, writes project.toml (and optionally project.user.toml), and hands off to the first skill of the chosen flow."
 ---
 
 # Start Project
 
 ## Overview
 
-Single entry point for theframework. Detects whether a project is already bootstrapped, elicits the flow (greenfield / brownfield / quick-dev), captures the project's super-context (identity, paths, repos, glossary, elicitation answers), writes the canonical `project.toml` (committed) and optionally `project.user.toml` (gitignored), then hands off by name to the first skill of the chosen flow.
+Single entry point for A.I.D.E. Detects whether a project is already bootstrapped, elicits the flow (greenfield / brownfield / quick-dev), captures the project's super-context (identity, paths, repos, glossary, elicitation answers), writes the canonical `project.toml` (committed) and optionally `project.user.toml` (gitignored), then hands off by name to the first skill of the chosen flow.
 
 This is the only skill that creates `project.toml` from scratch — all other skills assume it already exists. Once bootstrapped, the project never re-runs this skill except to extend a multi-repo enumeration or change the default flow; for narrower edits the user invokes `customize-framework` instead.
 
 ## When to use
 
-- The user is invoking theframework for the first time on a repository
+- The user is invoking A.I.D.E. for the first time on a repository
 - The user explicitly asks to "start", "bootstrap", "initialize", or "set up" the framework
 - An existing `project.toml` needs to be re-baselined (e.g. major repo restructure, new flow default)
 - The user wants to add a new repo to an existing multi-repo `[[project.repos]]` enumeration

@@ -1,6 +1,6 @@
-# theframework — AI orientation
+# A.I.D.E. (AI Integrated Delivery Enablement) — AI orientation
 
-This folder is **theframework**, a skills-based SDLC methodology framework conforming to [agentskills.io](https://agentskills.io). When this folder is open in a multi-root workspace, the AI agent has access to all framework skills via the host's default `.agents/skills/` discovery root — no configuration required.
+This folder is **A.I.D.E.**, a skills-based SDLC methodology framework conforming to [agentskills.io](https://agentskills.io). When this folder is open in a multi-root workspace, the AI agent has access to all framework skills via the host's default `.agents/skills/` discovery root — no configuration required.
 
 ## Using the framework
 
@@ -34,13 +34,13 @@ Multi-repo solutions may also include a knowledge-base repo as a separate siblin
 - `/detect-knowledge-base-drift` — flag source repos that have changed without KB updates
 - `/verify-knowledge-base-coverage` — ensure every public artifact maps to ≥1 KB component
 
-The KB lives in its own repo, separate from theframework and from any application repo.
+The KB lives in its own repo, separate from A.I.D.E. and from any application repo.
 
 ## What this folder is NOT
 
-This folder is **theframework**, not the user's project. Do **not** write user code, project artifacts, or implementation deliverables into `.agents/skills/`, `templates/`, `config/`, `scripts/`, or `references/` here. Those locations are framework-internal. The user's work product lives in their own project's workspace folder.
+This folder is **A.I.D.E.**, not the user's project. Do **not** write user code, project artifacts, or implementation deliverables into `.agents/skills/`, `templates/`, `config/`, `scripts/`, or `references/` here. Those locations are framework-internal. The user's work product lives in their own project's workspace folder.
 
-The single exception: if the user explicitly says they're working on theframework itself — adding a new skill, fixing a script, updating a template — then treat this folder as the project. Otherwise, leave it alone.
+The single exception: if the user explicitly says they're working on A.I.D.E. itself — adding a new skill, fixing a script, updating a template — then treat this folder as the project. Otherwise, leave it alone.
 
 ## Where to find more
 

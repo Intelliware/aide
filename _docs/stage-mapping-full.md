@@ -1,11 +1,11 @@
-# AI SDLC Stage Map — theframework (new)
+# AI SDLC Stage Map — A.I.D.E. (new)
 
-This reference defines the navigation language for theframework's unified, skills-based SDLC. It supersedes `ai-sdlc-stage-map-old.md`. Vocabulary moved from "phase" (overloaded) to **stage** (SDLC grouping) and **increment** (implementation chunk); "package" remains the term for stage outputs but is no longer a navigation level — it is an output **composed** from blocks via a YAML composition.
+This reference defines the navigation language for A.I.D.E.'s unified, skills-based SDLC. It supersedes `ai-sdlc-stage-map-old.md`. Vocabulary moved from "phase" (overloaded) to **stage** (SDLC grouping) and **increment** (implementation chunk); "package" remains the term for stage outputs but is no longer a navigation level — it is an output **composed** from blocks via a YAML composition.
 
 ## Naming Model
 
 ```text
-theframework
+A.I.D.E.
 ├── Flow                                    (greenfield / brownfield / quick-dev — declared in project.toml)
 │   └── Stage                               (requirements / design / planning / execution / reverse-engineering / quick-dev / knowledge-base / meta)
 │       ├── Skill                           (independently invocable; one trigger phrase per skill)
@@ -19,7 +19,7 @@ theframework
 
 ## Flow Map
 
-theframework supports three flows. Stages adapt via composition selection rather than parallel skill trees.
+A.I.D.E. supports three flows. Stages adapt via composition selection rather than parallel skill trees.
 
 ```text
 Flows
@@ -37,7 +37,7 @@ Flows
 ## Full Stage Map
 
 ```text
-theframework Stage Map
+A.I.D.E. Stage Map
 │
 ├── Stage: Reverse-Engineering              (.agents/skills/reverse-engineering/)
 │   │  Used in: brownfield flow, before requirements

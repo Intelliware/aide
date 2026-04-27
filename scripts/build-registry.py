@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build-registry.py — Generate the skill registry artifacts for theframework.
+build-registry.py — Generate the skill registry artifacts for A.I.D.E.
 
 Purpose
 -------

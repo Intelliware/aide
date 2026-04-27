@@ -1,4 +1,4 @@
-# theframework — Skills Test Results
+# A.I.D.E. — Skills Test Results
 
 Companion to `_docs/skills-test-plan.md`. Logs Fail / Partial verdicts and small improvements surfaced during the test pass.
 
@@ -293,7 +293,7 @@ Two reasons:
 
 1. **`create-pr` step 6 is currently undefined behaviour.** The skill's text gates on a condition the framework can't actually evaluate. Either the gate becomes determinate or the step gets removed; "silently skip" is the worst outcome because operators don't know whether they should have a changelog and aren't told.
 
-2. **Schema reuse showcases the framework's principle.** The block-based architecture exists precisely so we can reapply one canonical block at multiple scopes. Adding a project-level CHANGELOG via schema + composition + skill wiring (no new block) is exactly the pattern theframework wants to demonstrate.
+2. **Schema reuse showcases the framework's principle.** The block-based architecture exists precisely so we can reapply one canonical block at multiple scopes. Adding a project-level CHANGELOG via schema + composition + skill wiring (no new block) is exactly the pattern A.I.D.E. wants to demonstrate.
 
 ### Why not fix now
 Out of scope for the test pass — implementing F-007 means a small composition + schema additions + start-project elicitation + create-pr step 6 wiring. ~30-60 minutes of focused work. Captured here for the framework follow-up alongside F-001, F-003, and F-006.

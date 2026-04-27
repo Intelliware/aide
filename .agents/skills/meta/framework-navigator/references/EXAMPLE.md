@@ -83,7 +83,7 @@ catalog. But the state probe lets the navigator add a contextual footer.
 >
 > | Stage | Skill | Description | When to use this |
 > |---|---|---|---|
-> | meta | `start-project` | Single entry point that elicits flow choice, captures project super-context, writes `project.toml`, and hands off to the first skill of the chosen flow. | First time you invoke theframework on a repository. |
+> | meta | `start-project` | Single entry point that elicits flow choice, captures project super-context, writes `project.toml`, and hands off to the first skill of the chosen flow. | First time you invoke A.I.D.E. on a repository. |
 > | meta | `framework-navigator` | This skill — routes to the right skill based on workspace state and goal description. | When you don't know which skill to run. |
 > | meta | `customize-framework` | Walks the user through writing overrides without hand-TOML editing. | When you want to change a default, suppress an artifact, or pin an elicitation answer. |
 > | meta | `track-change` | Logs the change in CHANGE-TRACKER.md with Parts Affected and verification status. | After finishing any tracked change. |

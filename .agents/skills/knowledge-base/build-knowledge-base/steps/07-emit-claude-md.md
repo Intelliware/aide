@@ -51,7 +51,7 @@ and tells the agent how to traverse the rest.
    repo."
 
 7. **Schema reference.** "Component frontmatter schema:
-   `config/SCHEMAS.md` § 3.2 in theframework. graph.json schema: § 3.3.
+   `config/SCHEMAS.md` § 3.2 in A.I.D.E. graph.json schema: § 3.3.
    Edits MUST conform; `verify-knowledge-base-coverage` will reject
    non-conformant changes."
 

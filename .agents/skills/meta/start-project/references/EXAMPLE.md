@@ -2,7 +2,7 @@
 
 ## Trigger phrase
 
-> "Set up theframework for our checkout platform. We have three repos —
+> "Set up A.I.D.E. for our checkout platform. We have three repos —
 > orders, billing, web — and a sibling KB repo. We're brownfield."
 
 ## What the skill did

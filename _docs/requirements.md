@@ -1,4 +1,4 @@
-# theframework — Requirements
+# A.I.D.E. — Requirements
 
 This document captures the requirements expressed during the unification design conversation (2026-04-25). It records *what* the framework must do and *why*, separate from *how* it was implemented (covered in `_archive/skill-disposition.md`, `config/SCHEMAS.md`, and `README.md`).
 
@@ -80,7 +80,7 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
   - **FR9.1.2.** Is sufficiently decomposed so coding agents do **not** load the whole KB into context.
   - **FR9.1.3.** Includes a guiding architecture / index document mapping what each component does, so an agent can selectively load only components pertinent to a feature.
   - **FR9.1.4.** Is maintained over time — each shipped feature updates the KB with what changed.
-- **FR9.2.** The KB shall live in **its own repository**, separate from theframework.
+- **FR9.2.** The KB shall live in **its own repository**, separate from A.I.D.E.
 - **FR9.3.** Multi-repo solutions shall be supported by opening multiple repos in one VSCode workspace, or cloning under a common parent directory.
 - **FR9.4.** The framework shall provide skills to:
   - **Build** the KB from RE outputs
@@ -98,7 +98,7 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
 
 ### FR12. Framework-level always-on orientation
 - **FR12.1.** Theframework shall ship an `AGENTS.md` file at its repo root containing AI-agent orientation: skill discovery path, slash-invocation convention, framework vocabulary (stage / increment / package), the `project.toml` and knowledge-base conventions (phrased folder-agnostically because the framework cannot know sibling folder names), and a guard rail clarifying that the framework's own folder is not the user's project.
-- **FR12.2.** The shipped `AGENTS.md` shall be auto-attached to every chat by both supported hosts (Copilot and Cursor read `AGENTS.md` universally) when theframework is opened as a workspace folder. No project-side configuration shall be required for framework orientation.
+- **FR12.2.** The shipped `AGENTS.md` shall be auto-attached to every chat by both supported hosts (Copilot and Cursor read `AGENTS.md` universally) when A.I.D.E. is opened as a workspace folder. No project-side configuration shall be required for framework orientation.
 - **FR12.3.** Project-side always-on context (the user's own `AGENTS.md`, `.github/copilot-instructions.md`, `.github/instructions/*.instructions.md`, or `.cursor/rules/*.mdc`) shall remain **optional** and scoped to **project-specific** guidance only — codebase conventions, path-scoped rules, etc. The framework shall not require users to copy framework-orientation content into their project.
 - **FR12.4.** The shipped `AGENTS.md` shall be tight (orientation, not documentation) so its always-attached cost is small even in chats unrelated to active framework use.
 
@@ -134,9 +134,9 @@ with a **global, multi-repository knowledge base** that survives feature evoluti
   - Claude Code support is **parked** as of 2026-04-26 — the skills remain spec-conformant, so future re-enablement is a documentation-only change, but no current installation guidance targets Claude Code.
 - **NFR5.2.** No host-specific transformation of `SKILL.md`, `references/`, `steps/`, `scripts/`, or `assets/` shall be required at install time. Compositions (`templates/compositions/*.yaml`) and `project.toml` are framework-internal — skills consume them directly and the host is not asked to parse them.
 - **NFR5.3.** The framework shall ship per-host installation guidance in `README.md` covering:
-  - Skill discovery — both supported hosts list `.agents/skills/` among their default `chat.agentSkillsLocations` (Copilot) / fixed discovery roots (Cursor), so opening theframework as a workspace folder alongside the target project is sufficient; no settings.json edits, symlinks, or overlays.
-  - Framework orientation — automatic via theframework's shipped `AGENTS.md` (per FR12); no project-side wiring required.
-  - Optional project-side guidance: `.github/copilot-instructions.md` / project-root `AGENTS.md` / `.github/instructions/*.instructions.md` for Copilot; project-root `AGENTS.md` / `.cursor/rules/*.mdc` (with `alwaysApply: true` / `globs:`) for Cursor — scoped to project-specific rules; compounds with theframework's `AGENTS.md`.
+  - Skill discovery — both supported hosts list `.agents/skills/` among their default `chat.agentSkillsLocations` (Copilot) / fixed discovery roots (Cursor), so opening A.I.D.E. as a workspace folder alongside the target project is sufficient; no settings.json edits, symlinks, or overlays.
+  - Framework orientation — automatic via A.I.D.E.'s shipped `AGENTS.md` (per FR12); no project-side wiring required.
+  - Optional project-side guidance: `.github/copilot-instructions.md` / project-root `AGENTS.md` / `.github/instructions/*.instructions.md` for Copilot; project-root `AGENTS.md` / `.cursor/rules/*.mdc` (with `alwaysApply: true` / `globs:`) for Cursor — scoped to project-specific rules; compounds with A.I.D.E.'s `AGENTS.md`.
 - **NFR5.4.** Adding support for a new spec-conformant host shall require only README guidance — no changes to `.agents/skills/`, `references/`, `templates/`, `scripts/`, or `config/` that are specific to one host.
 
 ---
@@ -176,7 +176,7 @@ These are answers to design questions raised during the conversation, captured a
 4. **Skill folder grouping**: by stage (`.agents/skills/requirements/`, `.agents/skills/design/`, …), not by flow.
 5. **RE skill count**: keep 7 separate domain skills + a thin `analyze-repository` dispatcher (instead of one skill that elicits domain).
 6. **Vocabulary rename**: phase → stage (outer); phase → increment (inner implementation chunk); package retained for artifacts.
-7. **KB location**: lives in its own repo, not inside theframework. Multi-repo workspaces or shared parent directory.
+7. **KB location**: lives in its own repo, not inside A.I.D.E. Multi-repo workspaces or shared parent directory.
 8. **KB retrieval**: markdown + agentic search; no vector DB.
 9. **Help router upgrade**: keep the existing `framework-navigator` name; upgrade to two-mode (goal + catalog) help router with state probe.
 10. **Self-documenting standard**: 3-file `references/` minimum (OVERVIEW + INPUTS-OUTPUTS + EXAMPLE) for every skill.
@@ -187,11 +187,11 @@ These are answers to design questions raised during the conversation, captured a
 
 These supersede or extend the 2026-04-25 decisions above:
 
-11. **Skill location**: skills relocated from `skills/` to `.agents/skills/`. Rationale: `.agents/skills/` is a default discovery root in both currently-supported hosts (VSCode + GitHub Copilot per `chat.agentSkillsLocations` defaults; Cursor per its built-in roots), so a multi-root workspace with theframework as a sibling folder gives zero-configuration skill discovery — no `chat.agentSkillsLocations` edits, no symlinks (Windows-fragile), and no overlay/install step.
-12. **Repo deployment model**: theframework remains its own repository, opened alongside target project repos in a single multi-root VSCode / Cursor workspace. The framework is *not* installed into target projects; templates/, config/, scripts/, and references/ stay at theframework's repo root and are accessed by skills as part of the same workspace.
+11. **Skill location**: skills relocated from `skills/` to `.agents/skills/`. Rationale: `.agents/skills/` is a default discovery root in both currently-supported hosts (VSCode + GitHub Copilot per `chat.agentSkillsLocations` defaults; Cursor per its built-in roots), so a multi-root workspace with A.I.D.E. as a sibling folder gives zero-configuration skill discovery — no `chat.agentSkillsLocations` edits, no symlinks (Windows-fragile), and no overlay/install step.
+12. **Repo deployment model**: A.I.D.E. remains its own repository, opened alongside target project repos in a single multi-root VSCode / Cursor workspace. The framework is *not* installed into target projects; templates/, config/, scripts/, and references/ stay at A.I.D.E.'s repo root and are accessed by skills as part of the same workspace.
 13. **Claude Code support parked (2026-04-26)**: native installation guidance for Claude Code is removed from `README.md`. Skills remain agentskills.io-conformant, so re-enabling Claude Code support in future is a documentation-only change.
 14. **Internal documentation directory**: framework-internal documentation (this `requirements.md`) lives under `_docs/`, following the existing `_<name>/` underscore convention used by `_archive/` and `_bmad/` to signal "not part of any shippable artifact."
-15. **Framework-shipped AGENTS.md**: theframework ships its own `AGENTS.md` at the repo root (FR12), auto-attached by both Copilot and Cursor when theframework is opened as a workspace folder. Rationale: zero-setup orientation, stays in sync with framework versions via `git pull`, eliminates the need for users to copy framework-orientation content into every project. Project-side always-on context becomes optional and scoped to project-specific rules only.
+15. **Framework-shipped AGENTS.md**: A.I.D.E. ships its own `AGENTS.md` at the repo root (FR12), auto-attached by both Copilot and Cursor when A.I.D.E. is opened as a workspace folder. Rationale: zero-setup orientation, stays in sync with framework versions via `git pull`, eliminates the need for users to copy framework-orientation content into every project. Project-side always-on context becomes optional and scoped to project-specific rules only.
 
 ## Status (as of 2026-04-25)
 

@@ -26,7 +26,7 @@ whichever comes first).
 
 | Finding | Implication |
 |---|---|
-| File missing | Not yet a theframework project. **Recommend `start-project`** before anything else. |
+| File missing | Not yet a A.I.D.E. project. **Recommend `start-project`** before anything else. |
 | File present, malformed | Recommend `customize-framework` or manual repair; do not guess fields. |
 | File present, valid | Continue with subsequent checks; cache `[project].default_flow`, `[project.paths]`, `knowledge_base_path`, `[project.elicitation]`. |
 

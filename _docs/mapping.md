@@ -1,4 +1,4 @@
-# theframework — Archive → Current Mapping
+# A.I.D.E. — Archive → Current Mapping
 *Drafted 2026-04-26.*
 
 This document traces how every artifact in `_archive/` was converted into the current skills-based, agentskills.io-compliant SDLC framework. It is a *what-went-where* index — the *why* lives in `_docs/requirements.md` (FR1–FR12, NFR1–NFR5) and the per-skill *how* lives in `_archive/skill-disposition.md`.

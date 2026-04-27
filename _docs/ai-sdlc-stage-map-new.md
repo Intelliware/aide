@@ -1,11 +1,11 @@
-# AI SDLC Stage Map — theframework (new)
+# AI SDLC Stage Map — A.I.D.E. (new)
 
-This reference shows the **on-disk output structure** produced by theframework's stages. It is the direct successor to `ai-sdlc-stage-map-old.md` — same shape (a tree of artifacts), updated for the new vocabulary and the new flows. Skill-level mechanics (which skill produces what, which steps exist, which blocks compose which package) live in `stage-mapping-full.md`.
+This reference shows the **on-disk output structure** produced by A.I.D.E.'s stages. It is the direct successor to `ai-sdlc-stage-map-old.md` — same shape (a tree of artifacts), updated for the new vocabulary and the new flows. Skill-level mechanics (which skill produces what, which steps exist, which blocks compose which package) live in `stage-mapping-full.md`.
 
 ## Naming Model
 
 ```text
-theframework Output
+A.I.D.E. Output
 └── Stage
     └── Package                             (stage output artifact, e.g. requirements-package, design-package, implementation-package)
         ├── Section                         (single file or section inside the assembled package — used by requirements, design, quick-dev)
@@ -31,7 +31,7 @@ Vocabulary parallels to the old map:
 ## Full Stage Map
 
 ```text
-theframework Output Stage Map
+A.I.D.E. Output Stage Map
 │
 ├── Stage 1: Reverse-Engineering           (brownfield only — runs before requirements)
 │   └── Per-repo Output Bundle             (one bundle per repo, per analyze-repository classification)
@@ -81,7 +81,7 @@ theframework Output Stage Map
 │                                            templates/blocks/reverse-eng/<domain>/consumer/)
 │
 ├── Stage 2: Knowledge-Base                (brownfield only — runs after Reverse-Engineering)
-│   └── KB Instance                        (one per project; lives in its OWN repo, not inside theframework)
+│   └── KB Instance                        (one per project; lives in its OWN repo, not inside A.I.D.E.)
 │       <project.paths.knowledge_base_path>/   (typically "../my-project-kb")
 │       ├── Section: ARCHITECTURE.md       (root index — capability map; selective load entry point)
 │       ├── Section: CLAUDE.md             (agent navigation instructions)

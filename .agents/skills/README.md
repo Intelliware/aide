@@ -1,6 +1,6 @@
 # Skills
 
-Each capability in theframework is a **skill** following the [agentskills.io](https://agentskills.io) standard: a directory containing a `SKILL.md` (with `name` + `description` frontmatter) plus supporting files.
+Each capability in A.I.D.E. is a **skill** following the [agentskills.io](https://agentskills.io) standard: a directory containing a `SKILL.md` (with `name` + `description` frontmatter) plus supporting files.
 
 ## Stages
 

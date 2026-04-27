@@ -1,6 +1,6 @@
 # AI Working Principles
 
-The framework-wide principles every AI-driven skill in theframework
+The framework-wide principles every AI-driven skill in A.I.D.E.
 follows. These are not aspirational values — they are operational
 constraints baked into how each skill is authored, validated, and run.
 

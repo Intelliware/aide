@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`start-project` is the single front door to theframework. Before any stage
+`start-project` is the single front door to A.I.D.E. Before any stage
 skill runs, the project needs a `project.toml` — that's the
 super-context every subsequent skill reads to know who the user is, what
 the product is, where outputs go, and which flow applies. This skill is

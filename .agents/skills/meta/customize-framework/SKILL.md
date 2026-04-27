@@ -7,7 +7,7 @@ description: "Use when the user says \"customize the framework\", \"override a s
 
 ## Overview
 
-Authors and updates customization overrides for theframework's four-layer config model without making the user touch TOML directly. Covers all four override layers: `framework.user.toml` (rare, framework-global personal), `project.toml` (most common, project-team), `project.user.toml` (project-personal), and `customizations/<skill>.toml` / `.user.toml` (per-skill team or personal).
+Authors and updates customization overrides for A.I.D.E.'s four-layer config model without making the user touch TOML directly. Covers all four override layers: `framework.user.toml` (rare, framework-global personal), `project.toml` (most common, project-team), `project.user.toml` (project-personal), and `customizations/<skill>.toml` / `.user.toml` (per-skill team or personal).
 
 Implements the merge-aware operations that `config/SCHEMAS.md` § 1.3-1.4 requires: scalar override, recursive table merge, array-of-tables merge by `code`/`id`, plain-array replacement, and `_suppress: true` for dropping a base entry. Every authored file gets a managed-header comment and inline annotations explaining why each override exists, so reviewers see the intent at a glance.
 

@@ -1,4 +1,6 @@
-# theframework
+# A.I.D.E. (AI Integrated Delivery Enablement)
+
+**Version:** 1.0.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -22,52 +24,52 @@ If unsure where to start, invoke `framework-navigator` — it routes you based o
 
 ## Running in VSCode + GitHub Copilot
 
-GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specification natively on 2025-12-18, and theframework's skills conform to that spec. No transformation, transpile, or build step is required — Copilot reads `SKILL.md` files directly. Skills are stored under theframework's `.agents/skills/` directory, which is one of Copilot's default discovery roots, so **no settings.json edits, symlinks, or overlays are needed**.
+GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specification natively on 2025-12-18, and A.I.D.E.'s skills conform to that spec. No transformation, transpile, or build step is required — Copilot reads `SKILL.md` files directly. Skills are stored under A.I.D.E.'s `.agents/skills/` directory, which is one of Copilot's default discovery roots, so **no settings.json edits, symlinks, or overlays are needed**.
 
 ### Prerequisites
 
 - VSCode with the GitHub Copilot extension installed and signed in
 - Copilot in **agent mode** (Chat view → switch from "Ask" to "Agent"). Agent mode is required for skills that read multiple files or run scripts.
 
-### Step 1 — open theframework alongside your project
+### Step 1 — open A.I.D.E. alongside your project
 
-Open this repo as a folder in the same multi-root workspace as your target project repo(s). Save the workspace as `<project>.code-workspace` (File → Save Workspace As…) so the layout is reproducible. Copilot iterates every workspace folder root and looks for skills under each root's default discovery directories — `.agents/skills/` is one of those defaults, so theframework's skills are picked up automatically.
+Open this repo as a folder in the same multi-root workspace as your target project repo(s). Save the workspace as `<project>.code-workspace` (File → Save Workspace As…) so the layout is reproducible. Copilot iterates every workspace folder root and looks for skills under each root's default discovery directories — `.agents/skills/` is one of those defaults, so A.I.D.E.'s skills are picked up automatically.
 
 To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 32 framework skills should appear in the picker with their descriptions.
 
 ### Step 2 — framework orientation (automatic)
 
-Theframework ships an `AGENTS.md` at its repo root. Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having theframework open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that theframework's folder is the framework, not the user's project. **No project-side wiring required.**
+Theframework ships an `AGENTS.md` at its repo root. Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
 
 Project-side guidance is **optional** and scoped to project-specific rules — codebase conventions, path-scoped style preferences, etc. Add any of:
 
 - `.github/copilot-instructions.md` or `AGENTS.md` at your project's root (always-on)
 - `.github/instructions/<name>.instructions.md` with an `applyTo:` glob (path-scoped, e.g. "in `frontend/`, prefer functional components")
 
-Project-side files compound with theframework's `AGENTS.md` — both attach in parallel, no conflict.
+Project-side files compound with A.I.D.E.'s `AGENTS.md` — both attach in parallel, no conflict.
 
 ### Compositions and Copilot
 
-Copilot has no native equivalent of theframework's YAML compositions. Skills that consume compositions still work — the skill itself reads the YAML from disk. If you want a composition exposed as a one-shot Copilot agent (e.g. "run the whole greenfield-requirements-package flow"), wrap it as a custom agent at `.github/agents/<flow-name>.agent.md`. This is optional and not required for any skill to function.
+Copilot has no native equivalent of A.I.D.E.'s YAML compositions. Skills that consume compositions still work — the skill itself reads the YAML from disk. If you want a composition exposed as a one-shot Copilot agent (e.g. "run the whole greenfield-requirements-package flow"), wrap it as a custom agent at `.github/agents/<flow-name>.agent.md`. This is optional and not required for any skill to function.
 
 ## Running in Cursor IDE
 
-Cursor adopted native [agentskills.io](https://agentskills.io) support around v2.3.x — the same `SKILL.md` format used by Copilot is read directly. Skills are stored under theframework's `.agents/skills/` directory, which is one of Cursor's built-in discovery roots, so **no settings, symlinks, or overlays are needed**.
+Cursor adopted native [agentskills.io](https://agentskills.io) support around v2.3.x — the same `SKILL.md` format used by Copilot is read directly. Skills are stored under A.I.D.E.'s `.agents/skills/` directory, which is one of Cursor's built-in discovery roots, so **no settings, symlinks, or overlays are needed**.
 
 ### Prerequisites
 
 - Cursor IDE v2.3.x or later (skills support is bundled; no separate install).
 - Agent panel open and a model selected. Cursor's Agent reads skills automatically; slash invocation works in the Agent chat.
 
-### Step 1 — open theframework alongside your project
+### Step 1 — open A.I.D.E. alongside your project
 
-Open this repo as a folder in the same multi-root Cursor workspace as your target project repo(s). Cursor scans `.agents/skills/` (and `.cursor/skills/`) under every workspace folder root, so theframework's skills are picked up automatically.
+Open this repo as a folder in the same multi-root Cursor workspace as your target project repo(s). Cursor scans `.agents/skills/` (and `.cursor/skills/`) under every workspace folder root, so A.I.D.E.'s skills are picked up automatically.
 
-To verify: open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the theframework folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
+To verify: open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
 ### Step 2 — framework orientation (automatic)
 
-Theframework ships an `AGENTS.md` at its repo root. Cursor reads `AGENTS.md` from every workspace folder root, so simply having theframework open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that theframework's folder is the framework, not the user's project. **No project-side wiring required.**
+Theframework ships an `AGENTS.md` at its repo root. Cursor reads `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
 
 Project-side guidance is **optional** and scoped to project-specific rules. Add any of:
 
@@ -75,7 +77,7 @@ Project-side guidance is **optional** and scoped to project-specific rules. Add 
 - `.cursor/rules/<name>.mdc` with `alwaysApply: true` (always-on, project-scoped)
 - `.cursor/rules/<name>.mdc` with a `globs:` field (path-scoped, e.g. "in `frontend/`, prefer functional components")
 
-Project-side files compound with theframework's `AGENTS.md` — both attach in parallel, no conflict. Keep individual `.mdc` rule files under ~500 lines per Cursor's guidance.
+Project-side files compound with A.I.D.E.'s `AGENTS.md` — both attach in parallel, no conflict. Keep individual `.mdc` rule files under ~500 lines per Cursor's guidance.
 
 ### Step 3 — slash command shortcuts (optional)
 
@@ -91,7 +93,7 @@ Each file's body is a brief prompt that names the corresponding framework skill 
 
 ### Compositions and Cursor
 
-Like Copilot, Cursor has no native runtime for theframework's YAML compositions. Skills consume compositions directly from disk and run unchanged. There is no portable Cursor equivalent of Copilot's `.agent.md` files (Cursor's "custom agent modes" are UI-configured and stored in Cursor's local settings DB, not in a portable file). If you want a composition surfaced as a single shortcut, use a Step 3 slash command.
+Like Copilot, Cursor has no native runtime for A.I.D.E.'s YAML compositions. Skills consume compositions directly from disk and run unchanged. There is no portable Cursor equivalent of Copilot's `.agent.md` files (Cursor's "custom agent modes" are UI-configured and stored in Cursor's local settings DB, not in a portable file). If you want a composition surfaced as a single shortcut, use a Step 3 slash command.
 
 ### Known limitations
 
@@ -113,14 +115,14 @@ Like Copilot, Cursor has no native runtime for theframework's YAML compositions.
 | Composition manifests (YAML) | (skill-driven) | (skill-driven) |
 | Project super-context (`project.toml`) | (skill-driven) | (skill-driven) |
 
-The skills themselves are identical across both hosts — they live under `.agents/skills/` inside this repo and are auto-discovered when theframework is opened as a workspace folder. Claude Code is currently not supported.
+The skills themselves are identical across both hosts — they live under `.agents/skills/` inside this repo and are auto-discovered when A.I.D.E. is opened as a workspace folder. Claude Code is currently not supported.
 
 ## Top-level layout
 
 | Path | Purpose |
 |---|---|
 | `config/` | Schemas + example files for the four-layer config (framework + project + user overrides + per-skill customizations). See `config/SCHEMAS.md`. |
-| `.agents/skills/` | All capabilities, grouped by stage. Each skill is `SKILL.md` + `references/` + optional `steps/`. Sits at `.agents/skills/` so both Copilot and Cursor pick it up via their default discovery roots when theframework is opened as a workspace folder. |
+| `.agents/skills/` | All capabilities, grouped by stage. Each skill is `SKILL.md` + `references/` + optional `steps/`. Sits at `.agents/skills/` so both Copilot and Cursor pick it up via their default discovery roots when A.I.D.E. is opened as a workspace folder. |
 | `.agents/skills/_registry/` | Generated `skills.csv` + `skills.json` from frontmatter; hand-authored `workflow-graph.yaml` |
 | `templates/blocks/` | Reusable section blocks, grouped by stage |
 | `templates/compositions/` | YAML manifests assembling blocks into artifacts |
@@ -128,7 +130,7 @@ The skills themselves are identical across both hosts — they live under `.agen
 | `scripts/` | Build tools: `build-registry.py`, `validate.py` |
 | `_docs/` | Framework-internal documentation (e.g., `requirements.md`); not part of any shippable artifact. |
 | `_archive/` | Frozen snapshot of pre-unification legacy folders + audit + validation report |
-| `_bmad/` | BMAD method (kept locally for reference / inspiration; gitignored, not part of theframework) |
+| `_bmad/` | BMAD method (kept locally for reference / inspiration; gitignored, not part of A.I.D.E.) |
 
 ## Stages
 
@@ -147,7 +149,7 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 
 ## Knowledge base
 
-The KB **lives in its own repo**, separate from theframework. `project.toml`'s `[project.paths] knowledge_base_path` points at it. Open both repos in one multi-root workspace; coding agents access both.
+The KB **lives in its own repo**, separate from A.I.D.E. `project.toml`'s `[project.paths] knowledge_base_path` points at it. Open both repos in one multi-root workspace; coding agents access both.
 
 The KB is markdown-first. Agents traverse it via `read + grep + glob` over per-component frontmatter (`description`, `triggers`, `paths`, `depends_on`, `consumed_by`, …) — **no vector DB**, no embeddings. The root `ARCHITECTURE.md` (5–15 KB) loads first; `navigate-knowledge-base` selects the minimal component set for a given feature.
 

@@ -14,7 +14,7 @@ schema-driven `ARCHITECTURE.md` + `components/` + `graph.json` triumvirate
 defined in `config/SCHEMAS.md` § 3.
 
 The KB lives in its own repo, sibling to the source repos and to
-theframework. The skill operates against the path declared in
+A.I.D.E. The skill operates against the path declared in
 `project.toml`'s `[project.paths] knowledge_base_path`. It never reads from
 or writes to source repos directly — those are reached only via symlinks
 under `<knowledge_base_path>/source-docs/<repo-slug>/`, populated by the RE

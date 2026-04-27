@@ -2,7 +2,7 @@
 # kb-component-frontmatter.example.yaml
 #
 # This is the YAML FRONTMATTER that opens every
-# components/<repo>/<component-id>.md file in a theframework knowledge base.
+# components/<repo>/<component-id>.md file in a A.I.D.E. knowledge base.
 # It is shown here as a standalone YAML document for reference; in practice
 # it appears between two `---` lines at the top of a Markdown file:
 #
