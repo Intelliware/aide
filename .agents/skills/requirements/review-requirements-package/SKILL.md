@@ -9,7 +9,7 @@ description: "Use when the user asks to review, validate, or check readiness of 
 
 Runs the formal review sequence and final readiness gate against an already-assembled requirements package. Produces findings and a verdict (PASS / PASS WITH OBSERVATIONS / FAIL) per review, ending with `review-requirements-readiness` as the GO/NO-GO gate before design handoff. Independently invocable: the user can run this skill against any existing requirements package without re-running creation.
 
-The review sequence is strict — ten reviews in fixed order, no parallel execution. A FAIL verdict halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. If a fix changes content checked by an earlier passed review, that earlier verdict is explicitly re-evaluated.
+The review sequence is strict — twelve reviews in fixed order, no parallel execution. A FAIL verdict halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. If a fix changes content checked by an earlier passed review, that earlier verdict is explicitly re-evaluated.
 
 ## When to use
 
@@ -51,7 +51,9 @@ Run reviews strictly in order. Do not parallelize. Present findings and verdict 
 | 7 | review-data-completeness | Data dictionary and impacts fully specified |
 | 8 | review-traceability | Forward to acceptance criteria, backward to needs |
 | 9 | review-feasibility | No structurally infeasible or constraint-violating requirements |
-| 10 | review-requirements-readiness | Final go/no-go gate (last) |
+| 10 | review-adversarial-pass | Wraps `meta/review-adversarial` with `--stage=requirements` |
+| 11 | review-edge-cases | Wraps `meta/review-edge-case-hunter` with `--stage=requirements` |
+| 12 | review-requirements-readiness | Final go/no-go gate (last) |
 
 The detailed instructions, halt conditions, and verdict templates live in `references/review-workflow.md`.
 
@@ -60,6 +62,8 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 | Artifact | Path | Format |
 |---|---|---|
 | Per-review findings | `docs/<feature>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
 | Final readiness verdict | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
 | Updated `change-tracker.md` rows | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
 

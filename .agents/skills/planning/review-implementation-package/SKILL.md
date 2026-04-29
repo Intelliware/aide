@@ -77,7 +77,12 @@ help resolving it.
 7. **Support document review** — `implementation-package.md` overview,
    `increment-status.md`, `bugs-and-issues-log.md`, `change-tracker.md` all
    present and consistent
-8. **Implementation-readiness verdict** — final GO / NO-GO
+8. **Adversarial-pass review** — wraps `meta/review-adversarial` with
+   `--stage=planning`; findings flow into the consolidated issue list with
+   severity mapped per `references/review-patterns/adversarial-wrapper-pattern.md`
+9. **Edge-cases review** — wraps `meta/review-edge-case-hunter` with
+   `--stage=planning`; same mapping
+10. **Implementation-readiness verdict** — final GO / NO-GO
 
 For step-by-step procedure, see `references/review-workflow.md`.
 
@@ -85,9 +90,11 @@ For step-by-step procedure, see `references/review-workflow.md`.
 
 A review report containing:
 
-- A pass / fail verdict for each of the 8 reviews above
+- A pass / fail verdict for each of the 10 reviews above
 - Per-increment findings (organized by INC ID)
 - A consolidated issue list with severity (Critical / Important / Minor)
+- Adversarial findings file at `{implementation-package}/review/adversarial-findings.md` (Format 4)
+- Edge-case findings file at `{implementation-package}/review/edge-case-findings.md` (Format 4)
 - A final **GO** or **NO-GO** verdict
 - If NO-GO: explicit required fixes before re-validation
 

@@ -9,7 +9,7 @@ reviews would check.
 
 After each review, present the verdict (PASS or FAIL with findings) and
 proceed to the next review. Do not stop on a single FAIL — collect all
-findings across all 8 reviews into a single coherent issue list at the end.
+findings across all 10 reviews into a single coherent issue list at the end.
 The final implementation-readiness verdict (GO / NO-GO) consolidates all
 findings.
 
@@ -21,10 +21,10 @@ findings.
 4. Present per-review verdict to the user.
 5. Proceed to the next review.
 
-After all 8 reviews complete, render the consolidated issue list and the
+After all 10 reviews complete, render the consolidated issue list and the
 final GO / NO-GO verdict, and write the verdict into `change-tracker.md`.
 
-## The 8 reviews
+## The 10 reviews
 
 ### 1. Shape conformance
 
@@ -110,9 +110,59 @@ foundational dependency = Important.
 unknown upstream); missing `bugs-and-issues-log.md` = Important; missing
 `change-tracker.md` = Important.
 
-### 8. Implementation readiness verdict
+### 8. Adversarial-pass review
 
-Run last. Consolidate findings from reviews 1-7 into a single issue list.
+Invokes `meta/review-adversarial` against the implementation package's
+canonical entry file. Per the dispatcher pattern in
+`references/review-patterns/adversarial-wrapper-pattern.md`:
+
+```
+meta/review-adversarial \
+  --target={implementation_package_path}/implementation-package.md \
+  --stage=planning \
+  --output-path={implementation_package_path}/review/adversarial-findings.md
+```
+
+Each finding in the produced Format 4 file becomes one row in this skill's
+consolidated issue list. Severity mapping (per
+`references/review-patterns/adversarial-wrapper-pattern.md` § Critical /
+Important / Minor semantics):
+
+| Findings file `worst_severity` | Issue list severity |
+|---|---|
+| `critical` | Critical |
+| `high` | Important |
+| `medium` | Important |
+| `low` | Minor |
+| `none` | (no entry) |
+
+Each adversarial finding's `evidence`, `risk`, and `recommendation` fields
+flow into the consolidated issue list verbatim (with the source-file
+citation pointing at `adversarial-findings.md`).
+
+**Severity:** as mapped above. The adversarial lens for `--stage=planning`
+emphasizes scope ambiguity (increment boundaries) and "good news only"
+framing (risk register completeness).
+
+### 9. Edge-cases review
+
+Identical pattern with `meta/review-edge-case-hunter`:
+
+```
+meta/review-edge-case-hunter \
+  --target={implementation_package_path}/implementation-package.md \
+  --stage=planning \
+  --output-path={implementation_package_path}/review/edge-case-findings.md
+```
+
+The edge-case lens for `--stage=planning` emphasizes branching paths
+(increment ordering) and error paths (rollback / partial-failure handling).
+
+**Severity:** mapped same as review 8.
+
+### 10. Implementation readiness verdict
+
+Run last. Consolidate findings from reviews 1-9 into a single issue list.
 Determine the final verdict:
 
 - **GO** — no Critical findings, no unresolved `[NEEDS CLARIFICATION]`,
