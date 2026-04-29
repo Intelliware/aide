@@ -61,7 +61,8 @@ If any single runbook exceeds 80 lines OR § 4 lists more than 6
 runbooks, the skill SHALL split runbooks into individual files under
 `<KB>/shared/operations/runbooks/<runbook-slug>.md` and replace § 4 of
 `30-runbooks-and-oncall.md` with the runbook index pointing to those
-files.
+files. Each split-out runbook is rendered against
+`templates/blocks/knowledge-base/ops-runbook.md`.
 
 ### 3.2 Validation gate
 

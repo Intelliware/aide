@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.0.1` |
+| Current artifact version | `1.1.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,36 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.1.0` — 2026-04-29
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Addition | skills | `.agents/skills/knowledge-base/capture-solution-context/` | New 7-step interactive discovery skill that produces six leaves under `<KB>/shared/solution-context/` (mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI) plus a glossary delta — captures the project-scoped context the code can't reveal. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Addition | skills | `.agents/skills/knowledge-base/generate-ai-rules/` | New 4-step hybrid skill (auto-derive from RE Part A + interactive elicitation) that produces `<KB>/shared/ai-rules/project-context.md` plus optional per-repo overrides when stack divergence warrants. Equivalent in spirit to BMAD's `generate-project-context`, adapted to the multi-repo, KB-resident shape of A.I.D.E. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Addition | skills | `.agents/skills/knowledge-base/document-operations/` | New 3-step hybrid skill that produces four leaves under `<KB>/shared/operations/` (deployment topology, environments & secrets, SLOs & monitoring, runbooks & on-call) plus split runbook files when the index exceeds 6 rows. | repo @ this commit | ✅ Verified |
+| 4 | 2026-04-29 | Addition | blocks | `templates/blocks/knowledge-base/solution-overview.md`, `persona-catalog.md`, `goals-and-kpis.md`, `constraints-and-compliance.md`, `external-integrations.md`, `ownership-and-raci.md`, `ai-rules-project-context.md`, `ops-deployment-topology.md`, `ops-environments-and-secrets.md`, `ops-slos-and-monitoring.md`, `ops-runbooks-and-oncall.md`, `ops-runbook.md` | 12 new block templates that the three new skills compose against. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Addition | compositions | `templates/compositions/kb-solution-context.yaml`, `kb-ai-rules.yaml`, `kb-operations.yaml` | Three new compositions wrapping the new block templates. | repo @ this commit | ✅ Verified |
+| 6 | 2026-04-29 | Addition | references | `references/elicitation-patterns/personas.md`, `ownership-and-raci.md`, `coding-rules.md`, `operations-discovery.md` | Four new elicitation patterns referenced by the new skills' interactive steps. | repo @ this commit | ✅ Verified |
+| 7 | 2026-04-29 | Addition | docs | `_docs/solution-context-gap-audit.md` | Stage 1 audit mapping BMAD's `document-project` and `generate-project-context` sections against the existing RE → KB pipeline to drive Stage 2–3 scope. | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/build-knowledge-base/steps/02-scaffold-repos.md` | Scaffold also creates `shared/{solution-context, ai-rules, operations}/` alongside the existing `shared/` subtrees. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/build-knowledge-base/steps/06-emit-architecture-index.md` | New § 0 Solution Overview at the top of `ARCHITECTURE.md` linking to the human-grounded subtrees, with `pending` annotations when leaves don't yet exist. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/build-knowledge-base/steps/07-emit-claude-md.md` | Read-order block extended to instruct AI agents on when to consult solution-context, ai-rules, and operations leaves. | repo @ this commit | ✅ Verified |
+| 4 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/navigate-knowledge-base/SKILL.md` | New `--include-solution-context` flag (default true); trigger walk extended to the three shared subtrees; new tier values (`solution-context`, `ai-rules`, `operations`) returned alongside component matches without competing with the `--max-components` cap. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/detect-knowledge-base-drift/steps/04-l4-coverage-sweep.md` | New L4 sub-steps for solution-context leaf staleness and per-repo coverage. Configurable via `[knowledge_base.solution_context_max_age_days]`. | repo @ this commit | ✅ Verified |
+| 6 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/verify-knowledge-base-coverage/steps/03-check-staleness.md` | New informational warnings for missing shared leaves and repo-orphan solution-context references. | repo @ this commit | ✅ Verified |
+| 7 | 2026-04-29 | Source Update | config | `config/framework.toml.example` | Declared `[knowledge_base.solution_context_max_age_days]` (default 90) — drives the new L4 staleness check. | repo @ this commit | ✅ Verified |
+| 8 | 2026-04-29 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Inserted the three new skills into both `brownfield` (after `verify-knowledge-base-coverage`) and `greenfield` (split between pre-requirements and post-design) sequences. Added all three to `anytime` for refresh-mode use. Re-ran `scripts/build-registry.py`. | repo @ this commit | ✅ Verified |
+| 9 | 2026-04-29 | Source Update | docs | `README.md`, `.agents/skills/knowledge-base/README.md` | Skill count bumped 32 → 35; KB skill count bumped 5 → 8; added "two halves" framing for code-grounded vs human-grounded KB. | repo @ this commit | ✅ Verified |
+
+---
 
 ### `1.0.1` — 2026-04-27
 

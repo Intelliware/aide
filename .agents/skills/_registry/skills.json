@@ -50,12 +50,36 @@
       "path": ".agents/skills/knowledge-base/build-knowledge-base/SKILL.md"
     },
     {
+      "canonical_id": "capture-solution-context",
+      "name": "capture-solution-context",
+      "description": "Use when the user wants to capture project-level solution context that the code cannot tell you \u2014 mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI; says 'capture solution context', 'document the solution', 'set up project context', 'document who uses this and why', 'capture business context for the KB'; or when bootstrapping a new project's knowledge base after RE \u2192 build-knowledge-base. Produces six markdown files under <KB>/shared/solution-context/ plus a glossary delta. Interactive by default; supports --non-interactive for CI runs that stub from RE outputs.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/capture-solution-context/SKILL.md"
+    },
+    {
       "canonical_id": "detect-knowledge-base-drift",
       "name": "detect-knowledge-base-drift",
       "description": "Use when source repos may have changed without the KB being updated, when running a PR-gate freshness check, or for the scheduled (cron / weekly) drift sweep. Performs cheap-to-expensive layered detection (commit-stamp / structural diff / LLM contradiction / coverage sweep) and reports drift with per-component severity and recommended actions.",
       "stage": "knowledge-base",
       "package": "",
       "path": ".agents/skills/knowledge-base/detect-knowledge-base-drift/SKILL.md"
+    },
+    {
+      "canonical_id": "document-operations",
+      "name": "document-operations",
+      "description": "Use when the user wants to capture solution-level operational documentation that the code can only partially reveal \u2014 deployment topology, environment matrix, secrets layout, SLOs, dashboards, runbooks, on-call rotations; says 'document operations', 'capture deployment', 'document SLOs', 'set up runbooks for the KB'. Reads CI/CD configs and RE Part B deployment sections to auto-fill, then interactively elicits the gaps. Produces four leaves under <KB>/shared/operations/.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/document-operations/SKILL.md"
+    },
+    {
+      "canonical_id": "generate-ai-rules",
+      "name": "generate-ai-rules",
+      "description": "Use when the user wants to author the project-context.md that AI agents must follow when implementing code in this project \u2014 exact tech-stack versions, language-specific rules, framework rules, testing rules, workflow rules; says 'generate AI rules', 'create project-context', 'set up agent guardrails', 'document coding rules for the AI'. Hybrid: auto-derives rules from RE Part A (versions, build/test commands, lint configs), then interactively elicits the unobvious rules. Output is one canonical project-context.md plus optional per-repo overrides only when stacks diverge enough to warrant them.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/generate-ai-rules/SKILL.md"
     },
     {
       "canonical_id": "navigate-knowledge-base",
@@ -244,7 +268,7 @@
     {
       "canonical_id": "reverse-engineer-ui-framework",
       "name": "reverse-engineer-ui-framework",
-      "description": "Use when the user asks to document a UI framework, component library, design system codebase, Angular/React/Vue library, or reusable UI components. Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
+      "description": "Use when the user asks to document a UI framework, component library, design system, or reusable UI components \u2014 for any underlying technology (e.g., React, Vue, Angular, Svelte, Solid, Lit, Qwik, Web Components, SwiftUI, Jetpack Compose). Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-ui-framework/SKILL.md"
@@ -252,7 +276,7 @@
     {
       "canonical_id": "reverse-engineer-web-app",
       "name": "reverse-engineer-web-app",
-      "description": "Use when the user asks to document a web application, front-end app, SPA, React/Angular/Vue/Svelte app, or any user-facing web application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
+      "description": "Use when the user asks to document a web application, front-end app, SPA, MPA, or any user-facing web application repository \u2014 regardless of stack (e.g., React, Vue, Angular, Svelte, Solid, Astro, Next.js, Nuxt, SvelteKit, Remix, Rails, Django, Laravel, ASP.NET MVC). Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md"
