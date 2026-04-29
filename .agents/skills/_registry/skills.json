@@ -98,6 +98,22 @@
       "path": ".agents/skills/meta/framework-navigator/SKILL.md"
     },
     {
+      "canonical_id": "review-adversarial",
+      "name": "review-adversarial",
+      "description": "Use when the user asks to adversarially review, critique, stress-test, or challenge an A.I.D.E. artifact (requirements package, design package, implementation package, RE doc, KB component, KB instance, quick-change brief). Says 'adversarial review of X', 'critique X', 'find what's wrong with X', 'cynical review', 'stress-test these requirements', 'what would a skeptic say about this design', 'challenge my plan'. Attitude-driven \u2014 looks for hidden assumptions, weasel words, unsupported claims, missing risks, and scope inflation. Orthogonal to review-edge-case-hunter (method-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-adversarial/SKILL.md"
+    },
+    {
+      "canonical_id": "review-edge-case-hunter",
+      "name": "review-edge-case-hunter",
+      "description": "Use when the user asks to walk every branching path and boundary condition in an A.I.D.E. artifact and report only what's not handled. Says 'edge-case review of X', 'find unhandled edge cases in X', 'walk the paths in this design', 'what edges does this requirement miss', 'boundary analysis of X'. Method-driven \u2014 enumerates branches, error paths, boundaries, concurrency edges, time/clock edges, data-shape edges, authorization edges. Orthogonal to review-adversarial (attitude-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-edge-case-hunter/SKILL.md"
+    },
+    {
       "canonical_id": "scaffold-documentation",
       "name": "scaffold-documentation",
       "description": "Use when the user says \"scaffold the docs\", \"set up the doc structure\", \"propose the file structure\", \"create the documentation skeleton\", or after completing an inventory/discovery phase and needing to organize findings into a file structure before extraction or authoring begins. Cross-stage utility \u2014 works for RE, requirements, design, and KB packages. Enforces the \"structure before content\" principle.",
@@ -244,7 +260,7 @@
     {
       "canonical_id": "reverse-engineer-ui-framework",
       "name": "reverse-engineer-ui-framework",
-      "description": "Use when the user asks to document a UI framework, component library, design system codebase, Angular/React/Vue library, or reusable UI components. Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
+      "description": "Use when the user asks to document a UI framework, component library, design system, or reusable UI components \u2014 for any underlying technology (e.g., React, Vue, Angular, Svelte, Solid, Lit, Qwik, Web Components, SwiftUI, Jetpack Compose). Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-ui-framework/SKILL.md"
@@ -252,7 +268,7 @@
     {
       "canonical_id": "reverse-engineer-web-app",
       "name": "reverse-engineer-web-app",
-      "description": "Use when the user asks to document a web application, front-end app, SPA, React/Angular/Vue/Svelte app, or any user-facing web application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
+      "description": "Use when the user asks to document a web application, front-end app, SPA, MPA, or any user-facing web application repository \u2014 regardless of stack (e.g., React, Vue, Angular, Svelte, Solid, Astro, Next.js, Nuxt, SvelteKit, Remix, Rails, Django, Laravel, ASP.NET MVC). Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md"
