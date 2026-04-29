@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.0.1
+**Version:** 1.2.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -35,7 +35,7 @@ GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specificatio
 
 Open this repo as a folder in the same multi-root workspace as your target project repo(s). Save the workspace as `<project>.code-workspace` (File → Save Workspace As…) so the layout is reproducible. Copilot iterates every workspace folder root and looks for skills under each root's default discovery directories — `.agents/skills/` is one of those defaults, so A.I.D.E.'s skills are picked up automatically.
 
-To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 32 framework skills should appear in the picker with their descriptions.
+To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 36 framework skills should appear in the picker with their descriptions.
 
 ### Step 2 — framework orientation (automatic)
 
@@ -65,7 +65,7 @@ Cursor adopted native [agentskills.io](https://agentskills.io) support around v2
 
 Open this repo as a folder in the same multi-root Cursor workspace as your target project repo(s). Cursor scans `.agents/skills/` (and `.cursor/skills/`) under every workspace folder root, so A.I.D.E.'s skills are picked up automatically.
 
-To verify: open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
+To verify: open the Agent panel and type `/` — all 36 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
 ### Step 2 — framework orientation (automatic)
 
@@ -138,13 +138,13 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 
 | Stage | What it produces |
 |---|---|
-| `meta` | Cross-cutting orchestrators and utilities (`start-project`, `customize-framework`, `framework-navigator`, `track-change`, `shard-document`, `verify-source`, `scaffold-documentation`) |
+| `meta` | Cross-cutting orchestrators and utilities (`start-project`, `customize-framework`, `framework-navigator`, `track-change`, `shard-document`, `verify-source`, `scaffold-documentation`, `review-adversarial`, `review-edge-case-hunter`) |
 | `requirements` | Requirements packages (`create-`, `review-`) |
 | `design` | Solution design packages (`create-`, `review-`) |
 | `planning` | Implementation packages broken into INC-XXX increments (`create-`, `review-`) |
 | `execution` | Implemented code, increment-status, bug log, PR (`execute-increments`, `manage-bugs`, `create-pr`) |
-| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 7 domain skills) |
-| `knowledge-base` | The global multi-repo KB (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) |
+| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 7 domain skills + `review-reverse-engineering-package` gate) |
+| `knowledge-base` | The global multi-repo KB (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`, `review-knowledge-base-package`) |
 | `quick-dev` | Lightweight scoped-change path (`document-`, `plan-`, `execute-quick-change`) |
 
 ## Knowledge base
@@ -153,7 +153,7 @@ The KB **lives in its own repo**, separate from A.I.D.E. `project.toml`'s `[proj
 
 The KB is markdown-first. Agents traverse it via `read + grep + glob` over per-component frontmatter (`description`, `triggers`, `paths`, `depends_on`, `consumed_by`, …) — **no vector DB**, no embeddings. The root `ARCHITECTURE.md` (5–15 KB) loads first; `navigate-knowledge-base` selects the minimal component set for a given feature.
 
-See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 5 KB skills.
+See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 6 KB skills.
 
 ## Reverse engineering
 

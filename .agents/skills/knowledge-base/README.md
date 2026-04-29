@@ -15,11 +15,12 @@ The KB is markdown-first and traversed by agentic search (`read + grep + glob`) 
 - Implementation increment + git diff (for updates)
 - Source repository state (for drift detection)
 
-## Skills (NEW — authored in task #10)
+## Skills
 - `build-knowledge-base/` — initial KB construction from RE outputs
 - `navigate-knowledge-base/` — selective component lookup for any stage
 - `update-knowledge-base/` — closing skill at end of execution flows
 - `detect-knowledge-base-drift/` — PR-gate / scheduled drift detection
 - `verify-knowledge-base-coverage/` — scheduled coverage sweep
+- `review-knowledge-base-package/` — periodic global KB audit (cadence-based, not per-PR); orchestrates the two above plus seven additional lenses
 
 See `config/SCHEMAS.md` for the KB schemas (ARCHITECTURE.md template, per-component frontmatter, graph.json).
