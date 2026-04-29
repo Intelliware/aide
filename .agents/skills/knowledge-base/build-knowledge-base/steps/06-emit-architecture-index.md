@@ -23,6 +23,37 @@ combines `architecture-index` and `capability-index` blocks).
 
 ## Procedure
 
+0. **Solution Overview pointer (§ 0).** Add a header section
+   `## 0. Solution Overview` at the top of `ARCHITECTURE.md` that links
+   to the three solution-level shared subtrees. Render even when those
+   subtrees are still empty (so first-time readers find the doors that
+   `capture-solution-context`, `generate-ai-rules`, and
+   `document-operations` will fill):
+
+   ```markdown
+   ## 0. Solution Overview
+
+   The KB has two halves: the code-grounded half (this file +
+   `components/` + `graph.json`) and the human-grounded half under
+   `shared/`. Read these first when grounding a discussion in the
+   solution rather than in the code:
+
+   - [`shared/solution-context/00-overview.md`](shared/solution-context/00-overview.md) — mission, value proposition, classification
+   - [`shared/solution-context/10-personas-and-use-cases.md`](shared/solution-context/10-personas-and-use-cases.md) — personas and jobs-to-be-done
+   - [`shared/solution-context/20-goals-and-kpis.md`](shared/solution-context/20-goals-and-kpis.md) — goals and KPIs
+   - [`shared/solution-context/30-constraints-and-compliance.md`](shared/solution-context/30-constraints-and-compliance.md) — constraints and compliance
+   - [`shared/solution-context/40-external-integrations.md`](shared/solution-context/40-external-integrations.md) — vendor catalog
+   - [`shared/solution-context/50-ownership-and-raci.md`](shared/solution-context/50-ownership-and-raci.md) — ownership, RACI, on-call
+   - [`shared/ai-rules/project-context.md`](shared/ai-rules/project-context.md) — AI coding rules and architectural must-nots
+   - [`shared/operations/`](shared/operations/) — deployment topology, environments, SLOs, runbooks
+   ```
+
+   For each link, if the target file does not yet exist, render the
+   link with a trailing `(pending — run <skill name>)` annotation
+   instead of an `(empty)` annotation. Pending links are valid output;
+   `verify-knowledge-base-coverage` warns when they persist past the
+   bootstrap sequence.
+
 1. **Solution Summary (3 paragraphs).** Distill from RE Part B "system
    purpose" sections, supplemented by `project.toml` `[project]` `domain`
    and `description`:

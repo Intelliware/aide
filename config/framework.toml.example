@@ -203,6 +203,13 @@ default_verification_signal = "openapi-diff"
 # older than this many days raise a staleness warning when the KB is read.
 staleness_warning_days = 30
 
+# Solution-context leaves (under <KB>/shared/{solution-context, ai-rules,
+# operations}/) whose `last_captured` / `last_generated` / `last_reviewed`
+# is older than this many days raise a staleness flag in
+# detect-knowledge-base-drift's L4 layer. Solution-context staleness is
+# advisory; it never fires `high` severity.
+solution_context_max_age_days = 90
+
 
 # ─── [registry] ──────────────────────────────────────────────────────────────
 # Skill-registry regeneration triggers. The registry is the CSV the

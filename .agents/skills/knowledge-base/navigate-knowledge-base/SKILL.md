@@ -56,6 +56,7 @@ read top-N, read frontmatter only, etc.).
 | `knowledge_base_path` | `project.toml` `[project.paths]` | Yes |
 | `--max-components` (default 7) | Caller | No |
 | `--include-cross-cutting` (bool, default true) | Caller | No |
+| `--include-solution-context` (bool, default true) | Caller | No |
 | `--depth` (one-hop / two-hop, default one-hop) | Caller | No |
 
 See `references/INPUTS-OUTPUTS.md`.
@@ -84,12 +85,32 @@ This skill is single-shot — no `steps/` folder. The flow is:
    the feature description matches any cross-cutting concern keyword
    (auth, log, error, security, performance, version), append the
    `shared/cross-cutting/<concern>.md` pointer.
-5. **Cap and rank.** Apply `--max-components` cap. Ranking:
-   primary-match > one-hop neighbour > two-hop neighbour. Within a tier,
+5. **Solution-context injection.** If `--include-solution-context`
+   (default true), grep frontmatter `triggers:` lists in:
+   - `<knowledge_base_path>/shared/solution-context/*.md`
+   - `<knowledge_base_path>/shared/ai-rules/*.md`
+   - `<knowledge_base_path>/shared/operations/*.md` (and
+     `shared/operations/runbooks/*.md` if present)
+   For each match, append the leaf as a `solution-context` /
+   `ai-rules` / `operations` tier entry. These tiers are intentionally
+   ranked **below** primary component matches — the calling skill
+   should load components first and only consume the human-grounded
+   leaves when the feature is project-scoped (an architecture or
+   compliance question) rather than a single-component change.
+6. **Cap and rank.** Apply `--max-components` cap. Ranking:
+   primary-match > one-hop neighbour > two-hop neighbour > cross-
+   cutting > solution-context > ai-rules > operations. Within a tier,
    rank by trigger-overlap score.
-6. **Return.** Output is a JSON-or-markdown list of:
+
+   The cap applies to components only. Solution-context, ai-rules, and
+   operations entries are returned alongside the capped component list
+   without competing for the slot count — those leaves are cheap and
+   small, and surfacing them does not push useful components out of
+   the result.
+7. **Return.** Output is a JSON-or-markdown list of:
    - `path` (relative to KB root, ready for read).
-   - `tier` (`primary` / `one-hop` / `two-hop` / `cross-cutting`).
+   - `tier` (`primary` / `one-hop` / `two-hop` / `cross-cutting` /
+     `solution-context` / `ai-rules` / `operations`).
    - `why` (one sentence — which trigger / capability / edge selected it).
 
 ## Output
