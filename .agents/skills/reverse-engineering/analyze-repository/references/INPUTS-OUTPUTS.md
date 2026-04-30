@@ -19,6 +19,7 @@
 - Dependency manifest contents (for telltale framework signals).
 - README.md, `docs/`, and any `*.yaml`/`*.json` files at the root that look like API specs.
 - For monorepos, repeats the above for each `apps/<name>` and `packages/<name>` sub-tree.
+- For mainframe repos (no manifest): file-extension density across `*.cbl/*.cob/*.cpy/*.pli/*.jcl/*.proc/*.bms/*.dbd/*.psb`, plus quick line-grep for `IDENTIFICATION DIVISION`, `PROCEDURE DIVISION`, `EXEC CICS|SQL|DLI`, JCL `//STEP[0-9]* EXEC`, and Endevor / ChangeMan / Panvalet header markers.
 
 ### Elicitation
 
@@ -72,7 +73,7 @@ A structured recommendation document with these sections:
 ## Schema validation
 
 This skill does not write structured artifacts, so no JSON-Schema validation applies. The validation pass (task #8) will confirm:
-- All seven domain skill names are referenced exactly as registered
+- All ten domain skill names are referenced exactly as registered
 - The recommendation table format is consistent
 - The handoff trigger phrase syntax matches the slash-command vocabulary
 
