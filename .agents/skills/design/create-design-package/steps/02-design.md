@@ -47,6 +47,8 @@ Do not fail because Step 1 was skipped. Explain the confidence trade-off and pro
 
 Block ordering matches `templates/compositions/greenfield-design-package.yaml`. Skip blocks marked OUT in scoping; record N/A in the design change-tracker header with the gate condition.
 
+**Iterative blocks:** sub-step 6 (api-design) and sub-step 7 (database-design) contain multiple independent items. For these, apply the per-item acknowledgement loop defined in the block template (`templates/blocks/design/api-design.md`, `templates/blocks/design/database-design.md`) — present each item, get approval, then move on. Do not draft all items in one pass.
+
 ## The 7-Step per-file Workflow
 
 Apply to every block:

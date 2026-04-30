@@ -118,10 +118,11 @@ Add a sentence at the top of the "Sequential execution rule" section:
 
 **Edit per target block template:**
 
-Add a new authoring-rules section at the top of each (immediately under the YAML frontmatter):
+Add a new authoring-rule note at the top of each, **wrapped in an HTML comment** so it does not render in the assembled package (block templates are inlined into the final `requirements-package.md` / `design-package.md`; visible markdown headings would leak as user-facing output). Insert immediately under the YAML frontmatter close:
 
 ```markdown
-## Authoring rule — sub-section acknowledgement
+<!--
+AUTHORING RULE — sub-section acknowledgement
 
 Do not draft this entire block in one pass. The block contains multiple independent items (FRs / rules / endpoints / tables). For each item:
 
@@ -132,9 +133,10 @@ Do not draft this entire block in one pass. The block contains multiple independ
 5. Apply the answer; do not move to the next item until you have one.
 
 Only after every item has its own acknowledgement, mark the block complete in the completeness tracker.
+-->
 ```
 
-Heading is identical across the four templates so `grep -r "Authoring rule — sub-section acknowledgement"` locates them.
+Existing block templates already use HTML comments for authoring guidance (e.g., `<!-- NUMBERING CONVENTION: ... -->` in `functional-requirements.md`); this matches that convention. The title string `AUTHORING RULE — sub-section acknowledgement` is byte-identical across the four templates so `grep -r "AUTHORING RULE — sub-section acknowledgement" templates/blocks/` locates them.
 
 **Edit per skill step file that drives these blocks** (`requirements/.../steps/04-writing.md` and `design/.../steps/02-design.md`):
 
@@ -183,8 +185,8 @@ The named sentinel headings introduced by Changes A and C are grep-locatable eve
 grep -rln "## Verification rule (always-on)" .agents/skills/
 grep -rln "## Acknowledgement checkpoint" .agents/skills/
 
-# Change C landings (block templates)
-grep -rln "Authoring rule — sub-section acknowledgement" templates/blocks/
+# Change C landings (block templates — note: HTML-comment-wrapped, so uppercase title)
+grep -rln "AUTHORING RULE — sub-section acknowledgement" templates/blocks/
 ```
 
 Change B is line-level edits inside existing tables and prose. To locate a Change B residue after a partial revert, diff against the relevant Stage commit:
@@ -198,7 +200,7 @@ git diff <stage-2-sha>^ <stage-2-sha> -- .agents/skills/
 - `git log --oneline mm/add-ack..HEAD` — should show no Stage-1/2/3 commits remaining.
 - `grep -rln "## Verification rule (always-on)" .agents/skills/` — zero matches if Change A is reverted.
 - `grep -rln "## Acknowledgement checkpoint" .agents/skills/` — zero matches if Change A is reverted.
-- `grep -rln "Authoring rule — sub-section acknowledgement" templates/blocks/` — zero matches if Change C is reverted.
+- `grep -rln "AUTHORING RULE — sub-section acknowledgement" templates/blocks/` — zero matches if Change C is reverted.
 
 If any of those greps find residue after the corresponding revert, the revert is incomplete; investigate via `git log -p <path>`.
 
@@ -216,7 +218,7 @@ If any of those greps find residue after the corresponding revert, the revert is
 - [ ] All four SKILL.md files in scope contain the byte-identical "Verification rule (always-on)" section.
 - [ ] All step files in scope end with an "Acknowledgement checkpoint" sub-section.
 - [ ] `references/process.md` for both create-requirements-package and create-design-package shows step 0 of the 7-step workflow as **unconditional**.
-- [ ] The four large block templates each carry the "Authoring rule — sub-section acknowledgement" section.
+- [ ] The four large block templates each carry the HTML-commented "AUTHORING RULE — sub-section acknowledgement" note (wrapper prevents leak into assembled package).
 - [ ] `CHANGELOG.md` records 1.4.0 with a one-line entry pointing at this plan file.
 - [ ] No file outside §2 In Scope is modified.
 

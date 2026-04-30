@@ -42,6 +42,8 @@ Do not fail because an upstream phase was skipped. Explain the confidence trade-
 
 Block ordering matches `templates/compositions/greenfield-requirements-package.yaml`. Skip blocks marked N/A in the relevance gate; write them as N/A entries in the completeness tracker, not empty files.
 
+**Iterative blocks:** sub-step 5 (functional-requirements) and sub-step 6 (business-rules) contain multiple independent items. For these, apply the per-item acknowledgement loop defined in the block template (`templates/blocks/requirements/functional-requirements.md`, `templates/blocks/requirements/business-logic-rules.md`) — present each item, get approval, then move on. Do not draft all items in one pass.
+
 ## The 7-Step per-file Workflow
 
 Apply to every block:
