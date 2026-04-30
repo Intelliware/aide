@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.0.1` |
+| Current artifact version | `1.4.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,24 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.4.0` — 2026-04-30
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-30 | Restructure | skills | `.agents/skills/{requirements,design,planning,execution}/` — 4 SKILL.md + 9 step files + 2 process.md refs | Stage 1 of acknowledgement-restoration: promotes "verify understanding" from a single bullet inside the 7-step per-file workflow to a top-level "Verification rule (always-on)" section in every SDLC create/execute SKILL.md, plus an "Acknowledgement checkpoint" sub-section at the tail of each step file and a non-skippable note under the 7-step table in the two process.md references. See `_docs/plan-restore-acknowledgement.md`. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-30 | Restructure | skills | `.agents/skills/{requirements,design}/` — 2 process.md + 2 step files + 2 workflow refs | Stage 2 of acknowledgement-restoration: makes the section relevance check unconditional. Drops the "if relevance is in question" clause from the 7-step Step 0 row and from per-block workflow text. Adds explicit per-sub-step relevance ask to discovery-workflow and analysis-workflow refs. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-30 | Restructure | blocks, skills | `templates/blocks/{requirements,design}/` — 4 block templates + 2 step files | Stage 3 of acknowledgement-restoration: adds "AUTHORING RULE — sub-section acknowledgement" notes (HTML-comment-wrapped so they do not render in the assembled package) to the four large block templates (functional-requirements, business-logic-rules, api-design, database-design) mandating a per-item acknowledgement loop instead of one-pass drafting. Step files flag these blocks as iterative. | repo @ this commit | ✅ Verified |
+
+#### Branch Dependency
+
+This branch contains **only** the acknowledgement-restoration changes (Changes A / B / C from `_docs/plan-restore-acknowledgement.md`). The version label `1.4.0` reflects the design-doc-declared integration order:
+mm/add-context (1.1.0) → mm/add-adverserial (1.2.0) → mm/add-cobol (1.3.0) → mm/add-ack (1.4.0).
+If the merge order changes at integration time, the version on this branch must be adjusted accordingly. The cobol changes that previously rode on this branch live in `mm/add-cobol` only.
+
+---
 
 ### `1.0.1` — 2026-04-27
 
