@@ -26,7 +26,7 @@ Applied to every block when filling content:
 
 | # | Step | Halt condition |
 |---|---|---|
-| 0 | Section relevance check | If user says "Skip" or "No (with reason)", record in completeness tracker and exit |
+| 0 | Section relevance check (unconditional) | Ask Yes / No (with reason) / Skip / Not sure for every block. Record outcome in the completeness tracker before drafting. |
 | 1 | Define scope of the section | If scope is unclear, elicit before drafting |
 | 2 | Draft content from the block template under `templates/blocks/requirements/<slug>.md` | If template is missing, halt and report — do not invent structure |
 | 3 | Verify understanding by summarizing back | If user disagrees, return to step 1 |

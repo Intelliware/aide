@@ -51,7 +51,7 @@ Block ordering matches `templates/compositions/greenfield-design-package.yaml`. 
 
 Apply to every block:
 
-1. **Section relevance check** — if relevance is in question, ask Yes / No (with reason) / Skip / Not sure.
+1. **Section relevance check** (unconditional) — ask Yes / No (with reason) / Skip / Not sure for every block before drafting.
 2. **Define scope** of the section in plain language.
 3. **Draft** content using the block template under `templates/blocks/design/<slug>.md`.
 4. **Verify understanding** by summarizing back before continuing.
