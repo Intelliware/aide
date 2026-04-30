@@ -1,0 +1,50 @@
+# Composition: Reverse-Engineering — JCL Job (Consumer Part)
+#
+# Documents what JCL jobs do for downstream consumers — what each job does,
+# input/output datasets (with GDG), predecessor/successor jobs, failure
+# modes and recovery, integration examples.
+#
+# Source: templates/blocks/reverse-eng/jcl-job/consumer/
+
+name: re-jcl-job-consumer
+description: Reverse-engineering KB (job-flow guide) for downstream consumers of mainframe batch jobs.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/source-docs/{repo-slug}/jcl-job-consumer/"
+default-output-shape: tree
+# Path is rooted at the knowledge_base_path declared in project.toml.
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/jcl-job/consumer/" prefix stripped.
+blocks:
+  - slug: reverse-eng/jcl-job/consumer/what-this-job-does
+    optional: false
+    order: 290
+  - slug: reverse-eng/jcl-job/consumer/input-and-output-datasets
+    optional: false
+    order: 300
+  - slug: reverse-eng/jcl-job/consumer/predecessor-and-successor-jobs
+    optional: false
+    order: 310
+  - slug: reverse-eng/jcl-job/consumer/failure-modes-and-recovery
+    optional: false
+    order: 320
+  - slug: reverse-eng/jcl-job/consumer/integration-examples
+    optional: false
+    order: 330
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+notes: |
+  Block order follows order-hint values 290..330 (this part picks up where
+  re-jcl-job-internal leaves off; ordering is shared with re-jcl-job-internal
+  so both files compose into one continuous knowledge base if rendered
+  together).
+
+  This consumer composition is the source of truth for downstream consumers
+  (other repos / teams) hooking into the batch-job graph. The lineage skill
+  (build-mainframe-data-lineage) extends this with cross-program field-level
+  detail.

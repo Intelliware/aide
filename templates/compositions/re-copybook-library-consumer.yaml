@@ -1,0 +1,53 @@
+# Composition: Reverse-Engineering — Copybook Library (Consumer Part)
+#
+# Documents how to find and use copybooks from this library — canonical
+# record catalogue, field index, naming-convention key, COPY REPLACING
+# patterns, integration examples. This is the data dictionary.
+#
+# Source: templates/blocks/reverse-eng/copybook-library/consumer/
+
+name: re-copybook-library-consumer
+description: Reverse-engineering KB (data dictionary) for consuming copybooks from this library as a COBOL programmer or data architect.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/source-docs/{repo-slug}/copybook-library-consumer/"
+default-output-shape: tree
+# Path is rooted at the knowledge_base_path declared in project.toml.
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/copybook-library/consumer/" prefix stripped.
+blocks:
+  - slug: reverse-eng/copybook-library/consumer/how-to-pick-the-right-copybook
+    optional: false
+    order: 290
+  - slug: reverse-eng/copybook-library/consumer/canonical-record-catalogue
+    optional: false
+    order: 300
+  - slug: reverse-eng/copybook-library/consumer/field-index
+    optional: false
+    order: 310
+  - slug: reverse-eng/copybook-library/consumer/naming-convention-key
+    optional: false
+    order: 320
+  - slug: reverse-eng/copybook-library/consumer/copy-with-replacing-patterns
+    optional: false
+    order: 330
+  - slug: reverse-eng/copybook-library/consumer/integration-examples
+    optional: false
+    order: 340
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+notes: |
+  Block order follows order-hint values 290..340 (this part picks up where
+  re-copybook-library-internal leaves off; ordering is shared with
+  re-copybook-library-internal so both files compose into one continuous
+  knowledge base if rendered together).
+
+  This consumer composition is the source of truth for the data dictionary
+  consumed by reverse-engineer-cobol-program (for resolving COPY statements)
+  and by build-mainframe-data-lineage (for cross-program field-level
+  traceability).

@@ -1,0 +1,92 @@
+# Composition: Reverse-Engineering — COBOL Program (Internal Part)
+#
+# Documents the INTERNAL implementation of one or more COBOL programs:
+# DIVISION-by-DIVISION reference, PERFORM/CALL graph, FILE-CONTROL/FD
+# bindings, EXEC CICS/SQL/DLI inventories, error handling, performance.
+#
+# Source: templates/blocks/reverse-eng/cobol-program/internal/
+
+name: re-cobol-program-internal
+description: Reverse-engineering KB for the internal implementation of a COBOL program repository.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "docs/cobol-program-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/cobol-program/internal/" prefix stripped.
+blocks:
+  - slug: reverse-eng/cobol-program/internal/program-inventory
+    optional: false
+    order: 110
+  - slug: reverse-eng/cobol-program/internal/identification-and-environment
+    optional: false
+    order: 120
+  - slug: reverse-eng/cobol-program/internal/file-control-and-fd-bindings
+    optional: false
+    order: 130
+  - slug: reverse-eng/cobol-program/internal/working-storage-and-linkage
+    optional: false
+    order: 140
+  - slug: reverse-eng/cobol-program/internal/copy-statements-and-replacing-rules
+    optional: false
+    order: 150
+  - slug: reverse-eng/cobol-program/internal/paragraph-and-section-graph
+    optional: false
+    order: 160
+  - slug: reverse-eng/cobol-program/internal/call-and-perform-graph
+    optional: false
+    order: 170
+  - slug: reverse-eng/cobol-program/internal/exec-cics-inventory
+    optional: false
+    order: 180
+    include-if: "project.elicitation.has_cics == true"
+  - slug: reverse-eng/cobol-program/internal/exec-sql-inventory
+    optional: false
+    order: 190
+    include-if: "project.elicitation.has_db2 == true"
+  - slug: reverse-eng/cobol-program/internal/exec-dli-inventory
+    optional: false
+    order: 200
+    include-if: "project.elicitation.has_ims == true"
+  - slug: reverse-eng/cobol-program/internal/error-handling-and-abend-codes
+    optional: false
+    order: 210
+  - slug: reverse-eng/cobol-program/internal/performance-and-runtime-considerations
+    optional: false
+    order: 220
+  - slug: reverse-eng/cobol-program/internal/naming-conventions
+    optional: false
+    order: 230
+  - slug: reverse-eng/cobol-program/internal/anti-patterns-and-pitfalls
+    optional: false
+    order: 350
+  - slug: reverse-eng/cobol-program/internal/faq-and-troubleshooting
+    optional: false
+    order: 360
+  - slug: reverse-eng/cobol-program/internal/code-examples
+    optional: false
+    order: 370
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/cobol-program/internal/exec-cics-inventory
+    include-if: "project.elicitation.has_cics == true"
+  - block: reverse-eng/cobol-program/internal/exec-sql-inventory
+    include-if: "project.elicitation.has_db2 == true"
+  - block: reverse-eng/cobol-program/internal/exec-dli-inventory
+    include-if: "project.elicitation.has_ims == true"
+
+notes: |
+  Block order follows order-hint values 110..370 (gap between 230 and 350
+  is intentional and matches block frontmatter; consumer-stage content lives
+  in re-cobol-program-consumer.yaml). The three EXEC inventories (CICS, SQL,
+  DLI) are conditional because not every program runs under all three.
+  Mandatory side-artefacts (program-call-graph.mmd, program-data-bindings.json,
+  program-exec-inventory.md) are written at the Part-A directory root by the
+  parent skill and are NOT block-driven — they feed build-mainframe-data-lineage.

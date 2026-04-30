@@ -16,7 +16,7 @@ For monorepos, `analyze-repository` recommends an ordered set of RE skills (typi
 ## What it does
 
 1. Locates the repo and scans its package/build files, directory structure, dependency manifests, and existing documentation.
-2. Classifies the repo into one of seven domain types (api, api-framework, web-app, ui-framework, database, mobile-app, mobile-framework) — or in the hybrid/monorepo case, into multiple types with priority ordering.
+2. Classifies the repo into one of ten domain types (api, api-framework, web-app, ui-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job) — or in the hybrid/monorepo case, into multiple types with priority ordering. Mainframe repos commonly combine all three of cobol-program / copybook-library / jcl-job under one root and are handled like a monorepo.
 3. Resolves the application-vs-framework ambiguity using consumer-question heuristics (end users → application; other developers → framework).
 4. Hands off by name to the matching `reverse-engineer-<type>` skill with an exact trigger phrase.
 
@@ -43,5 +43,6 @@ Dynamic. Based on the classification result, hand off by name to one or more of:
 - `reverse-engineer-web-app` / `reverse-engineer-ui-framework`
 - `reverse-engineer-database`
 - `reverse-engineer-mobile-app` / `reverse-engineer-mobile-framework`
+- `reverse-engineer-cobol-program` / `reverse-engineer-copybook-library` / `reverse-engineer-jcl-job`
 
-All RE skills hand off to `build-knowledge-base` after extraction completes.
+All RE skills hand off to `build-knowledge-base` after extraction completes. Mainframe stacks additionally hand off to `build-mainframe-data-lineage` for cross-program field-level data traceability.

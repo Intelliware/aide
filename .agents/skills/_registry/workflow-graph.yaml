@@ -71,15 +71,23 @@ flows:
     sequence:
       - skill: start-project
       - skill: analyze-repository
-      # analyze-repository selects ONE of the seven domain skills at runtime:
+      # analyze-repository selects ONE of the ten domain skills at runtime:
       #   reverse-engineer-api, reverse-engineer-api-framework,
       #   reverse-engineer-database, reverse-engineer-mobile-app,
       #   reverse-engineer-mobile-framework, reverse-engineer-ui-framework,
-      #   reverse-engineer-web-app.
+      #   reverse-engineer-web-app, reverse-engineer-cobol-program,
+      #   reverse-engineer-copybook-library, reverse-engineer-jcl-job.
       # The placeholder below is a dispatcher slot — validation skips it.
       - skill: reverse-engineer-<dynamic>
         dispatcher: analyze-repository
       - skill: build-knowledge-base
+      # For mainframe stacks (cobol-program + copybook-library + jcl-job all
+      # contributed Part A), build-mainframe-data-lineage runs after
+      # build-knowledge-base and produces <KB>/lineage/mainframe/. Optional
+      # because non-mainframe projects don't need it.
+      - skill: build-mainframe-data-lineage
+        optional: true
+        condition: "mainframe stack present (any of cobol-program, copybook-library, jcl-job in [[project.repos]])"
       - skill: verify-knowledge-base-coverage
       - skill: create-requirements-package
         # In brownfield mode this skill consumes the KB via navigate-knowledge-base.

@@ -1,0 +1,78 @@
+# Composition: Reverse-Engineering — Copybook Library (Internal Part)
+#
+# Documents the INTERNAL implementation of a copybook library:
+# per-copybook record reference, REDEFINES variants, OCCURS expansion,
+# level-88 condition names, naming-convention buckets, duplicate /
+# divergent detection, deprecated copybooks, maintenance rules.
+#
+# Source: templates/blocks/reverse-eng/copybook-library/internal/
+
+name: re-copybook-library-internal
+description: Reverse-engineering KB for the internal implementation of a copybook library.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "docs/copybook-library-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/copybook-library/internal/" prefix stripped.
+blocks:
+  - slug: reverse-eng/copybook-library/internal/library-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/copybook-library/internal/naming-convention-buckets
+    optional: false
+    order: 120
+  - slug: reverse-eng/copybook-library/internal/per-copybook-record-reference
+    optional: false
+    order: 130
+  - slug: reverse-eng/copybook-library/internal/redefines-and-variant-handling
+    optional: false
+    order: 140
+  - slug: reverse-eng/copybook-library/internal/occurs-and-depending-on
+    optional: false
+    order: 150
+  - slug: reverse-eng/copybook-library/internal/level-88-condition-names
+    optional: false
+    order: 160
+  - slug: reverse-eng/copybook-library/internal/db2-and-ims-host-variable-copybooks
+    optional: false
+    order: 170
+    include-if: "project.elicitation.has_db2_or_ims == true"
+  - slug: reverse-eng/copybook-library/internal/cics-commarea-copybooks
+    optional: false
+    order: 180
+    include-if: "project.elicitation.has_cics == true"
+  - slug: reverse-eng/copybook-library/internal/duplicate-and-divergent-detection
+    optional: false
+    order: 190
+  - slug: reverse-eng/copybook-library/internal/deprecated-copybooks
+    optional: false
+    order: 200
+  - slug: reverse-eng/copybook-library/internal/maintenance-rules
+    optional: false
+    order: 210
+  - slug: reverse-eng/copybook-library/internal/anti-patterns-and-pitfalls
+    optional: false
+    order: 350
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/copybook-library/internal/db2-and-ims-host-variable-copybooks
+    include-if: "project.elicitation.has_db2_or_ims == true"
+  - block: reverse-eng/copybook-library/internal/cics-commarea-copybooks
+    include-if: "project.elicitation.has_cics == true"
+
+notes: |
+  Block order follows order-hint values 110..350 (gap between 210 and 350
+  is intentional; consumer-stage content lives in re-copybook-library-consumer.yaml).
+  DB2/IMS and CICS-specific blocks are conditional because not every library
+  contains those copybooks. Mandatory side-artefacts (copybook-record-graph.json,
+  data-dictionary.md, copybook-conflicts.md) are written at the Part-B directory
+  root by the parent skill and are NOT block-driven — they feed
+  reverse-engineer-cobol-program and build-mainframe-data-lineage.
