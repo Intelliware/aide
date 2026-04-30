@@ -50,6 +50,14 @@
       "path": ".agents/skills/knowledge-base/build-knowledge-base/SKILL.md"
     },
     {
+      "canonical_id": "build-mainframe-data-lineage",
+      "name": "build-mainframe-data-lineage",
+      "description": "Use when the user asks to build mainframe data lineage, generate cross-program field-level traceability, build a where-used index for COBOL copybooks or fields, build the JCL \u2192 program \u2192 dataset chain, resolve EXEC SQL host variables back to copybook fields, or aggregate copybook + COBOL program + JCL Part A into a coherent lineage artefact in the knowledge base. Runs after reverse-engineer-copybook-library, reverse-engineer-cobol-program, and reverse-engineer-jcl-job have all completed Part A for the contributing repos.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/build-mainframe-data-lineage/SKILL.md"
+    },
+    {
       "canonical_id": "detect-knowledge-base-drift",
       "name": "detect-knowledge-base-drift",
       "description": "Use when source repos may have changed without the KB being updated, when running a PR-gate freshness check, or for the scheduled (cron / weekly) drift sweep. Performs cheap-to-expensive layered detection (commit-stamp / structural diff / LLM contradiction / coverage sweep) and reports drift with per-component severity and recommended actions.",
@@ -196,7 +204,7 @@
     {
       "canonical_id": "analyze-repository",
       "name": "analyze-repository",
-      "description": "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke.",
+      "description": "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type \u2014 including mainframe / COBOL / copybook / JCL repositories. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/analyze-repository/SKILL.md"
@@ -218,12 +226,36 @@
       "path": ".agents/skills/reverse-engineering/reverse-engineer-api-framework/SKILL.md"
     },
     {
+      "canonical_id": "reverse-engineer-cobol-program",
+      "name": "reverse-engineer-cobol-program",
+      "description": "Use when the user asks to document COBOL programs, reverse-engineer COBOL source, extract documentation from a COBOL repository, document mainframe batch / online programs, document CICS / IMS / DB2 program logic, or build a program contract for COBOL callers. Produces Part A (internal docs for mainframe maintainers) and Part B (consumer guide for app integrators, batch schedulers, and downstream-system teams). Do NOT use for copybook-only repos \u2014 use reverse-engineer-copybook-library.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-cobol-program/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-copybook-library",
+      "name": "reverse-engineer-copybook-library",
+      "description": "Use when the user asks to document a copybook library, reverse-engineer mainframe record layouts, build a coherent data dictionary across COBOL copybooks, normalize record layouts (REDEFINES / OCCURS DEPENDING ON), find duplicate or divergent copybooks across teams, or produce a per-copybook record reference. Produces Part A (internal docs for copybook maintainers and data architects) and Part B (data dictionary for application developers and integrators). Do NOT use for COBOL program repos \u2014 use reverse-engineer-cobol-program.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-copybook-library/SKILL.md"
+    },
+    {
       "canonical_id": "reverse-engineer-database",
       "name": "reverse-engineer-database",
       "description": "Use when the user asks to document a database (schema, stored procedures, triggers, views), reverse-engineer a schema, extract database docs, create a data dictionary, or generate ERDs from existing database code. Produces Part A (internal DB docs for DBAs), Part B1 (data dictionary & ERD), and Part B2 (database consumer guide for application developers).",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-database/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-jcl-job",
+      "name": "reverse-engineer-jcl-job",
+      "description": "Use when the user asks to document JCL job decks, mainframe batch jobs, PROCs / PROCLIB, INCLUDE members, IDCAMS / SORT / IEBGENER control cards, GDG dataset lifecycles, or scheduler integration on a mainframe. Produces Part A (internal docs for batch developers and ops) and Part B (job-flow guide for application teams and downstream consumers). Do NOT use for COBOL source \u2014 use reverse-engineer-cobol-program; do NOT use for copybooks \u2014 use reverse-engineer-copybook-library.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-jcl-job/SKILL.md"
     },
     {
       "canonical_id": "reverse-engineer-mobile-app",
@@ -244,7 +276,7 @@
     {
       "canonical_id": "reverse-engineer-ui-framework",
       "name": "reverse-engineer-ui-framework",
-      "description": "Use when the user asks to document a UI framework, component library, design system codebase, Angular/React/Vue library, or reusable UI components. Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
+      "description": "Use when the user asks to document a UI framework, component library, design system, or reusable UI components \u2014 for any underlying technology (e.g., React, Vue, Angular, Svelte, Solid, Lit, Qwik, Web Components, SwiftUI, Jetpack Compose). Produces Part A (full framework docs) and Part B (implementer docs for app developers using the library). Do NOT use for application repositories \u2014 use reverse-engineer-web-app instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-ui-framework/SKILL.md"
@@ -252,7 +284,7 @@
     {
       "canonical_id": "reverse-engineer-web-app",
       "name": "reverse-engineer-web-app",
-      "description": "Use when the user asks to document a web application, front-end app, SPA, React/Angular/Vue/Svelte app, or any user-facing web application repository. Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
+      "description": "Use when the user asks to document a web application, front-end app, SPA, MPA, or any user-facing web application repository \u2014 regardless of stack (e.g., React, Vue, Angular, Svelte, Solid, Astro, Next.js, Nuxt, SvelteKit, Remix, Rails, Django, Laravel, ASP.NET MVC). Produces Part A (internal app docs) and Part B (app overview & integration guide). Do NOT use for frameworks/libraries \u2014 use reverse-engineer-ui-framework instead.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md"

@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.0.1
+**Version:** 1.3.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
