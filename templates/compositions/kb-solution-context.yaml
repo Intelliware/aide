@@ -1,0 +1,66 @@
+# Composition: Knowledge Base — Solution Context
+#
+# Composes the six leaves under <KB>/shared/solution-context/ — the
+# project-scoped, human-grounded layer of the KB. Authored by the
+# capture-solution-context skill. Sibling to kb-ai-rules and
+# kb-operations.
+#
+# Source: templates/blocks/knowledge-base/
+
+name: kb-solution-context
+description: Knowledge-base solution context — mission, personas, goals/KPIs, constraints, integrations, ownership.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-shared
+
+default-output-path: "{paths.knowledge_base_path}/shared/solution-context/"
+
+blocks:
+  - slug: knowledge-base/solution-overview
+    optional: false
+    order: 1
+    output-filename: 00-overview.md
+  - slug: knowledge-base/persona-catalog
+    optional: false
+    order: 2
+    output-filename: 10-personas-and-use-cases.md
+  - slug: knowledge-base/goals-and-kpis
+    optional: false
+    order: 3
+    output-filename: 20-goals-and-kpis.md
+  - slug: knowledge-base/constraints-and-compliance
+    optional: false
+    order: 4
+    output-filename: 30-constraints-and-compliance.md
+  - slug: knowledge-base/external-integrations
+    optional: false
+    order: 5
+    output-filename: 40-external-integrations.md
+  - slug: knowledge-base/ownership-and-raci
+    optional: false
+    order: 6
+    output-filename: 50-ownership-and-raci.md
+
+elicitation:
+  - prompt: references/elicitation-patterns/business-objectives.md
+    required: true
+  - prompt: references/elicitation-patterns/personas.md
+    required: true
+  - prompt: references/elicitation-patterns/non-functional-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/integration-discovery.md
+    required: true
+  - prompt: references/elicitation-patterns/ownership-and-raci.md
+    required: true
+
+decision-gates: []
+
+notes: |
+  This composition is the canonical solution-context shape. All six
+  blocks are required (no optional leaves) — "none" is a valid answer
+  per section, but the section itself must exist with the explicit
+  sentinel.
+
+  The capture-solution-context skill drives this composition through
+  steps 02–06; step 07 emits the glossary delta to <KB>/glossary.md
+  (not part of this composition because it is an append-only audit
+  artifact).

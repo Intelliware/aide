@@ -50,6 +50,10 @@ flows:
     description: "Full SDLC from requirements through execution. Best for new projects with elaborate workflow."
     sequence:
       - skill: start-project
+      # capture-solution-context informs requirements; runs before
+      # create-requirements-package so the first feature has project
+      # mission, personas, KPIs, and constraints to ground in.
+      - skill: capture-solution-context
       - skill: create-requirements-package
         gates:
           - skill: review-requirements-package
@@ -58,10 +62,20 @@ flows:
         gates:
           - skill: review-design-package
             required: true
+      # generate-ai-rules slots in here in greenfield because there is
+      # no stack to derive from until after design has fixed the
+      # framework choices. See generate-ai-rules/references/OVERVIEW.md
+      # § Position in workflow.
+      - skill: generate-ai-rules
       - skill: create-implementation-package
         gates:
           - skill: review-implementation-package
             required: true
+      # document-operations slots in after implementation begins so
+      # there is a deployment shape to document. Optional for
+      # pre-launch projects (skill stops cleanly if no infra exists).
+      - skill: document-operations
+        optional-when: "no infra files yet"
       - skill: execute-increments
         per-increment-closing-skill: update-knowledge-base
       - skill: create-pr
@@ -81,6 +95,16 @@ flows:
         dispatcher: analyze-repository
       - skill: build-knowledge-base
       - skill: verify-knowledge-base-coverage
+      # The three solution-context layer skills run AFTER the code-
+      # grounded KB is in place: components/graph/ARCHITECTURE.md exist
+      # and can be linked from solution-context leaves. They also feed
+      # the first requirements package below — solution-context is
+      # PROJECT-scoped (lives under <KB>/shared/), while
+      # create-requirements-package is FEATURE-scoped (lives under
+      # docs/<feature>/). The two layers do not overlap.
+      - skill: capture-solution-context
+      - skill: generate-ai-rules
+      - skill: document-operations
       - skill: create-requirements-package
         # In brownfield mode this skill consumes the KB via navigate-knowledge-base.
         gates:
@@ -122,6 +146,12 @@ anytime:
   - manage-bugs
   - navigate-knowledge-base
   - detect-knowledge-base-drift
+  # Solution-context layer skills are also runnable anytime so a team
+  # can refresh personas, KPIs, AI rules, or runbooks independently of
+  # the active flow's sequence.
+  - capture-solution-context
+  - generate-ai-rules
+  - document-operations
 
 # Validation rules the registry generator (or task #8 validation) should enforce.
 # `every-flow-skill-must-resolve` skips dispatcher placeholders (any skill name

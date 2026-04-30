@@ -28,11 +28,19 @@ without yet emitting any component leaves.
    <knowledge_base_path>/
    ├── repos/
    ├── components/
-   ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/}/
+   ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/,
+   │           solution-context/, ai-rules/, operations/}/
    └── synthesized/{01-architecture-overview/ … 10-repository-maintenance/}/
    ```
 
    Use the exact 10-folder names listed in `references/SYNTHESIZED-FOLDERS.md`.
+
+   The three new shared subtrees (`solution-context/`, `ai-rules/`,
+   `operations/`) are scaffolded empty here. They are populated later
+   by `capture-solution-context`, `generate-ai-rules`, and
+   `document-operations` respectively. `verify-knowledge-base-coverage`
+   warns when these directories remain empty after the bootstrap
+   sequence completes.
 
 2. **Seed `glossary.md`.** Read `[project.glossary]` from `project.toml`:
    - Inline `[[project.glossary.entries]]` rows become rendered glossary

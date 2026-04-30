@@ -26,10 +26,19 @@ and tells the agent how to traverse the rest.
 2. **Read-order block.**
 
    ```
-   1. ARCHITECTURE.md (sections 1–4) for system shape and capability index.
-   2. graph.json for blast radius walks.
-   3. components/<repo>/<id>.md for the specific components in scope.
-   4. shared/entities/<id>.md for cross-component data semantics.
+   1. ARCHITECTURE.md (sections 0–4) for system shape, solution-level
+      pointers (§ 0), and capability index (§ 4).
+   2. shared/solution-context/* for project-scoped intent (mission,
+      personas, goals, constraints, integrations, ownership). Cheap to
+      grep by trigger keywords; never read all six leaves blindly.
+   3. shared/ai-rules/project-context.md when about to write or modify
+      code in any repo. This is the contract for tech stack, language
+      conventions, testing discipline, and architectural must-nots.
+   4. shared/operations/* when the work touches deployment, secrets,
+      SLOs, or on-call concerns.
+   5. graph.json for blast radius walks.
+   6. components/<repo>/<id>.md for the specific components in scope.
+   7. shared/entities/<id>.md for cross-component data semantics.
    ```
 
 3. **Selection rule.** "Never read the whole KB. Use
