@@ -46,7 +46,7 @@ Block ordering matches `templates/compositions/greenfield-requirements-package.y
 
 Apply to every block:
 
-1. **Section relevance check** (Step 0 of the workflow) — if relevance is in question, ask Yes / No (with reason) / Skip / Not sure.
+1. **Section relevance check** (Step 0 of the workflow, unconditional) — ask Yes / No (with reason) / Skip / Not sure for every block before drafting.
 2. **Define scope** of the section in plain language.
 3. **Draft** content using the block template under `templates/blocks/requirements/<slug>.md`.
 4. **Verify understanding** by summarizing back to the user before proceeding.
