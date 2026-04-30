@@ -7,6 +7,20 @@ optional: false
 order-hint: 4
 ---
 
+<!--
+AUTHORING RULE — sub-section acknowledgement
+
+Do not draft this entire block in one pass. The block contains multiple independent items (FRs / rules / endpoints / tables). For each item:
+
+1. State the item heading and one-sentence scope.
+2. Draft the item.
+3. Present it to the user.
+4. Ask: "Approve, change, or skip?"
+5. Apply the answer; do not move to the next item until you have one.
+
+Only after every item has its own acknowledgement, mark the block complete in the completeness tracker.
+-->
+
 # 4. Functional Requirements
 
 > **Part of:** [Project Name] — Requirements Package

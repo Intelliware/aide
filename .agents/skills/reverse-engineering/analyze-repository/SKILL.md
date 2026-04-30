@@ -1,6 +1,6 @@
 ---
 name: analyze-repository
-description: "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke."
+description: "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type — including mainframe / COBOL / copybook / JCL repositories. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke."
 ---
 
 # Analyze Repository
@@ -36,17 +36,26 @@ Users rarely categorize their repos as "API" or "UI framework" — they say "doc
 
 Ask the user for the repository path (or identify from context). Then perform a structural scan:
 
-**1a. Read the package/build file** — check in order, stop when found: `package.json` → Node/JS/TS; `pom.xml`/`build.gradle` → Java/Kotlin; `Podfile`/`Package.swift`/`*.podspec` → iOS; `build.gradle` with `com.android.*` → Android; `requirements.txt`/`setup.py`/`pyproject.toml` → Python; `go.mod` → Go; `Cargo.toml` → Rust; `*.csproj`/`*.sln` → .NET.
+**1a. Read the package/build file** — check in order, stop when found: `package.json` → Node/JS/TS; `pom.xml`/`build.gradle` → Java/Kotlin; `Podfile`/`Package.swift`/`*.podspec` → iOS; `build.gradle` with `com.android.*` → Android; `requirements.txt`/`setup.py`/`pyproject.toml` → Python; `go.mod` → Go; `Cargo.toml` → Rust; `*.csproj`/`*.sln` → .NET. **Mainframe repos do not use a single root manifest** — fall through to 1b/1c below.
 
-**1b. Read the directory structure** — `ls -la` plus one level deep. Key signals: `src/routes/` + `src/controllers/` → API; `src/components/` + `public/index.html` → web app; `src/lib/` + published package → UI framework; `migrations/` + `*.sql` → database; `app/src/main/java/` + `AndroidManifest.xml` → Android; `*.xcodeproj` + `Info.plist` → iOS; `android/` + `ios/` + `App.tsx` → React Native; multiple `apps/` or `packages/` → monorepo.
+**1b. Read the directory structure** — `ls -la` plus one level deep. Key signals: `src/routes/` + `src/controllers/` → API; `src/components/` + `public/index.html` → web app; `src/lib/` + published package → UI framework; `migrations/` + `*.sql` → database; `app/src/main/java/` + `AndroidManifest.xml` → Android; `*.xcodeproj` + `Info.plist` → iOS; `android/` + `ios/` + `App.tsx` → React Native; multiple `apps/` or `packages/` → monorepo. **Mainframe signals:** `COBOL/` + `COPYBOOK/`, `SRC/CBL/`, `JCL/PROCLIB/`, `PROCLIB/` + `JCLLIB/`, PDS-as-Git directory shapes (`SOURCE.PDS.*`), Endevor / ChangeMan staging dirs.
 
 **1c. Check telltale dependencies** — read the dependency manifest and look for framework signals: `express`/`fastify`/`nestjs`/`spring-boot`/`flask`/`django` → API; `react`/`angular`/`vue`/`svelte` (in app context) → web app; same in library context with `peerDependencies` → UI framework; `react-native` → RN app or library; `sequelize`/`typeorm`/`prisma`/`flyway` → database-related; `retrofit`/`okhttp`/`alamofire` → mobile app.
+
+**1c′ (mainframe). File-extension density + source-line markers** — mainframe repos have no dependency manifest. Detect by extension density and quick line-grep:
+
+- File extensions: `*.cbl`, `*.cob`, `*.cpy`, `*.pli`, `*.jcl`, `*.proc`, `*.bms`, `*.dbd`, `*.psb`
+- COBOL source markers: `IDENTIFICATION DIVISION`, `PROCEDURE DIVISION`, `WORKING-STORAGE SECTION`, `LINKAGE SECTION`, `COPY <name>`, `EXEC CICS`, `EXEC SQL`, `EXEC DLI`
+- JCL markers: `//<jobname> JOB`, `//STEP[0-9]* EXEC`, `//SYSIN DD`, `// IF (RC=`, `IDCAMS`, `IEBGENER`, `SORT FIELDS=`
+- Header-comment markers: Endevor `*ENDEVOR*`, ChangeMan `*CHANGEMAN*`, Panvalet `++USE`, JES2 `/*JOBPARM`
+
+**Distinguishing the three mainframe sub-types:** a COBOL repo has files with a `PROCEDURE DIVISION`; a copybook library is `.cpy` files (record layouts, no `PROCEDURE DIVISION`); a JCL repo is `.jcl/.proc` plus control cards (`SYSIN`, `SORTIN`, etc.) and contains no COBOL sources.
 
 **1d. Check for existing documentation** — look for `docs/`, README.md, OpenAPI specs, JSDoc/Javadoc. Reveals what exists and what's missing.
 
 ### Stage 2: Classify the Repository
 
-Apply the classification table. The seven types are:
+Apply the classification table. The ten types are:
 
 | Type | Key Distinguisher | Skill to Invoke |
 | --- | --- | --- |
@@ -57,6 +66,9 @@ Apply the classification table. The seven types are:
 | Database Repository | Contains DDL, migrations, stored procedures | `reverse-engineer-database` |
 | Mobile Application | Android / iOS / React Native end-user app | `reverse-engineer-mobile-app` |
 | Mobile Framework / Library | Publishes reusable mobile components | `reverse-engineer-mobile-framework` |
+| COBOL Program | Repo's primary content is `.cbl/.cob/.pli` source with `PROCEDURE DIVISION` | `reverse-engineer-cobol-program` |
+| Copybook Library | Repo's primary content is `.cpy` (record layouts, no `PROCEDURE DIVISION`) | `reverse-engineer-copybook-library` |
+| JCL / Batch Repo | Repo's primary content is `.jcl/.proc` and control cards | `reverse-engineer-jcl-job` |
 
 **The application-vs-framework distinction** — most common ambiguity. Ask: who consumes this code? End users → application; other developers as a dependency → framework/library. Concrete signals: presence of `peerDependencies` (framework), `main`/`exports` field without a `start` script (framework), being listed as a dependency in other repos (framework), having its own deployment pipeline (application).
 
@@ -72,6 +84,12 @@ Apply the classification table. The seven types are:
 - API + DB migrations → primary `reverse-engineer-api`, secondary `reverse-engineer-database`
 - Web app that also serves an API for its frontend → `reverse-engineer-web-app`; if external consumers exist, add `reverse-engineer-api`
 - Mobile app with shared library → if extracted as own package, treat separately; if internal, one `reverse-engineer-mobile-app` effort
+
+**Mainframe monorepos** (the common shape — one PDS-as-Git repo mixing COBOL + copybooks + JCL):
+1. List sub-trees by extension density (`.cbl/.cob`, `.cpy`, `.jcl/.proc`)
+2. Recommend the order **copybook-library → cobol-program → jcl-job** (data layouts first because programs include them; JCL last because it invokes the programs)
+3. After all three Part A passes complete, recommend `build-mainframe-data-lineage` rather than (or in addition to) the standard `build-knowledge-base` — lineage is the mainframe-specific aggregator that turns the three Part A outputs into cross-program field-level traceability
+4. Mixed mainframe + DB2 DDL repo → also schedule `reverse-engineer-database` for the DB2 schema; the COBOL/lineage layer covers the embedded `EXEC SQL`, not the schema itself
 
 **Already-documented repos** — note what exists, recommend the appropriate RE skill anyway (existing docs become input to verify against, not a replacement). Suggest a gap analysis first.
 
@@ -90,8 +108,11 @@ Tell the user the exact phrase to use to invoke the first recommended skill. Rec
 - `reverse-engineer-database`
 - `reverse-engineer-mobile-app`
 - `reverse-engineer-mobile-framework`
+- `reverse-engineer-cobol-program`
+- `reverse-engineer-copybook-library`
+- `reverse-engineer-jcl-job`
 
-After the recommended RE skill(s) complete, the user proceeds to `build-knowledge-base` to aggregate Part B docs into the knowledge base.
+After the recommended RE skill(s) complete, the user proceeds to `build-knowledge-base` to aggregate Part B docs into the knowledge base. For mainframe stacks, additionally recommend `build-mainframe-data-lineage` to produce the cross-program data-traceability artifact.
 
 ## Output
 

@@ -8,6 +8,8 @@ Define the analysis sequence run after discovery (or instead of discovery if ski
 
 ## Sequential execution rule
 
+Before each sub-step, ask the user whether the sub-step applies. If they say "Skip" or "No (with reason)", record the outcome and proceed to the next sub-step. Do not assume relevance.
+
 Execute one sub-step at a time. Read the corresponding reference only when about to execute. After each sub-step:
 1. Produce the output artifact in full.
 2. Present to the user.

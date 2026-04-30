@@ -122,3 +122,51 @@ Then `build-knowledge-base` aggregates all five.
 If the API repo already shipped a published OpenAPI spec at `openapi.yaml`, the analysis flags it under "Existing Documentation":
 
 > *Existing OpenAPI 3.0 spec found at openapi.yaml. Likely partial coverage — does not include workflow examples or error-handling narratives. Recommendation: run `reverse-engineer-api` anyway; treat the existing spec as input to verify against, not as a replacement. Begin with a gap analysis: which paths in the spec lack request/response examples?*
+
+## Variant — Mainframe Monorepo Example
+
+If `~/code/billing-mainframe` had this layout:
+
+```
+COBOL/         ← 142 .cbl programs (PROCEDURE DIVISIONs)
+COPYBOOK/      ← 387 .cpy record layouts
+JCL/           ← 64 .jcl jobs
+PROCLIB/       ← 23 .proc cataloged procedures
+DBD/           ← 12 IMS .dbd files
+PSB/           ← 18 IMS .psb files
+*ENDEVOR* headers throughout
+```
+
+Stage 1 detection: no `package.json`/`pom.xml`/etc. → fall through to mainframe extension-density check. `.cpy` (387) > `.cbl` (142) > `.jcl` (64) > `.proc` (23). Source-line markers: `IDENTIFICATION DIVISION` in COBOL/, `EXEC SQL` and `EXEC DLI` in many programs, `//STEP* EXEC` in JCL/, Endevor header markers throughout.
+
+Stage 2 classification: this is a mainframe monorepo containing all three sub-types. The DBD/ + PSB/ directories indicate IMS database integration; EXEC SQL indicates DB2 integration.
+
+Stage 3 special case (mainframe monorepo): order is **copybook-library → cobol-program → jcl-job**, then `build-mainframe-data-lineage` for the cross-program field-level traceability artifact.
+
+```
+## Repository Analysis: billing-mainframe
+
+**Repository Path:** ~/code/billing-mainframe
+**Primary Language:** COBOL (Enterprise COBOL on z/OS)
+**Framework / Stack:** IBM z/OS, CICS, IMS DB, DB2, JES2 (inferred)
+**Version:** (mainframe repos commonly lack a top-level version; record the latest Endevor package or migration)
+
+### Classification
+
+| Component | Type | Skill | Priority |
+| --- | --- | --- | --- |
+| COPYBOOK/ (387 .cpy) | Copybook Library | reverse-engineer-copybook-library | 1 |
+| COBOL/ (142 .cbl) | COBOL Program | reverse-engineer-cobol-program | 2 |
+| JCL/ + PROCLIB/ (87) | JCL / Batch Repo | reverse-engineer-jcl-job | 3 |
+
+### Recommended Approach
+
+1. Start with `reverse-engineer-copybook-library` — record layouts are referenced everywhere downstream; data dictionary is the foundation.
+2. Then `reverse-engineer-cobol-program` — programs can now be documented against a known copybook canonical record graph.
+3. Then `reverse-engineer-jcl-job` — JCL ties programs to datasets and external triggers.
+4. Finally, run `build-mainframe-data-lineage` instead of (or in addition to) `build-knowledge-base` — produces copybook-where-used, field-level MOVE chains, JCL→program→dataset chains, EXEC SQL host-variable bindings, and IMS segment bindings.
+
+### To begin, say:
+
+> "I need to reverse engineer the documentation for my copybook library at ~/code/billing-mainframe."
+```

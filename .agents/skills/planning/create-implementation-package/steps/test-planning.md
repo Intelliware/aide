@@ -73,6 +73,15 @@ Test planning runs before increment decomposition because:
 - Required test environment (e.g., a sandbox API) is not available — log as
   a prerequisite that must be in place before any increment relying on it.
 
+## Acknowledgement checkpoint
+
+Before proceeding to increment decomposition:
+
+1. Summarize the test strategy, coverage targets, and verification commands in chat.
+2. Ask: "Is the test plan correct and sufficient for the AI Gates?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the test plan and repeat the summary.
+
 ## How this feeds increment writing
 
 When writing each increment's **AI Gate** section (block

@@ -26,13 +26,15 @@ Applied to every block when filling content:
 
 | # | Step | Halt condition |
 |---|---|---|
-| 0 | Section relevance check | If user says "Skip" or "No (with reason)", record in completeness tracker and exit |
+| 0 | Section relevance check (unconditional) | Ask Yes / No (with reason) / Skip / Not sure for every block. Record outcome in the completeness tracker before drafting. |
 | 1 | Define scope of the section | If scope is unclear, elicit before drafting |
 | 2 | Draft content from the block template under `templates/blocks/requirements/<slug>.md` | If template is missing, halt and report — do not invent structure |
 | 3 | Verify understanding by summarizing back | If user disagrees, return to step 1 |
 | 4 | Trace every item to an analysis artifact (constraint, risk, dependency, decision) | If a tracked item cannot be traced, flag and confirm with user |
 | 5 | Refine based on feedback | Continue until user acknowledges |
 | 6 | Mark complete; append `Added` row to change tracker | Tracker append must succeed before moving to next block |
+
+**Step 3 (Verify understanding) is non-skippable.** Even if the section seems trivially correct, summarize back what you understood and what you produced and wait for acknowledgement. Skipping this step is the most common cause of late-stage drift between artifact and intent.
 
 ## Composition awareness
 

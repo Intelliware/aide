@@ -8,6 +8,8 @@ Define the entry-point sequence for a brownfield feature: the BA/PO's discovery 
 
 ## Sequential execution rule
 
+Before each sub-step, ask the user whether the sub-step applies. If they say "Skip" or "No (with reason)", record the outcome and proceed to the next sub-step. Do not assume relevance.
+
 **Execute one step at a time. Do not pre-read all reference files before starting.**
 
 After each sub-step:

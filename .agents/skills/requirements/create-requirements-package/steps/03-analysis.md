@@ -52,6 +52,15 @@ The full step-by-step instructions, decision rules, and per-artifact templates l
 - [ ] Risk register acknowledged
 - [ ] Assumption-log and decision-log up to date
 
+## Acknowledgement checkpoint
+
+Before proceeding to `steps/04-writing.md`:
+
+1. Summarize the risk register, constraint register, and gap analysis in chat.
+2. Ask: "Have I captured the analysis correctly? Anything missing or wrong?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected artifact(s) and repeat the summary.
+
 ## Next
 
 Proceed to `steps/04-writing.md`.

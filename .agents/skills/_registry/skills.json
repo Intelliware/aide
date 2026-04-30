@@ -50,6 +50,14 @@
       "path": ".agents/skills/knowledge-base/build-knowledge-base/SKILL.md"
     },
     {
+      "canonical_id": "build-mainframe-data-lineage",
+      "name": "build-mainframe-data-lineage",
+      "description": "Use when the user asks to build mainframe data lineage, generate cross-program field-level traceability, build a where-used index for COBOL copybooks or fields, build the JCL \u2192 program \u2192 dataset chain, resolve EXEC SQL host variables back to copybook fields, or aggregate copybook + COBOL program + JCL Part A into a coherent lineage artefact in the knowledge base. Runs after reverse-engineer-copybook-library, reverse-engineer-cobol-program, and reverse-engineer-jcl-job have all completed Part A for the contributing repos.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/build-mainframe-data-lineage/SKILL.md"
+    },
+    {
       "canonical_id": "capture-solution-context",
       "name": "capture-solution-context",
       "description": "Use when the user wants to capture project-level solution context that the code cannot tell you \u2014 mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI; says 'capture solution context', 'document the solution', 'set up project context', 'document who uses this and why', 'capture business context for the KB'; or when bootstrapping a new project's knowledge base after RE \u2192 build-knowledge-base. Produces six markdown files under <KB>/shared/solution-context/ plus a glossary delta. Interactive by default; supports --non-interactive for CI runs that stub from RE outputs.",
@@ -244,7 +252,7 @@
     {
       "canonical_id": "analyze-repository",
       "name": "analyze-repository",
-      "description": "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke.",
+      "description": "Use when the user points at a code repository and asks what kind of project it is, which reverse-engineering skill to apply, how to document it, or when they describe a monorepo / hybrid / multi-project codebase without specifying the type \u2014 including mainframe / COBOL / copybook / JCL repositories. The diagnostic step between having code and knowing which reverse-engineer-* skill to invoke.",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/analyze-repository/SKILL.md"
@@ -266,12 +274,36 @@
       "path": ".agents/skills/reverse-engineering/reverse-engineer-api-framework/SKILL.md"
     },
     {
+      "canonical_id": "reverse-engineer-cobol-program",
+      "name": "reverse-engineer-cobol-program",
+      "description": "Use when the user asks to document COBOL programs, reverse-engineer COBOL source, extract documentation from a COBOL repository, document mainframe batch / online programs, document CICS / IMS / DB2 program logic, or build a program contract for COBOL callers. Produces Part A (internal docs for mainframe maintainers) and Part B (consumer guide for app integrators, batch schedulers, and downstream-system teams). Do NOT use for copybook-only repos \u2014 use reverse-engineer-copybook-library.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-cobol-program/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-copybook-library",
+      "name": "reverse-engineer-copybook-library",
+      "description": "Use when the user asks to document a copybook library, reverse-engineer mainframe record layouts, build a coherent data dictionary across COBOL copybooks, normalize record layouts (REDEFINES / OCCURS DEPENDING ON), find duplicate or divergent copybooks across teams, or produce a per-copybook record reference. Produces Part A (internal docs for copybook maintainers and data architects) and Part B (data dictionary for application developers and integrators). Do NOT use for COBOL program repos \u2014 use reverse-engineer-cobol-program.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-copybook-library/SKILL.md"
+    },
+    {
       "canonical_id": "reverse-engineer-database",
       "name": "reverse-engineer-database",
       "description": "Use when the user asks to document a database (schema, stored procedures, triggers, views), reverse-engineer a schema, extract database docs, create a data dictionary, or generate ERDs from existing database code. Produces Part A (internal DB docs for DBAs), Part B1 (data dictionary & ERD), and Part B2 (database consumer guide for application developers).",
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-database/SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-jcl-job",
+      "name": "reverse-engineer-jcl-job",
+      "description": "Use when the user asks to document JCL job decks, mainframe batch jobs, PROCs / PROCLIB, INCLUDE members, IDCAMS / SORT / IEBGENER control cards, GDG dataset lifecycles, or scheduler integration on a mainframe. Produces Part A (internal docs for batch developers and ops) and Part B (job-flow guide for application teams and downstream consumers). Do NOT use for COBOL source \u2014 use reverse-engineer-cobol-program; do NOT use for copybooks \u2014 use reverse-engineer-copybook-library.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/reverse-engineer-jcl-job/SKILL.md"
     },
     {
       "canonical_id": "reverse-engineer-mobile-app",

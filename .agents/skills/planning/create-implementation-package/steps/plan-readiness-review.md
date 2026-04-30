@@ -120,6 +120,15 @@ Issues:
 Required fixes: [...]
 ```
 
+## Acknowledgement checkpoint
+
+Before handing off to `review-implementation-package`:
+
+1. Surface the GO / NO-GO verdict and any issues to the user.
+2. Ask: "Confirmed GO — proceed to formal review?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes or wants to address issues first, revise the package and re-run this self-check.
+
 ## What happens next
 
 - **GO** → hand off to `review-implementation-package`. The handoff message

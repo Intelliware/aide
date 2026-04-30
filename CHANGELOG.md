@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.2.0` |
+| Current artifact version | `1.4.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -52,6 +52,49 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
+### `1.4.0` — 2026-04-30
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-30 | Restructure | skills | `.agents/skills/{requirements,design,planning,execution}/` — 4 SKILL.md + 9 step files + 2 process.md refs | Stage 1 of acknowledgement-restoration: promotes "verify understanding" from a single bullet inside the 7-step per-file workflow to a top-level "Verification rule (always-on)" section in every SDLC create/execute SKILL.md, plus an "Acknowledgement checkpoint" sub-section at the tail of each step file and a non-skippable note under the 7-step table in the two process.md references. See `_docs/plan-restore-acknowledgement.md`. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-30 | Restructure | skills | `.agents/skills/{requirements,design}/` — 2 process.md + 2 step files + 2 workflow refs | Stage 2 of acknowledgement-restoration: makes the section relevance check unconditional. Drops the "if relevance is in question" clause from the 7-step Step 0 row and from per-block workflow text. Adds explicit per-sub-step relevance ask to discovery-workflow and analysis-workflow refs. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-30 | Restructure | blocks, skills | `templates/blocks/{requirements,design}/` — 4 block templates + 2 step files | Stage 3 of acknowledgement-restoration: adds "AUTHORING RULE — sub-section acknowledgement" notes (HTML-comment-wrapped so they do not render in the assembled package) to the four large block templates (functional-requirements, business-logic-rules, api-design, database-design) mandating a per-item acknowledgement loop instead of one-pass drafting. Step files flag these blocks as iterative. | repo @ this commit | ✅ Verified |
+
+#### Branch Dependency
+
+Integrated on `mm/add-all` in the design-doc-declared merge order:
+mm/add-context (1.1.0) → mm/add-adverserial (1.2.0) → mm/add-cobol (1.3.0) → mm/add-ack (1.4.0).
+
+---
+
+### `1.3.0` — 2026-04-29
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Addition | docs | `_docs/cobol-mainframe-re-design.md` | Stage 1 design note for the COBOL/mainframe RE layer: three new RE domain skills, one new KB aggregation skill, analyze-repository extensions, block / composition trees, review-package integration. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Addition | skills | `.agents/skills/reverse-engineering/reverse-engineer-cobol-program/` | New domain skill: documents COBOL programs into Part A (DIVISION-by-DIVISION reference, PERFORM/CALL graph, FILE-CONTROL/FD bindings, EXEC CICS/SQL/DLI inventories) + Part B (program contract for batch schedulers and integrators). Emits three lineage feed-files (program-call-graph.mmd, program-data-bindings.json, program-exec-inventory.md). | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Addition | skills | `.agents/skills/reverse-engineering/reverse-engineer-copybook-library/` | New domain skill: documents copybook libraries into Part A (per-copybook record reference, REDEFINES variants, OCCURS expansion, level-88 condition names, naming-convention buckets, duplicate / divergent detection) + Part B (canonical record catalogue + field index = the data dictionary). Emits feed-files: copybook-record-graph.json, data-dictionary.md, copybook-conflicts.md. | repo @ this commit | ✅ Verified |
+| 4 | 2026-04-29 | Addition | skills | `.agents/skills/reverse-engineering/reverse-engineer-jcl-job/` | New domain skill: documents JCL / PROCLIB into Part A (step-by-step reference, PROC and INCLUDE expansion, DD inventory, GDG and dataset lifecycle, condition codes, IDCAMS/SORT/IEBGENER patterns, scheduler integration, RACF) + Part B (job-flow guide for downstream consumers). Emits feed-files: job-flow.mmd, dataset-io.json. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Addition | skills | `.agents/skills/knowledge-base/build-mainframe-data-lineage/` | New KB-stage aggregator skill: consumes the three domain skills' feed-files and emits a coherent cross-program data-lineage artefact under `<KB>/lineage/mainframe/` (copybook-where-used, field-where-used, MOVE chain, job→program→dataset chain, EXEC SQL/IMS/CICS bindings, unbound-and-flagged catalogue, summary). Eight-step workflow with explicit coverage-rule gate. | repo @ this commit | ✅ Verified |
+| 6 | 2026-04-29 | Addition | blocks | `templates/blocks/reverse-eng/cobol-program/`, `templates/blocks/reverse-eng/copybook-library/`, `templates/blocks/reverse-eng/jcl-job/` | 56 new block templates (16+6 cobol-program, 12+6 copybook-library, 11+5 jcl-job) backing the three new RE domain compositions. | repo @ this commit | ✅ Verified |
+| 7 | 2026-04-29 | Addition | blocks | `templates/blocks/knowledge-base/mainframe-lineage/` | 10 new block templates backing the kb-mainframe-data-lineage composition. | repo @ this commit | ✅ Verified |
+| 8 | 2026-04-29 | Addition | compositions | `templates/compositions/re-cobol-program-{internal,consumer}.yaml`, `templates/compositions/re-copybook-library-{internal,consumer}.yaml`, `templates/compositions/re-jcl-job-{internal,consumer}.yaml`, `templates/compositions/kb-mainframe-data-lineage.yaml` | Seven new compositions (six per-domain RE pairs plus the lineage aggregator). | repo @ this commit | ✅ Verified |
+| 9 | 2026-04-29 | Addition | docs | `_docs/cobol-mainframe-review-integration.md` | Documents the review-package patches that apply post-merge of mm/add-adverserial — extends review-reverse-engineering-package coverage tables for the three new domains and adds a review-mainframe-lineage-integrity sub-review to review-knowledge-base-package. Deferred patch because the target review skills don't exist on this branch. | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Source Update | skills | `.agents/skills/reverse-engineering/analyze-repository/` | Extended dispatcher with mainframe detection: new 1c′ extension-density + source-line-marker step (.cbl/.cob/.cpy/.pli/.jcl/.proc/.bms/.dbd/.psb, IDENTIFICATION DIVISION, EXEC CICS/SQL/DLI, JCL JOB/STEP/SYSIN, Endevor / ChangeMan / Panvalet headers), three new dispatch rows (cobol-program / copybook-library / jcl-job), mainframe-monorepo ordering rule (copybook-library → cobol-program → jcl-job → build-mainframe-data-lineage), worked-example variant for a mainframe monorepo. SKILL.md still under 200 lines. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Source Update | validator | `.agents/skills/_registry/{skills.csv, skills.json}` | Rebuilt registry on `mm/add-all` to 43 skills (was 35), 0 warnings. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Source Update | validator | `.agents/skills/_registry/workflow-graph.yaml` | Updated brownfield flow to reference ten domain skills (was seven) and to list build-mainframe-data-lineage as an optional post-build step gated on mainframe-stack presence. | repo @ this commit | ✅ Verified |
+
+---
+
 ### `1.2.0` — 2026-04-29
 
 #### Added
@@ -73,7 +116,7 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 | 2 | 2026-04-29 | Source Update | skills | `.agents/skills/design/review-design-package/` | Sequence expanded from 3 to 5 sub-reviews. New `review-adversarial-pass` (3) and `review-edge-cases` (4) inserted before `review-solution-readiness` (now 5). Halts on FAIL per existing pattern. | repo @ this commit | ✅ Verified |
 | 3 | 2026-04-29 | Source Update | skills | `.agents/skills/planning/review-implementation-package/` | Sequence expanded from 8 to 10 sub-reviews. New `review-adversarial-pass` (8) and `review-edge-cases` (9) inserted before the implementation-readiness verdict (now 10). Adversarial findings flow into the consolidated issue list rather than halting; severities mapped to Critical/Important/Minor per the wrapper pattern. | repo @ this commit | ✅ Verified |
 | 4 | 2026-04-29 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Inserted `review-reverse-engineering-package` in brownfield between `reverse-engineer-<dynamic>` and `build-knowledge-base` as a required gate. Added `review-adversarial`, `review-edge-case-hunter`, and `review-knowledge-base-package` to the `anytime` list. | repo @ this commit | ✅ Verified |
-| 5 | 2026-04-29 | Source Update | docs | `README.md` | Version bumped to 1.2.0. Skill count bumped to 40 (35 from 1.1.0 + 4 new + 1 already counted in 1.1.0 changes). Stage rows for `meta`, `reverse-engineering`, and `knowledge-base` updated to mention the new review skills. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Source Update | docs | `README.md` | Stage rows for `meta`, `reverse-engineering`, and `knowledge-base` updated to mention the new review skills. | repo @ this commit | ✅ Verified |
 
 ---
 
@@ -103,7 +146,7 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 | 6 | 2026-04-29 | Source Update | skills | `.agents/skills/knowledge-base/verify-knowledge-base-coverage/steps/03-check-staleness.md` | New informational warnings for missing shared leaves and repo-orphan solution-context references. | repo @ this commit | ✅ Verified |
 | 7 | 2026-04-29 | Source Update | config | `config/framework.toml.example` | Declared `[knowledge_base.solution_context_max_age_days]` (default 90) — drives the new L4 staleness check. | repo @ this commit | ✅ Verified |
 | 8 | 2026-04-29 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Inserted the three new skills into both `brownfield` (after `verify-knowledge-base-coverage`) and `greenfield` (split between pre-requirements and post-design) sequences. Added all three to `anytime` for refresh-mode use. Re-ran `scripts/build-registry.py`. | repo @ this commit | ✅ Verified |
-| 9 | 2026-04-29 | Source Update | docs | `README.md`, `.agents/skills/knowledge-base/README.md` | Skill count bumped 32 → 35; KB skill count bumped 5 → 8; added "two halves" framing for code-grounded vs human-grounded KB. | repo @ this commit | ✅ Verified |
+| 9 | 2026-04-29 | Source Update | docs | `README.md`, `.agents/skills/knowledge-base/README.md` | KB skill count bumped 5 → 8; added "two halves" framing for code-grounded vs human-grounded KB. | repo @ this commit | ✅ Verified |
 
 ---
 

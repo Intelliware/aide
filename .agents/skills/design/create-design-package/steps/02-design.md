@@ -47,11 +47,13 @@ Do not fail because Step 1 was skipped. Explain the confidence trade-off and pro
 
 Block ordering matches `templates/compositions/greenfield-design-package.yaml`. Skip blocks marked OUT in scoping; record N/A in the design change-tracker header with the gate condition.
 
+**Iterative blocks:** sub-step 6 (api-design) and sub-step 7 (database-design) contain multiple independent items. For these, apply the per-item acknowledgement loop defined in the block template (`templates/blocks/design/api-design.md`, `templates/blocks/design/database-design.md`) — present each item, get approval, then move on. Do not draft all items in one pass.
+
 ## The 7-Step per-file Workflow
 
 Apply to every block:
 
-1. **Section relevance check** — if relevance is in question, ask Yes / No (with reason) / Skip / Not sure.
+1. **Section relevance check** (unconditional) — ask Yes / No (with reason) / Skip / Not sure for every block before drafting.
 2. **Define scope** of the section in plain language.
 3. **Draft** content using the block template under `templates/blocks/design/<slug>.md`.
 4. **Verify understanding** by summarizing back before continuing.
@@ -81,6 +83,15 @@ Full instructions live in `references/solution-design-workflow.md` and `referenc
 - [ ] `solution-package.md` (alias) and `{paths.design_path}/{feature-id}-design.md` assembled per composition block ordering
 - [ ] Design change tracker at v0.1 with one `Added` row per tracked decision
 - [ ] User has acknowledged the assembled package
+
+## Acknowledgement checkpoint
+
+Before handing off to `review-design-package`:
+
+1. Summarize the assembled design package — technology stack with pinned versions, included blocks, gated-out blocks, ADRs authored.
+2. Ask: "Is the design package ready for formal review?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected sections and repeat the summary.
 
 ## Next
 

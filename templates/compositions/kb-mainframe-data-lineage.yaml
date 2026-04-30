@@ -1,0 +1,79 @@
+# Composition: Knowledge Base — Mainframe Data Lineage Artefact
+#
+# The cross-repo lineage artefact tree produced by build-mainframe-data-lineage.
+# Joins per-repo Part A outputs from reverse-engineer-copybook-library,
+# reverse-engineer-cobol-program, and reverse-engineer-jcl-job into one
+# coherent data-lineage artefact under <KB>/lineage/mainframe/.
+#
+# Source: templates/blocks/knowledge-base/mainframe-lineage/
+
+name: kb-mainframe-data-lineage
+description: KB-stage cross-program lineage artefact for mainframe (COBOL + copybook + JCL) projects.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-lineage
+
+default-output-path: "{paths.knowledge_base_path}/lineage/mainframe/"
+default-output-shape: tree
+# Path is rooted at the knowledge_base_path declared in project.toml.
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "knowledge-base/mainframe-lineage/" prefix stripped.
+blocks:
+  - slug: knowledge-base/mainframe-lineage/lineage-overview
+    optional: false
+    order: 110
+  - slug: knowledge-base/mainframe-lineage/copybook-where-used
+    optional: false
+    order: 120
+  - slug: knowledge-base/mainframe-lineage/field-where-used
+    optional: false
+    order: 130
+  - slug: knowledge-base/mainframe-lineage/move-chain
+    optional: false
+    order: 140
+  - slug: knowledge-base/mainframe-lineage/job-program-dataset-chain
+    optional: false
+    order: 150
+  - slug: knowledge-base/mainframe-lineage/db2-host-variable-bindings
+    optional: false
+    order: 160
+    include-if: "project.elicitation.has_db2 == true"
+  - slug: knowledge-base/mainframe-lineage/ims-segment-bindings
+    optional: false
+    order: 170
+    include-if: "project.elicitation.has_ims == true"
+  - slug: knowledge-base/mainframe-lineage/cics-commarea-bindings
+    optional: false
+    order: 180
+    include-if: "project.elicitation.has_cics == true"
+  - slug: knowledge-base/mainframe-lineage/unbound-and-flagged-items
+    optional: false
+    order: 190
+  - slug: knowledge-base/mainframe-lineage/lineage-summary
+    optional: false
+    order: 200
+
+elicitation: []
+
+decision-gates:
+  - block: knowledge-base/mainframe-lineage/db2-host-variable-bindings
+    include-if: "project.elicitation.has_db2 == true"
+  - block: knowledge-base/mainframe-lineage/ims-segment-bindings
+    include-if: "project.elicitation.has_ims == true"
+  - block: knowledge-base/mainframe-lineage/cics-commarea-bindings
+    include-if: "project.elicitation.has_cics == true"
+
+notes: |
+  Block order follows order-hint values 110..200 (continuous, no gap).
+  DB2/IMS/CICS-binding blocks are conditional because not every project
+  uses all three middleware systems. The two side-artefact files
+  (move-chain.json, job-program-dataset-chain.mmd) are written by the
+  parent skill alongside their corresponding markdown blocks but are NOT
+  driven by this composition's block list — they are the canonical
+  machine-readable forms that downstream consumers (audit / refactoring
+  / graph-rendering tools) read.
+
+  This skill is a re-runnable aggregator: every re-run overwrites the
+  artefact tree in place. The change-tracker logs each build (Parts
+  Affected: lineage). Hand-editing any artefact is forbidden — every
+  claim must trace back to a contributing RE pass's feed-files.
