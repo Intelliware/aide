@@ -139,17 +139,16 @@ Verification report: 1 failure, 0 warnings. GO after correction.
   ├── 04-working-storage-and-linkage.md
   ├── 05-copy-statements-and-replacing-rules.md
   ├── 06-paragraph-and-section-graph.md
-  ├── 07-perform-graph.md
-  ├── 08-call-and-perform-graph.md
-  ├── 09-exec-cics-inventory.md
-  ├── 10-exec-sql-inventory.md
-  ├── 11-exec-dli-inventory.md
-  ├── 12-error-handling-and-abend-codes.md
-  ├── 13-performance-and-runtime-considerations.md
-  ├── 14-naming-conventions.md
-  ├── 15-anti-patterns-and-pitfalls.md
-  ├── 16-faq-and-troubleshooting.md
-  ├── 17-code-examples.md
+  ├── 07-call-and-perform-graph.md
+  ├── 08-exec-cics-inventory.md
+  ├── 09-exec-sql-inventory.md
+  ├── 10-exec-dli-inventory.md
+  ├── 11-error-handling-and-abend-codes.md
+  ├── 12-performance-and-runtime-considerations.md
+  ├── 13-naming-conventions.md
+  ├── 14-anti-patterns-and-pitfalls.md
+  ├── 15-faq-and-troubleshooting.md
+  ├── 16-code-examples.md
   ├── program-call-graph.mmd
   ├── program-data-bindings.json
   ├── program-exec-inventory.md

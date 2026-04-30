@@ -1,0 +1,71 @@
+# Composition: Reverse-Engineering — JCL Job (Internal Part)
+#
+# Documents the INTERNAL implementation of JCL / PROCLIB / INCLUDE members:
+# step-by-step reference, PROC and INCLUDE expansion, DD inventory and DISP,
+# GDG and dataset lifecycle, condition codes, restart points, IDCAMS / SORT
+# / IEBGENER patterns, scheduler integration, RACF.
+#
+# Source: templates/blocks/reverse-eng/jcl-job/internal/
+
+name: re-jcl-job-internal
+description: Reverse-engineering KB for the internal implementation of a JCL / PROCLIB repository.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "docs/jcl-job-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/jcl-job/internal/" prefix stripped.
+blocks:
+  - slug: reverse-eng/jcl-job/internal/job-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/jcl-job/internal/step-by-step-reference
+    optional: false
+    order: 120
+  - slug: reverse-eng/jcl-job/internal/proc-and-include-expansion
+    optional: false
+    order: 130
+  - slug: reverse-eng/jcl-job/internal/dd-inventory-and-disp
+    optional: false
+    order: 140
+  - slug: reverse-eng/jcl-job/internal/gdg-and-dataset-lifecycle
+    optional: false
+    order: 150
+    include-if: "project.elicitation.has_gdg == true"
+  - slug: reverse-eng/jcl-job/internal/condition-codes-and-restart-points
+    optional: false
+    order: 160
+  - slug: reverse-eng/jcl-job/internal/idcams-sort-iebgener-patterns
+    optional: false
+    order: 170
+  - slug: reverse-eng/jcl-job/internal/scheduler-integration
+    optional: false
+    order: 180
+  - slug: reverse-eng/jcl-job/internal/security-and-racf-considerations
+    optional: false
+    order: 190
+  - slug: reverse-eng/jcl-job/internal/anti-patterns-and-pitfalls
+    optional: false
+    order: 350
+  - slug: reverse-eng/jcl-job/internal/faq-and-troubleshooting
+    optional: false
+    order: 360
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+decision-gates:
+  - block: reverse-eng/jcl-job/internal/gdg-and-dataset-lifecycle
+    include-if: "project.elicitation.has_gdg == true"
+
+notes: |
+  Block order follows order-hint values 110..360 (gap between 190 and 350
+  is intentional; consumer-stage content lives in re-jcl-job-consumer.yaml).
+  GDG block is conditional because not every JCL repo uses GDGs. Mandatory
+  side-artefacts (job-flow.mmd, dataset-io.json) are written at the Part-A
+  directory root by the parent skill and are NOT block-driven — they feed
+  build-mainframe-data-lineage.
