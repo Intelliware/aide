@@ -82,6 +82,15 @@ Full instructions live in `references/solution-design-workflow.md` and `referenc
 - [ ] Design change tracker at v0.1 with one `Added` row per tracked decision
 - [ ] User has acknowledged the assembled package
 
+## Acknowledgement checkpoint
+
+Before handing off to `review-design-package`:
+
+1. Summarize the assembled design package — technology stack with pinned versions, included blocks, gated-out blocks, ADRs authored.
+2. Ask: "Is the design package ready for formal review?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected sections and repeat the summary.
+
 ## Next
 
 Hand off by name to `review-design-package`.

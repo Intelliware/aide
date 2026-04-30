@@ -84,6 +84,15 @@ map of the affected codebase areas covering:
 - Architecture baseline contradicts the codebase — surface the conflict; the
   design package may need updating before implementation planning continues.
 
+## Acknowledgement checkpoint
+
+Before proceeding to `steps/test-planning.md`:
+
+1. Summarize the affected modules, existing patterns, and integration points in chat.
+2. Ask: "Does the codebase analysis match your understanding of where this work lands?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the analysis and repeat the summary.
+
 ## Why this step is first
 
 Without codebase analysis, the implementation package's increments reference

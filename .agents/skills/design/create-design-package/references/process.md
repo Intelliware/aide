@@ -34,6 +34,8 @@ Applied to every block when filling content:
 | 5 | Refine based on feedback | Continue until user acknowledges |
 | 6 | Mark complete; append `Added` row to design change tracker | Tracker append must succeed before next block |
 
+**Step 3 (Verify understanding) is non-skippable.** Even if the section seems trivially correct, summarize back what you understood and what you produced and wait for acknowledgement. Skipping this step is the most common cause of late-stage drift between artifact and intent.
+
 ## Composition awareness
 
 Always resolve which blocks apply by reading the active composition's `blocks:` and `decision-gates:` lists. Honor `optional: true` (offer to skip) and `include-if: <expr>` (skip when expr resolves false). For backbone-only projects, the resolved set may be just solution-overview + technology-stack + architecture + security + ops/test + NFR + change-log.

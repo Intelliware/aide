@@ -33,6 +33,10 @@ See `references/INPUTS-OUTPUTS.md` for the full table. Required:
 - Active composition YAML (`greenfield-design-package.yaml` or `brownfield-enhancement-spec.yaml`)
 - Knowledge base (when present and brownfield) — accessed via `knowledge-base/navigate-knowledge-base`
 
+## Verification rule (always-on)
+
+After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
+
 ## Workflow
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference.

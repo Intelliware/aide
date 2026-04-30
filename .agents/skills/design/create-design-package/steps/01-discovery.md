@@ -46,6 +46,15 @@ When `project.paths.knowledge_base_path` is set, query the KB via `knowledge-bas
 - [ ] `architecture-baseline.md` written and acknowledged
 - [ ] C4 Level 1 + Level 2 diagrams in the baseline reviewed by the user
 
+## Acknowledgement checkpoint
+
+Before proceeding to `steps/02-design.md`:
+
+1. Summarize the architecture baseline, technical-debt assessment, and any constraints surfaced.
+2. Ask: "Does the baseline match the architecture you want me to design against?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected discovery artifact(s) and repeat the summary.
+
 ## Next
 
 Proceed to `steps/02-design.md`.
