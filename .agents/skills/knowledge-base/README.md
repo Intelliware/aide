@@ -43,4 +43,7 @@ The KB has two complementary halves. Both share the same root layout under `<kno
 - `generate-ai-rules/` — hybrid (auto + interactive): canonical `project-context.md` plus per-repo overrides
 - `document-operations/` — hybrid (auto + interactive): 4 leaves (deployment topology, environments & secrets, SLOs & monitoring, runbooks & on-call) plus split runbooks
 
+### Periodic gate
+- `review-knowledge-base-package/` — periodic global KB audit (cadence-based, not per-PR); orchestrates `verify-knowledge-base-coverage` + `detect-knowledge-base-drift` plus seven additional lenses, ending in a readiness verdict
+
 See `config/SCHEMAS.md` for the KB schemas (ARCHITECTURE.md template, per-component frontmatter, graph.json), `_docs/solution-context-gap-audit.md` for the rationale behind the human-grounded layer, and the per-skill `references/EXAMPLE.md` for worked examples.

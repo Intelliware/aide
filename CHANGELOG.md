@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.1.0` |
+| Current artifact version | `1.2.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,31 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.2.0` — 2026-04-29
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Addition | skills | `.agents/skills/meta/review-adversarial/` | New anytime skill performing attitude-driven adversarial review of A.I.D.E. artifacts. Six lenses: weasel words, hidden assumptions, unsupported claims, missing stakeholders, "good news only" framing, scope inflation. Stage-aware via `--stage` hint with frontmatter fallback. Produces Format 4 findings (`aide-adversarial-findings@1`). | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Addition | skills | `.agents/skills/meta/review-edge-case-hunter/` | New anytime skill performing method-driven edge-case review. Seven categories: branching paths, error paths, boundaries, concurrency, time/clock, data shapes, authorization. Reports only unhandled edges. Same Format 4 schema as the adversarial sibling. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Addition | skills | `.agents/skills/reverse-engineering/review-reverse-engineering-package/` | New per-repo gate skill that validates Part A + Part B before KB ingestion. 9 sub-reviews (section-completeness, grounding, consistency, coverage, freshness, traceability, adversarial-pass, edge-cases, readiness). Wraps the new anytime skills in sub-reviews 7–8. | repo @ this commit | ✅ Verified |
+| 4 | 2026-04-29 | Addition | skills | `.agents/skills/knowledge-base/review-knowledge-base-package/` | New periodic global KB audit skill (cadence-based, not per-PR). 10 sub-reviews orchestrating `verify-knowledge-base-coverage` and `detect-knowledge-base-drift` plus seven additional lenses, ending with a readiness verdict. Wraps the new anytime skills in sub-reviews 8–9. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Addition | references | `references/review-patterns/review-output-format.md`, `review-verdict-mapping.md`, `adversarial-wrapper-pattern.md` | Three new shared references: Format 4 schema spec (`aide-adversarial-findings@1`), severity-to-verdict mapping for wrappers, and the dispatcher pattern documentation cited from all five `review-*-package` skills. Single source of truth for the wrapper integration. | repo @ this commit | ✅ Verified |
+| 6 | 2026-04-29 | Addition | docs | `_docs/adversarial-review-design.md` | Stage 1 design note for the layer (281 lines). Defines two new anytime skills, two new review-package skills, wrapper integration into all five review-package skills, the shared output format, the verdict mapping, and the staged delivery plan. | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-04-29 | Source Update | skills | `.agents/skills/requirements/review-requirements-package/` | Sequence expanded from 10 to 12 sub-reviews. New sub-reviews `review-adversarial-pass` (10) and `review-edge-cases` (11) inserted before the readiness gate (now 12). Halts on FAIL per existing pattern. | repo @ this commit | ✅ Verified |
+| 2 | 2026-04-29 | Source Update | skills | `.agents/skills/design/review-design-package/` | Sequence expanded from 3 to 5 sub-reviews. New `review-adversarial-pass` (3) and `review-edge-cases` (4) inserted before `review-solution-readiness` (now 5). Halts on FAIL per existing pattern. | repo @ this commit | ✅ Verified |
+| 3 | 2026-04-29 | Source Update | skills | `.agents/skills/planning/review-implementation-package/` | Sequence expanded from 8 to 10 sub-reviews. New `review-adversarial-pass` (8) and `review-edge-cases` (9) inserted before the implementation-readiness verdict (now 10). Adversarial findings flow into the consolidated issue list rather than halting; severities mapped to Critical/Important/Minor per the wrapper pattern. | repo @ this commit | ✅ Verified |
+| 4 | 2026-04-29 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Inserted `review-reverse-engineering-package` in brownfield between `reverse-engineer-<dynamic>` and `build-knowledge-base` as a required gate. Added `review-adversarial`, `review-edge-case-hunter`, and `review-knowledge-base-package` to the `anytime` list. | repo @ this commit | ✅ Verified |
+| 5 | 2026-04-29 | Source Update | docs | `README.md` | Version bumped to 1.2.0. Skill count bumped to 40 (35 from 1.1.0 + 4 new + 1 already counted in 1.1.0 changes). Stage rows for `meta`, `reverse-engineering`, and `knowledge-base` updated to mention the new review skills. | repo @ this commit | ✅ Verified |
+
+---
 
 ### `1.1.0` — 2026-04-29
 

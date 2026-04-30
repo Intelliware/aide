@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -35,7 +35,7 @@ GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specificatio
 
 Open this repo as a folder in the same multi-root workspace as your target project repo(s). Save the workspace as `<project>.code-workspace` (File → Save Workspace As…) so the layout is reproducible. Copilot iterates every workspace folder root and looks for skills under each root's default discovery directories — `.agents/skills/` is one of those defaults, so A.I.D.E.'s skills are picked up automatically.
 
-To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 35 framework skills should appear in the picker with their descriptions.
+To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 39 framework skills should appear in the picker with their descriptions.
 
 ### Step 2 — framework orientation (automatic)
 
@@ -65,7 +65,7 @@ Cursor adopted native [agentskills.io](https://agentskills.io) support around v2
 
 Open this repo as a folder in the same multi-root Cursor workspace as your target project repo(s). Cursor scans `.agents/skills/` (and `.cursor/skills/`) under every workspace folder root, so A.I.D.E.'s skills are picked up automatically.
 
-To verify: open the Agent panel and type `/` — all 35 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
+To verify: open the Agent panel and type `/` — all 39 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
 ### Step 2 — framework orientation (automatic)
 
@@ -138,13 +138,13 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 
 | Stage | What it produces |
 |---|---|
-| `meta` | Cross-cutting orchestrators and utilities (`start-project`, `customize-framework`, `framework-navigator`, `track-change`, `shard-document`, `verify-source`, `scaffold-documentation`) |
+| `meta` | Cross-cutting orchestrators and utilities (`start-project`, `customize-framework`, `framework-navigator`, `track-change`, `shard-document`, `verify-source`, `scaffold-documentation`, `review-adversarial`, `review-edge-case-hunter`) |
 | `requirements` | Requirements packages (`create-`, `review-`) |
 | `design` | Solution design packages (`create-`, `review-`) |
 | `planning` | Implementation packages broken into INC-XXX increments (`create-`, `review-`) |
 | `execution` | Implemented code, increment-status, bug log, PR (`execute-increments`, `manage-bugs`, `create-pr`) |
-| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 7 domain skills) |
-| `knowledge-base` | The global multi-repo KB. Code-grounded skills (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) plus the solution-context layer (`capture-solution-context`, `generate-ai-rules`, `document-operations`) for project-scoped intent the code can't reveal |
+| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 7 domain skills + `review-reverse-engineering-package` gate) |
+| `knowledge-base` | The global multi-repo KB. Code-grounded skills (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) plus the solution-context layer (`capture-solution-context`, `generate-ai-rules`, `document-operations`) and the periodic gate (`review-knowledge-base-package`) |
 | `quick-dev` | Lightweight scoped-change path (`document-`, `plan-`, `execute-quick-change`) |
 
 ## Knowledge base
@@ -155,7 +155,7 @@ The KB is markdown-first. Agents traverse it via `read + grep + glob` over per-c
 
 The KB has two complementary halves. The **code-grounded half** (this `ARCHITECTURE.md` + `components/` + `graph.json`, all derived from RE Part A/B) is what most KB skills produce and consume. The **human-grounded half** under `<KB>/shared/{solution-context, ai-rules, operations}/` captures the project-scoped intent that code can't recover: mission, personas, KPIs, constraints, AI coding rules, deployment topology, SLOs, runbooks. The new `capture-solution-context`, `generate-ai-rules`, and `document-operations` skills produce that half through interactive discovery; `navigate-knowledge-base` surfaces leaves from both halves when feature triggers match.
 
-See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 8 KB skills.
+See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 9 KB skills.
 
 ## Reverse engineering
 

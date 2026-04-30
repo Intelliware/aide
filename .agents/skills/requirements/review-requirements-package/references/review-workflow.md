@@ -19,7 +19,41 @@ Run reviews strictly in the order below. Do not skip ahead and do not run review
 | 7 | review-data-completeness | `review-data-completeness.md` | Data dictionary and data impacts fully specified |
 | 8 | review-traceability | `review-traceability.md` | Requirements trace forward to acceptance criteria and backward to needs |
 | 9 | review-feasibility | `review-feasibility.md` | No structurally infeasible or constraint-violating requirements |
-| 10 | review-requirements-readiness | `review-requirements-readiness.md` | Final go/no-go gate for design handoff |
+| 10 | review-adversarial-pass | `references/review-patterns/adversarial-wrapper-pattern.md` | Invokes `meta/review-adversarial --stage=requirements` |
+| 11 | review-edge-cases | `references/review-patterns/adversarial-wrapper-pattern.md` | Invokes `meta/review-edge-case-hunter --stage=requirements` |
+| 12 | review-requirements-readiness | `review-requirements-readiness.md` | Final go/no-go gate for design handoff |
+
+## Adversarial wrapper sub-reviews (10 and 11)
+
+Sub-reviews 10 (`review-adversarial-pass`) and 11 (`review-edge-cases`) follow the dispatcher pattern documented in `references/review-patterns/adversarial-wrapper-pattern.md`. Per-skill parameters:
+
+```
+meta/review-adversarial \
+  --target=docs/<feature>/requirements-package/requirements-package.md \
+  --stage=requirements \
+  --output-path=docs/<feature>/requirements-package/review/adversarial-findings.md
+```
+
+```
+meta/review-edge-case-hunter \
+  --target=docs/<feature>/requirements-package/requirements-package.md \
+  --stage=requirements \
+  --output-path=docs/<feature>/requirements-package/review/edge-case-findings.md
+```
+
+After each anytime skill writes its findings file, this skill reads the frontmatter `worst_severity` and applies the standard verdict mapping (`references/review-patterns/review-verdict-mapping.md`):
+
+| `worst_severity` | Verdict |
+|---|---|
+| `critical` | FAIL |
+| `high` | PASS WITH OBSERVATIONS |
+| `medium` | PASS WITH OBSERVATIONS |
+| `low` | PASS |
+| `none` | PASS |
+
+If `triage_counts.must-fix > 0` AND `worst_severity == high`, MAY upgrade to FAIL.
+
+The wrapper writes its own verdict file (`review-adversarial-pass.md` or `review-edge-cases.md`) alongside the findings file, citing the findings path and rendering the one-line summary.
 
 The deeper per-review checklists live in `model-2-sdlc-skills/requirement-package/requirements-review/references/<review>.md` for now and will be lifted to `templates/blocks/requirements/review-*.md` in a later migration task. Until then, this skill points authors to those legacy files for the detailed checklists.
 

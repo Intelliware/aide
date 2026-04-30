@@ -93,6 +93,12 @@ flows:
       # The placeholder below is a dispatcher slot — validation skips it.
       - skill: reverse-engineer-<dynamic>
         dispatcher: analyze-repository
+      # Per-repo gate before KB ingestion. Validates the Part A + Part B
+      # output for the repo just RE'd. APPROVED / CONDITIONAL is required
+      # before build-knowledge-base ingests the docs. See
+      # _docs/adversarial-review-design.md § Stage 4.
+      - skill: review-reverse-engineering-package
+        required: true
       - skill: build-knowledge-base
       - skill: verify-knowledge-base-coverage
       # The three solution-context layer skills run AFTER the code-
@@ -152,6 +158,13 @@ anytime:
   - capture-solution-context
   - generate-ai-rules
   - document-operations
+  # Adversarial-review layer (1.2.0). The two anytime skills are runnable
+  # against any A.I.D.E. artifact; the review-knowledge-base-package skill
+  # is the periodic global KB audit (per-PR drift signal stays with
+  # detect-knowledge-base-drift above).
+  - review-adversarial
+  - review-edge-case-hunter
+  - review-knowledge-base-package
 
 # Validation rules the registry generator (or task #8 validation) should enforce.
 # `every-flow-skill-must-resolve` skips dispatcher placeholders (any skill name

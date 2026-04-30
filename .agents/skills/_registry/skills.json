@@ -90,6 +90,14 @@
       "path": ".agents/skills/knowledge-base/navigate-knowledge-base/SKILL.md"
     },
     {
+      "canonical_id": "review-knowledge-base-package",
+      "name": "review-knowledge-base-package",
+      "description": "Use when the user asks to review, audit, validate, or check readiness of the global knowledge base. Says 'review the KB', 'audit the knowledge base', 'check KB readiness', 'is the KB current', 'periodic KB review', 'review knowledge-base package'. Periodic skill, not gate-blocking on every change. Orchestrates verify-knowledge-base-coverage and detect-knowledge-base-drift; adds adversarial and edge-case sub-reviews; emits a final readiness verdict.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/review-knowledge-base-package/SKILL.md"
+    },
+    {
       "canonical_id": "update-knowledge-base",
       "name": "update-knowledge-base",
       "description": "Use when a feature has just shipped and the KB must be brought back into sync \u2014 invoked as the closing step of execute-increments or execute-quick-change. Updates only the components matched by the diff, appends to change-tracker, emits an ADR if a threshold is crossed, and incrementally regenerates graph.json and the capability index. Never re-runs a full build.",
@@ -120,6 +128,22 @@
       "stage": "meta",
       "package": "",
       "path": ".agents/skills/meta/framework-navigator/SKILL.md"
+    },
+    {
+      "canonical_id": "review-adversarial",
+      "name": "review-adversarial",
+      "description": "Use when the user asks to adversarially review, critique, stress-test, or challenge an A.I.D.E. artifact (requirements package, design package, implementation package, RE doc, KB component, KB instance, quick-change brief). Says 'adversarial review of X', 'critique X', 'find what's wrong with X', 'cynical review', 'stress-test these requirements', 'what would a skeptic say about this design', 'challenge my plan'. Attitude-driven \u2014 looks for hidden assumptions, weasel words, unsupported claims, missing risks, and scope inflation. Orthogonal to review-edge-case-hunter (method-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-adversarial/SKILL.md"
+    },
+    {
+      "canonical_id": "review-edge-case-hunter",
+      "name": "review-edge-case-hunter",
+      "description": "Use when the user asks to walk every branching path and boundary condition in an A.I.D.E. artifact and report only what's not handled. Says 'edge-case review of X', 'find unhandled edge cases in X', 'walk the paths in this design', 'what edges does this requirement miss', 'boundary analysis of X'. Method-driven \u2014 enumerates branches, error paths, boundaries, concurrency edges, time/clock edges, data-shape edges, authorization edges. Orthogonal to review-adversarial (attitude-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-edge-case-hunter/SKILL.md"
     },
     {
       "canonical_id": "scaffold-documentation",
@@ -280,6 +304,14 @@
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md"
+    },
+    {
+      "canonical_id": "review-reverse-engineering-package",
+      "name": "review-reverse-engineering-package",
+      "description": "Use when the user asks to review, validate, or check readiness of the reverse-engineered Part A + Part B doc set for a single repo before it is ingested into the knowledge base. Says 'review the RE output for <repo>', 'validate reverse-engineering for <repo>', 'check RE readiness', 'is the RE pass ready for the KB', 'review reverse-engineering package'. Independently invocable; assumes Part A and Part B already exist for the repo.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/review-reverse-engineering-package/SKILL.md"
     }
   ]
 }
