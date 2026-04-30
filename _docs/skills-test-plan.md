@@ -117,7 +117,8 @@ The narrative is the part the operator reads first; the table and ledger are the
 | Greenfield sandbox project | `~/Dev/framework-tests/recipes-app/` |
 | Knowledge-base repo | `~/Dev/framework-tests/recipes-kb/` (sibling repo, separate from the sandbox app) |
 | Brownfield clone root | `~/Dev/framework-tests/oss-clones/` |
-| Mainframe sample (1.3.0) | `~/Dev/framework-tests/oss-clones/mainframe-sample/` — small synthetic deck of `.cbl` + `.cpy` + `.jcl` (10–20 files; user-authored or pulled from a public teaching repo such as `IBM/the-art-of-modern-cobol` or similar). Used only by C.1m, C.8.1–C.8.3, and C.9.4 |
+| Mainframe sample — primary (1.3.0) | `~/Dev/framework-tests/oss-clones/zopeneditor-sample/` — shallow clone of [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) (~924K). Provides `COBOL/` (SAM1, SAM2, PSAM1 — CALL chain + file I/O), `COPYBOOK/` + `COPYLIB/` + `COPYLIB-MVS/` (CUSTCOPY with `OCCURS`, TRANREC with `REDEFINES`), and `JCL/` + `JCLLIB/` + `JCLPROC/` (ALLOCATE, RUN, INCLUDE, COMPROC). Used by C.1m, C.8.1–C.8.3, and C.9.4. |
+| Mainframe sample — supplementary (1.3.0) | `~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample/` — shallow clone of [`pratikdastw/hlasm_cics_cobol_sample`](https://github.com/pratikdastw/hlasm_cics_cobol_sample) (~156K). Adds `EXEC SQL` (CUSTDB2.CBL) + `EXEC CICS` (CUSTMAIN.CBL) host-variable coverage that zopeneditor-sample lacks. Used by C.8.1 only, to exercise the host-var inventory path. |
 | Host under test | Whatever Mike has open (Claude Code session, Cursor, or VSCode + Copilot — record per phase) |
 | Python | system `python3` (for `scripts/build-registry.py` and `scripts/validate.py`) |
 
@@ -125,24 +126,24 @@ The narrative is the part the operator reads first; the table and ledger are the
 
 ## 4. Reverse-engineering candidate repos (Next.js-anchored + mainframe sample)
 
-Selected to exercise all 10 domain RE skills (7 modern-stack + 3 mainframe added in 1.3.0) with small-to-medium open-source codebases. The Next.js / React group keeps the modern KB internally coherent; the mainframe sample is a separate, deliberately-small synthetic deck that exercises the cobol/copybook/jcl skills + `build-mainframe-data-lineage` aggregator without bringing a 100k-line legacy codebase into the test pass.
+Selected to exercise all 10 domain RE skills (7 modern-stack + 3 mainframe added in 1.3.0) with small-to-medium open-source codebases. The Next.js / React group keeps the modern KB internally coherent; the mainframe slice uses two real open-source repos (an IBM-authored sample for COBOL/copybook/JCL breadth + a small CICS+DB2 sample for the host-variable path) instead of a hand-authored synthetic deck.
 
-| # | Domain | Skill | Candidate repo | Why |
+| # | Domain | Skill | Candidate repo (URL) | Why |
 |---|---|---|---|---|
-| 1 | api | `reverse-engineer-api` | `gothinkster/node-express-realworld-example-app` | Small REST API with auth + CRUD. Standard reference. Optional alt: a Next.js `app/api/*` slice from candidate #3. |
-| 2 | api-framework | `reverse-engineer-api-framework` | `honojs/hono` | Modern, compact JS API framework. Pairs naturally with Next.js Edge runtime. |
-| 3 | web-app | `reverse-engineer-web-app` | `vercel/commerce` | Canonical Next.js (App Router) example. Well-known, manageable size. |
-| 4 | ui-framework | `reverse-engineer-ui-framework` | `shadcn-ui/ui` | The dominant Next.js component library. Tests `peerDependencies` classification path. |
-| 5 | database | `reverse-engineer-database` | `documenso/documenso` (Prisma schema only) | Real Prisma schema with migrations; we point the skill at `packages/prisma/`. |
-| 6 | mobile-app | `reverse-engineer-mobile-app` | `bluesky-social/social-app` | Active React Native + Expo app. |
-| 7 | mobile-framework | `reverse-engineer-mobile-framework` | `nativewind/nativewind` | Small RN library with `peerDependencies` — exercises framework-vs-app distinction. |
-| 8 | cobol-program | `reverse-engineer-cobol-program` | `mainframe-sample/programs/` (synthetic; a 3–5 program deck with `WORKING-STORAGE`, `PERFORM`, `CALL`, `EXEC SQL`, `EXEC CICS`) | Smallest realistic deck that exercises DIVISION-by-DIVISION extraction, the PERFORM/CALL graph, and EXEC SQL/CICS host-variable inventory. Emits the `program-call-graph.mmd` + `program-data-bindings.json` lineage feed-files needed by C.9.4. |
-| 9 | copybook-library | `reverse-engineer-copybook-library` | `mainframe-sample/copybooks/` (synthetic; ~10 `.cpy` with `01–88` levels, `REDEFINES`, `OCCURS DEPENDING ON`, naming-convention prefixes) | The canonical "data-dictionary producer" — verifies REDEFINES variants are preserved, OCCURS expanded into indexed positions, and divergent-layout detection fires on a deliberately-duplicated copybook name. Emits `copybook-record-graph.json` + `data-dictionary.md` + `copybook-conflicts.md`. |
-| 10 | jcl-job | `reverse-engineer-jcl-job` | `mainframe-sample/jcl/` (synthetic; 2–3 jobs with PROC + INCLUDE chains, GDG roll, IDCAMS + SORT control cards) | Verifies PROC expansion, DD inventory, GDG generation, and condition-code restart points. Emits `job-flow.mmd` + `dataset-io.json` lineage feed-files. |
+| 1 | api | `reverse-engineer-api` | [`gothinkster/node-express-realworld-example-app`](https://github.com/gothinkster/node-express-realworld-example-app) | Small REST API with auth + CRUD. Standard reference. Optional alt: a Next.js `app/api/*` slice from candidate #3. |
+| 2 | api-framework | `reverse-engineer-api-framework` | [`honojs/hono`](https://github.com/honojs/hono) | Modern, compact JS API framework. Pairs naturally with Next.js Edge runtime. |
+| 3 | web-app | `reverse-engineer-web-app` | [`vercel/commerce`](https://github.com/vercel/commerce) | Canonical Next.js (App Router) example. Well-known, manageable size. |
+| 4 | ui-framework | `reverse-engineer-ui-framework` | [`shadcn-ui/ui`](https://github.com/shadcn-ui/ui) | The dominant Next.js component library. Tests `peerDependencies` classification path. |
+| 5 | database | `reverse-engineer-database` | [`documenso/documenso`](https://github.com/documenso/documenso) (Prisma schema only) | Real Prisma schema with migrations; we point the skill at `packages/prisma/`. |
+| 6 | mobile-app | `reverse-engineer-mobile-app` | [`bluesky-social/social-app`](https://github.com/bluesky-social/social-app) | Active React Native + Expo app. |
+| 7 | mobile-framework | `reverse-engineer-mobile-framework` | [`nativewind/nativewind`](https://github.com/nativewind/nativewind) | Small RN library with `peerDependencies` — exercises framework-vs-app distinction. |
+| 8 | cobol-program | `reverse-engineer-cobol-program` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `COBOL/` dir (SAM1.cbl, SAM2.cbl, PSAM1.cbl); supplementary [`pratikdastw/hlasm_cics_cobol_sample`](https://github.com/pratikdastw/hlasm_cics_cobol_sample) (CUSTDB2.CBL, CUSTMAIN.CBL) | zopeneditor-sample exercises DIVISION-by-DIVISION extraction, CALL chain (SAM1→SAM2), and copybook resolution against COPYLIB / COPYLIB-MVS. The CICS+DB2 supplementary repo adds `EXEC SQL` + `EXEC CICS` host-variable inventory coverage that zopeneditor-sample lacks. Emits the `program-call-graph.mmd` + `program-data-bindings.json` lineage feed-files needed by C.9.4. |
+| 9 | copybook-library | `reverse-engineer-copybook-library` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `COPYBOOK/` + `COPYLIB/` + `COPYLIB-MVS/` (CUSTCOPY.cpy, TRANREC.cpy, …) | Verifies REDEFINES variants (TRANREC) are preserved, OCCURS clauses (CUSTCOPY) are expanded into indexed positions, and the local-vs-MVS library duplication (`COPYLIB` ↔ `COPYLIB-MVS`) fires the divergent-layout detector. Emits `copybook-record-graph.json` + `data-dictionary.md` + `copybook-conflicts.md`. |
+| 10 | jcl-job | `reverse-engineer-jcl-job` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `JCL/` + `JCLLIB/` + `JCLPROC/` (ALLOCATE.jcl, RUN.jcl, INCLUDE.jcl, RUNASAM1.jcl, COMPROC.jcl) | Verifies PROC expansion (COMPROC), `INCLUDE MEMBER=` resolution, DD inventory, and condition-code restart points. **Known coverage gap:** zopeneditor-sample has no GDG-roll example; that pass-criterion in C.8.3 is downgraded to "GDG-handling code path executes without error against jobs that have no GDGs." Emits `job-flow.mmd` + `dataset-io.json` lineage feed-files. |
 
-Mirror choices (used only if a primary candidate is unavailable / too large): `nestjs/nest` (api-framework), `makeplane/plane` (web-app), `mantinedev/mantine` (ui-framework), `expo/expo` (mobile-framework). For the mainframe sample, an alternative is to lift a tiny COBOL teaching deck out of any public GnuCOBOL example repo or hand-author the 10–15 files; the design point is breadth (cobol + copybook + JCL all present) not size.
+Mirror choices (used only if a primary candidate is unavailable / too large): [`nestjs/nest`](https://github.com/nestjs/nest) (api-framework), [`makeplane/plane`](https://github.com/makeplane/plane) (web-app), [`mantinedev/mantine`](https://github.com/mantinedev/mantine) (ui-framework), [`expo/expo`](https://github.com/expo/expo) (mobile-framework). For the mainframe slice, mirror options are [`openmainframeproject/cobol-programming-course`](https://github.com/openmainframeproject/cobol-programming-course) (larger, course-oriented) or [`dscobol/Cobol-Projects`](https://github.com/dscobol/Cobol-Projects) (Hercules/MVS-flavoured, includes VSAM); the design point is breadth (cobol + copybook + JCL all present) not size.
 
-Clones live under `~/Dev/framework-tests/oss-clones/<repo>`. We **shallow-clone** (`--depth 1`) to minimize disk and network use. The mainframe sample lives at `~/Dev/framework-tests/oss-clones/mainframe-sample/{programs,copybooks,jcl}/` and is committed locally so source-version stamps in Part A frontmatter resolve.
+Clones live under `~/Dev/framework-tests/oss-clones/<repo>`. We **shallow-clone** (`--depth 1`) to minimize disk and network use. The mainframe primary clone lives at `~/Dev/framework-tests/oss-clones/zopeneditor-sample/` (using its native `COBOL/`, `COPYBOOK/`, `COPYLIB/`, `COPYLIB-MVS/`, `JCL/`, `JCLLIB/`, `JCLPROC/` directory layout) and the supplementary CICS+DB2 clone at `~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample/`. Both are committed upstream, so source-version stamps in Part A frontmatter resolve to upstream commits.
 
 ## 5. Forward-engineering scenario
 
@@ -454,12 +455,12 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 **Rollback:** none.
 
 ### C.1m  analyze-repository  —  classify the mainframe sample (1.3.0 dispatcher extension)
-**Trigger phrase:** "What kind of project is `~/Dev/framework-tests/oss-clones/mainframe-sample`? Which RE skill should I run?"
-**Inputs:** The synthetic mainframe deck at `~/Dev/framework-tests/oss-clones/mainframe-sample/{programs,copybooks,jcl}/`.
+**Trigger phrase:** "What kind of project is `~/Dev/framework-tests/oss-clones/zopeneditor-sample`? Which RE skill should I run?"
+**Inputs:** Cloned `IBM/zopeneditor-sample` at `~/Dev/framework-tests/oss-clones/zopeneditor-sample/` with the upstream layout (`COBOL/`, `COPYBOOK/`, `COPYLIB/`, `COPYLIB-MVS/`, `JCL/`, `JCLLIB/`, `JCLPROC/`, plus PLI / ASM / REXX peer dirs which the dispatcher should treat as additional sub-classifications).
 **Expected outputs:** Classification verdict that recognises mainframe content (post-1.3.0 1c′ extension-density step) and emits the **mainframe-monorepo ordering rule**: copybook-library → cobol-program → jcl-job → build-mainframe-data-lineage.
 **Pass criteria:**
-- [ ] [auto] Detection signals fire correctly: `.cbl/.cob/.cpy/.pli/.jcl/.proc/.bms/.dbd/.psb` extension census, `IDENTIFICATION DIVISION.` source-line marker, `EXEC CICS/SQL/DLI` markers, `JOB`/`STEP`/`SYSIN` JCL markers (where present in the sample).
-- [ ] [auto] Three sub-classifications produced (one each for `programs/`, `copybooks/`, `jcl/`).
+- [ ] [auto] Detection signals fire correctly: `.cbl/.cob/.cpy/.pli/.jcl/.proc/.bms/.dbd/.psb` extension census, `IDENTIFICATION DIVISION.` source-line marker, `EXEC CICS/SQL/DLI` markers (absent in zopeneditor-sample — should be reported as zero, not as a missing-detector failure), `JOB`/`STEP`/`SYSIN` JCL markers.
+- [ ] [auto] At least three mainframe sub-classifications produced (one each for the COBOL, copybook, and JCL slices). PLI / ASM / REXX dirs may be reported as out-of-scope or routed to "no skill available".
 - [ ] [auto] The ordered skill list is exactly: `reverse-engineer-copybook-library` → `reverse-engineer-cobol-program` → `reverse-engineer-jcl-job` → `build-mainframe-data-lineage`. (Order matters: copybooks emit the canonical record graph before programs reference fields; programs emit data-bindings before JCL pins a step's program; lineage is last.)
 - [ ] [auto] Verdict ends with the exact next-skill trigger phrase for the FIRST skill (`reverse-engineer-copybook-library`).
 **Rollback:** none.
@@ -557,41 +558,45 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 **Rollback:** `rm -rf recipes-kb/source-docs/nativewind && rm -rf <oss-clones>/nativewind/docs/mobile-framework-internal`.
 
 ### C.8.1  reverse-engineer-copybook-library  —  mainframe sample copybooks (1.3.0)
-**Trigger phrase:** "Reverse-engineer the copybook library at `~/Dev/framework-tests/oss-clones/mainframe-sample/copybooks`."
+**Trigger phrase:** "Reverse-engineer the copybook library at `~/Dev/framework-tests/oss-clones/zopeneditor-sample/COPYBOOK`."
 **Expected outputs:**
 - **Part A**: tree at `<repo>/docs/copybook-library-internal/<NN>-<bare-slug>.md` per `re-copybook-library-internal.yaml` (~12 blocks).
-- **Part B**: tree at `recipes-kb/source-docs/mainframe-sample/copybook-library-consumer/<NN>-<bare-slug>.md` per `re-copybook-library-consumer.yaml` (~6 blocks).
-- **Supplementary** (mandatory for this skill): `recipes-kb/source-docs/mainframe-sample/copybook-record-graph.json`, `data-dictionary.md`, `copybook-conflicts.md` at the Part-B directory root.
+- **Part B**: tree at `recipes-kb/source-docs/zopeneditor-sample/copybook-library-consumer/<NN>-<bare-slug>.md` per `re-copybook-library-consumer.yaml` (~6 blocks).
+- **Supplementary** (mandatory for this skill): `recipes-kb/source-docs/zopeneditor-sample/copybook-record-graph.json`, `data-dictionary.md`, `copybook-conflicts.md` at the Part-B directory root.
 
 **Pass criteria** (in addition to the universal Phase-C criteria):
 - [ ] [auto] Every `01-` record across the sample copybooks appears as a node in `copybook-record-graph.json` with REDEFINES collapsed into named variants and OCCURS expanded into indexed positions.
 - [ ] [auto] `data-dictionary.md` groups fields by naming-convention prefix (e.g., `WS-`, `IO-`, `LS-`, `DB2-`) per the design doc's bucket model.
-- [ ] [auto] If the sample includes a deliberately-duplicated copybook name (recommended), `copybook-conflicts.md` flags the divergent layout.
+- [ ] [auto] zopeneditor-sample's `COPYLIB/` and `COPYLIB-MVS/` directories (which by design house local-vs-MVS variants of the same copybook members) are scanned together, and `copybook-conflicts.md` flags any divergent layouts between them. If the two libraries are byte-identical for every shared member, the file may be empty but must still be present with a "no conflicts detected" note.
 - [ ] [user] Part B does **not** include internal level-by-level layouts (subset rule honoured).
 
-**Rollback:** `rm -rf recipes-kb/source-docs/mainframe-sample/copybook-library-consumer recipes-kb/source-docs/mainframe-sample/{copybook-record-graph.json,data-dictionary.md,copybook-conflicts.md} && rm -rf <oss-clones>/mainframe-sample/copybooks/docs/copybook-library-internal`.
+**Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/copybook-library-consumer recipes-kb/source-docs/zopeneditor-sample/{copybook-record-graph.json,data-dictionary.md,copybook-conflicts.md} && rm -rf <oss-clones>/zopeneditor-sample/COPYBOOK/docs/copybook-library-internal`.
 
 ### C.8.2  reverse-engineer-cobol-program  —  mainframe sample programs (1.3.0)
-**Trigger phrase:** "Reverse-engineer the COBOL programs at `~/Dev/framework-tests/oss-clones/mainframe-sample/programs`."
+**Trigger phrase:** "Reverse-engineer the COBOL programs at `~/Dev/framework-tests/oss-clones/zopeneditor-sample/COBOL`."
 **Expected outputs:**
 - **Part A**: tree at `<repo>/docs/cobol-program-internal/<NN>-<bare-slug>.md` per `re-cobol-program-internal.yaml` (~16 blocks).
-- **Part B**: tree at `recipes-kb/source-docs/mainframe-sample/cobol-program-consumer/<NN>-<bare-slug>.md` per `re-cobol-program-consumer.yaml` (~6 blocks).
+- **Part B**: tree at `recipes-kb/source-docs/zopeneditor-sample/cobol-program-consumer/<NN>-<bare-slug>.md` per `re-cobol-program-consumer.yaml` (~6 blocks).
 - **Supplementary** (mandatory): `program-call-graph.mmd`, `program-data-bindings.json`, and `program-exec-inventory.md` per program at the Part-B directory root.
 
 **Pass criteria** (in addition to the universal Phase-C criteria):
 - [ ] [auto] Each program's Part A documents all four DIVISIONs and a SECTION/PARAGRAPH outline.
-- [ ] [auto] `program-call-graph.mmd` parses as Mermaid; `CALL` / `PERFORM` / `XCTL` edges to other programs in the deck resolve to nodes (programs not present in the deck are explicitly flagged "external").
-- [ ] [auto] `program-data-bindings.json` keys every host variable in any `EXEC SQL ... INTO :host-var` (or out-binding) back to a copybook field present in C.8.1's `copybook-record-graph.json`.
-- [ ] [auto] EXEC CICS / EXEC SQL / EXEC DLI inventories are non-empty when the source contains them; absent / empty when it does not.
+- [ ] [auto] `program-call-graph.mmd` parses as Mermaid; the SAM1→SAM2 CALL chain resolves to nodes inside the deck; `CALL` / `PERFORM` / `XCTL` edges to programs outside the deck are flagged "external".
+- [ ] [auto] EXEC CICS / EXEC SQL / EXEC DLI inventories are emitted as empty for zopeneditor-sample (the sample does not contain SQL/CICS/DLI), but the inventory files themselves must be present (zero-row, not absent).
 - [ ] [user] Part B contains a "program contract" section (entry points, expected DD names, observable side effects) but no internal PERFORM-level detail.
 
-**Rollback:** `rm -rf recipes-kb/source-docs/mainframe-sample/cobol-program-consumer recipes-kb/source-docs/mainframe-sample/{program-call-graph.mmd,program-data-bindings.json,program-exec-inventory.md} && rm -rf <oss-clones>/mainframe-sample/programs/docs/cobol-program-internal`.
+**Supplementary host-var pass (`hlasm-cics-cobol-sample`):** Re-run the same skill against `~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample/`. Output goes to `recipes-kb/source-docs/hlasm-cics-cobol-sample/cobol-program-consumer/`. Pass criteria for this supplementary pass:
+- [ ] [auto] `EXEC SQL` inventory is non-empty (CUSTDB2.CBL has SQL statements with `:host-var` binds).
+- [ ] [auto] `EXEC CICS` inventory is non-empty (CUSTMAIN.CBL contains CICS commands).
+- [ ] [auto] `program-data-bindings.json` keys at least one `:host-var` from `EXEC SQL ... INTO :var` back to a field defined in CUSTDEF.CPY (the supplementary repo's lone copybook — must first be ingested via a supplementary C.8.1 pass against `oss-clones/hlasm-cics-cobol-sample/`).
+
+**Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/cobol-program-consumer recipes-kb/source-docs/zopeneditor-sample/{program-call-graph.mmd,program-data-bindings.json,program-exec-inventory.md} && rm -rf <oss-clones>/zopeneditor-sample/COBOL/docs/cobol-program-internal && rm -rf recipes-kb/source-docs/hlasm-cics-cobol-sample`.
 
 ### C.8.3  reverse-engineer-jcl-job  —  mainframe sample JCL (1.3.0)
-**Trigger phrase:** "Reverse-engineer the JCL at `~/Dev/framework-tests/oss-clones/mainframe-sample/jcl`."
+**Trigger phrase:** "Reverse-engineer the JCL at `~/Dev/framework-tests/oss-clones/zopeneditor-sample/JCL`."
 **Expected outputs:**
 - **Part A**: tree at `<repo>/docs/jcl-job-internal/<NN>-<bare-slug>.md` per `re-jcl-job-internal.yaml` (~11 blocks).
-- **Part B**: tree at `recipes-kb/source-docs/mainframe-sample/jcl-job-consumer/<NN>-<bare-slug>.md` per `re-jcl-job-consumer.yaml` (~5 blocks).
+- **Part B**: tree at `recipes-kb/source-docs/zopeneditor-sample/jcl-job-consumer/<NN>-<bare-slug>.md` per `re-jcl-job-consumer.yaml` (~5 blocks).
 - **Supplementary** (mandatory): `job-flow.mmd` + `dataset-io.json` at the Part-B directory root.
 
 **Pass criteria** (in addition to the universal Phase-C criteria):
@@ -601,7 +606,7 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 - [ ] [auto] `dataset-io.json` records, per job × step × DD, the (DSN, DISP, program-invoked) tuple and resolves the program-invoked field to a node in C.8.2's `program-data-bindings.json` when the program is present in the deck.
 - [ ] [auto] `job-flow.mmd` parses as Mermaid and shows step→step edges with DD I/O annotated.
 
-**Rollback:** `rm -rf recipes-kb/source-docs/mainframe-sample/jcl-job-consumer recipes-kb/source-docs/mainframe-sample/{job-flow.mmd,dataset-io.json} && rm -rf <oss-clones>/mainframe-sample/jcl/docs/jcl-job-internal`.
+**Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/jcl-job-consumer recipes-kb/source-docs/zopeneditor-sample/{job-flow.mmd,dataset-io.json} && rm -rf <oss-clones>/zopeneditor-sample/JCL/docs/jcl-job-internal`.
 
 ### C.8.4  review-reverse-engineering-package  —  per-repo gate against the RealWorld API output (1.2.0)
 **Setup:** Re-use C.2's RealWorld API Part A + Part B output. (The skill is per-repo; we exercise it once on a meaty modern-stack repo and again on the mainframe sample in C.8.5.)
@@ -619,15 +624,15 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 **Rollback:** `rm -rf recipes-kb/source-docs/realworld-api/_review/`.
 
 ### C.8.5  review-reverse-engineering-package  —  per-repo gate on the mainframe sample (1.2.0 + 1.3.0 coverage tables)
-**Trigger phrase:** "Review the reverse-engineering package for the mainframe-sample repo."
+**Trigger phrase:** "Review the reverse-engineering package for the zopeneditor-sample repo."
 **Inputs:** The three Part A trees produced by C.8.1–C.8.3 + their three Part B trees + the lineage feed-files at the Part-B directory root.
 **Expected outputs:** Same 9-sub-review structure as C.8.4 but reading the 1.3.0 coverage-table extensions (cobol-program, copybook-library, jcl-job rows in the `review-section-completeness` block).
 **Pass criteria:**
 - [ ] [auto] The completeness sub-review references the three mainframe domains' block lists (post-1.3.0 extension).
-- [ ] [auto] The grounding sub-review checks that every claim in Part A traces to a file under `programs/`, `copybooks/`, or `jcl/` (paths in component frontmatter resolve).
+- [ ] [auto] The grounding sub-review checks that every claim in Part A traces to a file under `COBOL/`, `COPYBOOK/` (or COPYLIB / COPYLIB-MVS), or `JCL/` (or JCLLIB / JCLPROC) (paths in component frontmatter resolve).
 - [ ] [auto] The traceability sub-review confirms all required lineage feed-files (`copybook-record-graph.json`, `program-data-bindings.json`, `program-call-graph.mmd`, `dataset-io.json`, `job-flow.mmd`) are present at the Part-B directory root.
 - [ ] [auto] Wrapper sub-reviews 7/8 fire with `--stage=reverse-engineering` and produce Format-4 findings.
-**Rollback:** `rm -rf recipes-kb/source-docs/mainframe-sample/_review/`.
+**Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/_review/`.
 
 ### C.9  build-knowledge-base  —  scaffold the KB
 **Trigger:** "Build the knowledge base from the source-docs we just produced."
@@ -667,10 +672,10 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 ### C.9.2  generate-ai-rules  —  hybrid auto + interactive (1.1.0)
 **Trigger phrase:** "Generate the AI rules for this project."
 **Inputs:** RE Part A docs from C.2–C.8 (auto-derivation source: tech-stack versions, build/test commands, lint configs) + interactive answers for the unobvious rules (commit conventions, review etiquette, testing philosophy).
-**Expected outputs:** `<KB>/shared/ai-rules/project-context.md` (the canonical rules file) plus `<KB>/shared/ai-rules/per-repo/<repo-slug>.md` only when stack divergence between repos warrants it (the modern-stack group is mostly Next.js; the mainframe-sample is a clear divergence — at minimum one per-repo override is expected here).
+**Expected outputs:** `<KB>/shared/ai-rules/project-context.md` (the canonical rules file) plus `<KB>/shared/ai-rules/per-repo/<repo-slug>.md` only when stack divergence between repos warrants it (the modern-stack group is mostly Next.js; `zopeneditor-sample` (and the supplementary `hlasm-cics-cobol-sample`) are clear divergences — at minimum one per-repo override is expected here).
 **Pass criteria:**
 - [ ] [auto] `project-context.md` exists and contains both the auto-derived sections (tech-stack pin lines per repo) and the elicited sections (testing, commits, etc.)
-- [ ] [auto] At least one `per-repo/<slug>.md` exists, almost certainly for `mainframe-sample` (the divergence between Next.js and COBOL is the canonical worked example in `references/EXAMPLE.md`)
+- [ ] [auto] At least one `per-repo/<slug>.md` exists, almost certainly for `zopeneditor-sample` (the divergence between Next.js and COBOL/JCL is the canonical worked example in `references/EXAMPLE.md`)
 - [ ] [auto] Auto-derived sections cite their source (the RE Part A frontmatter `last_verified_against_commit` SHA)
 - [ ] [auto] No `TODO(human):` markers if this run was interactive
 **Rollback:** `rm -rf recipes-kb/shared/ai-rules`.
@@ -690,11 +695,11 @@ Validator Check H enforces the SKILL.md side; the on-disk shape of the produced 
 ### C.9.4  build-mainframe-data-lineage  —  KB aggregator across the 3 mainframe Part B feeds (1.3.0)
 **Trigger phrase:** "Build the mainframe data lineage for this knowledge base."
 **Inputs:** The 5 lineage feed-files produced by C.8.1–C.8.3:
-- `recipes-kb/source-docs/mainframe-sample/copybook-record-graph.json` (from C.8.1)
-- `recipes-kb/source-docs/mainframe-sample/program-data-bindings.json` (from C.8.2)
-- `recipes-kb/source-docs/mainframe-sample/program-call-graph.mmd` (from C.8.2)
-- `recipes-kb/source-docs/mainframe-sample/program-exec-inventory.md` (from C.8.2)
-- `recipes-kb/source-docs/mainframe-sample/dataset-io.json` (from C.8.3)
+- `recipes-kb/source-docs/zopeneditor-sample/copybook-record-graph.json` (from C.8.1)
+- `recipes-kb/source-docs/zopeneditor-sample/program-data-bindings.json` (from C.8.2)
+- `recipes-kb/source-docs/zopeneditor-sample/program-call-graph.mmd` (from C.8.2)
+- `recipes-kb/source-docs/zopeneditor-sample/program-exec-inventory.md` (from C.8.2)
+- `recipes-kb/source-docs/zopeneditor-sample/dataset-io.json` (from C.8.3)
 **Expected outputs:** A coherent cross-program lineage artefact under `recipes-kb/lineage/mainframe/` per the `kb-mainframe-data-lineage.yaml` composition:
 - `copybook-where-used.md`
 - `field-where-used.md`
