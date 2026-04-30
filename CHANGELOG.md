@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.4.0` |
+| Current artifact version | `1.3.5` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -52,7 +52,7 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
-### `1.4.0` — 2026-04-30
+### `1.3.5` — 2026-04-30
 
 #### Changed
 
@@ -64,9 +64,9 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 #### Branch Dependency
 
-This release contains the acknowledgement-restoration changes (Changes A / B / C from `_docs/plan-restore-acknowledgement.md`) merged on top of mm/add-cobol (1.3.0). The version label `1.4.0` reflects the design-doc-declared integration order:
+This release contains the acknowledgement-restoration changes (Changes A / B / C from `_docs/plan-restore-acknowledgement.md`) merged on top of mm/add-cobol (1.3.0). The version label `1.3.5` is an integration-branch label for `mm/add-ack-cobol-repo` — it sits between the standalone `mm/add-cobol` (1.3.0) and the design-doc-declared `mm/add-ack` (1.4.0) labels, used here to avoid claiming the 1.4.0 release identity before the canonical merge order lands. The original integration order remains:
 mm/add-context (1.1.0) → mm/add-adverserial (1.2.0) → mm/add-cobol (1.3.0) → mm/add-ack (1.4.0).
-This branch (`mm/add-ack-cobol-repo`) integrates 1.3.0 and 1.4.0 as the foundation for the SoD multi-repo capability work.
+This branch (`mm/add-ack-cobol-repo`) bundles 1.3.0 + acknowledgement-restoration as the foundation for the SoD multi-repo capability work.
 
 ---
 
