@@ -40,21 +40,7 @@ Three concrete changes:
 
 ## 3. The three changes — concrete edit specifications
 
-All inserted text MUST be wrapped between marker comments so reversion is grep-and-delete:
-
-```
-<!-- ack-restore:begin -->
-... new content ...
-<!-- ack-restore:end -->
-```
-
-Existing line edits (where content is replaced rather than added) MUST be preceded by a comment of the form:
-
-```
-<!-- ack-restore:edit was="<original-text-shortened>" -->
-```
-
-These marker comments are the single source of truth for reversion (see §5).
+All edits are plain prose — no inline marker comments, no sentinel HTML. Reversion is driven by git commits (see §5).
 
 ### Change A — Re-promote "verify understanding"
 
@@ -65,19 +51,18 @@ These marker comments are the single source of truth for reversion (see §5).
 Insert a new section immediately before `## Workflow`:
 
 ```markdown
-<!-- ack-restore:begin -->
 ## Verification rule (always-on)
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
-<!-- ack-restore:end -->
 ```
+
+The text is **byte-identical** across the four SKILL.md files so a single grep can verify consistency.
 
 **Edit per step file (`steps/*.md`) that ends with "produce artifact and proceed":**
 
-Add a final sub-section `## Acknowledgement checkpoint` (wrapped in markers) that lists the artifact name produced by the step and explicitly tells the runtime to wait for user sign-off before moving to the next step. Example for `requirements/.../steps/03-analysis.md`:
+Add a final sub-section `## Acknowledgement checkpoint` that lists the artifact name produced by the step and explicitly tells the runtime to wait for user sign-off before moving to the next step. Example for `requirements/.../steps/03-analysis.md`:
 
 ```markdown
-<!-- ack-restore:begin -->
 ## Acknowledgement checkpoint
 
 Before proceeding to `steps/04-writing.md`:
@@ -86,12 +71,13 @@ Before proceeding to `steps/04-writing.md`:
 2. Ask: "Have I captured the analysis correctly? Anything missing or wrong?"
 3. Wait for explicit confirmation. Do not infer.
 4. If the user requests changes, revise the affected artifact(s) and repeat the summary.
-<!-- ack-restore:end -->
 ```
+
+The `## Acknowledgement checkpoint` heading is a named sentinel — `grep -r "## Acknowledgement checkpoint"` locates every one of them after the change lands.
 
 **Edit per references/process.md (in each skill):**
 
-In the "7-step per-file workflow" table, promote the existing "Verify understanding by summarizing back" row from one bullet to a paragraph immediately under the table that restates: *"Step 3 (Verify understanding) is non-skippable. Even if the section seems trivially correct, summarize back and wait for acknowledgement."* Wrap in markers.
+In the "7-step per-file workflow" table, promote the existing "Verify understanding by summarizing back" row from one bullet to a paragraph immediately under the table that restates: *"Step 3 (Verify understanding) is non-skippable. Even if the section seems trivially correct, summarize back and wait for acknowledgement."*
 
 ### Change B — Make Section Relevance Check unconditional
 
@@ -108,23 +94,18 @@ Before:
 
 After:
 ```
-<!-- ack-restore:edit was="conditional relevance check" -->
 | 0 | Section relevance check (unconditional) | Ask Yes / No (with reason) / Skip / Not sure for every block. Record outcome in the completeness tracker before drafting. |
 ```
 
 **Edit per `steps/04-writing.md` (requirements) and `steps/02-design.md` (design):**
 
-Replace the "Section relevance check — if relevance is in question, ask…" line with the unconditional form. Mark with `ack-restore:edit` comment as above.
+Replace the "Section relevance check — if relevance is in question, ask…" line with the unconditional form. Drop the conditional clause; require the check for every section.
 
 **Edit per `references/discovery-workflow.md` and `references/analysis-workflow.md`:**
 
-Add a sentence (wrapped in markers) at the top of the "Sequential execution rule" section:
+Add a sentence at the top of the "Sequential execution rule" section:
 
-```markdown
-<!-- ack-restore:begin -->
-Before each sub-step, ask the user whether the sub-step applies. If they say "Skip" or "No (with reason)", record the outcome and proceed to the next sub-step. Do not assume relevance.
-<!-- ack-restore:end -->
-```
+> Before each sub-step, ask the user whether the sub-step applies. If they say "Skip" or "No (with reason)", record the outcome and proceed to the next sub-step. Do not assume relevance.
 
 ### Change C — Per-sub-section acknowledgement loops in large blocks
 
@@ -137,10 +118,9 @@ Before each sub-step, ask the user whether the sub-step applies. If they say "Sk
 
 **Edit per target block template:**
 
-Add a new authoring-rules section at the top of each (wrapped in markers):
+Add a new authoring-rules section at the top of each (immediately under the YAML frontmatter):
 
 ```markdown
-<!-- ack-restore:begin -->
 ## Authoring rule — sub-section acknowledgement
 
 Do not draft this entire block in one pass. The block contains multiple independent items (FRs / rules / endpoints / tables). For each item:
@@ -152,73 +132,84 @@ Do not draft this entire block in one pass. The block contains multiple independ
 5. Apply the answer; do not move to the next item until you have one.
 
 Only after every item has its own acknowledgement, mark the block complete in the completeness tracker.
-<!-- ack-restore:end -->
 ```
+
+Heading is identical across the four templates so `grep -r "Authoring rule — sub-section acknowledgement"` locates them.
 
 **Edit per skill step file that drives these blocks** (`requirements/.../steps/04-writing.md` and `design/.../steps/02-design.md`):
 
-In the sub-step table, add a column or footnote (wrapped in markers) flagging the four large blocks as "iterative — apply per-item loop from block template".
+In the sub-step table, add a footnote flagging the four large blocks as "iterative — apply per-item loop from block template."
 
 ## 4. Stage breakdown (one commit per stage; each stage is independently revertible)
 
 | Stage | Commit message | Files touched | Approx. line delta |
 |---|---|---|---|
-| **0** | `docs(plan): add acknowledgement-restore plan (mm/add-ack)` | `_docs/plan-restore-acknowledgement.md` (new) | +~250 (this file) |
-| **1** | `feat(re): restore per-section ack — Change A (verify-understanding promotion)` | 4 SKILL.md files, 4-6 step files, 3 process.md files | +~120 |
-| **2** | `feat(re): restore per-section ack — Change B (unconditional relevance check)` | 2 process.md files, 2 step files, 2 workflow refs | +~40, ~6 edits |
-| **3** | `feat(re): restore per-section ack — Change C (per-sub-section loops)` | 4 block templates, 2 step files | +~80 |
+| **0** | `docs(plan): add acknowledgement-restore plan (mm/add-ack)` | `_docs/plan-restore-acknowledgement.md` (new) | +~210 (this file) |
+| **1** | `feat(re): restore per-section ack — Change A (verify-understanding promotion)` | 4 SKILL.md files, 4-6 step files, 3 process.md files | +~110 |
+| **2** | `feat(re): restore per-section ack — Change B (unconditional relevance check)` | 2 process.md files, 2 step files, 2 workflow refs | +~30, ~6 edits |
+| **3** | `feat(re): restore per-section ack — Change C (per-sub-section loops)` | 4 block templates, 2 step files | +~70 |
 | **4** | `chore(release): bump 1.4.0 — acknowledgement restoration` | `CHANGELOG.md`, version files (per existing release pattern) | +~15 |
 
 Stages 1, 2, 3 are independent and can land in any order or partially. Stage 0 is this plan and must land first.
 
-## 5. Reversion strategy
+**Hygiene rules for each stage:**
 
-The marker-comment convention is the load-bearing piece. To revert:
+- One stage = one commit. Do not mix changes from different stages in one commit.
+- Each commit message must reference this plan file (`_docs/plan-restore-acknowledgement.md`) so future archaeology lands here first.
+- Each commit body must list the files touched explicitly. This is the audit trail reverters will read.
 
-### Full revert (back out everything)
+## 5. Reversion strategy — git-only
 
-```bash
-# All inserted blocks
-grep -rln "ack-restore:begin" .agents/ templates/ | while read -r f; do
-  perl -i -0pe 's/<!--\s*ack-restore:begin\s*-->.*?<!--\s*ack-restore:end\s*-->\n?//gs' "$f"
-done
+Reversion depends entirely on git history. No inline markers, no sentinel comments.
 
-# All single-line edits (restore via git)
-grep -rln "ack-restore:edit" .agents/ templates/  # locate
-# then either git checkout the affected lines from the pre-Stage-1 commit,
-# or remove the ack-restore:edit comment and revert that line by hand.
-```
-
-Or simply:
+### Full revert
 
 ```bash
 git revert <stage-3-sha> <stage-2-sha> <stage-1-sha>
 ```
 
-Each stage is one commit; reverting a single stage backs out only that change.
+Order matters when the stages touch overlapping files; revert in reverse order of landing. If conflicts arise, resolve by taking the pre-Stage-1 state of the file (`git show <stage-0-sha>:<path>`).
 
 ### Partial revert (keep some changes, drop others)
 
-Because each stage is one commit, `git revert <stage-N-sha>` removes exactly the changes from that stage. The marker comments still help locate residue if a revert merge conflicts.
+Each stage is one commit, so `git revert <stage-N-sha>` removes exactly that stage's changes. To drop only Change C while keeping A and B, revert only Stage 3.
+
+### Locating what to revert
+
+The named sentinel headings introduced by Changes A and C are grep-locatable even without inline markers:
+
+```bash
+# Change A landings (SKILL.md + step files)
+grep -rln "## Verification rule (always-on)" .agents/skills/
+grep -rln "## Acknowledgement checkpoint" .agents/skills/
+
+# Change C landings (block templates)
+grep -rln "Authoring rule — sub-section acknowledgement" templates/blocks/
+```
+
+Change B is line-level edits inside existing tables and prose. To locate a Change B residue after a partial revert, diff against the relevant Stage commit:
+
+```bash
+git diff <stage-2-sha>^ <stage-2-sha> -- .agents/skills/
+```
 
 ### Verification after revert
 
-```bash
-# Should return zero matches:
-grep -rln "ack-restore:" .agents/ templates/
-```
+- `git log --oneline mm/add-ack..HEAD` — should show no Stage-1/2/3 commits remaining.
+- `grep -rln "## Verification rule (always-on)" .agents/skills/` — zero matches if Change A is reverted.
+- `grep -rln "## Acknowledgement checkpoint" .agents/skills/` — zero matches if Change A is reverted.
+- `grep -rln "Authoring rule — sub-section acknowledgement" templates/blocks/` — zero matches if Change C is reverted.
 
-If the grep returns matches, revert is incomplete.
+If any of those greps find residue after the corresponding revert, the revert is incomplete; investigate via `git log -p <path>`.
 
 ## 6. Risks
 
 | Risk | Mitigation |
 |---|---|
 | Skills become slower / chattier in long sessions, especially for FR-heavy blocks. | Change C explicitly only applies to the 4 largest blocks. Other blocks keep current cadence. |
-| Marker comments leak into rendered docs in tools that don't strip HTML comments. | All four target file types (`.md` step files, SKILL.md, references, block templates) are consumed by the skill runtime which already tolerates HTML comments; the markers do not appear in user-rendered output. |
-| Acknowledgement language drifts between skills as we copy-paste. | Stage 1's verification rule is identical text across the four SKILL.md files — keep it byte-identical so a single grep can verify consistency. |
+| Acknowledgement language drifts between skills as we copy-paste. | Stage 1's verification rule is byte-identical text across the four SKILL.md files. Stage 3's authoring rule is byte-identical across the four block templates. A single grep verifies consistency. |
 | Conflict with adversarial-review work on other branches. | `mm/add-ack` is downstream of `mm/add-cobol`. Coordinate merge order: `mm/add-context` → `mm/add-adverserial` → `mm/add-cobol` → `mm/add-ack`. |
-| Reviewers see the marker comments and assume they're permanent. | This plan file documents them as deliberate-but-removable; link to `_docs/plan-restore-acknowledgement.md` from the PR description. |
+| Change B's line-level edits are harder to locate than A and C. | Stage 2's commit will be small (`~6 edits`); reverting the whole commit is the easy path. Avoid cherry-picking inside Stage 2. |
 
 ## 7. Acceptance check (definition of done)
 
@@ -226,7 +217,6 @@ If the grep returns matches, revert is incomplete.
 - [ ] All step files in scope end with an "Acknowledgement checkpoint" sub-section.
 - [ ] `references/process.md` for both create-requirements-package and create-design-package shows step 0 of the 7-step workflow as **unconditional**.
 - [ ] The four large block templates each carry the "Authoring rule — sub-section acknowledgement" section.
-- [ ] `grep -rln "ack-restore:" .agents/ templates/` returns a non-zero count after Stages 1-3, and zero after a full revert.
 - [ ] `CHANGELOG.md` records 1.4.0 with a one-line entry pointing at this plan file.
 - [ ] No file outside §2 In Scope is modified.
 
@@ -235,7 +225,8 @@ If the grep returns matches, revert is incomplete.
 - Restoring the example dialogue (*"AI: Now for Question 1.2: ... User: ..."*) from the archive playbooks. Too prescriptive; runs against the just-in-time loading model.
 - Reintroducing the `phases/create-*-package.md` 1,300-1,500-line playbooks. The reference structure (one ref file per workflow) is preserved.
 - Adding acknowledgement gates to the elicitation patterns under `references/elicitation-patterns/`. They already say "ask one question at a time" and "wrap-up: confirm." No change needed.
-- Tooling: no scripts, no hooks, no validators. The marker convention is plain-text and grepable; no automation required to enforce or revert.
+- Tooling: no scripts, no hooks, no validators. Reversion is git-only.
+- Inline marker comments / sentinel HTML — explicitly rejected: HTML comments are not stripped from LLM context, so they would carry token cost and confusion risk in every skill execution.
 
 ## 9. Open questions for the user (block Stage 1)
 
