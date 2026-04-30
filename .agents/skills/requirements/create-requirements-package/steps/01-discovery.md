@@ -52,6 +52,15 @@ When a knowledge base exists at `project.paths.knowledge_base_path`, prefer quer
 - [ ] All six sub-step artifacts produced (or minimally recorded with the gap explicit)
 - [ ] `current-capability-baseline.md` written and acknowledged
 
+## Acknowledgement checkpoint
+
+Before proceeding to the relevance gate / Step 3 (Analysis):
+
+1. Summarize the change description, current-capability baseline, and any unresolved gaps in chat.
+2. Ask: "Does the baseline match your understanding of the system today, and does the change description still capture what you want to build?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected discovery artifact(s) and repeat the summary.
+
 ## Next
 
 Proceed to the relevance gate (implicit step 2 in the SKILL.md workflow), then `steps/03-analysis.md`.

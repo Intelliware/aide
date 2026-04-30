@@ -71,6 +71,14 @@ Before writing the first failing test for the increment, verify:
 
 If any gate fails, halt — recommend re-running `review-implementation-package`.
 
+## Acknowledgement checkpoint
+
+Before proceeding to `steps/03-ai-gate.md`:
+
+1. Summarize what each Plan item produced — files changed, tests added, behavior added — in chat.
+2. Ask: "Plan items complete — ready to run the AI Gate?"
+3. Wait for explicit confirmation. The AI Gate then re-verifies with fresh evidence; this checkpoint is the human "implementation looks right" pre-check.
+
 ## Output of this step
 
 - Working code in the target codebase, with test coverage from TDD

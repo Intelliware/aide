@@ -60,6 +60,10 @@ same turn. It never proceeds past a failed gate.
 
 See `references/INPUTS-OUTPUTS.md` for full inputs/outputs tables.
 
+## Verification rule (always-on)
+
+After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
+
 ## Workflow
 
 For each increment, execute the steps in order. **Read each step file only

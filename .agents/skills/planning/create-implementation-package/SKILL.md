@@ -58,6 +58,10 @@ at `templates/compositions/greenfield-implementation-package.yaml`.
 
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
 
+## Verification rule (always-on)
+
+After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
+
 ## Workflow
 
 Execute one step at a time. Read each step file only when starting that step.

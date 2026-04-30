@@ -75,6 +75,15 @@ Full instructions live in `references/requirements-writing-workflow.md` and `ref
 - [ ] Change tracker at v0.1 with one `Added` row per tracked item
 - [ ] User has acknowledged the assembled package
 
+## Acknowledgement checkpoint
+
+Before handing off to `review-requirements-package`:
+
+1. Summarize the assembled requirements package — which sections are filled, which are N/A, which are skipped-with-revisit.
+2. Ask: "Is the package ready for formal review?"
+3. Wait for explicit confirmation. Do not infer.
+4. If the user requests changes, revise the affected sections and repeat the summary.
+
 ## Next
 
 Hand off by name to `review-requirements-package`.
