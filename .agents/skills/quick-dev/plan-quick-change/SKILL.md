@@ -31,10 +31,10 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Workflow
 
-1. **Read the quick-dev spec** — load `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md`. Confirm no markers remain and the user has confirmed it.
+1. **Read the quick-dev spec** — load `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md`. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.
 2. **Codebase orientation** — read the affected files (the spec's "Where" / FR file references). Identify patterns, conventions, test infrastructure. See `steps/01-orient.md`.
 3. **Escape-hatch check** — if orientation reveals the change is too large, halt and recommend the full elaborate pipeline. See `steps/02-escape-hatch.md`.
-4. **Decompose into increments** — group ACs into 1–3 increments. Each increment must produce a working system state, be independently verifiable, and trace to one or more ACs.
+4. **Decompose into increments** — group ACs into 1–3 increments. Each increment must produce a working system state, be independently verifiable, and trace to one or more ACs. Cross-check that the proposed approach for each increment honors every §12.2a Solution Constraint — an increment whose plan would have to violate a constraint to ship is not a legal increment.
 5. **Populate the reduced increment shape** — Identity (INC-XXX, name, AC mapping), Goal, Plan (file paths + steps), AI Gate (test commands + expected results), Human Gate (review steps), Success Criteria. See `steps/03-populate-shape.md`.
 6. **Clarity gate** — no markers, all sections, file paths specified, AC mappings present, no speculative increments. If it fails, return to step 1 or 2.
 7. **Write and confirm** — write to `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-plan.md`. Get explicit user approval before handoff.
@@ -55,3 +55,4 @@ See `references/INPUTS-OUTPUTS.md`. A plan file with 1–3 increments per the re
 - Speculative increments not traceable to ACs
 - Filling `Dependencies` and `Outcome` for the sake of it on a one-increment plan
 - Returning success while a `[NEEDS CLARIFICATION]` marker still exists in the plan
+- Planning an increment whose intended approach violates a §12.2a Solution Constraint (the executor cannot rescue this with a Solution Pivot — constraints survive pivots)

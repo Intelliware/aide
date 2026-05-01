@@ -14,7 +14,7 @@
    each card") and one open question ("what about already-read notifications?").
 3. Classified as **small** rigor (one component, 2–3 ACs, no architectural
    decisions). Confirmed with user.
-4. Drafted the four blocks against `quick-dev-spec.yaml`.
+4. Drafted the five blocks against `quick-dev-spec.yaml` — including §12.2a Solution Constraints ("no new toast libraries — reuse `useToast`"; "all retries via `useRetry`") so the executor has them through any Solution Pivot.
 5. Inserted one `[NEEDS CLARIFICATION]` marker for the existing-notifications
    question. User answered: hide the button on already-read notifications.
 6. Removed the marker, finalized the spec.

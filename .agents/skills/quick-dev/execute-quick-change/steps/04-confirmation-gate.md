@@ -50,11 +50,11 @@ implementation for environment-level confirmation before closing the loop.
 
 | User signal | Action |
 |---|---|
-| Explicit confirmation: "looks good", "confirmed", "verified", "ship it", "merge it" | Mark the increment complete, proceed to KB hand-off (step 5 of the workflow). |
+| Explicit confirmation: "looks good", "confirmed", "verified", "ship it", "merge it" | Mark the increment complete, proceed to KB hand-off (step 7 of the workflow). |
 | Specific issue report: "X is still broken", "still seeing GMT+5:30 in the browser", "the toast doesn't appear" | Treat as a failed verification. Do **not** patch — go to step 02-verify.md "Failed verification — Solution Pivot Gate" and run the protocol from there. |
 | Vague concern: "I'm not sure", "something feels off" | Ask the user for a specific reproduction step or observable they saw, then route to one of the rows above based on their answer. Do not assume the change is done. |
 | Silence / "I'll check later" | Acknowledge, but do **not** mark the change complete. The skill stays in this gate until explicit confirmation arrives. The PR can sit open; the implementation is just not "done" yet. |
-| Approval of a partial slice ("AC1 looks good, I haven't checked AC2 yet") | Mark only what was confirmed; keep the gate open on the remainder. Do not extrapolate one confirmation to cover the whole change. |
+| Approval of a partial slice ("AC1 looks good, I haven't checked AC2 yet") | Record an audit row that names which ACs are confirmed and which remain pending; keep the gate open until **every** AC has been confirmed. Do not extrapolate one confirmation to cover the whole change, and do not proceed to KB hand-off while any AC is still pending. |
 
 ## What "complete" means after this gate
 
@@ -71,7 +71,7 @@ After explicit user confirmation, the skill may:
 
 Until the gate has cleared, none of those happen.
 
-## Anti-patterns
+## Common mistakes
 
 - "Tests pass and the PR is open, so I'll go ahead and update the KB." —
   No. The KB hand-off is **after** the gate, not before.
@@ -92,7 +92,9 @@ Until the gate has cleared, none of those happen.
 
 Append a one-line entry to the increment's row in
 `<feature-folder>/quick-dev-package/CHANGE-TRACKER.md` capturing the
-confirmation: who confirmed, when, in what environment. If the gate had
+confirmation: who confirmed, when, in what environment, and (when the
+confirmation is partial) which ACs are confirmed vs still pending. The
+gate is only closed once an entry exists for every AC. If the gate had
 to be re-opened (the user reported a problem, a Solution Pivot fired,
 re-implementation, gate re-opened, then confirmed) record that loop too —
 the audit shows the change was confirmed by a human, not by the AI alone.

@@ -16,9 +16,10 @@ Anchors the legacy `expedited-implementation-package`'s execute + deliver phases
 1. **No production code without a failing test first.** Code written ahead of a failing test is deleted and redone.
 2. **No success claim without fresh verification in the same turn.** "I ran them earlier" is not acceptable — re-run in the turn that claims success.
 3. **Never commit without explicit user approval.**
-4. **Solution Pivot Gate.** If the first implementation attempt fails verification, do not silently iterate. Diagnose the root cause, present **one** alternative approach with rationale and tradeoffs, and wait for explicit user approval of the new approach before writing any new code. Each pivot is a checkpoint. See `steps/02-verify.md`.
-5. **Solution constraints survive pivots.** The spec's §12.2a Solution Constraints (no regex, no hardcoded maps, no new dependencies, etc.) must be honored on every iteration — including any pivot. Cross-check candidate fixes against them before proposing.
-6. **Completion Confirmation Gate.** Do not treat the change as done once code is written, tests pass, and the PR opens. The change is only complete after the user explicitly confirms the fix works in their environment ("confirmed", "verified", "ship it"). The AI does not self-close. If the user reports the change still doesn't work, treat it as a failed verification and run the Solution Pivot Gate. See `steps/04-confirmation-gate.md`.
+4. **Zero findings in adversarial review is a re-analysis trigger, not a pass.** A clean review almost always means the lens was wrong, not that the diff is perfect.
+5. **Solution Pivot Gate.** If the first implementation attempt fails verification, do not silently iterate. Diagnose the root cause, present **one** alternative approach with rationale and tradeoffs, and wait for explicit user approval of the new approach before writing any new code. Each pivot is a checkpoint. See `steps/02-verify.md`.
+6. **Solution constraints survive pivots.** The spec's §12.2a Solution Constraints (no regex, no hardcoded maps, no new dependencies, etc.) must be honored on every iteration — including any pivot. Cross-check candidate fixes against them before proposing.
+7. **Completion Confirmation Gate.** Do not treat the change as done once code is written, tests pass, and the PR opens. The change is only complete after the user explicitly confirms the fix works in their environment ("confirmed", "verified", "ship it"). The AI does not self-close. If the user reports the change still doesn't work, treat it as a failed verification and run the Solution Pivot Gate. See `steps/04-confirmation-gate.md`.
 
 ## When to use
 
@@ -69,7 +70,6 @@ See `references/INPUTS-OUTPUTS.md`. Working tested code, atomic commits, an open
 - Claiming success without re-running tests in the same turn (no verification from memory)
 - Committing without explicit user approval
 - Skipping adversarial review when the diff "looks fine"
-- Treating zero-findings as success rather than as a re-analysis trigger
 - Forgetting the KB catalog update — drift starts here
 - Patching symptoms instead of root cause when bugs surface mid-execution
 - Silently iterating through two or three approaches in the same turn instead of halting at the Solution Pivot Gate to surface the first failure and proposed alternative

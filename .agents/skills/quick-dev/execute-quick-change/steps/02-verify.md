@@ -70,6 +70,12 @@ silently iterate on the existing approach. Instead:
    - the tradeoffs (perf, footprint, complexity, blast radius),
    - confirmation that the alternative honors every solution constraint.
 
+   If the root cause is that a documented solution constraint itself
+   blocks every viable fix, the legitimate pivot proposal is to **ask the
+   user to revisit the constraint** — name the constraint, explain why it
+   blocks the fix, and let the user decide to relax it or escalate. The
+   AI does not unilaterally relax a constraint.
+
    Then **stop and wait for explicit user approval** before writing any new
    code. Do not propose two alternatives in parallel and do not begin
    implementing while presenting — the gate is a hard halt. If the user
@@ -77,11 +83,17 @@ silently iterate on the existing approach. Instead:
    approach. If the user redirects to a different alternative, treat that
    as a new pivot — re-verify it against the solution constraints before
    proceeding.
-5. **One pivot per failure.** If a pivot is approved, executed, and *also*
-   fails verification, that is the user's signal to escalate — surface that
-   the change may be larger than quick-dev scope and offer the brownfield
-   enhancement spec as the escalation path. Do not pivot a second time
-   silently.
+5. **One pivot per verification event.** The pivot budget resets per
+   verification event, not per change. A failed 3-dimension verification
+   gets one pivot; a Confirmation Gate report ("doesn't work in my
+   environment") is a *separate* verification event and gets its own
+   pivot budget. What the rule forbids is pivoting twice on the *same*
+   failing event without escalation. If a pivot is approved, executed,
+   and the same verification event fails again, that is the user's signal
+   to escalate — surface that the change may be larger than quick-dev
+   scope and offer the brownfield enhancement spec (authored via
+   `create-requirements-package` in brownfield mode) as the escalation
+   path. Do not pivot a second time on the same event silently.
 
 The rule the gate enforces: each change of approach is a checkpoint. Silent
 iteration through three or four approaches in one turn is the failure mode
