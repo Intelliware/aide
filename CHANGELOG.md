@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.4.5` |
+| Current artifact version | `1.4.6` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,32 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.4.6` — 2026-05-01
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-01 | Addition | skills | `.agents/skills/quick-dev/execute-quick-change/steps/04-confirmation-gate.md` | New Completion Confirmation gate at the tail of the quick-dev execution workflow — forces an explicit user-confirmation checkpoint before the skill closes the change. | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-01 | Addition | blocks | `templates/blocks/quick-dev/assumptions-constraints-out-of-scope.md` | New shared block capturing assumptions, constraints, and out-of-scope items at quick-dev spec time so they propagate into plan and execute steps. | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-01 | Source Update | skills | `.agents/skills/quick-dev/execute-quick-change/{SKILL.md,steps/02-verify.md,references/*}` | Added Solution Pivot gate to step 02 (verify) — when the implemented change diverges from the documented intent, the skill prompts the user to confirm a pivot or rewind rather than silently shipping the divergent solution. | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-01 | Source Update | skills | `.agents/skills/quick-dev/{document-quick-change,plan-quick-change,execute-quick-change}/` — SKILL.md + step files | Aligned the three quick-dev SKILL.md and step files with the new gates and solution-constraints capture (per adversarial-review feedback) — consistent terminology, gate references, and handoff text across the flow. | repo @ this commit | ✅ Verified |
+| 3 | 2026-05-01 | Source Update | compositions | `templates/compositions/quick-dev-spec.yaml`, `templates/compositions/brownfield-enhancement-spec.yaml` | Wired the new assumptions/constraints/out-of-scope block into both quick-dev-flavoured spec compositions. | repo @ this commit | ✅ Verified |
+| 4 | 2026-05-01 | Source Update | branding | `README.md` | Rewrote Getting Started: install (mandatory/optional/skip lists), open in IDE (VSCode + Copilot first, then Cursor), bootstrap with /start-project (sibling workspace layout, Legacy vs SoD subsections), where to go next. Existing reference sections preserved below. | repo @ this commit | ✅ Verified |
+| 5 | 2026-05-01 | Source Update | docs, config | `_docs/sod-multi-repo-proposal.md` § 3-4, `config/project.toml.example` (commented SoD block) | Updated SoD layout diagram and example `dir`/`path` values to recommend siblings of the workspace folder (`dir = "../ba-repo"`, `path = "{project-root}/../<repo>"`) rather than children. | repo @ this commit | ✅ Verified |
+| 6 | 2026-05-01 | Restructure | config, skills | `config/project.toml.example`, `config/project.user.toml.example`, `.agents/skills/meta/start-project/references/{EXAMPLE,INPUTS-OUTPUTS}.md` | Renamed example KB repo from `checkout-knowledge-base` to generic `knowledge-base-repo` across all docs/examples (4 files, 7 occurrences). | repo @ this commit | ✅ Verified |
+
+#### Branch Dependency
+
+This release adds the Solution Pivot + Completion Confirmation gates and solution-constraints capture to the quick-dev workflow on top of `1.4.5`. Pure additive — no breaking changes to existing quick-dev projects; the new constraints block is wired through the spec composition and the new gates run inside the existing execute-quick-change flow.
+
+---
 
 ### `1.4.5` — 2026-05-01
 
