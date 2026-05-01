@@ -33,6 +33,14 @@ The `--scope=catalog-only` mode is a lighter version invoked by
 last_feature_id, last_verified_against_commit) and the change-tracker, and
 skips body re-derivation and ADR emission.
 
+**The set of components touched is the same in both modes** — the
+affected-component set Step 1 derives by intersecting the feature's diff
+against each component's `paths:` glob. `--scope=catalog-only` does not
+re-attest components whose `paths:` did not match the diff, even if their
+`last_verified_against_commit` is stale relative to current source HEAD.
+Sweeping stale stamps independent of a shipping feature is a
+`verify-knowledge-base-coverage` job, not this skill's responsibility.
+
 ## When to use
 
 - An execute flow has just finished and reports an implementation
@@ -52,6 +60,10 @@ skips body re-derivation and ADR emission.
 - The agent is reading the KB, not writing — use `navigate-knowledge-base`.
 - A drift alert was raised but no specific feature shipped — use
   `detect-knowledge-base-drift` to investigate.
+- You want to sweep stale `last_verified_against_commit` stamps across the
+  KB without a feature shipping — use `verify-knowledge-base-coverage`
+  instead. This skill only re-attests components matched by a feature's
+  diff; it is not a stale-stamp sweeper.
 
 ## Inputs
 
@@ -110,7 +122,11 @@ none — invoked as a closing step. Optionally hands off to
   the audit log; missing rows compound into drift.
 - **Updating components whose `paths:` did not match the diff.** Step 1
   is the gatekeeper. If the diff didn't touch `paths:`, the component
-  doesn't change.
+  doesn't change — even in `--scope=catalog-only` mode, even if the
+  component's `last_verified_against_commit` is stale relative to current
+  source HEAD. Re-attesting "every stale-SHA component in the repo" is
+  out-of-contract for this skill; for that, see
+  `verify-knowledge-base-coverage`.
 - **Bumping `last_verified_against_commit` without re-deriving triggers /
   description / depends_on.** In `--scope=full`, all derived fields are
   re-checked against the new code state. In `catalog-only`, only the

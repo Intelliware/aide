@@ -24,6 +24,14 @@ The skill operates in two modes:
   refresh. Lighter, faster, suitable when the change is too small to
   warrant a full re-derivation pass.
 
+  **Both modes touch the same component set:** the affected components
+  Step 1 derives by intersecting the feature's diff against each
+  component's `paths:` glob. `catalog-only` is "smaller per-component
+  surface, same per-component selection." Components whose `paths:` did
+  not match the diff are not re-attested even if their
+  `last_verified_against_commit` is stale relative to current source
+  HEAD — that's a separate sweep, see "When NOT to use" below.
+
 ## When to use
 
 - `execute-increments` has finished a feature → invoke with `--scope=full`,
@@ -41,6 +49,10 @@ The skill operates in two modes:
 - The KB doesn't exist — run `build-knowledge-base`.
 - A drift alarm was raised but no feature shipped — use
   `detect-knowledge-base-drift` to identify the source of drift.
+- You want to re-attest stale `last_verified_against_commit` stamps
+  without a feature shipping — use `verify-knowledge-base-coverage`
+  instead. This skill is scoped to the affected-component set derived
+  from a feature's diff; it is not a stale-stamp sweeper.
 
 ## Position in workflow
 
