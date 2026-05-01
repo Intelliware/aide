@@ -1,0 +1,12 @@
+# Negative fixture for SoD rule 12 — affects_repos lists a code that is
+# NOT declared in [[project.repos]].
+# Expected: validator REJECTS the paired artifact with message containing
+# "unknown repo" or "not declared".
+# Use with: --cross-cutting-artifact cross-cutting-unknown-repo.md
+
+[project]
+code = "neg-12"
+
+[[project.repos]]
+code = "recipes-web"
+path = "{project-root}/../recipes-web"

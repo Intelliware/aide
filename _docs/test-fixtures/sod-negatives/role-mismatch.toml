@@ -1,0 +1,13 @@
+# Negative fixture for SoD rule 9b (plan rule 9) — [user].role lacks
+# permission to write the active stage's write_role.
+# Expected: validator REJECTS with message containing "role mismatch".
+
+[project]
+code = "neg-9"
+
+[user]
+role = "BA"
+
+[stages.requirements]
+dir = "specs"
+write_role = "Architect"

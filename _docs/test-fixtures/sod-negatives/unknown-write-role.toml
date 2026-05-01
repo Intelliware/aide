@@ -1,0 +1,9 @@
+# Negative fixture for SoD rule 9 — write_role outside the enum.
+# Expected: validator REJECTS with message containing "unknown role" + "enum".
+
+[project]
+code = "neg-8"
+
+[stages.requirements]
+dir = "specs"
+write_role = "Wizard"

@@ -1,0 +1,6 @@
+# Negative fixture for SoD rule 11 — artifact_subdir is absolute.
+# Expected: validator REJECTS with message containing "must be relative".
+
+[project]
+code = "neg-10"
+artifact_subdir = "/tmp/output"

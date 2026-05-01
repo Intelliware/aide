@@ -1,0 +1,9 @@
+# Negative fixture for SoD rule 7 — dir AND colocate_with_source set.
+# Expected: validator REJECTS with message containing "mutually exclusive".
+
+[project]
+code = "neg-7"
+
+[stages.requirements]
+dir = "specs"
+colocate_with_source = true

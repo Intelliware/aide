@@ -1,0 +1,16 @@
+# Negative fixture for SoD rule 12 — cross-cutting artifact whose
+# affects_repos array is EMPTY.
+# Expected: validator REJECTS the paired artifact with message containing
+# "affects_repos" + "empty".
+# Use with: --cross-cutting-artifact cross-cutting-empty-affects.md
+
+[project]
+code = "neg-11"
+
+[[project.repos]]
+code = "recipes-web"
+path = "{project-root}/../recipes-web"
+
+[[project.repos]]
+code = "recipes-api"
+path = "{project-root}/../recipes-api"
