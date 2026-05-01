@@ -422,7 +422,7 @@ The triple shape is *not* a defect to fix in this test pass — it reflects thre
 **Rollback:** none — read-only.
 
 ### A.7  SoD validation rule negatives  —  feed the validator deliberately broken `project.toml` fixtures
-**Trigger:** craft six tiny TOML fixtures under `_docs/test-fixtures/sod-negatives/` (one per validation rule 7–12 in `config/SCHEMAS.md`), then point `scripts/validate.py` at each via `--project-toml`. **The validator must REJECT each fixture** with the rule-specific error message.
+**Trigger:** craft six tiny TOML fixtures under `scripts/test_fixtures/sod-negatives/` (one per validation rule 7–12 in `config/SCHEMAS.md`), then point `scripts/validate.py` at each via `--project-toml`. **The validator must REJECT each fixture** with the rule-specific error message.
 
 **Inputs:** the six fixtures below (create them as part of this step; rollback deletes the directory):
 
@@ -442,7 +442,7 @@ The triple shape is *not* a defect to fix in this test pass — it reflects thre
 
 > **Note: this step depends on the validator actually implementing rules 7–12.** If `scripts/validate.py` doesn't currently enforce them (only `config/SCHEMAS.md` documents them), this step will FAIL as written — and that's the *correct* signal: the rules exist on paper but not in code. Capture the FAIL with a note, then file a follow-up issue. Don't paper over this by downgrading to `[user]`.
 
-**Rollback:** `rm -rf _docs/test-fixtures/sod-negatives/`.
+**Rollback:** `rm -rf scripts/test_fixtures/sod-negatives/`. (Note: the fixtures are now regression-test data for `scripts/test_validate.py` and live as committed test artifacts; in practice you don't roll them back — you only roll back transient working-tree edits to them. Listed here for shape-symmetry with the other A.* steps.)
 
 > **End of Phase A — run the §11 teardown checklist** (status sweep + Phase-A-specific rollbacks) before moving to Phase B.
 
@@ -1336,7 +1336,7 @@ Append the output of each command to the results file under the phase's teardown
 
 | Phase | What to check / sweep |
 |---|---|
-| A | Validator output captured to results file. `_docs/test-fixtures/sod-negatives/` removed (A.7 rollback). No stray edits under `.agents/skills/` from the rebuild. |
+| A | Validator output captured to results file. `scripts/test_fixtures/sod-negatives/` retained (now regression-test data for `scripts/test_validate.py`, not transient — A.7 rollback no longer applies). No stray edits under `.agents/skills/` from the rebuild. |
 | B | `recipes-app/{project.toml, project.user.toml, CHANGE-TRACKER.md, docs/}` reflect only steps you ran. The B.4 brownfield flag remains set (Phase C depends on it). |
 | C | `recipes-kb/source-docs/<repo>/` populated for every RE step that ran. `oss-clones/` clones are still shallow (`git rev-parse --is-shallow-repository` per repo). The KB itself (`recipes-kb/{ARCHITECTURE.md, components/, repos/, ...}`) is intact unless C.9 rollback ran. C.12 / C.13 / C.13b setup commits are reset against `_docs/.sha-pre-c12`. |
 | D | `recipes-app-gf/` reset against `_docs/.sha-pre-d8` / `.sha-pre-d10` / `.sha-pre-e3` if you intend to teardown to a clean greenfield (or leave the artefacts in place if you want a follow-up sitting). `git stash list` inspected for any `*-pre-rollback` entries to restore. |

@@ -11,7 +11,7 @@ Stdlib-only (matches the ethos of `validate.py` + `build-registry.py`). Run with
 Coverage:
 
   * SoD negative fixtures (rules 7–12) — every fixture under
-    `_docs/test-fixtures/sod-negatives/` must reject with the substring
+    `scripts/test_fixtures/sod-negatives/` must reject with the substring
     contract documented in `_docs/skills-test-plan.md` § A.7.
   * SoD positive cases — a clean `project.toml`, a partial config in legacy
     mode, and a fully consistent SoD config all pass.
@@ -36,7 +36,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VALIDATE = REPO_ROOT / "scripts" / "validate.py"
-FIXTURES = REPO_ROOT / "_docs" / "test-fixtures" / "sod-negatives"
+FIXTURES = REPO_ROOT / "scripts" / "test_fixtures" / "sod-negatives"
 
 
 def run_validate(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
