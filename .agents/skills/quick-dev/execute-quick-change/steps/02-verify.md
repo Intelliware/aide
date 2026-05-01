@@ -43,14 +43,55 @@ Verification evidence (test output, lint output, AI Gate output) is captured
 in the same conversation turn that claims success. "I ran them earlier and
 they passed" is not acceptable. If too much time has passed, re-run.
 
-## Failure handling
+## Failed verification — Solution Pivot Gate
 
-Any failed check stops the increment. Do not patch — invoke systematic
-debugging (4-phase RCA), find the root cause, fix, then re-verify all three
-dimensions. Patching without RCA is rejected.
+Any failed check stops the increment. The default response is **not** to
+silently iterate on the existing approach. Instead:
+
+1. **Diagnose to root cause.** Run 4-phase RCA — reproduce, isolate, root
+   cause, fix candidate. Do not propose a fix until you can name *why* the
+   first attempt failed in terms the user can verify. Symptom-level patches
+   are rejected.
+2. **Cross-check against solution constraints.** Re-read the spec's §12.2a
+   Solution Constraints (or, if the spec is inline, the constraints captured
+   during change-scope-discovery). Any candidate fix that would violate a
+   solution constraint is discarded before it is proposed — including on a
+   pivot. The constraints survive the pivot.
+3. **Decide: small-loop fix or pivot?** If the same approach is salvageable
+   with a localized adjustment that does **not** change the strategy
+   (e.g., off-by-one fix, missing await, wrong selector), perform the fix
+   and re-verify all three dimensions in the same turn. This is a
+   small-loop fix, not a pivot.
+4. **If the approach itself is wrong, halt at the Solution Pivot Gate.**
+   Present **one** alternative approach with:
+   - the root cause diagnosis (one or two sentences),
+   - what changes vs. the current approach (specific files / techniques),
+   - why it will resolve the failure,
+   - the tradeoffs (perf, footprint, complexity, blast radius),
+   - confirmation that the alternative honors every solution constraint.
+
+   Then **stop and wait for explicit user approval** before writing any new
+   code. Do not propose two alternatives in parallel and do not begin
+   implementing while presenting — the gate is a hard halt. If the user
+   approves, restart the increment loop from TDD step 1 with the new
+   approach. If the user redirects to a different alternative, treat that
+   as a new pivot — re-verify it against the solution constraints before
+   proceeding.
+5. **One pivot per failure.** If a pivot is approved, executed, and *also*
+   fails verification, that is the user's signal to escalate — surface that
+   the change may be larger than quick-dev scope and offer the brownfield
+   enhancement spec as the escalation path. Do not pivot a second time
+   silently.
+
+The rule the gate enforces: each change of approach is a checkpoint. Silent
+iteration through three or four approaches in one turn is the failure mode
+this protocol exists to prevent.
 
 ## Verification log
 
 Append a one-line verification entry to the increment's section in
 `<feature-folder>/quick-dev-package/CHANGE-TRACKER.md` so the audit shows the
-increment was verified in three dimensions, not just unit-tested.
+increment was verified in three dimensions, not just unit-tested. If a
+Solution Pivot Gate fired during the increment, append a second line
+recording the root cause, the approved alternative, and the user who
+approved it — pivots are part of the audit trail.

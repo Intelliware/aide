@@ -17,6 +17,7 @@ requirements + design pipeline, not a quick-dev/enhancement spec.
 - Affected components (probe the KB if available; otherwise enumerate)
 - Estimated size (XS / S / M; L means escalate to full pipeline)
 - Hard constraints (deadline, budget, "must not touch X")
+- Solution constraints (implementation guardrails the AI must honor — "no regex", "no hardcoded maps", "no new dependencies")
 - Success criteria (observable outcome)
 - Explicit out-of-scope statements
 
@@ -50,22 +51,28 @@ Ask **one question at a time**. Prefer multiple-choice when applicable. Allow "s
    - **Validation:** at least one entry encouraged (warn if empty)
    - **Maps to:** `quick_dev.change.constraints[]`
 
-6. **Success criteria.** What observable outcome confirms the change is done? (1-3 entries; format like an acceptance criterion)
+6. **Solution constraints.** Implementation choices the AI must honor through every iteration of the change — including any pivot after a failed verification. (e.g. "no regex", "no hardcoded lookup maps", "no new dependencies", "no schema migrations", "must use the existing retry helper")
+   - **Format:** structured-list of `{constraint_kind, description, rationale?}` where `constraint_kind` ∈ `{forbidden-technique, forbidden-dependency, required-pattern, performance-budget, footprint-limit, other}`
+   - **Validation:** none required, but the question is asked verbatim — silence here is the most common cause of an AI quietly violating an unspoken rule on a retry. Echo the answer (or "none") back.
+   - **Maps to:** `quick_dev.change.solution_constraints[]`
+   - **Why this is separate from Q5:** hard constraints answer "what must we not break or exceed in the world?"; solution constraints answer "what techniques must the implementation not use?". The first prevents scope drift; the second prevents the AI from re-introducing a forbidden approach during a Solution Pivot.
+
+7. **Success criteria.** What observable outcome confirms the change is done? (1-3 entries; format like an acceptance criterion)
    - **Format:** structured-list of `{given, when, then}` triples
    - **Validation:** at least one triple
    - **Maps to:** `quick_dev.change.success_criteria[]`
 
-7. **What is explicitly OUT of scope?** (one bullet per item — names the things you're NOT changing even if a reader might assume you should)
+8. **What is explicitly OUT of scope?** (one bullet per item — names the things you're NOT changing even if a reader might assume you should)
    - **Format:** structured-list of free-text bullets
    - **Validation:** at least one entry encouraged (warn if empty — out-of-scope is the cheapest insurance against scope creep)
    - **Maps to:** `quick_dev.change.out_of_scope[]`
 
-8. **Existing artifacts to incorporate.** Tickets, incident notes, screenshots, prior PRs, ADRs, design notes — anything the user has that should seed the spec.
+9. **Existing artifacts to incorporate.** Tickets, incident notes, screenshots, prior PRs, ADRs, design notes — anything the user has that should seed the spec.
    - **Format:** structured-list of paths or URLs
    - **Validation:** local paths must resolve; URLs are accepted as-is
    - **Maps to:** `quick_dev.change.existing_artifacts[]`
 
-**Wrap-up:** Confirm the answers in summary form before proceeding. Echo the title, trigger + rationale, affected components, size, constraints, success criteria, out-of-scope list, and existing artifacts. Re-prompt the size if `L`. Confirm before drafting the spec.
+**Wrap-up:** Confirm the answers in summary form before proceeding. Echo the title, trigger + rationale, affected components, size, hard constraints, solution constraints, success criteria, out-of-scope list, and existing artifacts. Re-prompt the size if `L`. Confirm before drafting the spec.
 
 ## Output format
 
@@ -90,6 +97,10 @@ the UI) is breaking on >500 rows.
 - Deadline: 2026-05-15 (customer demo)
 - Do-not-touch: existing /v1/orders REST endpoints
 
+## Solution constraints
+- forbidden-dependency: no new CSV libraries — use the stdlib formatter already in `acme-orders-api/lib/csv/`
+- forbidden-technique: no in-memory full-result-set buffering — stream the export
+
 ## Success criteria
 - GIVEN an operator with an active order-list filter, WHEN they click "Export CSV", THEN they receive a CSV file with columns id/customer/status/created_at/updated_at containing exactly the filtered rows.
 
@@ -106,6 +117,7 @@ the UI) is breaking on >500 rows.
 - When the KB exists, affected components must resolve to real component files; unresolved IDs are flagged.
 - Out-of-scope must be explicit (warn if empty — silent assumption is the most common cause of quick-dev scope drift).
 - Success criteria are Given/When/Then; vague statements ("export works") are re-prompted.
+- Solution constraints are asked verbatim and echoed in the wrap-up (even when "none") — these are the rules the implementer must honor through every retry, including a Solution Pivot after a failed verification.
 
 ## Reusable across
 

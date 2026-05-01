@@ -41,6 +41,12 @@ blocks:
   - slug: requirements/assumptions-constraints-out-of-scope
     optional: false
     order: 7
+    notes: |
+      §12.2a Solution Constraints captures implementation guardrails the
+      implementer must honor on every iteration — including any Solution
+      Pivot after a failed verification. Required even when the user reports
+      "no constraints" — render that explicitly as "None known at spec time"
+      rather than omitting the section.
   - slug: requirements/acceptance-criteria
     optional: false
     order: 8

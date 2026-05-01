@@ -6,15 +6,21 @@
 implements the plan's increments with TDD, verifies each one along three
 dimensions (Completeness / Correctness / Coherence), runs adversarial PR
 review with four lenses, creates atomic commits after explicit user
-approval, and closes by handing off to `update-knowledge-base
---scope=catalog-only` so the KB catalog reflects the new behavior.
+approval, halts at the Completion Confirmation Gate until the user
+confirms the change works in their environment, and only then hands off to
+`update-knowledge-base --scope=catalog-only` so the KB catalog reflects
+the new behavior.
 
 The skill anchors the legacy `expedited-implementation-package`'s execute +
-deliver phases. The iron rules are non-negotiable: (1) no production code
-without a failing test first; (2) no success claim without fresh
-verification in the same turn — not from memory; (3) never commit without
-explicit user approval; (4) zero findings in adversarial review is a
-re-analysis trigger, not a pass.
+deliver phases. The iron rules are non-negotiable:
+
+1. No production code without a failing test first.
+2. No success claim without fresh verification in the same turn — not from memory.
+3. Never commit without explicit user approval.
+4. Zero findings in adversarial review is a re-analysis trigger, not a pass.
+5. **Solution Pivot Gate** — a failed verification that calls for a different approach is a hard halt: present one alternative with rationale and tradeoffs, wait for explicit user approval, then restart. No silent iteration.
+6. **Solution constraints survive pivots** — the spec's §12.2a constraints (no regex, no new dependencies, etc.) must be honored on every iteration, including after a pivot.
+7. **Completion Confirmation Gate** — the change is not done until the user confirms it works in their environment. The skill cannot self-close.
 
 The catalog-only KB hand-off is deliberate. Quick-dev changes are usually
 component-local, so a full KB re-synthesis is overkill — the catalog update

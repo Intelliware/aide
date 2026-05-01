@@ -7,9 +7,18 @@ description: "Use when a quick-dev plan exists and the user says \"execute the q
 
 ## Overview
 
-Implements the quick-dev plan increment-by-increment with TDD, runs three-dimension verification (Completeness / Correctness / Coherence), invokes adversarial PR review (4-lens: blind / spec compliance / standards compliance / codebase integration), creates atomic commits after explicit user approval, then hands off to `update-knowledge-base --scope=catalog-only` so the KB catalog reflects the change.
+Implements the quick-dev plan increment-by-increment with TDD, runs three-dimension verification (Completeness / Correctness / Coherence), invokes adversarial PR review (4-lens: blind / spec compliance / standards compliance / codebase integration), creates atomic commits after explicit user approval, halts at the Completion Confirmation Gate until the user confirms the change works in their environment, then hands off to `update-knowledge-base --scope=catalog-only` so the KB catalog reflects the change.
 
-Anchors the legacy `expedited-implementation-package`'s execute + deliver phases. Same iron rules: no production code without a failing test first, no success claim without fresh verification in the same turn, never commit without explicit user approval.
+Anchors the legacy `expedited-implementation-package`'s execute + deliver phases.
+
+### Iron rules (no exceptions)
+
+1. **No production code without a failing test first.** Code written ahead of a failing test is deleted and redone.
+2. **No success claim without fresh verification in the same turn.** "I ran them earlier" is not acceptable — re-run in the turn that claims success.
+3. **Never commit without explicit user approval.**
+4. **Solution Pivot Gate.** If the first implementation attempt fails verification, do not silently iterate. Diagnose the root cause, present **one** alternative approach with rationale and tradeoffs, and wait for explicit user approval of the new approach before writing any new code. Each pivot is a checkpoint. See `steps/02-verify.md`.
+5. **Solution constraints survive pivots.** The spec's §12.2a Solution Constraints (no regex, no hardcoded maps, no new dependencies, etc.) must be honored on every iteration — including any pivot. Cross-check candidate fixes against them before proposing.
+6. **Completion Confirmation Gate.** Do not treat the change as done once code is written, tests pass, and the PR opens. The change is only complete after the user explicitly confirms the fix works in their environment ("confirmed", "verified", "ship it"). The AI does not self-close. If the user reports the change still doesn't work, treat it as a failed verification and run the Solution Pivot Gate. See `steps/04-confirmation-gate.md`.
 
 ## When to use
 
@@ -32,19 +41,19 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Workflow
 
-1. **Per-increment loop** — for each increment in plan order:
-   - **Phase Education** — restate what, how, dependencies, deliverables
-   - **Game Plan** — order of operations, key decisions, integration points
-   - **Go/No-Go** — present, wait for explicit "go"
-   - **Branch** — `feature/<inc-id>-<short-name>`
-   - **TDD per task** — RED (failing test) → verify-fail → GREEN (minimal code) → verify-pass → REFACTOR. Iron rule: no production code without a failing test first. See `steps/01-tdd-loop.md`.
+1. **Load solution constraints** — before any increment starts, read the spec's §12.2a Solution Constraints and treat them as facts the implementation must honor on every iteration, including any Solution Pivot. If the spec is inline (trivial) and a constraints section was not written, ask the user once before opening the TDD loop.
+2. **Per-increment loop** — for each increment in plan order:
+   - **Education + game plan + Go/No-Go** — restate what, how, dependencies, deliverables; lay out order of operations; wait for explicit "go".
+   - **Branch** — `feature/<inc-id>-<short-name>`.
+   - **TDD per task** — RED (failing test) → verify-fail → GREEN (minimal code) → verify-pass → REFACTOR. See `steps/01-tdd-loop.md`.
    - **3-dimension verification** — Completeness / Correctness / Coherence (`verify-source` for content claims; the AI Gate test commands for code). See `steps/02-verify.md`.
-   - **Debug** — if issues arise, run 4-phase systematic RCA before fixing. No fix without root cause.
+   - **Failed verification → Solution Pivot Gate** — if any check fails, run 4-phase RCA, cross-check candidate fixes against solution constraints, then either small-loop fix (no strategy change) or halt and present **one** alternative approach for explicit user approval. No silent iteration. See `steps/02-verify.md`.
    - **Approve + commit** — present summary, wait for explicit approval before staging and committing with a conventional commit message.
-2. **Adversarial PR review** — 4-lens review of the uncommitted (or staged) diff: blind → spec compliance → standards compliance → codebase integration. Zero findings triggers re-analysis. See `steps/03-adversarial-pr-review.md`.
-3. **Fix cycle** — fix Critical and Important findings, re-verify, re-review affected diff.
-4. **Commit + PR** — only after explicit user approval; conventional commit messages; PR description generated from the spec, plan, and diff.
-5. **KB hand-off** — invoke `update-knowledge-base --scope=catalog-only` so the catalog reflects the change without forcing a full re-synthesis.
+3. **Adversarial PR review** — 4-lens review of the uncommitted (or staged) diff: blind → spec compliance → standards compliance → codebase integration. Zero findings triggers re-analysis. See `steps/03-adversarial-pr-review.md`.
+4. **Fix cycle** — fix Critical and Important findings, re-verify, re-review affected diff.
+5. **Commit + PR** — only after explicit user approval; conventional commit messages; PR description generated from the spec, plan, and diff.
+6. **Completion Confirmation Gate** — present the implementation, surface verification evidence, and ask the user to confirm the change works in their environment. **Halt** until explicit confirmation arrives. If the user reports a problem, route back to step 2's Solution Pivot Gate. The skill cannot self-close. See `steps/04-confirmation-gate.md`.
+7. **KB hand-off** — only after the Confirmation Gate clears, invoke `update-knowledge-base --scope=catalog-only` so the catalog reflects the change without forcing a full re-synthesis.
 
 ## Output
 
@@ -63,3 +72,7 @@ See `references/INPUTS-OUTPUTS.md`. Working tested code, atomic commits, an open
 - Treating zero-findings as success rather than as a re-analysis trigger
 - Forgetting the KB catalog update — drift starts here
 - Patching symptoms instead of root cause when bugs surface mid-execution
+- Silently iterating through two or three approaches in the same turn instead of halting at the Solution Pivot Gate to surface the first failure and proposed alternative
+- Violating a documented solution constraint during a pivot ("we hit a wall, so I added a regex / a new dependency / a hardcoded map") — solution constraints survive the pivot
+- Self-closing the change after tests pass and the PR opens, instead of waiting at the Completion Confirmation Gate for the user to confirm the change works in their environment
+- Conflating commit approval with completion confirmation — they are two separate gates and must be asked separately
