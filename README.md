@@ -11,94 +11,174 @@ Supports three flows:
 
 Includes a global **knowledge-base** capability for multi-repo, large solutions: built initially via reverse-engineering, maintained by closing skills as features ship.
 
-## Getting started
+## Getting Started
 
-1. Open this repo and your target project repo(s) as folders in one multi-root VSCode or Cursor workspace.
-2. Skills auto-discover — see "Running in …" sections below for the one-time host verification.
-3. Invoke the `start-project` skill to choose a flow and write your `project.toml`.
-4. Follow the recommended next skill at each stage handoff.
+### Step 1 — Install the framework
 
-If unsure where to start, invoke `framework-navigator` — it routes you based on a goal in plain English (or shows the catalog).
+A.I.D.E. is consumed by copying its runtime folders out of this repo into wherever you keep your project repos. Skills auto-discover from the copied location once an IDE picks it up — there is no build step or install command.
 
-> **Currently supported hosts:** VSCode + GitHub Copilot, Cursor IDE. Claude Code is currently not supported.
+**Mandatory — copy these from this repo into your AIDE folder:**
 
-## Running in VSCode + GitHub Copilot
+| Path | Purpose |
+|---|---|
+| `AGENTS.md` | Framework orientation file the IDE auto-attaches to every chat |
+| `.agents/` | All 32 skills + the committed `_registry/` (catalog + workflow graph) |
+| `config/` | Schemas + example TOMLs the skills reference |
+| `templates/` | Reusable section blocks + YAML compositions |
+| `references/` | Cross-cutting framework references loaded by skills on demand |
 
-GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specification natively on 2025-12-18, and A.I.D.E.'s skills conform to that spec. No transformation, transpile, or build step is required — Copilot reads `SKILL.md` files directly. Skills are stored under A.I.D.E.'s `.agents/skills/` directory, which is one of Copilot's default discovery roots, so **no settings.json edits, symlinks, or overlays are needed**.
+**Optional:**
 
-### Prerequisites
+- `README.md` — this file; useful for human reference, not consumed by skills.
 
+**Don't copy** (framework-maintenance only): `scripts/`, `CLAUDE.md`, `CHANGELOG.md`, `_docs/`, `_archive/`, `_bmad/`. Grab `scripts/` later only if you decide to extend or modify the skills inside your AIDE copy — it contains `build-registry.py` (regenerates `_registry/skills.csv` + `skills.json` after skill edits) and `validate.py`.
+
+### Step 2 — Open it in your IDE
+
+Open your AIDE folder alongside your project repo(s) in one multi-root workspace. The framework's skills sit at `.agents/skills/` — a default discovery root for both supported IDEs — so no `settings.json` edits, symlinks, or overlays are needed.
+
+To verify discovery: open the IDE's agent panel and type `/`. All 32 framework skills should appear in the picker with their descriptions.
+
+> **Currently supported hosts:** VSCode + GitHub Copilot (primary), Cursor IDE. Claude Code is currently not supported.
+
+#### Step 2a — VSCode + GitHub Copilot (primary target)
+
+GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specification natively on 2025-12-18, and A.I.D.E.'s skills conform to that spec. Copilot reads `SKILL.md` files directly — no transformation, transpile, or build step is required.
+
+**Prerequisites:**
 - VSCode with the GitHub Copilot extension installed and signed in
 - Copilot in **agent mode** (Chat view → switch from "Ask" to "Agent"). Agent mode is required for skills that read multiple files or run scripts.
 
-### Step 1 — open A.I.D.E. alongside your project
+**Verify discovery.** Open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 32 framework skills should appear in the picker with their descriptions.
 
-Open this repo as a folder in the same multi-root workspace as your target project repo(s). Save the workspace as `<project>.code-workspace` (File → Save Workspace As…) so the layout is reproducible. Copilot iterates every workspace folder root and looks for skills under each root's default discovery directories — `.agents/skills/` is one of those defaults, so A.I.D.E.'s skills are picked up automatically.
+**Framework orientation (automatic).** Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that AIDE's folder is the framework, not the user's project. **No project-side wiring required.**
 
-To verify: open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 32 framework skills should appear in the picker with their descriptions.
-
-### Step 2 — framework orientation (automatic)
-
-A.I.D.E. ships an `AGENTS.md` at its repo root. Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
-
-Project-side guidance is **optional** and scoped to project-specific rules — codebase conventions, path-scoped style preferences, etc. Add any of:
+**Project-side guidance (optional).** Scoped to project-specific rules — codebase conventions, path-scoped style preferences, etc. Add any of:
 
 - `.github/copilot-instructions.md` or `AGENTS.md` at your project's root (always-on)
 - `.github/instructions/<name>.instructions.md` with an `applyTo:` glob (path-scoped, e.g. "in `frontend/`, prefer functional components")
 
-Project-side files compound with A.I.D.E.'s `AGENTS.md` — both attach in parallel, no conflict.
+Project-side files compound with AIDE's `AGENTS.md` — both attach in parallel, no conflict.
 
-### Compositions and Copilot
+**Compositions and Copilot.** Copilot has no native equivalent of AIDE's YAML compositions. Skills that consume compositions still work — the skill itself reads the YAML from disk. If you want a composition exposed as a one-shot Copilot agent (e.g. "run the whole greenfield-requirements-package flow"), wrap it as a custom agent at `.github/agents/<flow-name>.agent.md`. This is optional and not required for any skill to function.
 
-Copilot has no native equivalent of A.I.D.E.'s YAML compositions. Skills that consume compositions still work — the skill itself reads the YAML from disk. If you want a composition exposed as a one-shot Copilot agent (e.g. "run the whole greenfield-requirements-package flow"), wrap it as a custom agent at `.github/agents/<flow-name>.agent.md`. This is optional and not required for any skill to function.
+#### Step 2b — Cursor IDE
 
-## Running in Cursor IDE
+Cursor adopted native [agentskills.io](https://agentskills.io) support around v2.3.x — the same `SKILL.md` format used by Copilot is read directly.
 
-Cursor adopted native [agentskills.io](https://agentskills.io) support around v2.3.x — the same `SKILL.md` format used by Copilot is read directly. Skills are stored under A.I.D.E.'s `.agents/skills/` directory, which is one of Cursor's built-in discovery roots, so **no settings, symlinks, or overlays are needed**.
-
-### Prerequisites
-
-- Cursor IDE v2.3.x or later (skills support is bundled; no separate install).
+**Prerequisites:**
+- Cursor IDE v2.3.x or later (skills support is bundled; no separate install)
 - Agent panel open and a model selected. Cursor's Agent reads skills automatically; slash invocation works in the Agent chat.
 
-### Step 1 — open A.I.D.E. alongside your project
+**Verify discovery.** Open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the AIDE folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
-Open this repo as a folder in the same multi-root Cursor workspace as your target project repo(s). Cursor scans `.agents/skills/` (and `.cursor/skills/`) under every workspace folder root, so A.I.D.E.'s skills are picked up automatically.
+**Framework orientation (automatic).** Cursor reads `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation. **No project-side wiring required.**
 
-To verify: open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the A.I.D.E. folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
-
-### Step 2 — framework orientation (automatic)
-
-A.I.D.E. ships an `AGENTS.md` at its repo root. Cursor reads `AGENTS.md` from every workspace folder root, so simply having A.I.D.E. open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that A.I.D.E.'s folder is the framework, not the user's project. **No project-side wiring required.**
-
-Project-side guidance is **optional** and scoped to project-specific rules. Add any of:
+**Project-side guidance (optional).** Scoped to project-specific rules. Add any of:
 
 - `AGENTS.md` at your project's root (always-on)
 - `.cursor/rules/<name>.mdc` with `alwaysApply: true` (always-on, project-scoped)
 - `.cursor/rules/<name>.mdc` with a `globs:` field (path-scoped, e.g. "in `frontend/`, prefer functional components")
 
-Project-side files compound with A.I.D.E.'s `AGENTS.md` — both attach in parallel, no conflict. Keep individual `.mdc` rule files under ~500 lines per Cursor's guidance.
+Keep individual `.mdc` rule files under ~500 lines per Cursor's guidance. Project-side files compound with AIDE's `AGENTS.md` — both attach in parallel, no conflict.
 
-### Step 3 — slash command shortcuts (optional)
+**Slash command shortcuts (optional).** Cursor supports project-level slash commands via `.cursor/commands/<name>.md`. These are short markdown prompts that expand at invocation — useful as one-line entry points to common flows (e.g. `start-greenfield.md`, `start-brownfield.md`, `start-quick-dev.md`). Each file's body is a brief prompt that names the corresponding framework skill and any required arguments. This is sugar — every framework skill is already directly invocable as `/<skill-name>`.
 
-Cursor supports project-level slash commands via `.cursor/commands/<name>.md`. These are short markdown prompts that expand at invocation. Useful as one-line entry points to common flows:
+**Compositions and Cursor.** Like Copilot, Cursor has no native runtime for AIDE's YAML compositions. Skills consume compositions directly from disk and run unchanged. There is no portable Cursor equivalent of Copilot's `.agent.md` files (Cursor's "custom agent modes" are UI-configured and stored in Cursor's local settings DB, not in a portable file). If you want a composition surfaced as a single shortcut, use a slash command shortcut.
 
-```
-.cursor/commands/start-greenfield.md
-.cursor/commands/start-brownfield.md
-.cursor/commands/start-quick-dev.md
-```
-
-Each file's body is a brief prompt that names the corresponding framework skill and any required arguments. This is sugar — every framework skill is already directly invocable as `/<skill-name>` once Step 1 is done.
-
-### Compositions and Cursor
-
-Like Copilot, Cursor has no native runtime for A.I.D.E.'s YAML compositions. Skills consume compositions directly from disk and run unchanged. There is no portable Cursor equivalent of Copilot's `.agent.md` files (Cursor's "custom agent modes" are UI-configured and stored in Cursor's local settings DB, not in a portable file). If you want a composition surfaced as a single shortcut, use a Step 3 slash command.
-
-### Known limitations
-
+**Known limitations:**
 - No setting to add custom skill discovery roots (VSCode has `chat.agentSkillsLocations`; Cursor does not). Not a blocker — `.agents/skills/` is in Cursor's defaults.
 - Custom agent modes are not file-based, so cross-tool agent personas don't port from Copilot.
+
+### Step 3 — Bootstrap your project with `/start-project`
+
+Once your IDE shows the framework skills in the slash picker, the entry point for any new project is `/start-project`. It elicits the flow (greenfield / brownfield / quick-dev), captures project identity, paths, glossary, and decision-table prefills, then writes `project.toml` and hands off to the first skill of the chosen flow.
+
+#### Recommended workspace layout
+
+Create a dedicated **workspace folder** that holds `project.toml`, the optional `project.user.toml`, and the IDE workspace file (`.code-workspace`). Keep your source repos and the knowledge-base repo as **siblings** of the workspace folder, not children:
+
+```
+~/Dev/
+├── checkout-workspace/        ← {project-root}: project.toml + checkout.code-workspace
+├── api-orders/                ← source repo (sibling)
+├── web-portal/                ← source repo (sibling)
+└── knowledge-base-repo/       ← KB repo (sibling)
+```
+
+The framework defines `{project-root}` as whatever directory contains `project.toml`. Sibling repos are addressed via the `{project-root}/../<repo>` path token. Run `/start-project` from inside the workspace folder so it writes `project.toml` there.
+
+This layout works for both setup modes below and is the recommended starting point even for single-repo projects — it keeps framework artifacts out of your source repos and gives you one stable location for the IDE workspace file.
+
+#### Two setup modes
+
+A.I.D.E. supports two project-bootstrap modes. **Pick one based on team layout, not project size:**
+
+- **Legacy (simple).** All artifacts (requirements, design, planning, execution) land under `{project-root}/.framework-output/<stage>/`. One person can play any role; no per-stage repo separation. Recommended starting point.
+- **Separation-of-Duties (SoD).** Each SDLC stage writes to a dedicated role-restricted repo (BA-repo for requirements, architect-repo for design, tester-repo for testing) or colocates with the relevant source repo (planning + execution). The framework checks `[user].role` from `project.user.toml` against the stage's `write_role` at every write boundary; per-repo write access at the platform level (GitHub teams, etc.) provides the hard guardrail. For teams that need RBAC at the artifact level.
+
+SoD is **opt-in per-stage** — a project may flip requirements to SoD while leaving execution on legacy paths. Both modes use the same `start-project` entry point and the same skills under the hood.
+
+#### Step 3a — Legacy setup (recommended starting point)
+
+1. Open the workspace folder in the IDE alongside the AIDE folder and your project repo(s).
+2. From within the workspace folder, invoke `/start-project`.
+3. Answer the elicitation prompts:
+   - **Flow:** greenfield / brownfield / quick-dev
+   - **Identity:** `name`, `code` (lowercase kebab-case), `domain`, optional `description`
+   - **Paths:** stage output directories (defaults to `{project-root}/.framework-output/<stage>/`); `knowledge_base_path` for greenfield/brownfield (default `{project-root}/../knowledge-base-repo`)
+   - **Glossary:** optional inline terms + reference files
+   - **Repos:** for multi-repo projects, one entry per source repo with `code`, `name`, `path`, `role`
+   - **Decision-table prefills:** compliance regime, team size, deployment model, etc.
+4. The skill writes `project.toml` (committed) and optionally `project.user.toml` (gitignored personal overrides), then hands off to the first skill of the chosen flow:
+   - **greenfield** → `/create-requirements-package`
+   - **brownfield** → `/analyze-repository`
+   - **quick-dev** → `/document-quick-change`
+
+The resulting `project.toml` contains `[project]`, `[project.paths]`, `[project.glossary]`, `[project.elicitation]`, and (for multi-repo) `[[project.repos]]` blocks. **No `[stages.*]` blocks** — that's what keeps the project in legacy mode.
+
+#### Step 3b — Separation-of-Duties setup
+
+SoD requires the same `start-project` bootstrap, plus a hand-edit to `project.toml` to declare per-stage role policy. `start-project` does not yet elicit SoD config interactively (planned future enhancement) — for now, follow this two-step path:
+
+1. **Run `/start-project` first** to produce a working legacy `project.toml` exactly as in Step 3a.
+2. **Hand-edit `project.toml`** to add `[stages.<stage>]` blocks declaring the host repo (or colocation) and write role for each SoD-adopting stage. Using the recommended sibling layout, point each `dir` at a sibling repo via `..`:
+
+   ```toml
+   [project]
+   artifact_subdir = ".framework-output"
+
+   [stages.requirements]
+   dir        = "../ba-repo"
+   write_role = "BA"
+
+   [stages.design]
+   dir        = "../architect-repo"
+   write_role = "Architect"
+
+   [stages.planning]
+   colocate_with_source = true
+   write_role           = "Developer"
+
+   [stages.execution]
+   colocate_with_source = true
+   write_role           = "Developer"
+   ```
+
+3. **Add your role** to `project.user.toml` (gitignored):
+
+   ```toml
+   [user]
+   role = "Developer"   # or BA / Architect / BSA / Tester / KB-Steward
+   ```
+
+The skill layer compares `[user].role` against `[stages.<stage>].write_role` at every write boundary and refuses mismatched writes. Stages without role policy declared (`dir` or `colocate_with_source` unset) fall back to legacy resolution exactly as today — adoption is per-stage.
+
+For the full SoD design (path resolution rules, cross-cutting feature handling, validator rules), see `_docs/sod-multi-repo-proposal.md`. For the full annotated `project.toml` schema including the SoD example block, see `config/project.toml.example`.
+
+### Step 4 — Where to go next
+
+If you're unsure which skill to invoke for a given goal, run `/framework-navigator` — it routes a plain-English goal to the right skill, or shows the catalog. Otherwise follow each skill's `## Next skill` handoff at the end of its run.
 
 ## Host-comparison cheatsheet
 

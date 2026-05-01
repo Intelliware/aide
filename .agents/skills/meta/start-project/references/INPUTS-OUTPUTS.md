@@ -14,7 +14,7 @@
 | `project.paths.requirements_package` | no | user input — defaults to `{project-root}/.framework-output/requirements` | `{project-root}/docs/requirements` |
 | `project.paths.design_package` | no | user input — defaults to `{project-root}/.framework-output/design` | `{project-root}/docs/design` |
 | `project.paths.implementation_package` | no | user input — defaults to `{project-root}/.framework-output/implementation` | `{project-root}/docs/implementation` |
-| `project.paths.knowledge_base_path` | yes (when flow ≠ quick-dev) | user input — sibling-repo path | `{project-root}/../checkout-knowledge-base` |
+| `project.paths.knowledge_base_path` | yes (when flow ≠ quick-dev) | user input — sibling-repo path | `{project-root}/../knowledge-base-repo` |
 | `project.glossary.references` | no | user input — list of paths | `["{project-root}/docs/glossary.md"]` |
 | `project.glossary.entries[]` | no | user input — `term`, `definition`, `aliases`, `domain_specific` | (see `EXAMPLE.md`) |
 | `project.elicitation.<code>` | no | user input — answers to known decision-table codes | `compliance_regime = "pci-dss"` |

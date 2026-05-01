@@ -26,7 +26,7 @@ Asked individually:
 - `code`: "acme-checkout" (validated against `^[a-z][a-z0-9-]*$`)
 - `domain`: "B2B SaaS checkout, billing, and refunds for marketplace merchants"
 - `description`: a multi-paragraph blurb
-- `paths.knowledge_base_path`: `{project-root}/../checkout-knowledge-base`
+- `paths.knowledge_base_path`: `{project-root}/../knowledge-base-repo`
 - (other path fields accepted at default `{project-root}/.framework-output/...`)
 - glossary: three inline entries (`Order`, `Refund`, `Settlement`) plus
   one reference path

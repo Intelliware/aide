@@ -56,21 +56,22 @@ These are validated against the current state of `mm/add-ack-cobol-repo`:
 ## 3. Workspace layout
 
 ```
-~/Dev/checkout-workspace/                                ← workspace root = {project-root}
-├── project.toml                                         ← schema lives here
-├── project.user.toml                                    ← gitignored, [user].role
-├── checkout.code-workspace                              ← VSCode multi-root workspace file
+~/Dev/                                                   ← parent directory holding all repos
+├── checkout-workspace/                                  ← {project-root}: workspace folder
+│   ├── project.toml                                     ← schema lives here
+│   ├── project.user.toml                                ← gitignored, [user].role
+│   └── checkout.code-workspace                          ← VSCode multi-root workspace file
 │
 ├── ba-repo/                                             ← write_role: BA (requirements artifacts)
 ├── architect-repo/                                      ← write_role: Architect (design artifacts)
 ├── tester-repo/                                         ← write_role: Tester (test plans) — Step 7
-├── knowledge-base/                                      ← KB sibling repo
+├── knowledge-base-repo/                                 ← KB sibling repo
 │
 ├── api-orders/                                          ← write_role: Developer (code + planning + execution artifacts)
 └── ui-checkout/                                         ← write_role: Developer (code + planning + execution artifacts)
 ```
 
-`{project-root}` = the directory containing `project.toml` (existing framework convention, `config/SCHEMAS.md:135-145`, unchanged). The framework loader walks up from `cwd` until it finds `project.toml`.
+`{project-root}` = the directory containing `project.toml` (existing framework convention, `config/SCHEMAS.md:135-145`, unchanged). The framework loader walks up from `cwd` until it finds `project.toml`. **All repos are siblings of the workspace folder**, addressed via the `{project-root}/../<repo>` path token. The workspace folder itself is just a holder for `project.toml`, `project.user.toml`, and the `.code-workspace` file — it never contains source code or stage artifacts.
 
 **No `developer-repo`.** Planning and execution artifacts live inside the source-code repos they describe.
 
@@ -85,17 +86,18 @@ The proposal **adds new fields to existing tables**; it does not introduce new t
 ```toml
 # project.toml — at the workspace root.
 # {project-root} = directory containing this file.
+# All repos are siblings of the workspace folder; addressed via {project-root}/../<repo>.
 
 [project]
 name            = "Checkout Modernization"
 artifact_subdir = ".framework-output"   # subdirectory name under each SoD stage's host repo
 
 [stages.requirements]
-dir        = "ba-repo"
+dir        = "../ba-repo"
 write_role = "BA"
 
 [stages.design]
-dir        = "architect-repo"
+dir        = "../architect-repo"
 write_role = "Architect"
 
 [stages.planning]
@@ -107,19 +109,19 @@ colocate_with_source = true
 write_role           = "Developer"
 
 [stages.testing]
-dir        = "tester-repo"
+dir        = "../tester-repo"
 write_role = "Tester"
 # (Step 7 — tester skills deferred; this entry shown for completeness.)
 
 [[project.repos]]
 code = "api-orders"
-path = "{project-root}/api-orders"
+path = "{project-root}/../api-orders"
 role = "api"
 type = "node-typescript-nest"
 
 [[project.repos]]
 code = "ui-checkout"
-path = "{project-root}/ui-checkout"
+path = "{project-root}/../ui-checkout"
 role = "ui"
 type = "react-typescript"
 ```

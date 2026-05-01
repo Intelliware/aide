@@ -8,7 +8,7 @@
 #   • api-orders     — order placement and lifecycle service
 #   • api-billing    — payment, invoicing, refunds service
 #   • web-portal     — admin and merchant-facing React app
-# with a sibling Knowledge Base repository at ../checkout-knowledge-base.
+# with a sibling Knowledge Base repository at ../knowledge-base-repo.
 #
 # Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
 # Relative paths resolve under {project-root}.
@@ -53,9 +53,9 @@ implementation_package  = "{project-root}/.framework-output/implementation"
 
 # Knowledge-base path. The KB is a SEPARATE git repository — this path
 # almost always points outside {project-root}. Sibling-repo layout shown
-# here; absolute paths (e.g. "/srv/kb/checkout-knowledge-base") are also
+# here; absolute paths (e.g. "/srv/kb/knowledge-base-repo") are also
 # valid. If unset, KB-stage skills error early with a helpful message.
-knowledge_base_path     = "{project-root}/../checkout-knowledge-base"
+knowledge_base_path     = "{project-root}/../knowledge-base-repo"
 
 
 # ─── [project.glossary] — terms used across the project ──────────────────────
@@ -65,7 +65,7 @@ knowledge_base_path     = "{project-root}/../checkout-knowledge-base"
 # files override earlier ones on identical terms.
 references = [
   "{project-root}/docs/glossary.md",
-  "{project-root}/../checkout-knowledge-base/_meta/glossary.md",
+  "{project-root}/../knowledge-base-repo/_meta/glossary.md",
 ]
 
 # Inline entries override the reference files.
@@ -138,8 +138,11 @@ event_bus                  = "kafka"
 # Stages without those fields continue resolving via [project.paths] exactly
 # as today. Uncomment the blocks below to enable SoD for this project.
 #
-# See `config/SCHEMAS.md` § 2.1 (SoD fields) and § 5 (layout conventions).
-# See `_docs/sod-multi-repo-proposal.md` for the full design rationale.
+# Recommended layout: workspace folder (containing this file) sits alongside
+# the role-restricted and source repos as siblings. `dir` values therefore use
+# `../<repo>` to reach a sibling. See `_docs/sod-multi-repo-proposal.md` § 3
+# for the full layout diagram, and `config/SCHEMAS.md` § 2.1 / § 5 for the
+# SoD field reference.
 
 # [project]
 # # Subdirectory name under each SoD stage's host repo where artifacts land.
@@ -147,11 +150,11 @@ event_bus                  = "kafka"
 # artifact_subdir = ".framework-output"
 
 # [stages.requirements]
-# dir        = "ba-repo"            # host repo for requirements artifacts
+# dir        = "../ba-repo"          # sibling host repo for requirements artifacts
 # write_role = "BA"                  # one of: BA | Architect | BSA | Developer | Tester | KB-Steward
 
 # [stages.design]
-# dir        = "architect-repo"
+# dir        = "../architect-repo"
 # write_role = "Architect"
 
 # [stages.planning]
@@ -164,7 +167,7 @@ event_bus                  = "kafka"
 
 # [stages.testing]
 # # Step 8 — tester skills deferred; this entry shown for completeness.
-# dir        = "tester-repo"
+# dir        = "../tester-repo"
 # write_role = "Tester"
 
 
