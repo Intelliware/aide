@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Research / design proposal — revised after adversarial review |
-| Branch | `mm/add-ack-cobol-repo` (integration version 1.3.5) |
+| Branch | `mm/add-ack-cobol-repo` (integration version 1.4.5) |
 | Date | 2026-04-30 (revised) |
 | Foundation | Builds on `mm/add-cobol` (1.3.0) + `mm/add-ack` (acknowledgement-restoration); does not depend on `mm/add-adverserial` |
 | Backward compatibility | **Hard requirement.** Existing single-repo `project.toml` projects must keep working without any change. |
@@ -362,7 +362,7 @@ For legacy artifacts that lack the field, Step 0 falls back to the prompt (with 
 
 ## 11. Backward compatibility — explicit guarantees
 
-The proposed changes layer additively over the current `mm/add-ack-cobol-repo` 1.3.5 schema. **Every legacy project keeps working without modification.** Per § 6, SoD adoption is *per-stage*: a stage adopts SoD only when its `[stages.<stage>]` entry declares `dir` or `colocate_with_source`. Otherwise that stage continues using its legacy `[project.paths]` resolution. This enables **incremental migration** — a team can flip requirements to SoD while leaving execution on legacy paths.
+The proposed changes layer additively over the current `mm/add-ack-cobol-repo` 1.4.5 schema. **Every legacy project keeps working without modification.** Per § 6, SoD adoption is *per-stage*: a stage adopts SoD only when its `[stages.<stage>]` entry declares `dir` or `colocate_with_source`. Otherwise that stage continues using its legacy `[project.paths]` resolution. This enables **incremental migration** — a team can flip requirements to SoD while leaving execution on legacy paths.
 
 | What today's project has | What the new framework does |
 |---|---|
