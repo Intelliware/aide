@@ -15,6 +15,10 @@ task #8 -> task #9):
   F. Re-run of build-registry.py for sanity.
   G. Elicitation-pattern resolution (composition + skill citations resolve;
      orphan patterns flagged).
+  H. RE skill output-structure binding.
+  I. Separation-of-duties (SoD) rule enforcement against a fixture
+     project.toml (and optional cross-cutting artifact). Run with
+     `--project-toml PATH` to evaluate rules 7–12 from `config/SCHEMAS.md`.
 
 Hard errors fail the run (exit 1):
   - Composition references a non-existent block (A).
@@ -22,6 +26,7 @@ Hard errors fail the run (exit 1):
   - Missing required block frontmatter field, missing/unclosed frontmatter,
     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
   - Composition or skill cites an elicitation pattern that does not exist (G).
+  - Any SoD rule violation when running in --project-toml mode (I).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 """
@@ -89,6 +94,9 @@ PHASE_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
 RE_SUPPRESSED_PHASE_LABELS = {"Phase N header (RE)", "Phase N (non-RE)"}
 
 REQUIRED_BLOCK_FIELDS = ("slug", "title", "applies-to", "requires-decision-from", "optional", "order-hint")
+
+# SoD enum (config/SCHEMAS.md § 4 rules 9 / 10).
+SOD_ROLE_ENUM = ("BA", "Architect", "BSA", "Developer", "Tester", "KB-Steward")
 
 
 # --- frontmatter parser (same shape as build-registry.py) -------------------
@@ -511,6 +519,178 @@ def check_h() -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def check_sod(
+    project_toml_path: Path,
+    artifact_path: Path | None = None,
+) -> tuple[list[str], list[str]]:
+    """I — Separation-of-duties (SoD) rule enforcement.
+
+    Loads `project_toml_path` (and optionally a cross-cutting artifact .md)
+    and evaluates the SoD rules documented in `config/SCHEMAS.md` § 4 (rules
+    7–12). Each violation produces an error with a substring matching the
+    expected validator message in `_docs/skills-test-plan.md` § A.7.
+
+    Rules covered:
+      Rule 7  — `[stages.<stage>].dir` and `colocate_with_source` are mutually
+                 exclusive (one mode per stage).
+      Rule 8  — `[stages.<stage>].dir`, when set, is a bare relative path.
+      Rule 9  — `[stages.<stage>].write_role`, when set, is in SOD_ROLE_ENUM.
+      Rule 9b — `[user].role` (when set) must satisfy the active stage's
+                 `write_role` — mismatch is a permission error.
+      Rule 10 — `[user].role`, when set, is in SOD_ROLE_ENUM.
+      Rule 11 — `[project].artifact_subdir`, when set, is a bare relative path
+                 (no leading slash, no `{...}` path tokens).
+      Rule 12 — Cross-cutting artifact frontmatter must declare a non-empty
+                 `affects_repos` array, and every code must resolve to a known
+                 `[[project.repos]].code`.
+    """
+    import tomllib
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not project_toml_path.exists():
+        errors.append(f"{project_toml_path}: file does not exist")
+        return errors, warnings
+
+    try:
+        with project_toml_path.open("rb") as fh:
+            data = tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        errors.append(f"{project_toml_path}: TOML parse error — {exc}")
+        return errors, warnings
+
+    declared_repos: set[str] = set()
+    for repo in data.get("project", {}).get("repos", []) or []:
+        if isinstance(repo, dict):
+            code = repo.get("code")
+            if isinstance(code, str) and code:
+                declared_repos.add(code)
+
+    stages = data.get("stages", {}) or {}
+
+    # Rule 7 — dir XOR colocate per stage.
+    for stage_name, stage_cfg in stages.items():
+        if not isinstance(stage_cfg, dict):
+            continue
+        has_dir = "dir" in stage_cfg
+        has_colocate = bool(stage_cfg.get("colocate_with_source"))
+        if has_dir and has_colocate:
+            errors.append(
+                f"{project_toml_path}: [stages.{stage_name}] sets both `dir` and "
+                f"`colocate_with_source` — these are mutually exclusive (one mode "
+                f"per stage)."
+            )
+
+    # Rule 8 — dir is a bare relative path.
+    for stage_name, stage_cfg in stages.items():
+        if not isinstance(stage_cfg, dict):
+            continue
+        d = stage_cfg.get("dir")
+        if d is None:
+            continue
+        if not isinstance(d, str):
+            errors.append(
+                f"{project_toml_path}: [stages.{stage_name}].dir must be a string."
+            )
+            continue
+        if d.startswith("/") or d.startswith("\\"):
+            errors.append(
+                f"{project_toml_path}: [stages.{stage_name}].dir = '{d}': must be "
+                f"relative — bare path with no leading slash."
+            )
+
+    # Rule 9 — write_role enum.
+    for stage_name, stage_cfg in stages.items():
+        if not isinstance(stage_cfg, dict):
+            continue
+        wr = stage_cfg.get("write_role")
+        if wr is None:
+            continue
+        if wr not in SOD_ROLE_ENUM:
+            errors.append(
+                f"{project_toml_path}: [stages.{stage_name}].write_role = '{wr}': "
+                f"unknown role — enum requires one of {list(SOD_ROLE_ENUM)}."
+            )
+
+    # Rule 10 — [user].role enum.
+    user = data.get("user", {}) or {}
+    user_role = user.get("role") if isinstance(user, dict) else None
+    if user_role is not None and user_role not in SOD_ROLE_ENUM:
+        errors.append(
+            f"{project_toml_path}: [user].role = '{user_role}': unknown role — "
+            f"enum requires one of {list(SOD_ROLE_ENUM)}."
+        )
+
+    # Rule 9b — role mismatch ([user].role must satisfy write_role on every
+    # stage that declares one). Permission failure if any stage's write_role
+    # disagrees with [user].role.
+    if user_role in SOD_ROLE_ENUM:
+        for stage_name, stage_cfg in stages.items():
+            if not isinstance(stage_cfg, dict):
+                continue
+            wr = stage_cfg.get("write_role")
+            if wr in SOD_ROLE_ENUM and wr != user_role:
+                errors.append(
+                    f"{project_toml_path}: role mismatch — [user].role='{user_role}' "
+                    f"lacks permission to write [stages.{stage_name}] "
+                    f"(requires write_role='{wr}')."
+                )
+
+    # Rule 11 — artifact_subdir bare relative path.
+    proj = data.get("project", {}) or {}
+    asd = proj.get("artifact_subdir") if isinstance(proj, dict) else None
+    if asd is not None:
+        if not isinstance(asd, str):
+            errors.append(
+                f"{project_toml_path}: [project].artifact_subdir must be a string."
+            )
+        else:
+            if asd.startswith("/") or asd.startswith("\\"):
+                errors.append(
+                    f"{project_toml_path}: [project].artifact_subdir = '{asd}': "
+                    f"must be relative — bare path with no leading slash."
+                )
+            if "{" in asd or "}" in asd:
+                errors.append(
+                    f"{project_toml_path}: [project].artifact_subdir = '{asd}': "
+                    f"must be a bare path — path tokens like {{project-root}} "
+                    f"are not permitted here."
+                )
+
+    # Rule 12 — cross-cutting artifact frontmatter integrity.
+    if artifact_path is not None:
+        if not artifact_path.exists():
+            errors.append(
+                f"{artifact_path}: cross-cutting artifact does not exist."
+            )
+        else:
+            text = artifact_path.read_text(encoding="utf-8")
+            fm = parse_frontmatter(text)
+            if "affects_repos" not in fm:
+                errors.append(
+                    f"{artifact_path}: cross-cutting artifact must declare an "
+                    f"`affects_repos` array in its YAML frontmatter (≥ 1 repo)."
+                )
+            else:
+                ar = fm["affects_repos"]
+                if not isinstance(ar, list) or len(ar) == 0:
+                    errors.append(
+                        f"{artifact_path}: `affects_repos` is empty — cross-cutting "
+                        f"artifacts must list ≥ 1 affected repo."
+                    )
+                else:
+                    for code in ar:
+                        if code not in declared_repos:
+                            errors.append(
+                                f"{artifact_path}: `affects_repos` lists unknown repo "
+                                f"'{code}' — not declared in [[project.repos]] of "
+                                f"{project_toml_path}."
+                            )
+
+    return errors, warnings
+
+
 def check_f() -> tuple[list[str], list[str], str]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -566,7 +746,39 @@ def _md(title: str, errors: list[str], warnings: list[str]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deeper cross-check validation for A.I.D.E.")
     parser.add_argument("--summary-md", type=str, help="Write a markdown summary to this path.")
+    parser.add_argument(
+        "--project-toml",
+        type=str,
+        help=(
+            "Path to a project.toml fixture. Switches the validator into SoD-fixture "
+            "mode (Check I): evaluates rules 7-12 from config/SCHEMAS.md against the "
+            "given file. Exits non-zero on any rule violation. Skips the regular A-H "
+            "checks."
+        ),
+    )
+    parser.add_argument(
+        "--cross-cutting-artifact",
+        type=str,
+        help=(
+            "Path to a cross-cutting artifact .md (frontmatter + body) — pairs with "
+            "--project-toml to evaluate rule 12 (affects_repos must be a non-empty "
+            "list of declared [[project.repos]] codes)."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.project_toml:
+        ptoml = Path(args.project_toml)
+        artifact = Path(args.cross_cutting_artifact) if args.cross_cutting_artifact else None
+        print(f"validate.py — SoD fixture check against {ptoml}")
+        if artifact:
+            print(f"  cross-cutting artifact: {artifact}")
+        sod_err, sod_warn = check_sod(ptoml, artifact)
+        _print("Check I — SoD rules (project.toml)", sod_err, sod_warn)
+        print("\n=== Summary ===")
+        print(f"  errors:   {len(sod_err)}")
+        print(f"  warnings: {len(sod_warn)}")
+        return 0 if not sod_err else 1
 
     print(f"validate.py — running deeper cross-checks against {REPO_ROOT}")
     a_err, a_warn = check_a()
