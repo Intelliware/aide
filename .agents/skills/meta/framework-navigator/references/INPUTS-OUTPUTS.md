@@ -8,7 +8,7 @@
 | operating mode | yes | inferred from utterance per `steps/01-detect-mode.md` | `goal` or `catalog` |
 | `project.toml` | optional but probed | `{project-root}/project.toml` | flow=`greenfield`, paths.requirements_package=`./.framework-output/requirements`, knowledge_base_path=`../knowledge-base` |
 | stage artifacts on disk | probed | filesystem | presence of `requirements_package/`, `design_package/`, `implementation_package/`, KB index |
-| skill catalog | yes | `skills/_registry/skills.csv` (or `skills.json`) | 32-row list of all skills |
+| skill catalog | yes | `skills/_registry/skills.csv` (or `skills.json`) | full skill list — read every data row at runtime; do not assume a fixed count |
 | workflow graph | yes | `skills/_registry/workflow-graph.yaml` | flows, gates, anytime list |
 | decision-table answers | optional | `project.toml.[project.elicitation]` | `compliance_regime = "pci-dss"` |
 | disambiguation answers | sometimes | conversation (up to 2 questions) | "new project or extending existing one?" |

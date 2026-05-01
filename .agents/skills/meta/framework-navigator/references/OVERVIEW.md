@@ -8,9 +8,11 @@ the project is in, and emits a single downstream-skill recommendation plus the
 exact trigger phrase to invoke that skill. It is the safe default whenever the
 user does not know which skill to run.
 
-The navigator exists because the unified framework now has 32 skills spread
-across eight stages (meta, requirements, design, planning, execution,
-reverse-engineering, knowledge-base, quick-dev). Without a router, users would
+The navigator exists because the unified framework now has dozens of skills
+spread across eight stages (meta, requirements, design, planning, execution,
+reverse-engineering, knowledge-base, quick-dev) — the exact count drifts as
+skills are added or restructured, so the navigator reads `skills/_registry/skills.csv`
+at runtime rather than relying on a baked-in number. Without a router, users would
 have to memorize the skill catalog and the workflow graph by hand. Instead the
 navigator centralizes that matching: it consumes the registry
 (`skills/_registry/skills.csv`, `skills.json`), the flow graph

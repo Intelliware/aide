@@ -15,8 +15,9 @@ After mode detection (step 01) and the state probe (step 02), branch on mode.
 
 ### Procedure
 
-1. **Load the catalog.** Read all 32 rows from `skills.csv`. Build a list of
-   `{name, description, stage}` tuples.
+1. **Load the catalog.** Read every data row from `skills.csv` (the count is
+   whatever the registry currently holds — do not hard-code a number). Build
+   a list of `{name, description, stage}` tuples.
 2. **Apply the state-probe override.** If the probe says `project_toml_present
    == false` AND the utterance does not already mention `start-project`,
    skip scoring and return `start-project` as the recommendation with the
