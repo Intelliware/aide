@@ -346,8 +346,8 @@ grep -L "if relevance is in question" \
 # Step 0 prepended to the six SDLC skills
 grep -l "Step 0 — Scope the requirements artifact" .agents/skills/requirements/create-requirements-package/steps/00-scope-target-repo.md
 grep -l "Step 0 — Scope the design artifact"        .agents/skills/design/create-design-package/steps/00-scope-target-repo.md
-grep -l "Step 0 — Scope the implementation artifact" .agents/skills/planning/create-implementation-package/steps/scope-target-repo.md
-grep -l "Step 0 — Scope the execution"               .agents/skills/execution/execute-increments/steps/00-scope-target-repo.md
+grep -l "Step 0 — Scope the target source repo"     .agents/skills/planning/create-implementation-package/steps/scope-target-repo.md
+grep -l "Step 0 — Scope the target source repo"     .agents/skills/execution/execute-increments/steps/00-scope-target-repo.md
 grep -l "Step 0 — Locate the upstream artifact (SoD only)" .agents/skills/requirements/review-requirements-package/SKILL.md
 grep -l "Step 0 — Locate the upstream artifact (SoD only)" .agents/skills/design/review-design-package/SKILL.md
 
