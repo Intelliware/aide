@@ -131,6 +131,43 @@ primary_database           = "postgres"
 event_bus                  = "kafka"
 
 
+# ─── [stages.<stage>] — separation-of-duties (SoD) layout, OPTIONAL ──────────
+# SoD lets each SDLC role write to a dedicated repo (or, for planning/execution,
+# to the relevant source-code repo). Adoption is per-stage: a stage adopts SoD
+# only when its [stages.<stage>] entry declares `dir` or `colocate_with_source`.
+# Stages without those fields continue resolving via [project.paths] exactly
+# as today. Uncomment the blocks below to enable SoD for this project.
+#
+# See `config/SCHEMAS.md` § 2.1 (SoD fields) and § 5 (layout conventions).
+# See `_docs/sod-multi-repo-proposal.md` for the full design rationale.
+
+# [project]
+# # Subdirectory name under each SoD stage's host repo where artifacts land.
+# # Bare relative directory name; not a path. Default: ".framework-output".
+# artifact_subdir = ".framework-output"
+
+# [stages.requirements]
+# dir        = "ba-repo"            # host repo for requirements artifacts
+# write_role = "BA"                  # one of: BA | Architect | BSA | Developer | Tester | KB-Steward
+
+# [stages.design]
+# dir        = "architect-repo"
+# write_role = "Architect"
+
+# [stages.planning]
+# colocate_with_source = true        # planning artifacts live inside each source repo
+# write_role           = "Developer"
+
+# [stages.execution]
+# colocate_with_source = true        # execution artifacts live inside each source repo
+# write_role           = "Developer"
+
+# [stages.testing]
+# # Step 8 — tester skills deferred; this entry shown for completeness.
+# dir        = "tester-repo"
+# write_role = "Tester"
+
+
 # ─── [[project.repos]] — multi-repo enumeration ──────────────────────────────
 # Array-of-table; the merge key is `code`. Order does not matter.
 # Exactly one entry MAY set primary = true; that repo becomes the project's

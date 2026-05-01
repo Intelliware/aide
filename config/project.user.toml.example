@@ -34,3 +34,17 @@ default_flow = "quick-dev"
 # even when the team has not standardized.
 [project.elicitation]
 testing_strategy = "tdd-required"
+
+
+# ─── [user] — project-scoped personal preferences ────────────────────────────
+# OPTIONAL. Used only when the project has adopted separation-of-duties (SoD).
+# Deep-merges with framework.user.toml's [user] (which holds machine-global
+# identity attributes like name, communication_language, skill_level).
+#
+# Project-scoped because the same person may act as different roles on
+# different projects. See config/SCHEMAS.md § 2.4.
+
+# [user]
+# # The role you operate as on this project. Compared against
+# # [stages.<stage>].write_role at every write boundary. Mismatch → write refused.
+# role = "Developer"   # one of: BA | Architect | BSA | Developer | Tester | KB-Steward

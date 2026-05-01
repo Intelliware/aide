@@ -186,6 +186,32 @@ artifact):
 | `required_artifacts` | array<table> | (see example) | Artifact descriptors keyed by `code`. The build-knowledge-repository and check-implementation-readiness skills consume this list. |
 | `[stages.<stage>.elicitation]` | table | `{}` | Stage-scoped elicitation defaults (e.g. depth, persona to use). |
 
+**Separation-of-duties (SoD) fields.** When a project adopts an SoD layout
+(stage artifacts written to role-restricted repos), the following fields may
+be set on `[stages.<stage>]`. They are **additive** to the existing fields
+above; absence means the stage uses legacy `[project.paths]` resolution.
+See `_docs/sod-multi-repo-proposal.md` for the full SoD design.
+
+| Field | Type | Default | Purpose |
+|---|---|---|---|
+| `dir` | string | (unset) | Host repo (relative to `{project-root}`) where this stage's artifacts are written. Mutually exclusive with `colocate_with_source`. Used by directory-mode SoD resolution. |
+| `colocate_with_source` | bool | (unset) | When `true`, artifacts live inside the relevant source repo (resolved via `[[project.repos]][code=<repo-code>].path`). Mutually exclusive with `dir`. Used by colocate-mode SoD resolution. |
+| `write_role` | enum | (unset) | The role allowed to write to this stage's artifacts. Compared against `[user].role` from `project.user.toml` at every write boundary. Values: `BA`, `Architect`, `BSA`, `Developer`, `Tester`, `KB-Steward`. |
+| `output` | string | (unset) | Per-stage override of `[project].artifact_subdir`. Bare relative directory name; no leading slash, no path tokens. |
+
+A stage adopts SoD when it declares `dir` or `colocate_with_source`. With
+neither set, the stage falls back to legacy `[project.paths].<stage>_package`
+resolution exactly as today. SoD adoption is **per-stage**: a project may
+flip requirements to SoD while leaving execution on legacy paths.
+
+**Layer-restriction note.** SoD policy fields (`dir`, `colocate_with_source`,
+`write_role`, plus `[project].artifact_subdir` and `[user].role`) live in
+Layers 1–4 only. Per-skill customizations at `customizations/<skill>.toml`
+(Layer 5) **cannot** override these fields. This prevents per-skill escape
+hatches in the role policy. Layer 5 customizations continue to apply for
+skill-internal behavior (composition pinning, elicitation depth, artifact
+suppression, custom blocks).
+
 `[knowledge_base]`
 
 | Field | Type | Default | Purpose |
@@ -254,6 +280,7 @@ This is the single richest layer. Sections:
 | `domain` | string | yes | One-line domain ("e-commerce checkout", "internal HR tooling"). Feeds glossary disambiguation and persona priming. |
 | `description` | string | no | A few-sentence project summary. Free-form Markdown allowed. |
 | `default_flow` | enum | no | One of `greenfield`, `brownfield`, `quick-dev`. Defaults to `framework.toml`'s `core.default_flow`. |
+| `artifact_subdir` | string | no | (SoD only) Subdirectory name under each SoD stage's host repo where artifacts land. **Bare relative directory name** (no leading slash, no path tokens). Default `".framework-output"`. Distinct from `framework.toml.core.output_root`, which is a fully tokenized path used in legacy-mode resolution and remains unchanged. Per-stage override available via `[stages.<stage>].output`. |
 
 #### `[project.paths]`
 
@@ -336,8 +363,17 @@ overrides.
 **Sharing:** personal, machine-local.
 **Edit policy:** edited freely by the user.
 
-Same schema as `project.toml` but every field is optional. Typical contents are
-just one or two sections — see `project.user.toml.example`.
+Same schema as `project.toml` but every field is optional. In addition,
+`project.user.toml` accepts a `[user]` block for **project-scoped** personal
+preferences. The block deep-merges field-by-field with `framework.user.toml`'s
+`[user]` (which holds machine-global identity attributes like `name`,
+`communication_language`, `skill_level`, `preferred_persona`):
+
+| Field | Type | Purpose |
+|---|---|---|
+| `role` | enum | (SoD only) The role this user operates as on this project. Values: `BA`, `Architect`, `BSA`, `Developer`, `Tester`, `KB-Steward`. Compared against `[stages.<stage>].write_role` at every write boundary. Project-scoped because the same person may act as different roles on different projects. |
+
+Typical contents are one or two sections — see `project.user.toml.example`.
 
 ### 2.5 Layer 5 — `customizations/<skill-name>.toml`
 
@@ -499,6 +535,15 @@ skill's contract assumes these have already passed.
 5. Every path token used (`{project-root}` etc.) is one of the four defined in § 1.5.
 6. `_suppress = true` only appears in array-of-table entries with a `code` or `id`.
 
+**Config — separation-of-duties (SoD):**
+
+7. `[stages.<stage>]` entries are rejected if they have neither `dir` nor `colocate_with_source = true`, or if they have both. (One mode per stage; choosing neither leaves the stage in legacy mode and is fine — but partial SoD config is rejected.)
+8. `[stages.<stage>].dir` (when set) is a relative path resolvable under `{project-root}`.
+9. `[stages.<stage>].write_role` (when set) is one of: `BA`, `Architect`, `BSA`, `Developer`, `Tester`, `KB-Steward`.
+10. `[user].role` (when set in `project.user.toml`) matches the same enum.
+11. `[project].artifact_subdir` (when set) is a bare relative path: no leading slash, no path tokens.
+12. **Artifact frontmatter (cross-cutting):** any artifact written under a `_cross-cutting/` directory MUST carry an `affects_repos` array in its YAML frontmatter, and every value MUST resolve to a known `[[project.repos]].code`. Single-repo artifacts MAY omit the field; if present, must have exactly one entry matching the artifact's `<repo-code>` directory.
+
 **KB:**
 
 1. `component_id` is unique across the entire KB (not just within a repo).
@@ -511,7 +556,69 @@ skill's contract assumes these have already passed.
 
 ---
 
-## 5. Open questions deferred to later tasks
+## 5. Separation-of-duties (SoD) layout conventions
+
+When a stage adopts SoD via `[stages.<stage>].dir` (directory mode) or
+`colocate_with_source = true` (colocate mode), it follows one of two
+subdirectory conventions for organizing artifacts. The asymmetry between
+the two modes is forced by the geometry of the layouts, not stylistic.
+
+### 5.1 Directory-mode geometry (used by requirements, design, testing)
+
+A single host repo aggregates artifacts from many source repos. To
+disambiguate which artifact belongs to which source repo, the layout uses
+two subdirectory conventions:
+
+```
+<host-repo>/<artifact_subdir>/<stage>/
+  ├── <repo-code-1>/                     ← single-repo features for that source repo
+  │   ├── <feature-id>-<stage>.md
+  │   └── ...
+  ├── <repo-code-2>/
+  │   └── ...
+  └── _cross-cutting/                    ← features spanning >1 source repo
+      └── <feature-id>-<stage>.md
+```
+
+- `<repo-code>/` directories hold artifacts for single-repo features. The
+  directory name matches a `code` value from `[[project.repos]]`.
+- `_cross-cutting/` holds artifacts for features that span multiple source
+  repos. Every artifact under `_cross-cutting/` MUST carry an `affects_repos`
+  array in its YAML frontmatter listing the affected `[[project.repos]].code`
+  values.
+
+### 5.2 Colocate-mode geometry (used by planning, execution)
+
+Each source repo holds only its own slice of every feature. The repo path
+itself is the discriminator — no further subdirectory scoping is needed:
+
+```
+<source-repo>/<artifact_subdir>/<stage>/
+  ├── <feature-id-A>/                    ← single-repo feature
+  │   ├── INC-001.md
+  │   └── increment-status.md
+  └── <feature-id-B>/                    ← cross-cutting feature, this repo's slice
+      ├── INC-001.md
+      └── increment-status.md
+```
+
+Colocate-mode stages have **no `_cross-cutting/` directory** — there is no
+host repo a cross-cutting artifact could live in "outside" any source repo.
+A cross-cutting feature appears in each affected source repo's directory,
+scoped to that repo's slice of the work.
+
+### 5.3 Why the layouts differ
+
+Dir-mode aggregates many source repos' artifacts into one host repo, so it
+needs `<repo-code>/` and `_cross-cutting/` to disambiguate within that host.
+Colocate-mode distributes artifacts into the source repos themselves, so the
+source-repo path *is* the discriminator and no further subdirectory is
+needed. Path-globbing skills must check the stage's mode before assuming
+layout.
+
+---
+
+## 6. Open questions deferred to later tasks
 
 - **Multi-project KBs.** A single KB serving multiple `project.toml`s is
   desirable for monorepo setups; the current schema assumes 1-KB-per-project.

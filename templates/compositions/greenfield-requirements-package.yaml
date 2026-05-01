@@ -17,6 +17,12 @@ blocks:
   - slug: requirements/index
     optional: false
     order: 0
+  - slug: shared/affects-repos
+    optional: true
+    order: 0.5
+    # Include only when authoring a cross-cutting feature under
+    # `_cross-cutting/` in an SoD project layout. Otherwise omit;
+    # the artifact's <repo-code>/ directory encodes the scope.
   - slug: requirements/executive-summary-business-context
     optional: false
     order: 1

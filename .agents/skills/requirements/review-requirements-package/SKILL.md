@@ -36,6 +36,37 @@ The review sequence is strict — ten reviews in fixed order, no parallel execut
 
 See `references/INPUTS-OUTPUTS.md` for the full table.
 
+## Step 0 — Locate the upstream artifact (SoD only)
+
+Before running the review sequence, resolve the path to the assembled
+requirements artifact under the project's current stage configuration.
+
+- **Legacy mode.** If `[stages.requirements]` has neither `dir` nor
+  `colocate_with_source`, the artifact lives at
+  `{project.paths.requirements_package}/{feature-id}-requirements.md`. No
+  scoping needed.
+- **SoD directory mode** (`[stages.requirements].dir = "..."`). The artifact
+  lives under `<host-repo>/<artifact_subdir>/requirements/`:
+  - **Single-repo:** under `<repo-code>/<feature-id>-requirements.md`. The
+    user identifies the feature; if the `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** under `_cross-cutting/<feature-id>-requirements.md`.
+    The artifact's YAML frontmatter carries `affects_repos` (validated as
+    part of review-completeness).
+- **SoD colocate mode** (uncommon for requirements): single-repo only;
+  artifact lives under `<source-repo-path>/<artifact_subdir>/requirements/<feature-id>-requirements.md`.
+
+This step is **read-only** — no permission check required (the review skill
+does not write to the upstream artifact). When the review skill writes its
+own findings, it writes to the same host repo as the upstream artifact under
+`docs/<feature>/requirements-package/review/...` (relative to the host).
+
+If executed non-interactively without an explicit `feature-id` (and `scope`
+when ambiguous), **fail fast** with a clear error rather than blocking on a
+prompt.
+
+See `_docs/sod-multi-repo-proposal.md` § 5 and `config/SCHEMAS.md` § 5 for
+the full SoD layout geometry.
+
 ## Workflow
 
 Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any FAIL until resolved.

@@ -52,7 +52,7 @@ same turn. It never proceeds past a failed gate.
 
 | Input | Source | Required |
 |---|---|---|
-| Implementation package | `{project.paths.implementation_package}/` | Yes (with GO from review) |
+| Implementation package | resolved per stage mode (SoD: per-repo path; legacy: `{project.paths.implementation_package}/`) | Yes (with GO from review) |
 | Target codebase | filesystem | Yes |
 | Test runner / build tools | environment | Yes |
 | project.toml | `{project-root}/project.toml` | Yes |
@@ -69,6 +69,9 @@ After every drafted artifact and before any file write, summarize back to the us
 For each increment, execute the steps in order. **Read each step file only
 when you are about to execute that step.** Do not pre-load all step files.
 
+0. `steps/00-scope-target-repo.md` — (SoD only) resolve the target source
+   repo for this run. No-op when the execution stage is in legacy mode. Run
+   once per session, not per increment.
 1. `steps/01-load-increment.md` — load the next `INC-XXX.md`, verify
    dependencies completed, confirm prerequisites
 2. `steps/02-execute-plan.md` — execute Plan items with TDD discipline

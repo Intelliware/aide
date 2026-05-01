@@ -14,6 +14,12 @@ default-output-path: "{paths.design_path}/{feature-id}-design.md"
 
 blocks:
   # ---- Front matter / framing ----
+  - slug: shared/affects-repos
+    optional: true
+    order: 0.5
+    # Include only when authoring a cross-cutting feature under
+    # `_cross-cutting/` in an SoD project layout. Otherwise omit;
+    # the artifact's <repo-code>/ directory encodes the scope.
   - slug: shared/overview
     optional: false
     order: 1

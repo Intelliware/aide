@@ -41,6 +41,7 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference.
 
+0. `steps/00-scope-target-repo.md` — (SoD only) inherit the artifact's host repo and `affects_repos` from the upstream requirements artifact. No-op when the design stage is in legacy mode.
 1. `steps/01-discovery.md` — brownfield only. Architecture-discovery → technical-debt-assessment → existing-architecture-assessment, producing `architecture-baseline.md`. Skipped for greenfield (record empty baseline assumption).
 2. `steps/02-design.md` — scoping (which of the 14+ design blocks apply), then the 11-step design assembly with the 7-Step per-file Workflow, producing block files and assembling `design-package.md` (alias to `{paths.design_path}/{feature-id}-design.md`).
 3. **Assembly + review handoff** — final cross-reference pass (API contracts vs frontend/backend, database vs data requirements), update change tracker, hand off by name to `review-design-package`.
@@ -51,7 +52,7 @@ The deeper how-to lives in `references/process.md`, `references/solution-discove
 
 | Artifact | Path | Format |
 |---|---|---|
-| Assembled design package | `{paths.design_path}/{feature-id}-design.md` | Markdown (composed per `templates/compositions/greenfield-design-package.yaml`) |
+| Assembled design package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/design/<repo-code-or-_cross-cutting>/<feature-id>-design.md`; legacy: `{paths.design_path}/{feature-id}-design.md`) | Markdown (composed per `templates/compositions/greenfield-design-package.yaml`) |
 | Per-section block files | `docs/<feature>/solutions-package/design/*.md` | Markdown (one block per file) |
 | Architecture-baseline (brownfield) | `docs/<feature>/solutions-package/discovery/architecture-baseline.md` | Markdown |
 | ADR files (one per significant decision) | `{paths.knowledge_base_path}/adr/<id>.md` (or `docs/<feature>/solutions-package/design/adr/<id>.md` if KB absent) | Markdown — ADR template from `templates/blocks/knowledge-base/adr-template.md` |

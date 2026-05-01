@@ -66,6 +66,7 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Execute one step at a time. Read each step file only when starting that step.
 
+0. **Scope the target source repo** (SoD only) — `steps/scope-target-repo.md`. No-op when the planning stage is in legacy mode.
 1. **Codebase analysis** (brownfield only) — `steps/codebase-analysis.md`
 2. **Test planning** — `steps/test-planning.md`
 3. **Increment decomposition** — propose INC-XXX list and dependencies, get approval
@@ -79,7 +80,13 @@ For the per-increment authoring loop, see
 
 ## Output
 
-An implementation package at `{project.paths.implementation_package}/`:
+An implementation package at the path resolved for the planning stage. Resolution depends on stage mode (set in `project.toml` `[stages.planning]`):
+
+- **Colocate mode** (`colocate_with_source = true`): `<source-repo-path>/<artifact_subdir>/implementation/<feature-id>/`
+- **Directory mode** (`dir = "..."`): `<host-repo>/<artifact_subdir>/implementation/<repo-code>/<feature-id>/`
+- **Legacy mode** (no SoD fields): `{project.paths.implementation_package}/`
+
+In each case the package contains:
 
 - One file per increment named `INC-XXX.md` (composed via
   `greenfield-implementation-package.yaml`)

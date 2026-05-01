@@ -42,6 +42,7 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference.
 
+0. `steps/00-scope-target-repo.md` — (SoD only) determine the artifact's host repo and, for cross-cutting features, capture `affects_repos`. No-op when the requirements stage is in legacy mode.
 1. `steps/01-discovery.md` — brownfield discovery; produce `current-capability-baseline.md`. Skipped when the active composition is `greenfield-requirements-package.yaml`.
 2. **Relevance gate (implicit)** — after discovery (or directly after Step 0 in greenfield), review the 14 section blocks defined in the active composition's `blocks:` list, run the File Relevance Recommendation against gathered context, and mark each as Fill / Skip / N/A in the completeness tracker. Re-evaluate per-section during Step 4 using the Section Relevance Check (Step 0 of the 7-Step Workflow). User confirms or overrides.
 3. `steps/03-analysis.md` — scope, stakeholders, dependencies, impacts, constraints, gaps, assumptions, decisions, risks. Risk register must be complete before writing.
@@ -54,7 +55,7 @@ Use elicitation prompts referenced from the active composition (`references/elic
 
 | Artifact | Path | Format |
 |---|---|---|
-| Assembled requirements package | `{paths.requirements_path}/{feature-id}-requirements.md` | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
+| Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>-requirements.md`; legacy: `{paths.requirements_path}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
 | Per-section files (when sharded) | `docs/<feature>/requirements-package/requirements/*.md` | Markdown (one block per file) |
 | Discovery artifacts (brownfield) | `docs/<feature>/requirements-package/discovery/*.md` | Markdown |
 | Analysis artifacts | `docs/<feature>/requirements-package/analysis/*.md` | Markdown |

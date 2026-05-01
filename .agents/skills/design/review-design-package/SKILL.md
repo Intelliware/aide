@@ -36,6 +36,37 @@ The review sequence is strict — three reviews in fixed order (architecture, se
 
 See `references/INPUTS-OUTPUTS.md` for the full table.
 
+## Step 0 — Locate the upstream artifact (SoD only)
+
+Before running the review sequence, resolve the path to the assembled design
+artifact under the project's current stage configuration.
+
+- **Legacy mode.** If `[stages.design]` has neither `dir` nor
+  `colocate_with_source`, the artifact lives at
+  `{project.paths.design_package}/{feature-id}-design.md` (or its
+  `solution-package.md` alias). No scoping needed.
+- **SoD directory mode** (`[stages.design].dir = "..."`). The artifact lives
+  under `<host-repo>/<artifact_subdir>/design/`:
+  - **Single-repo:** under `<repo-code>/<feature-id>-design.md`. The user
+    identifies the feature; if the `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** under `_cross-cutting/<feature-id>-design.md`. The
+    artifact's YAML frontmatter carries `affects_repos` (must match the
+    upstream requirements artifact; cross-checked during review-architecture).
+- **SoD colocate mode** (uncommon for design): single-repo only; artifact
+  lives under `<source-repo-path>/<artifact_subdir>/design/<feature-id>-design.md`.
+
+This step is **read-only** — no permission check required (the review skill
+does not write to the upstream artifact). When the review skill writes its
+own findings, it writes under the same host repo at
+`docs/<feature>/solutions-package/review/...`.
+
+If executed non-interactively without an explicit `feature-id` (and `scope`
+when ambiguous), **fail fast** with a clear error rather than blocking on a
+prompt.
+
+See `_docs/sod-multi-repo-proposal.md` § 5 and `config/SCHEMAS.md` § 5 for
+the full SoD layout geometry.
+
 ## Workflow
 
 Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any NO-GO or blocking finding until resolved.
