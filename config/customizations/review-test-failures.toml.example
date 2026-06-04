@@ -1,0 +1,128 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/review-test-failures.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `review-test-failures` skill —
+# the independently-invocable triage walk-through of a failed test run.
+#
+# This example expresses a team that:
+#   • walks each failure one at a time (hard-stop between failures),
+#   • uses the canonical 4-category taxonomy (script / app-defect /
+#     environment-data / flaky), plus a custom "intermittent-3rd-party"
+#     category appended via array-of-tables merge,
+#   • routes script issues to execute-quality-increments, app defects to
+#     manage-bugs, environment issues to a project-specific runbook,
+#   • emits a structured summary as markdown + JSON for dashboard ingestion.
+#
+# A sibling `review-test-failures.user.toml` file (gitignored) can do the
+# same things at higher precedence for your personal overrides.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Walk mode: "one-at-a-time" (hard-stop between failures, awaits user
+# decision) or "batch-classify" (classify all up front, then walk). Most
+# teams want one-at-a-time for proper triage hygiene.
+walk_mode = "one-at-a-time"
+
+# Whether the skill requires explicit user approval ("approved", "next",
+# "go") before advancing from one failure to the next. Strongly recommended
+# `true`; the default flow is intentionally conversational.
+require_user_advance = true
+
+# Whether to consult the test-suite KB component via `navigate-knowledge-base
+# --profile=test-suite` when classifying script issues (to look up locator
+# definitions, fixture sources, known patterns).
+use_knowledge_base = true
+
+# Output format. Allowed: "markdown" | "markdown+json".
+output_format = "markdown+json"
+
+# Where the triage summary lands (relative to the failure-data source dir).
+output_subdir = "triage"
+
+
+# ─── Failure categories ──────────────────────────────────────────────────────
+# The canonical 4 categories ship in the framework default. Merge keys on
+# `code`. Set `_suppress = true` to drop a category; add a new entry to
+# append a project-specific category.
+
+[[failure_categories]]
+code            = "script"
+display_name    = "Script issue"
+description     = "The test itself is wrong (stale locator, bad assertion, drifted fixture, race condition introduced by the test)"
+default_routing = "execute-quality-increments"
+
+[[failure_categories]]
+code            = "app-defect"
+display_name    = "Application defect"
+description     = "The application under test is genuinely broken; the test correctly caught it"
+default_routing = "manage-bugs"
+
+[[failure_categories]]
+code            = "environment-data"
+display_name    = "Environment or test data"
+description     = "Infra, deployment, seed data, or upstream service issue — not a script bug and not a real app defect"
+default_routing = "runbook:env-triage"
+
+[[failure_categories]]
+code            = "flaky"
+display_name    = "Flaky"
+description     = "Non-deterministic test (timing, ordering, resource contention) — quarantine and fix the determinism, not the symptom"
+default_routing = "execute-quality-increments"
+
+# Project-specific addition: a separate bucket for third-party-service flakes
+# so they don't pollute the "flaky" stats for our own scenarios.
+[[failure_categories]]
+code            = "intermittent-3rd-party"
+display_name    = "Intermittent third-party outage"
+description     = "Downstream SaaS or partner API returned an error our retry/circuit-breaker did not absorb; not a defect on our side"
+default_routing = "runbook:third-party-incident"
+
+
+# ─── Severity defaults ───────────────────────────────────────────────────────
+# Bands the triage step uses to suggest priority when the user does not
+# specify. Override `keywords` to retune.
+
+[[severity_bands]]
+code        = "critical"
+description = "Blocks release; affects revenue path or compliance"
+keywords    = ["payment", "checkout", "auth", "pii", "compliance"]
+
+[[severity_bands]]
+code        = "high"
+description = "Blocks a feature increment but not the release"
+keywords    = ["main-flow", "primary-journey"]
+
+[[severity_bands]]
+code        = "medium"
+description = "Affects a non-primary journey; workaround exists"
+keywords    = []
+
+[[severity_bands]]
+code        = "low"
+description = "Cosmetic / edge case; can wait"
+keywords    = ["cosmetic", "edge"]
+
+
+# ─── Routing overrides ───────────────────────────────────────────────────────
+# Override the default routing per category, or pin a project-specific
+# remediation target (a runbook URL, a Jira board, a Slack channel, etc.).
+
+[routing]
+"script"                   = "execute-quality-increments"
+"app-defect"               = "manage-bugs"
+"environment-data"         = "runbook:env-triage"
+"flaky"                    = "execute-quality-increments"
+"intermittent-3rd-party"   = "runbook:third-party-incident"
+
+
+# ─── Summary block ───────────────────────────────────────────────────────────
+
+[summary]
+# Group by category in the markdown summary (the default).
+group_by      = "category"
+# Whether to include the per-failure debug trace excerpt in the summary
+# (false by default; true for postmortems).
+include_trace = false
+

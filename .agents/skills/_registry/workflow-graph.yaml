@@ -32,27 +32,30 @@ stages:
   - id: planning
     description: "Decompose the approved design into increments conforming to the Canonical Increment Shape."
     order: 3
+  - id: quality
+    description: "Consolidate quality strategy, test design (traced to acceptance criteria), and quality-engineering plan (automation, CI gates, test data, release gates) into the Quality Package before execution."
+    order: 4
   - id: execution
     description: "Execute increments with TDD, manage bugs, and create pull requests."
-    order: 4
+    order: 5
   - id: reverse-engineering
     description: "Analyze and document existing code repositories (API, UI, DB, mobile, framework) into Part A/B docs that feed the knowledge base."
-    order: 5
+    order: 6
   - id: knowledge-base
     description: "Build, navigate, update, and verify the cross-repository knowledge base."
-    order: 6
+    order: 7
   - id: quick-dev
     description: "Lightweight scoped-change path: document-quick-change, plan-quick-change, execute-quick-change."
-    order: 7
+    order: 8
   - id: jira
     description: "Jira integration utilities: fetch issues, search with JQL, and extract requirements packages from Jira epics/features."
-    order: 8
+    order: 9
   - id: confluence
     description: "Confluence integration utilities: fetch pages and extract documentation packages from Confluence."
-    order: 9
+    order: 10
   - id: files-conversion
     description: "Document conversion and analysis utilities: convert Word, Excel, and PDF to Markdown with structured analysis."
-    order: 10
+    order: 11
 
 flows:
   greenfield:
@@ -82,6 +85,10 @@ flows:
         gates:
           - skill: review-implementation-package
             required: true
+      - skill: create-quality-package
+        gates:
+          - skill: review-quality-package
+            required: true
       - skill: execute-increments
         per-increment-closing-skill: update-knowledge-base
       - skill: create-pr
@@ -91,12 +98,13 @@ flows:
     sequence:
       - skill: start-project
       - skill: analyze-repository
-      # analyze-repository selects ONE of the ten domain skills at runtime:
+      # analyze-repository selects ONE of the eleven domain skills at runtime:
       #   reverse-engineer-api, reverse-engineer-api-framework,
       #   reverse-engineer-database, reverse-engineer-mobile-app,
       #   reverse-engineer-mobile-framework, reverse-engineer-ui-framework,
       #   reverse-engineer-web-app, reverse-engineer-cobol-program,
-      #   reverse-engineer-copybook-library, reverse-engineer-jcl-job.
+      #   reverse-engineer-copybook-library, reverse-engineer-jcl-job,
+      #   reverse-engineer-test-suite.
       # The placeholder below is a dispatcher slot — validation skips it.
       - skill: reverse-engineer-<dynamic>
         dispatcher: analyze-repository
@@ -133,6 +141,10 @@ flows:
         gates:
           - skill: review-implementation-package
             required: true
+      - skill: create-quality-package
+        gates:
+          - skill: review-quality-package
+            required: true
       - skill: execute-increments
         per-increment-closing-skill: update-knowledge-base
       - skill: create-pr
@@ -161,6 +173,13 @@ anytime:
   - manage-bugs
   - navigate-knowledge-base
   - detect-knowledge-base-drift
+  # Quality stage skills that are independently invocable at any time:
+  #   - audit-quality-coverage: read-only coverage audit against the implementation package
+  #   - review-test-failures: triage walk-through of a failed test run
+  #   - execute-quality-increments: optional TC-XXX flow after a GO quality package
+  - audit-quality-coverage
+  - review-test-failures
+  - execute-quality-increments
   - jira-get
   - jira-search
   - confluence-fetch

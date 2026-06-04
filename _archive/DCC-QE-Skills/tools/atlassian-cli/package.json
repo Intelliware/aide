@@ -1,0 +1,44 @@
+{
+  "name": "@tdbc/atlassian-cli",
+  "version": "0.1.0",
+  "description": "CLI for caching Jira and Confluence data for agent-driven analysis, with Jira/Confluence create, update, attachment, and field-mapping helpers",
+  "main": "bin/atl.js",
+  "bin": {
+    "atl": "./bin/atl.js"
+  },
+  "scripts": {
+    "start": "node bin/atl.js",
+    "setup": "node bin/atl.js init",
+    "issue": "node src/standalone/fetch-jira-issue.js",
+    "related": "node src/standalone/fetch-related.js",
+    "create": "node src/standalone/create-jira-issue.js",
+    "status": "node src/standalone/update-jira-status.js",
+    "generate-mapping": "node src/standalone/generate-field-mapping.js",
+    "test": "jest"
+  },
+  "keywords": ["confluence", "jira", "atlassian", "cli", "markdown"],
+  "author": "TDBC Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TD-Universe/TDBC-Skills",
+    "directory": "tools/atlassian-cli"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "conf": "^10.2.0",
+    "dotenv": "^17.4.1",
+    "form-data": "^4.0.4",
+    "inquirer": "^8.2.5",
+    "ora": "^5.4.1",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

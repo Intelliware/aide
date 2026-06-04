@@ -11,6 +11,16 @@ Implements the quick-dev plan increment-by-increment with TDD, runs three-dimens
 
 Anchors the legacy `expedited-implementation-package`'s execute + deliver phases.
 
+### Quality stage is bypassed (by design)
+
+Quick-dev intentionally bypasses the dedicated quality stage (`create-quality-package` / `review-quality-package` / `execute-quality-increments` / `audit-quality-coverage` / `review-test-failures`) the same way it bypasses `review-requirements-package` and `review-design-package`. Quality is not skipped — it is folded inline:
+
+- **Test design** lives in the spec's per-AC "How will this be proven?" notes (authored by `document-quick-change`) and in §12.2a's **quality constraints** subsection (test framework, coverage floor, lint/format rules, prohibited test patterns).
+- **Quality engineering** lives in this skill's TDD loop, the 3-dimension verification, and the adversarial PR review.
+- **QA analysis / release gates** collapse to the Completion Confirmation Gate plus the per-AC proof notes.
+
+If, mid-execution, the scope grows past quick-dev tolerances (new data model, new endpoint, cross-team coordination, architectural decision, high risk/ambiguity) **or** the quality posture needs more than the inline carriers above (multi-environment automation strategy, formal coverage matrix, release-gate metrics, compliance evidence), halt and escalate to the full pipeline (`create-quality-package` and the elaborate flow). See `.agents/skills/quality/README.md` and `create-quality-package/references/quality-in-the-lifecycle.md` for the bypass rationale and the per-stage carrier map.
+
 ### Iron rules (no exceptions)
 
 1. **No production code without a failing test first.** Code written ahead of a failing test is deleted and redone.

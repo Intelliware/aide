@@ -1,6 +1,6 @@
 ---
 name: jira-search
-description: Search Jira issues using JQL (Jira Query Language) queries. Find issues by status, assignee, project, sprint, labels, or custom criteria. Returns multiple issues with summaries and generates search reports.
+description: "Use when the user asks to search Jira issues, run a JQL query, find issues by status, assignee, project, sprint, labels, or custom criteria, or says 'show me all issues matching...'. Translates search intent into JQL where needed, returns multiple issues with summaries, and generates search reports."
 ---
 
 # Jira Search
@@ -75,38 +75,32 @@ atl j search "type = Bug" --fields=summary,status,assignee
 ## Common JQL Patterns
 
 ### Project & Status
-```jql
-project = ABC
-status = "In Progress"
-project = ABC AND status != Done
-```
+
+- `project = ABC`
+- `status = "In Progress"`
+- `project = ABC AND status != Done`
 
 ### Assignee
-```jql
-assignee = currentUser()
-assignee is EMPTY
-assignee = "john.doe@example.com"
-```
+
+- `assignee = currentUser()`
+- `assignee is EMPTY`
+- `assignee = "john.doe@example.com"`
 
 ### Type & Priority
-```jql
-type = Story
-priority >= High
-type IN (Bug, Task) AND priority = Highest
-```
+
+- `type = Story`
+- `priority >= High`
+- `type IN (Bug, Task) AND priority = Highest`
 
 ### Dates
 
-```jql
-created >= -7d
-updated >= -2w
-duedate <= now()
-```
+- `created >= -7d`
+- `updated >= -2w`
+- `duedate <= now()`
 
 ### Complex Queries
-```jql
-project = ABC AND type = Bug AND status != Done AND assignee = currentUser()
-```
+
+- `project = ABC AND type = Bug AND status != Done AND assignee = currentUser()`
 
 ## Response Pattern
 
@@ -192,4 +186,4 @@ User: "Extract requirements for PROJ-123"
 ## Additional Resources
 
 - [JQL Reference Documentation](https://support.atlassian.com/jira-service-management-cloud/docs/use-advanced-search-with-jira-query-language-jql/)
-- [Atlassian CLI Setup Guide](../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
+- [Atlassian CLI Setup Guide](../../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)

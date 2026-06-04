@@ -1,6 +1,6 @@
 ---
 name: jira-get
-description: Fetch a Jira issue using the Atlassian CLI tool. Saves the raw JSON response, metadata, and agent-generated markdown analysis by default to cache/jira/{projectKey}/{ISSUE_KEY}/.
+description: "Use when the user asks to fetch, view, cache, or analyze a single Jira issue by key; says 'fetch PROJ-123', 'show me Jira issue {KEY}', 'get this Jira ticket', or needs raw Jira issue JSON and metadata for agent analysis. Saves the raw JSON response, metadata, and agent-generated markdown analysis by default to cache/jira/{projectKey}/{ISSUE_KEY}/."
 ---
 
 # Jira Get
@@ -204,5 +204,5 @@ cache/jira/
 
 ## Additional Resources
 
-- [Atlassian CLI Setup Guide](../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
-- [JIRA Integration Documentation](../../../tools/packages/atlassian-cli/README.md)
+- [Atlassian CLI Setup Guide](../../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
+- [JIRA Integration Documentation](../../../../tools/packages/atlassian-cli/README.md)

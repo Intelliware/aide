@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net" agent="Claude">
+  <diagram name="QE Fail Fast POC" id="qe-fail-fast-poc">
+    <mxGraphModel dx="1358" dy="882" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=5" value="QE Fail Fast Development Proof of Concept" vertex="1">
+          <mxGeometry height="40" width="700" x="60" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9D9D9;strokeColor=#7F7F7F;fontSize=16;arcSize=50;fontStyle=1" value="Start" vertex="1">
+          <mxGeometry height="60" width="110" x="80" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="qe-pkg-gen" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=13;arcSize=30;fontStyle=1" value="qe package generation A.I.D.E" vertex="1">
+          <mxGeometry height="80" width="160" x="280" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="work-qemd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9D08E;strokeColor=#548235;fontSize=14;arcSize=30;fontStyle=1" value="work qe.md" vertex="1">
+          <mxGeometry height="60" width="120" x="540" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="qemd-doc" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#5B9BD5;strokeColor=#2E75B6;size=18;fontSize=14;fontColor=#FFFFFF;fontStyle=1" value="qe.md" vertex="1">
+          <mxGeometry height="80" width="90" x="720" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-tests" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9D08E;strokeColor=#548235;fontSize=13;arcSize=30;fontStyle=1" value="Generate Tests" vertex="1">
+          <mxGeometry height="60" width="130" x="720" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="decision-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1" value="Go no go?&#xa;decision point" vertex="1">
+          <mxGeometry height="40" width="140" x="840" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#C77DBA;strokeColor=#7B2A8F;fontSize=13;fontStyle=1;fontColor=#000000" value="~&gt;80%+&#xa;capability" vertex="1">
+          <mxGeometry height="110" width="160" x="840" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="qe-pkg-comp" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=13;arcSize=30;fontStyle=1" value="qe package completion A.I.D.E" vertex="1">
+          <mxGeometry height="80" width="160" x="1080" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-harness" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9D08E;strokeColor=#548235;fontSize=13;arcSize=30;fontStyle=1" value="Generate first&#xa;test harness" vertex="1">
+          <mxGeometry height="80" width="140" x="1090" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9D9D9;strokeColor=#7F7F7F;fontSize=16;arcSize=50;fontStyle=1" value="End" vertex="1">
+          <mxGeometry height="60" width="110" x="870" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="internal-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#7F7F7F" value="Internal" vertex="1">
+          <mxGeometry height="20" width="80" x="60" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" target="qe-pkg-gen">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="135" y="290" />
+              <mxPoint x="360" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="qe-pkg-gen" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0" target="work-qemd">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="530" />
+              <mxPoint x="600" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="work-qemd" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="gen-tests">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="290" />
+              <mxPoint x="680" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="gen-tests" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0" target="work-qemd">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="200" />
+              <mxPoint x="900" y="330" />
+              <mxPoint x="660" y="330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="qemd-doc" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" target="decision">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="765" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="decision" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=14;fontStyle=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF" target="work-qemd" value="False">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="525" />
+              <mxPoint x="600" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="decision" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=14;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF" target="qe-pkg-comp" value="True">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1160" y="525" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="qe-pkg-comp" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0" target="gen-harness">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1300" y="420" />
+              <mxPoint x="1300" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="gen-harness" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

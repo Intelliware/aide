@@ -63,6 +63,8 @@ read top-N, read frontmatter only, etc.).
 | `--max-components` (default 7) | Caller | No |
 | `--include-cross-cutting` (bool, default true) | Caller | No |
 | `--depth` (one-hop / two-hop, default one-hop) | Caller | No |
+| `--profile` (`default` / `test-suite`, default `default`) | Caller | No — when `test-suite`, biases ranking toward `kind: test-suite` components produced by `reverse-engineer-test-suite`; consumed by the merged quality stage's skills (`create-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) |
+| `--profile-subkind` (one of `runner` / `shared-utilities` / `fixtures` / `marker-vocabulary` / `feature-inventory` / `environment-matrix` / `ci-surface` / `ownership`, repeatable) | Caller | No — restricts a `--profile=test-suite` query to the named subkind(s); used by e.g. `review-test-failures` to fetch `shared-utilities` only for locator lookup |
 
 See `references/INPUTS-OUTPUTS.md`.
 
@@ -116,7 +118,58 @@ A ranked component list (the skill writes nothing to disk). Example:
 ## Next skill
 none — returns context to caller.
 
-## Common mistakes
+## Profiles
+
+A **profile** is a named query bias the caller selects with `--profile`.
+It does not change the workflow steps; it changes how step 2 (capability
+lookup) and step 5 (cap and rank) weight components.
+
+### `default` profile
+
+The behaviour described above. No frontmatter filtering; all components
+in the capability index are eligible.
+
+### `test-suite` profile
+
+Used by the merged quality stage to ground in test-suite documentation
+rather than application code.
+
+- **Step 2 (capability lookup):** filter the capability index to
+  components whose frontmatter declares `kind: test-suite` (produced
+  by `reverse-engineer-test-suite`). Score and shortlist as usual,
+  but draw the candidate pool from that filtered set.
+- **Step 3 (graph expansion):** walk one hop on `depends_on` /
+  `consumed_by` as usual; do **not** filter the expansion — the
+  expansion correctly pulls in the application components the test
+  suite tests (recorded in `tests:` frontmatter), which the caller
+  typically wants to see alongside the suite components.
+- **Step 5 (cap and rank):** within tiers, prefer `kind: test-suite`
+  components over application components. The fan-out of one suite
+  query to application components is expected and useful — but
+  applications should never out-rank the suite components for a
+  test-suite-profile query.
+- **`--profile-subkind` filter (optional):** restrict the primary
+  selection to the named subkind(s). Example:
+  `--profile=test-suite --profile-subkind=shared-utilities` returns
+  only `shared-utilities.md` components plus their one-hop
+  expansion. Useful for `review-test-failures`'s locator lookup.
+
+If no components carry `kind: test-suite` (the KB has not yet ingested
+a `reverse-engineer-test-suite` output), the profile returns an empty
+primary set and the caller is told:
+
+> No test-suite components found in the KB. Run
+> `/reverse-engineer-test-suite` against the suite repo, then
+> `/build-knowledge-base` or `/update-knowledge-base` to fold the
+> components in. Falling back to the `default` profile would return
+> application components, which is not what a test-grounded query
+> needs.
+
+The caller (typically a quality-stage skill) then decides whether to
+abort or proceed with a clearly-flagged "no KB grounding available"
+note.
+
+
 
 - **Returning more than `--max-components`.** The default cap exists for
   good reason; raise it consciously, not by default.
@@ -134,3 +187,12 @@ none — returns context to caller.
   It returns components with their stated `last_verified_against_commit`
   and lets the caller decide. If freshness matters, the caller should
   run `detect-knowledge-base-drift --mode=gate` first.
+- **Falling back to the `default` profile when `test-suite` returns
+  empty.** A quality-stage caller that needs test-suite grounding
+  should never silently substitute application components — that
+  produces correct-looking but wrong results. Always surface the
+  empty-profile case to the caller and let it decide.
+- **Using `--profile=test-suite` for application-feature queries.**
+  Profiles are not free filters — `test-suite` is for quality-stage
+  callers grounding in test artefacts. A requirements or design skill
+  should always use the `default` profile.

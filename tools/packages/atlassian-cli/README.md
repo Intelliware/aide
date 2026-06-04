@@ -2,6 +2,8 @@
 
 > A command-line tool for caching raw Confluence pages and Jira issues as JSON with smart local caching, so agents can generate markdown analysis from the full response when needed.
 
+> **Status: optional companion tool.** This CLI is **not** part of the A.I.D.E. framework and is **not required** by any stage skill (requirements, design, planning, quality, execution, knowledge-base, quick-dev). It exists as a convenience for the `jira-*` and `confluence-*` integration skills under `.agents/skills/jira/` and `.agents/skills/confluence/`, which gate on its presence and degrade gracefully when it is not installed. No A.I.D.E. quality-stage skill (`create-quality-package`, `review-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) may hard-depend on this CLI; if you ever see one trying to, treat it as a framework bug.
+
 ## ✨ Features
 
 - 📄 **Confluence Cache** - Save pages, spaces, and page trees as raw JSON for agent analysis

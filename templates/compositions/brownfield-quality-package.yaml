@@ -1,0 +1,106 @@
+# Composition: Brownfield Quality Package
+#
+# Full quality package for an enhancement to an existing system. Uses the same
+# quality-stage block set as the greenfield package, with brownfield grounding
+# supplied by the skill workflow through the knowledge base and existing source
+# artifacts before the strategy / design blocks are authored.
+
+name: brownfield-quality-package
+description: Full quality package for a brownfield enhancement (greenfield quality surface plus KB/source grounding).
+applies-to-flow: brownfield
+package-type: quality
+
+default-output-path: "{paths.quality_path}/{feature-id}-quality.md"
+
+blocks:
+  # ---- Front matter / framing ----
+  - slug: shared/affects-repos
+    optional: true
+    order: 0.5
+    # Include only when authoring a cross-cutting feature under
+    # `_cross-cutting/` in an SoD project layout. Otherwise omit;
+    # the artifact's <repo-code>/ directory encodes the scope.
+  - slug: quality/index
+    optional: false
+    order: 0
+  - slug: shared/overview
+    optional: false
+    order: 1
+
+  # ---- Testability classification (from Step 0b; always runs, visible block is gated) ----
+  - slug: quality/testability-classification
+    optional: true
+    order: 1.5
+    include-if: "project.elicitation.records_testability_classification == true"
+
+  # ---- Quality strategy (QA analysis) ----
+  - slug: quality/quality-strategy
+    optional: false
+    order: 2
+  - slug: quality/test-approach
+    optional: false
+    order: 3
+
+  # ---- Test design (software testing) ----
+  - slug: quality/test-design
+    optional: false
+    order: 4
+  - slug: quality/test-case-increment
+    optional: true
+    order: 4.5
+    include-if: "project.elicitation.uses_test_case_increments == true"
+
+  # ---- Quality engineering ----
+  - slug: quality/test-data-and-environments
+    optional: false
+    order: 5
+  - slug: quality/automation-and-cicd
+    optional: false
+    order: 6
+  - slug: quality/nonfunctional-quality
+    optional: true
+    order: 7
+    include-if: "project.elicitation.has_nfrs == true"
+
+  # ---- Defects, metrics ----
+  - slug: quality/defect-management
+    optional: false
+    order: 8
+  - slug: quality/failure-categories
+    optional: true
+    order: 8.5
+    include-if: "project.elicitation.uses_team_failure_categories == true"
+  - slug: quality/quality-metrics-and-reporting
+    optional: false
+    order: 9
+
+  # ---- Traceability, glossary, change log ----
+  - slug: shared/traceability
+    optional: false
+    order: 10
+  - slug: shared/glossary
+    optional: false
+    order: 11
+  - slug: shared/change-log
+    optional: false
+    order: 12
+
+decision-gates:
+  - block: quality/testability-classification
+    include-if: "project.elicitation.records_testability_classification == true"
+  - block: quality/nonfunctional-quality
+    include-if: "project.elicitation.has_nfrs == true"
+  - block: quality/test-case-increment
+    include-if: "project.elicitation.uses_test_case_increments == true"
+  - block: quality/failure-categories
+    include-if: "project.elicitation.uses_team_failure_categories == true"
+
+notes: |
+  Brownfield uses the same quality artifact shape as greenfield so review and
+  execution gates remain identical across flows. The brownfield-specific work is
+  contextual: `create-quality-package` must ground the package in the existing
+  implementation, existing tests, and KB components selected through
+  `navigate-knowledge-base` (using `--profile=test-suite` when test-suite KB
+  components exist) before authoring strategy, test design, automation gates,
+  and traceability. shared/traceability renders the test ↔ AC ↔ FR/NFR ↔ INC
+  matrix.

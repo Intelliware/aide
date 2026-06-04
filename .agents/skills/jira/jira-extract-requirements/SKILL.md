@@ -1,11 +1,6 @@
 ---
 name: jira-extract-requirements
-description: >-
-  Fetches a Jira issue and builds a structured markdown requirements package.
-  Detects issue type and prompts for output location. Saves raw data to cache;
-  agent reads cache and creates markdown. Performs staleness checks and prints
-  Package Update Report. Use when user says "extract requirements for {KEY}",
-  "create requirements package", "build requirements package from Jira".
+description: "Use when the user asks to extract requirements from Jira, create a requirements package from a Jira Feature/Epic, build requirements from Jira, or says 'extract requirements for {KEY}'. Fetches the Jira issue, detects issue type, prompts for output location, saves raw data to cache, creates a structured markdown requirements package, performs staleness checks, and prints a Package Update Report."
 compatibility: "Requires atl CLI tool."
 metadata:
   version: 2.1.0
@@ -150,5 +145,5 @@ atl j issue {KEY} --fresh
 
 ## Additional Resources
 
-- [Atlassian CLI Setup](../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
+- [Atlassian CLI Setup](../../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
 

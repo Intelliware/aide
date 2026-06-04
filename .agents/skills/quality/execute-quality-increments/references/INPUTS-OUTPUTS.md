@@ -1,0 +1,37 @@
+# Inputs and Outputs — execute-quality-increments
+
+## Inputs
+
+| Name | Required? | Source | Purpose |
+|---|---|---|---|
+| Assembled quality package | yes | `{paths.quality_path}/{feature-id}-quality.md` | Topology, test stack, harness design, execution conventions |
+| Quality automation & CI/CD block | yes | `docs/<feature>/quality-package/quality/automation-and-cicd.md` | Framework, runner, tag vocabulary, environment profiles |
+| Test-case plan overview | yes | `docs/<feature>/quality-package/quality/plan/qe-plan-overview.md` | Increment list, dependency graph, execution order |
+| Scaffolding increment files | yes | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding type) | Implementation plans for prep work |
+| Test-case increment files | yes | `docs/<feature>/quality-package/quality/plan/<category>/TC-XXX.md` or `docs/<feature>/quality-package/quality/plan/TC-XXX.md` | Implementation plans for test artifacts |
+| Test-case status tracker | yes | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Tracks progress through the plan |
+| Review readiness verdict | yes | `docs/<feature>/quality-package/review/readiness-verdict.md` | Must be GO or accepted CONDITIONAL GO |
+| Target codebase | yes | filesystem (repo paths from `project.toml`) | Where test artifacts are written |
+| `project.toml` | yes | `{project-root}/project.toml` | Flow detection, paths, repos, test-stack pins |
+| Knowledge base | recommended | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Reuse cross-check against existing test utilities and fixtures |
+
+## Outputs
+
+| Artifact | Location | Format | Notes |
+|---|---|---|---|
+| Build-file modifications | Target codebase (path per build tool) | Per build tool | Scaffolding only |
+| Runner classes / suite definitions | Target codebase (path per test framework) | Per framework | Scaffolding only |
+| Test configuration | Target codebase (path per framework / runner) | Per framework | Scaffolding only |
+| Shared test utilities, fixtures, builders | Target codebase (path per language) | Per language | Scaffolding only |
+| Feature / scenario / spec files | Target codebase (path per framework) | Per framework | Test-case increments |
+| Step definitions / test classes | Target codebase (path per language) | Per language | Test-case increments |
+| Test-case data files / exports (CSV, JSON, fixtures) | `{paths.quality_path}/` or target codebase | Per format | Test-case increments |
+| Updated test-case-status.md | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Markdown table | Every increment |
+| Updated change-tracker.md | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table | Every increment; with `Trigger = Execution deviation` when relevant |
+
+Exact paths depend on the embedding strategy (in-repo vs. dedicated
+test-repo) and the tool conventions declared during `create-quality-package`
+and documented in the quality package's automation-and-cicd and
+test-data-and-environments blocks. The skill reads those values rather
+than hard-coding paths.
+

@@ -1,10 +1,6 @@
 ---
 name: confluence-extract-package
-description: >-
-  Given a Confluence page ID or URL, extracts the main page plus all linked pages
-  and Jira issues (L0 only). Checks for related Jira packages. Performs staleness
-  checks and prints Package Update Report. Use when user says "extract Confluence
-  package", "download page and its links", "build package from Confluence page {ID}".
+description: "Use when the user asks to extract a Confluence package, download a Confluence page plus linked pages, build a package from Confluence page {ID}, or gather discovery input from Confluence. Given a Confluence page ID or URL, extracts the main page plus all linked pages and Jira issues (L0 only), checks for related Jira packages, performs staleness checks, and prints a Package Update Report."
 compatibility: "Requires atl CLI tool."
 metadata:
   version: 2.1.0
@@ -136,4 +132,4 @@ When the root page is fetched with `--with-jira`, `confluence-fetch` writes `cac
 
 ## Additional Resources
 
-- [Atlassian CLI Setup](../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
+- [Atlassian CLI Setup](../../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)

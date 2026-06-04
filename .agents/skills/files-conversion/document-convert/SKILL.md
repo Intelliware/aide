@@ -1,9 +1,6 @@
 ---
 name: document-convert
-description: >-
-  Universal document converter AND analyzer: Word (.docx), Excel (.xlsx/.xls), PDF (.pdf) to 
-  Markdown with intelligent content analysis. Auto-detects format, converts to markdown, then 
-  analyzes content and generates structured reports. Returns actionable insights, not just raw tables.
+description: "Use when the user asks to convert or analyze a Word (.docx), Excel (.xlsx/.xls), or PDF (.pdf) document; says 'convert this document', 'analyze this spreadsheet', 'turn this PDF into markdown', or needs document content transformed into markdown with structured analysis. Auto-detects format, converts to markdown, analyzes content, and generates actionable structured reports rather than only raw tables."
 ---
 
 # Universal Document Converter & Analyzer
@@ -160,4 +157,4 @@ This minimizes context usage.
 
 ## Additional Resources
 
-- [SharePoint Tools Documentation](../../../tools/README.md)
+- [SharePoint Tools Documentation](../../../../tools/README.md)

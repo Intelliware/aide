@@ -1,6 +1,6 @@
 ---
 name: confluence-fetch
-description: Fetch Confluence documentation pages by ID or URL. Saves the raw JSON response and metadata, then lets the agent read the response and generate markdown analysis when needed.
+description: "Use when the user asks to fetch, view, cache, or analyze a single Confluence page by ID or URL; says 'fetch Confluence page', 'show me page {ID}', 'read this Confluence URL', or needs raw page JSON and metadata for agent analysis. Saves the raw JSON response and metadata, then lets the agent generate markdown analysis when needed."
 ---
 
 # Confluence Fetch
@@ -148,4 +148,4 @@ cache/confluence/
 
 ## Additional Resources
 
-- [Atlassian CLI Setup](../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)
+- [Atlassian CLI Setup](../../../../tools/packages/atlassian-cli/SETUP-ATL-CLI.md)

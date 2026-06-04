@@ -1,0 +1,105 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/execute-quality-increments.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `execute-quality-increments`
+# skill (the optional per-test-case TC-XXX execution flow that follows a GO
+# quality package).
+#
+# This example expresses a team that:
+#   • uses Cucumber + JUnit 5 with a BDD/Java stack,
+#   • organises feature files by category sub-folder,
+#   • requires the test-case-status tracker on disk,
+#   • generates a Jira-import CSV alongside each batch of test cases,
+#   • runs lint and a smoke-test gate before marking a TC-XXX done.
+#
+# A sibling `execute-quality-increments.user.toml` file (gitignored) can do
+# the same things at higher precedence for your personal overrides.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Elicitation mode for the per-test-case loop: "wizard" hard-stops at each
+# TC-XXX increment; "batch" walks a list end-to-end without pausing
+# (NOT recommended unless every TC-XXX has unambiguous inputs).
+elicitation_mode = "wizard"
+
+# Whether the test-case-status tracker file MUST exist on disk before the
+# skill runs. Strongly recommended `true`; the tracker is the single source
+# of truth for which TC-XXX increments are open / in-progress / done.
+require_tracker = true
+
+# Whether the skill should fail fast on the first failing test in a TC-XXX
+# or run the whole increment and report all failures at the end.
+fail_fast = false
+
+# Whether to emit a Jira-import CSV of completed test cases at the end of
+# each TC-XXX increment.
+generate_csv_export = true
+
+# Whether to organise generated artifacts (feature files, step defs, fixtures)
+# into category sub-folders (true) or a flat layout (false).
+use_category_subfolders = true
+
+
+# ─── Technology pinning ──────────────────────────────────────────────────────
+# Locks the implementation stack so the executor does not re-elicit per
+# TC-XXX. Overrides the project-level defaults guessed by `create-quality-package`.
+
+[technology]
+language        = "Java 17+"
+test_framework  = "Cucumber 7 + JUnit 5"
+build_tool      = "Maven"
+assertions      = "AssertJ"
+mocking         = "WireMock"
+containers      = "Testcontainers"
+http_client     = "RestAssured"
+
+
+# ─── Per-TC-XXX exit gates ───────────────────────────────────────────────────
+# Gates the executor must pass before marking a TC-XXX done.
+# Array-of-tables merged by `code`; set `_suppress = true` to drop a gate.
+
+[[exit_gates]]
+code        = "tests-green"
+description = "All scenarios for the TC-XXX pass locally"
+required    = true
+
+[[exit_gates]]
+code        = "lint-clean"
+description = "Spotless / Checkstyle / equivalent runs clean on the diff"
+required    = true
+
+[[exit_gates]]
+code        = "smoke-test"
+description = "Repo-wide smoke suite passes after the new scenarios are added"
+required    = true
+
+[[exit_gates]]
+code        = "tracker-updated"
+description = "test-case-status.md flipped to 'done' with date + commit ref"
+required    = true
+
+
+# ─── Artifact defaults ───────────────────────────────────────────────────────
+
+[[expected_artifacts]]
+code        = "feature-file"
+extension   = ".feature"
+description = "Gherkin scenarios for the TC-XXX"
+
+[[expected_artifacts]]
+code        = "step-definition"
+extension   = ".java"
+description = "Step definition class(es) implementing the new steps"
+
+[[expected_artifacts]]
+code        = "test-data"
+extension   = ".json"
+description = "Fixture / payload data files for the scenarios"
+
+[[expected_artifacts]]
+code        = "csv-export"
+extension   = ".csv"
+description = "Test case export for Jira import (batch closing artifact)"
+

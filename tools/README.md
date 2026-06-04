@@ -2,6 +2,8 @@
 
 Command-line tools for integrating with Atlassian (Jira/Confluence) and SharePoint. Built as an npm workspace monorepo with shared dependencies and utilities.
 
+> **Status: optional companion tools.** These CLIs are **not** part of the A.I.D.E. framework and are **not required** by any stage skill. They are convenience companions to the optional `jira-*`, `confluence-*`, and document-conversion skills, which gate on the relevant CLI being present and halt with a clear message when it is not. You can use A.I.D.E. end-to-end without installing anything in this folder.
+
 ## 📦 What's Included
 
 - **`atlassian-cli`** (`atl`) - Fetch Jira issues and Confluence pages

@@ -1,0 +1,87 @@
+# Composition: Reverse-Engineering — Test Suite (Internal Part)
+#
+# Documents the INTERNAL implementation of a standalone test-automation
+# repository: runner config, project layout, shared utilities (actions /
+# waits / assertions / fixtures), spec / feature inventory, marker / tag
+# vocabulary, environment matrix, CI integration, and known gaps.
+#
+# Source: templates/blocks/reverse-eng/test-suite/internal/
+
+name: re-test-suite-internal
+description: Reverse-engineering KB for the internal implementation of a standalone test-automation repository.
+applies-to-flow: reverse-eng
+package-type: re-internal
+
+default-output-path: "docs/test-suite-internal/"
+default-output-shape: tree
+# Path is RELATIVE to the source repo root (RE skill prepends the repo path).
+# Tree shape: one .md file per block, named "<NN>-<bare-slug>.md" where NN is
+# the 1-based zero-padded sort index after sorting blocks by `order`, and
+# <bare-slug> is the slug with the "reverse-eng/test-suite/internal/" prefix
+# stripped.
+
+blocks:
+  - slug: reverse-eng/test-suite/internal/suite-overview
+    optional: false
+    order: 110
+  - slug: reverse-eng/test-suite/internal/runner-and-entry-points
+    optional: false
+    order: 120
+  - slug: reverse-eng/test-suite/internal/project-structure-and-conventions
+    optional: false
+    order: 130
+  - slug: reverse-eng/test-suite/internal/configuration-and-profiles
+    optional: false
+    order: 140
+  - slug: reverse-eng/test-suite/internal/shared-utilities-catalogue
+    optional: false
+    order: 150
+  - slug: reverse-eng/test-suite/internal/fixtures-and-test-data
+    optional: false
+    order: 160
+  - slug: reverse-eng/test-suite/internal/page-objects-and-step-defs
+    optional: false
+    order: 170
+  - slug: reverse-eng/test-suite/internal/spec-feature-inventory
+    optional: false
+    order: 180
+  - slug: reverse-eng/test-suite/internal/marker-tag-vocabulary
+    optional: false
+    order: 190
+  - slug: reverse-eng/test-suite/internal/auth-and-environment-entry
+    optional: false
+    order: 200
+  - slug: reverse-eng/test-suite/internal/environment-matrix
+    optional: false
+    order: 210
+  - slug: reverse-eng/test-suite/internal/parallelism-and-isolation
+    optional: false
+    order: 220
+  - slug: reverse-eng/test-suite/internal/reporting-and-analytics
+    optional: false
+    order: 230
+  - slug: reverse-eng/test-suite/internal/ci-integration
+    optional: false
+    order: 240
+  - slug: reverse-eng/test-suite/internal/known-gaps-and-anti-patterns
+    optional: false
+    order: 250
+  - slug: reverse-eng/test-suite/internal/glossary
+    optional: false
+    order: 260
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+notes: |
+  Block order follows order-hint values from each block's frontmatter
+  (110..260). All 16 blocks are mandatory by default; the suite is small
+  enough that selectively omitting blocks tends to hide more than it
+  saves. If a project genuinely doesn't need (e.g.) a parallelism story
+  because the suite is single-worker by design, the block can still be
+  rendered as a one-line "single-worker, no parallelism" entry.
+
+  Pairs with re-test-suite-consumer.yaml; the two produce complementary
+  outputs from the same suite. Run both during a reverse-engineer-test-suite
+  invocation.

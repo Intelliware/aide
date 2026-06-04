@@ -853,9 +853,9 @@ function parseSimpleToml(text) {
   const lines = text.split('\n');
   const result = {};
   let currentSection = result;
-  let currentPath = [];
 
-  for (const line of lines) {
+  for (let lineNo = 0; lineNo < lines.length; lineNo++) {
+    const line = lines[lineNo];
     const trimmed = line.trim();
 
     // Skip comments and empty lines
@@ -864,14 +864,20 @@ function parseSimpleToml(text) {
     }
 
     // Section header
-    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-      const section = trimmed.slice(1, -1);
-      const parts = section.split('.');
+    if (trimmed.startsWith('[') || trimmed.endsWith(']')) {
+      if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+        throw new Error(`line ${lineNo + 1}: malformed section header '${trimmed}'`);
+      }
 
       // Handle array tables [[section]]
       if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
         const arraySection = trimmed.slice(2, -2);
         const arrayParts = arraySection.split('.');
+
+        if (!arraySection || arrayParts.some(part => !part || !/^[A-Za-z0-9_-]+$/.test(part))) {
+          throw new Error(`line ${lineNo + 1}: malformed array table header '${trimmed}'`);
+        }
+
         let current = result;
 
         for (let i = 0; i < arrayParts.length - 1; i++) {
@@ -888,8 +894,18 @@ function parseSimpleToml(text) {
         const newItem = {};
         current[last].push(newItem);
         currentSection = newItem;
-        currentPath = arrayParts;
       } else {
+        if (trimmed.startsWith('[[') || trimmed.endsWith(']]')) {
+          throw new Error(`line ${lineNo + 1}: malformed array table header '${trimmed}'`);
+        }
+
+        const section = trimmed.slice(1, -1);
+        const parts = section.split('.');
+
+        if (!section || parts.some(part => !part || !/^[A-Za-z0-9_-]+$/.test(part))) {
+          throw new Error(`line ${lineNo + 1}: malformed section header '${trimmed}'`);
+        }
+
         // Regular section
         let current = result;
         for (let i = 0; i < parts.length; i++) {
@@ -899,7 +915,6 @@ function parseSimpleToml(text) {
           current = current[parts[i]];
         }
         currentSection = current;
-        currentPath = parts;
       }
       continue;
     }
@@ -909,6 +924,10 @@ function parseSimpleToml(text) {
     if (eqIndex > 0) {
       const key = trimmed.slice(0, eqIndex).trim();
       let value = trimmed.slice(eqIndex + 1).trim();
+
+      if (!/^[A-Za-z_][A-Za-z0-9_-]*$/.test(key)) {
+        throw new Error(`line ${lineNo + 1}: malformed key '${key}'`);
+      }
 
       // Parse value
       if (value === 'true') {
@@ -924,7 +943,10 @@ function parseSimpleToml(text) {
       }
 
       currentSection[key] = value;
+      continue;
     }
+
+    throw new Error(`line ${lineNo + 1}: expected section header or key/value pair`);
   }
 
   return result;

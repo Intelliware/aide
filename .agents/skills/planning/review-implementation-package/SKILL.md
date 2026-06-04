@@ -96,7 +96,9 @@ The verdict is also recorded in
 
 ## Next skill
 
-- **GO** → `execute-increments`
+- **GO** → `create-quality-package` (the quality stage authors the test/quality
+  plan before execution; its `review-quality-package` gate must return GO before
+  `execute-increments` runs)
 - **NO-GO** → back to `create-implementation-package` for rework, then re-run
   this skill
 

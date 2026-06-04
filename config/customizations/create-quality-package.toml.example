@@ -1,0 +1,150 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/create-quality-package.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `create-quality-package` skill
+# — the stage-driver that assembles the Quality Package (quality strategy,
+# test design, quality-engineering plan).
+#
+# This skill acts as a WIZARD/WORKFLOW — it MUST stop at each elicitation
+# step and wait for user input. It must NEVER auto-proceed.
+#
+# This example expresses a team that:
+#   • uses Cucumber + JUnit 5 + Playwright (BDD-first stack),
+#   • opts INTO the per-test-case TC-XXX increment flow (so execute-quality-
+#     increments is the downstream executor),
+#   • auto-loads sibling package context (requirements, design, planning),
+#   • pins NFR floors and security-posture sources at the project level,
+#   • requires the reuse-analysis cross-check against the KB before any
+#     new test case is authored.
+#
+# A sibling `create-quality-package.user.toml` file (gitignored) can do the
+# same things at higher precedence for your personal overrides.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Default composition to use. The framework ships:
+#   - `greenfield-quality-package` (full surface)
+#   - `brownfield-quality-package` (same quality surface, with brownfield
+#     KB/source grounding performed by the skill workflow)
+default_composition = "greenfield-quality-package"
+
+# Elicitation mode: "wizard" hard-stops at every step; "batch" expects all
+# answers up-front (NOT recommended for first use).
+elicitation_mode = "wizard"
+
+# Whether the skill should auto-load context from sibling packages.
+# When true, the skill trawls requirements-package/, design-package/, and
+# implementation-package/ for context before opening the first elicitation
+# step.
+auto_load_context = true
+
+# Whether to opt INTO the per-test-case TC-XXX increment flow. When true,
+# Step 02b runs and the resulting plan carries `TC-XXX` increments that
+# `execute-quality-increments` consumes. When false, the plan stays at the
+# strategy / test-design level and `execute-increments` is the executor.
+uses_test_case_increments = true
+
+# Whether the reuse-analysis cross-check against the KB
+# (`navigate-knowledge-base --profile=test-suite`) is REQUIRED before any
+# new test case is authored. Strongly recommended `true` — it is the
+# framework's substitute for a dedicated qe-code-scanner skill.
+require_reuse_analysis = true
+
+# Whether the testability check (Step 00b) is REQUIRED. When true and the
+# scope has no automatable surface, the skill halts with a "non-testable
+# scope" verdict and routes to manual-validation guidance instead of
+# producing a quality package.
+require_testability_check = true
+
+
+# ─── Context sources ─────────────────────────────────────────────────────────
+
+[context_sources]
+requirements_package    = true
+design_package          = true
+implementation_package  = true
+knowledge_base          = true
+existing_test_suite     = true   # consults the test-suite KB component if present
+
+
+# ─── Technology defaults ─────────────────────────────────────────────────────
+# Initial guess presented to the user during Step 03 (test-design). Override
+# here to change the default; the skill always presents these for
+# confirmation, never silently uses them.
+
+[technology_defaults]
+language        = "Java 17+ / TypeScript"
+test_framework  = "Cucumber 7 + JUnit 5 (API) + Playwright (UI)"
+build_tool      = "Maven (Java) / pnpm (TS)"
+assertions      = "AssertJ (Java) / Playwright expect (TS)"
+mocking         = "WireMock"
+containers      = "Testcontainers"
+ci_runner       = "GitHub Actions"
+
+
+# ─── NFR floors ──────────────────────────────────────────────────────────────
+# Project-wide minimum bars the quality-engineering plan must meet. The
+# skill renders these into the `release-gates` block; the gate review
+# (review-quality-package) fails the package if any floor is below this.
+
+[nfr_floors]
+unit_test_coverage      = 80      # %
+integration_coverage    = 60      # %
+critical_path_coverage  = 100     # %
+p95_latency_ms          = 250
+error_budget            = "0.1%"  # monthly
+a11y_wcag               = "AA"
+
+
+# ─── Required artifacts in the quality package ───────────────────────────────
+# Array-of-tables merged by `code`. Set `_suppress = true` to drop one.
+# Add new entries to require project-specific deliverables.
+
+[[required_artifacts]]
+code        = "quality-strategy"
+description = "The QA-analysis-driven strategy + release gates + metrics"
+required    = true
+
+[[required_artifacts]]
+code        = "test-design"
+description = "Concrete test cases traced to ACs / NFRs / increments"
+required    = true
+
+[[required_artifacts]]
+code        = "qe-plan"
+description = "Automation, CI gates, test data, environments"
+required    = true
+
+[[required_artifacts]]
+code        = "traceability-matrix"
+description = "AC → TC → INC mapping (machine-readable + markdown)"
+required    = true
+
+[[required_artifacts]]
+code        = "release-gates"
+description = "Per-environment gates with measurable pass criteria"
+required    = true
+
+
+# ─── Reuse-analysis ──────────────────────────────────────────────────────────
+# Settings consumed when `require_reuse_analysis = true`. The reference is
+# at `.agents/skills/quality/create-quality-package/references/reuse-analysis.md`.
+
+[reuse_analysis]
+profile             = "test-suite"   # passed to navigate-knowledge-base
+fail_if_kb_absent   = false          # WARN rather than fail when no KB exists yet
+component_kinds     = ["shared-utility", "fixture", "page-object", "step-def", "helper"]
+
+
+# ─── Test-case-increment defaults ────────────────────────────────────────────
+# Only used when `uses_test_case_increments = true`. Mirrors the canonical
+# 8-section shape used for INC-XXX so the two executors stay symmetrical.
+
+[test_case_increments]
+id_prefix        = "TC"
+status_tracker   = "test-case-status.md"
+canonical_shape  = "8-section"   # same shape as INC-XXX
+default_subdir   = "test-cases"
+

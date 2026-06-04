@@ -1,0 +1,91 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/audit-quality-coverage.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Real example for the `audit-quality-coverage`
+# skill — the independently-invocable, read-only audit of test coverage
+# against the implementation package.
+#
+# This example expresses a team that:
+#   • requires every INC-XXX to have ≥ 1 mapped TC-XXX before release,
+#   • allows a small allowlist of intentionally untested INCs (config-only,
+#     docs-only) with explicit justification,
+#   • emits both a markdown coverage report and a CSV roll-up,
+#   • runs the KB-tag verification step against the knowledge base by default.
+#
+# A sibling `audit-quality-coverage.user.toml` file (gitignored) can do the
+# same things at higher precedence for your personal overrides.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Scalar overrides ────────────────────────────────────────────────────────
+
+# Audit-mode profile: "release-gate" (fail on any uncovered INC) or
+# "snapshot" (report only; never fail). Most teams want release-gate.
+audit_mode = "release-gate"
+
+# Whether to consult the KB via `navigate-knowledge-base` during Step 3
+# (tag verification). When false the audit runs purely against the
+# implementation package + test-case-status tracker.
+use_knowledge_base = true
+
+# Whether to fail the audit if the test-case-status tracker is missing.
+# Strongly recommended `true`; without the tracker, coverage cannot be
+# computed deterministically.
+require_tracker = true
+
+# Output format. Allowed: "markdown" | "markdown+csv" | "json".
+output_format = "markdown+csv"
+
+# Where the audit report lands (relative to {paths.implementation_package}).
+output_subdir = "quality-audit"
+
+
+# ─── Coverage floor ──────────────────────────────────────────────────────────
+# Per-category minimum coverage thresholds. Audit fails if any category
+# falls below its floor. Values are percentages (0–100).
+
+[coverage_floor]
+overall          = 100   # every INC must map to ≥ 1 TC by default
+critical_path    = 100
+nfr              = 80    # NFRs may be partially deferred to monitoring
+accessibility    = 90
+
+
+# ─── Intentionally untested allowlist ────────────────────────────────────────
+# INCs that are exempt from the coverage floor. Each entry must include a
+# `reason`; entries without a reason are rejected.
+# Array-of-tables merged by `inc_id`; set `_suppress = true` to remove an
+# entry inherited from a lower layer.
+
+[[exempt_increments]]
+inc_id = "INC-001"
+reason = "Docs-only change; no executable surface to test"
+
+[[exempt_increments]]
+inc_id = "INC-014"
+reason = "Pure config rename; covered by CI smoke suite"
+
+
+# ─── KB tag verification ─────────────────────────────────────────────────────
+# When `use_knowledge_base = true`, the audit cross-checks markers / tags
+# referenced by the quality package against what the test-suite KB
+# component actually declares.
+
+[kb_verification]
+profile          = "test-suite"   # passed to navigate-knowledge-base
+fail_on_missing  = true           # error if a marker referenced by the QP is not in the KB
+fail_on_orphan   = false          # WARN only if a KB marker has no QP reference
+
+
+# ─── Next-actions output ─────────────────────────────────────────────────────
+
+[next_actions]
+# Whether the audit emits a Section 5 "Next actions" block routing each
+# finding to a named follow-up skill (e.g. create-quality-package,
+# execute-quality-increments, review-test-failures).
+emit_routing = true
+
+# Whether to write a machine-readable next-actions.json alongside the
+# markdown report (consumed by CI bots / dashboards).
+emit_json = true
+

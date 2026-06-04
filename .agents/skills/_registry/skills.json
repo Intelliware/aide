@@ -4,7 +4,7 @@
     {
       "canonical_id": "confluence-extract-package",
       "name": "confluence-extract-package",
-      "description": ">- Given a Confluence page ID or URL, extracts the main page plus all linked pages and Jira issues (L0 only). Checks for related Jira packages. Performs staleness checks and prints Package Update Report. Use when user says \"extract Confluence package\", \"download page and its links\", \"build package from Confluence page {ID}\".",
+      "description": "Use when the user asks to extract a Confluence package, download a Confluence page plus linked pages, build a package from Confluence page {ID}, or gather discovery input from Confluence. Given a Confluence page ID or URL, extracts the main page plus all linked pages and Jira issues (L0 only), checks for related Jira packages, performs staleness checks, and prints a Package Update Report.",
       "stage": "confluence",
       "package": "",
       "path": ".agents\\skills\\confluence\\confluence-extract-package\\SKILL.md"
@@ -12,7 +12,7 @@
     {
       "canonical_id": "confluence-fetch",
       "name": "confluence-fetch",
-      "description": "Fetch Confluence documentation pages by ID or URL. Saves the raw JSON response and metadata, then lets the agent read the response and generate markdown analysis when needed.",
+      "description": "Use when the user asks to fetch, view, cache, or analyze a single Confluence page by ID or URL; says 'fetch Confluence page', 'show me page {ID}', 'read this Confluence URL', or needs raw page JSON and metadata for agent analysis. Saves the raw JSON response and metadata, then lets the agent generate markdown analysis when needed.",
       "stage": "confluence",
       "package": "",
       "path": ".agents\\skills\\confluence\\confluence-fetch\\SKILL.md"
@@ -60,7 +60,7 @@
     {
       "canonical_id": "document-convert",
       "name": "document-convert",
-      "description": ">- Universal document converter AND analyzer: Word (.docx), Excel (.xlsx/.xls), PDF (.pdf) to Markdown with intelligent content analysis. Auto-detects format, converts to markdown, then analyzes content and generates structured reports. Returns actionable insights, not just raw tables.",
+      "description": "Use when the user asks to convert or analyze a Word (.docx), Excel (.xlsx/.xls), or PDF (.pdf) document; says 'convert this document', 'analyze this spreadsheet', 'turn this PDF into markdown', or needs document content transformed into markdown with structured analysis. Auto-detects format, converts to markdown, analyzes content, and generates actionable structured reports rather than only raw tables.",
       "stage": "files-conversion",
       "package": "",
       "path": ".agents\\skills\\files-conversion\\document-convert\\SKILL.md"
@@ -68,7 +68,7 @@
     {
       "canonical_id": "jira-extract-requirements",
       "name": "jira-extract-requirements",
-      "description": ">- Fetches a Jira issue and builds a structured markdown requirements package. Detects issue type and prompts for output location. Saves raw data to cache; agent reads cache and creates markdown. Performs staleness checks and prints Package Update Report. Use when user says \"extract requirements for {KEY}\", \"create requirements package\", \"build requirements package from Jira\".",
+      "description": "Use when the user asks to extract requirements from Jira, create a requirements package from a Jira Feature/Epic, build requirements from Jira, or says 'extract requirements for {KEY}'. Fetches the Jira issue, detects issue type, prompts for output location, saves raw data to cache, creates a structured markdown requirements package, performs staleness checks, and prints a Package Update Report.",
       "stage": "jira",
       "package": "",
       "path": ".agents\\skills\\jira\\jira-extract-requirements\\SKILL.md"
@@ -76,7 +76,7 @@
     {
       "canonical_id": "jira-get",
       "name": "jira-get",
-      "description": "Fetch a Jira issue using the Atlassian CLI tool. Saves the raw JSON response, metadata, and agent-generated markdown analysis by default to cache/jira/{projectKey}/{ISSUE_KEY}/.",
+      "description": "Use when the user asks to fetch, view, cache, or analyze a single Jira issue by key; says 'fetch PROJ-123', 'show me Jira issue {KEY}', 'get this Jira ticket', or needs raw Jira issue JSON and metadata for agent analysis. Saves the raw JSON response, metadata, and agent-generated markdown analysis by default to cache/jira/{projectKey}/{ISSUE_KEY}/.",
       "stage": "jira",
       "package": "",
       "path": ".agents\\skills\\jira\\jira-get\\SKILL.md"
@@ -84,7 +84,7 @@
     {
       "canonical_id": "jira-search",
       "name": "jira-search",
-      "description": "Search Jira issues using JQL (Jira Query Language) queries. Find issues by status, assignee, project, sprint, labels, or custom criteria. Returns multiple issues with summaries and generates search reports.",
+      "description": "Use when the user asks to search Jira issues, run a JQL query, find issues by status, assignee, project, sprint, labels, or custom criteria, or says 'show me all issues matching...'. Translates search intent into JQL where needed, returns multiple issues with summaries, and generates search reports.",
       "stage": "jira",
       "package": "",
       "path": ".agents\\skills\\jira\\jira-search\\SKILL.md"
@@ -210,6 +210,46 @@
       "path": ".agents\\skills\\planning\\review-implementation-package\\SKILL.md"
     },
     {
+      "canonical_id": "audit-quality-coverage",
+      "name": "audit-quality-coverage",
+      "description": "Use when the user asks to audit test coverage against an implementation package, check whether all increments have test coverage, produce a coverage report, find INCs with no tests, detect coverage drift, or run a pre-release coverage check; says 'check quality coverage', 'audit coverage', 'are all increments covered', 'coverage report', 'which INCs have no tests', 'coverage gap', 'pre-release quality audit'. Independently invocable at any time; read-only against source code; creates the test-case status tracker only if missing.",
+      "stage": "quality",
+      "package": "",
+      "path": ".agents\\skills\\quality\\audit-quality-coverage\\SKILL.md"
+    },
+    {
+      "canonical_id": "create-quality-package",
+      "name": "create-quality-package",
+      "description": "Use when the user asks to create, build, write, or assemble a quality package; says 'create the quality package', 'plan the testing', 'write the test strategy', 'design the tests', 'how will we test this', 'set up the quality plan', 'start the quality stage', 'define quality gates', 'plan test automation', or 'create the QA plan'. Drives the full quality stage: quality strategy (QA analysis), test design traced to acceptance criteria, and a quality-engineering plan (automation, CI gates, test data) — handing off to review-quality-package.",
+      "stage": "quality",
+      "package": "",
+      "path": ".agents\\skills\\quality\\create-quality-package\\SKILL.md"
+    },
+    {
+      "canonical_id": "execute-quality-increments",
+      "name": "execute-quality-increments",
+      "description": "Use when the user asks to execute quality / test-case increments, implement TC-XXX, build the test artifacts, run the next quality increment, or turn an approved quality package into working test code. Executes one test-case increment at a time, producing the actual test artifacts (feature files, step definitions, runners, fixtures, exports) and updating the test-case-status tracker. Optional path after a GO quality package when the team has opted into the TC-XXX increment flow.",
+      "stage": "quality",
+      "package": "",
+      "path": ".agents\\skills\\quality\\execute-quality-increments\\SKILL.md"
+    },
+    {
+      "canonical_id": "review-quality-package",
+      "name": "review-quality-package",
+      "description": "Use when the user asks to review, validate, or check readiness of an assembled quality package; says 'review the quality package', 'validate the test plan', 'check test coverage', 'is the quality plan ready', 'quality gate review', 'check the test strategy', 'review the test design', 'are the quality gates measurable', or 'quality readiness for execution'. Independently invocable; assumes the quality package is already assembled.",
+      "stage": "quality",
+      "package": "",
+      "path": ".agents\\skills\\quality\\review-quality-package\\SKILL.md"
+    },
+    {
+      "canonical_id": "review-test-failures",
+      "name": "review-test-failures",
+      "description": "Use when the user asks to review test failures, analyse why tests failed, triage failed scenarios, walk through defects, or determine root cause of a failing run; says 'my tests failed', 'analyse the failures', 'review the failures', 'what went wrong', 'triage the failed scenarios', or after execute-quality-increments / execute-increments / a CI run hands off with failure details. Walks through each failure one at a time, classifies as script issue / application defect / environment-or-data / flaky, proposes a remediation routed to a named framework skill, and waits for explicit user approval before advancing. Outputs a structured summary with action items grouped by routing target.",
+      "stage": "quality",
+      "package": "",
+      "path": ".agents\\skills\\quality\\review-test-failures\\SKILL.md"
+    },
+    {
       "canonical_id": "document-quick-change",
       "name": "document-quick-change",
       "description": "Use when the user says \"quick change\", \"small change\", \"fast-track this\", \"expedited spec\", \"write a change spec\", or \"document a small fix/feature\" and the change does not warrant a full requirements + design package. Captures one combined lightweight spec (mini-requirements + mini-design in a single artifact) per `templates/compositions/quick-dev-spec.yaml`. First of three quick-dev skills.",
@@ -320,6 +360,14 @@
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents\\skills\\reverse-engineering\\reverse-engineer-mobile-framework\\SKILL.md"
+    },
+    {
+      "canonical_id": "reverse-engineer-test-suite",
+      "name": "reverse-engineer-test-suite",
+      "description": "Use when the user asks to document a dedicated test-automation repository — E2E suite, integration suite, contract-test suite, BDD repo, or any standalone test project — regardless of stack (e.g., Cucumber/Java, Playwright, Cypress, Selenium, pytest, RestAssured, Karate, k6). Produces Part A (internal docs for test engineers maintaining the suite) and Part B (consumer docs for application developers and QE consumers calling the suite or relying on its components in the knowledge base). Do NOT use for application code with embedded tests — those are documented inside the application RE skill (`reverse-engineer-web-app` / `-mobile-app` / `-api`).",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents\\skills\\reverse-engineering\\reverse-engineer-test-suite\\SKILL.md"
     },
     {
       "canonical_id": "reverse-engineer-ui-framework",

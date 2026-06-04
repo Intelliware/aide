@@ -12,6 +12,10 @@ overrides (`<skill-name>.toml`, committed) and personal per-skill overrides
 | `create-requirements-package.toml.example` | Realistic example: a stage-driver skill where the team pins the brownfield composition by default, deepens elicitation, suppresses the optional `competitive-analysis` artifact, and adds a custom block. |
 | `analyze-repository.toml.example` | Realistic example: a dispatcher skill where the team tunes classification thresholds, pins a default domain for ambiguous monorepo cases, and lengthens the diagnostic scan budget. |
 | `review-implementation-package.toml.example` | Realistic example: a review skill where the team turns on stricter coverage gates, requires a second reviewer for high-risk increments, and adds a project-specific lens. |
+| `create-quality-package.toml.example` | Realistic example for the quality-stage driver: opts the team into the TC-XXX per-test-case increment flow, pins NFR floors and a BDD-first technology stack, and requires the KB reuse-analysis cross-check before any new test case is authored. |
+| `execute-quality-increments.toml.example` | Realistic example for the optional per-test-case (TC-XXX) executor: locks the implementation stack, defines per-TC exit gates (tests-green / lint-clean / smoke-test / tracker-updated), and pins the artifact catalogue. |
+| `audit-quality-coverage.toml.example` | Realistic example for the read-only coverage audit: sets per-category coverage floors, manages an intentionally-untested allowlist with justifications, and configures KB-tag verification. |
+| `review-test-failures.toml.example` | Realistic example for the failed-run triage walk-through: appends a project-specific failure category (`intermittent-3rd-party`), pins per-category routing, and tunes severity-band keywords. |
 
 ## How files are named
 

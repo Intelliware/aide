@@ -45,6 +45,6 @@ The single exception: if the user explicitly says they're working on A.I.D.E. it
 ## Where to find more
 
 - `README.md` — host setup, top-level layout, stages, knowledge-base architecture, vocabulary, maintenance scripts.
-- `.agents/skills/_registry/skills.csv` — generated catalog of every skill (32 of them) with description and stage.
+- `.agents/skills/_registry/skills.csv` — generated catalog of every skill (48 of them) with description and stage.
 - `.agents/skills/_registry/workflow-graph.yaml` — hand-authored stage flow / gates.
 - `_docs/requirements.md` — framework-internal requirements; not part of any shippable artifact.

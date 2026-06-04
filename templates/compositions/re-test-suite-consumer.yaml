@@ -1,0 +1,79 @@
+# Composition: Reverse-Engineering — Test Suite (Consumer Part)
+#
+# Documents the CONSUMER surface of a standalone test-automation repository:
+# the catalogue of reusable assets the suite exposes (shared utilities,
+# fixtures, page objects, step-defs), the marker / tag vocabulary, the
+# environment contract, the CI surface, and ownership. Lands in the
+# knowledge base. Every output file declares `kind: test-suite` in its
+# frontmatter so `navigate-knowledge-base --profile=test-suite` can find it.
+#
+# Source: templates/blocks/reverse-eng/test-suite/consumer/
+
+name: re-test-suite-consumer
+description: Reverse-engineering KB consumer view of a standalone test-automation repository, queried by quality-stage skills via `navigate-knowledge-base --profile=test-suite`.
+applies-to-flow: reverse-eng
+package-type: re-consumer
+
+default-output-path: "{paths.knowledge_base_path}/components/<test-suite-id>/"
+default-output-shape: tree
+# Path resolves under the KB. Tree shape: one .md file per logical
+# component. Every file MUST declare `kind: test-suite` in its YAML
+# frontmatter so `navigate-knowledge-base --profile=test-suite` finds it.
+
+blocks:
+  - slug: reverse-eng/test-suite/consumer/suite-purpose-and-scope
+    optional: false
+    order: 110
+  - slug: reverse-eng/test-suite/consumer/runner-and-invocation
+    optional: false
+    order: 120
+  - slug: reverse-eng/test-suite/consumer/shared-utilities-catalogue
+    optional: false
+    order: 130
+  - slug: reverse-eng/test-suite/consumer/fixtures-catalogue
+    optional: false
+    order: 140
+  - slug: reverse-eng/test-suite/consumer/page-objects-and-step-defs-catalogue
+    optional: false
+    order: 150
+  - slug: reverse-eng/test-suite/consumer/marker-tag-vocabulary
+    optional: false
+    order: 160
+  - slug: reverse-eng/test-suite/consumer/environment-and-data-contract
+    optional: false
+    order: 170
+  - slug: reverse-eng/test-suite/consumer/feature-inventory
+    optional: false
+    order: 180
+  - slug: reverse-eng/test-suite/consumer/ci-surface
+    optional: false
+    order: 190
+  - slug: reverse-eng/test-suite/consumer/ownership
+    optional: false
+    order: 200
+
+elicitation:
+  - prompt: references/elicitation-patterns/repo-scope-discovery.md
+    required: true
+
+notes: |
+  Block order follows order-hint values from each block's frontmatter
+  (110..200). All 10 blocks are mandatory — the consumer view is the
+  contract surface that downstream quality-stage skills depend on, and
+  omitting any one of them produces silent gaps (a quality package that
+  cannot find the marker vocabulary will silently emit non-conformant
+  tags; one that cannot find the shared-utilities catalogue will silently
+  re-author duplicates).
+
+  Every output file MUST declare `kind: test-suite` in its YAML
+  frontmatter so `navigate-knowledge-base --profile=test-suite` finds it.
+
+  Consuming skills:
+    - execute-quality-increments — Step 2a reuse cross-check
+    - audit-quality-coverage     — Step 3 live drift check
+    - review-test-failures       — Step 3 classify-and-remediate lookups
+    - create-quality-package     — Step 2b test-case-increment planning
+
+  Pairs with re-test-suite-internal.yaml; the two produce complementary
+  outputs from the same suite. Run both during a reverse-engineer-test-suite
+  invocation.

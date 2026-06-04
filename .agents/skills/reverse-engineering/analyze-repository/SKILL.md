@@ -5,7 +5,7 @@ description: "Use when the user points at a code repository and asks what kind o
 
 # Analyze Repository
 
-Diagnostic skill that scans a repository, classifies it into one of the seven reverse-engineering domain types, handles monorepos and hybrid repos, and recommends the next skill by name.
+Diagnostic skill that scans a repository, classifies it into one of the eleven reverse-engineering domain types, handles monorepos and hybrid repos, and recommends the next skill by name.
 
 ## Overview
 
@@ -55,7 +55,7 @@ Ask the user for the repository path (or identify from context). Then perform a 
 
 ### Stage 2: Classify the Repository
 
-Apply the classification table. The ten types are:
+Apply the classification table. The eleven types are:
 
 | Type | Key Distinguisher | Skill to Invoke |
 | --- | --- | --- |
@@ -69,6 +69,7 @@ Apply the classification table. The ten types are:
 | COBOL Program | Repo's primary content is `.cbl/.cob/.pli` source with `PROCEDURE DIVISION` | `reverse-engineer-cobol-program` |
 | Copybook Library | Repo's primary content is `.cpy` (record layouts, no `PROCEDURE DIVISION`) | `reverse-engineer-copybook-library` |
 | JCL / Batch Repo | Repo's primary content is `.jcl/.proc` and control cards | `reverse-engineer-jcl-job` |
+| Test-Suite Repository | Repo's primary output is **test artefacts** — features/specs, step-defs, page-objects, fixtures, runners (e.g. dedicated Cucumber / Playwright / Cypress / Selenium / pytest / RestAssured / Karate / k6 project). No production code; no end-users. Often named `*-e2e`, `*-tests`, `*-qa-suite`, or sits as a sibling to the application it tests. | `reverse-engineer-test-suite` |
 
 **The application-vs-framework distinction** — most common ambiguity. Ask: who consumes this code? End users → application; other developers as a dependency → framework/library. Concrete signals: presence of `peerDependencies` (framework), `main`/`exports` field without a `start` script (framework), being listed as a dependency in other repos (framework), having its own deployment pipeline (application).
 
@@ -84,6 +85,7 @@ Apply the classification table. The ten types are:
 - API + DB migrations → primary `reverse-engineer-api`, secondary `reverse-engineer-database`
 - Web app that also serves an API for its frontend → `reverse-engineer-web-app`; if external consumers exist, add `reverse-engineer-api`
 - Mobile app with shared library → if extracted as own package, treat separately; if internal, one `reverse-engineer-mobile-app` effort
+- Application + co-located test suite → if the tests live under `src/test/`, `__tests__/`, `tests/` or similar inside the application repo, document them in the application RE skill's `## Testing` section, **not** with `reverse-engineer-test-suite` (that skill is for dedicated test repos). If the application also ships a separately-deployable test-suite directory (rare), classify the sub-tree on its own.
 
 **Mainframe monorepos** (the common shape — one PDS-as-Git repo mixing COBOL + copybooks + JCL):
 1. List sub-trees by extension density (`.cbl/.cob`, `.cpy`, `.jcl/.proc`)
@@ -111,6 +113,7 @@ Tell the user the exact phrase to use to invoke the first recommended skill. Rec
 - `reverse-engineer-cobol-program`
 - `reverse-engineer-copybook-library`
 - `reverse-engineer-jcl-job`
+- `reverse-engineer-test-suite`
 
 After the recommended RE skill(s) complete, the user proceeds to `build-knowledge-base` to aggregate Part B docs into the knowledge base. For mainframe stacks, additionally recommend `build-mainframe-data-lineage` to produce the cross-program data-traceability artifact.
 

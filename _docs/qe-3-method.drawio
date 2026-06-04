@@ -1,0 +1,272 @@
+<mxfile host="app.diagrams.net" agent="GitHub Copilot">
+  <diagram name="QE 3-Method Quality Stage" id="qe-3-method-quality-stage">
+    <mxGraphModel dx="1780" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=5" value="A.I.D.E. Quality Stage — 3-Method QE Strategy Implemented" vertex="1">
+          <mxGeometry height="40" width="980" x="60" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#666666" value="Current live skills under .agents/skills/quality, derived from _docs/qe-analysis-3-methods.md. Solid arrows show the default gated flow; dashed arrows show optional/anytime support paths." vertex="1">
+          <mxGeometry height="40" width="1120" x="60" y="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="merge-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#404040" value="Strategy inputs merged into one quality stage" vertex="1">
+          <mxGeometry height="30" width="420" x="60" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="src-branch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=12;arcSize=20;fontStyle=1" value="Branch QE / fail-fast POC&#xa;create-qe-package&#xa;review-qe-package&#xa;execute-qe-increments&#xa;&#xa;Preserved as optional TC-XXX execution loop" vertex="1">
+          <mxGeometry height="120" width="300" x="80" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="src-em" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#548235;fontSize=12;arcSize=20;fontStyle=1" value="EM-QE quality stage&#xa;Quality Package&#xa;QA analysis + software testing + quality engineering&#xa;&#xa;Adopted as architectural skeleton" vertex="1">
+          <mxGeometry height="120" width="300" x="430" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="src-dcc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBF7;strokeColor=#2E75B6;fontSize=12;arcSize=20;fontStyle=1" value="DCC-QE operational patterns&#xa;testability guard&#xa;reuse analysis&#xa;coverage audit&#xa;failure triage&#xa;&#xa;Generalised; hardcoded stack removed" vertex="1">
+          <mxGeometry height="120" width="300" x="780" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="merged-stage" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=14;arcSize=20;fontStyle=1" value="Unified live stage&#xa;.agents/skills/quality&#xa;&#xa;5 generic, customisable skills&#xa;No hard external-tool dependency&#xa;KB used for test-suite intelligence" vertex="1">
+          <mxGeometry height="120" width="330" x="1160" y="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="main-lane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#BFBFBF;dashed=1;fontSize=12;arcSize=10" value="" vertex="1">
+          <mxGeometry height="360" width="1700" x="50" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="main-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#404040" value="Default full-pipeline quality flow" vertex="1">
+          <mxGeometry height="30" width="420" x="70" y="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="upstream" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9D9D9;strokeColor=#7F7F7F;fontSize=12;arcSize=20;fontStyle=1" value="Approved upstream packages&#xa;&#xa;Requirements package&#xa;Design package&#xa;GO implementation package&#xa;(INC-XXX set)" vertex="1">
+          <mxGeometry height="120" width="220" x="80" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="create-quality" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="create-quality-package&#xa;&#xa;Step 00b testability check&#xa;Quality strategy / gates&#xa;Test design + traceability&#xa;Optional TC-XXX plan&#xa;Quality engineering plan" vertex="1">
+          <mxGeometry height="150" width="250" x="370" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="quality-package" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#5B9BD5;strokeColor=#2E75B6;size=18;fontSize=12;fontColor=#FFFFFF;fontStyle=1" value="Quality Package&#xa;&#xa;quality-package.md&#xa;traceability.md&#xa;change-tracker.md&#xa;optional TC-XXX files" vertex="1">
+          <mxGeometry height="125" width="125" x="680" y="422" as="geometry" />
+        </mxCell>
+        <mxCell id="review-quality" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="review-quality-package&#xa;&#xa;Coverage&#xa;Test-design quality&#xa;Quality engineering&#xa;Metrics / gates&#xa;Traceability&#xa;TC-XXX shape if enabled&#xa;Readiness verdict" vertex="1">
+          <mxGeometry height="160" width="250" x="870" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="go-decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#EADCF8;strokeColor=#7B2A8F;fontSize=12;fontStyle=1" value="GO or accepted&#xa;CONDITIONAL GO?" vertex="1">
+          <mxGeometry height="120" width="170" x="1190" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="amend-quality" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4D6;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="NO-GO / blocking finding&#xa;&#xa;Amend package then re-review" vertex="1">
+          <mxGeometry height="80" width="220" x="990" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="tc-decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#EADCF8;strokeColor=#7B2A8F;fontSize=12;fontStyle=1" value="Uses per-test-case&#xa;TC-XXX increment flow?" vertex="1">
+          <mxGeometry height="130" width="190" x="1430" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="execute-quality" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="execute-quality-increments&#xa;&#xa;Optional fail-fast branch&#xa;One TC-XXX at a time&#xa;Scaffolding before test cases&#xa;AI reuse gate via KB&#xa;Writes test artifacts only" vertex="1">
+          <mxGeometry height="135" width="275" x="1325" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="execute-increments" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9D08E;strokeColor=#548235;fontSize=12;arcSize=20;fontStyle=1" value="execute-increments&#xa;&#xa;Application INC-XXX loop&#xa;TDD implements tests inline when TC-XXX flow is not used&#xa;Quality release gates are exit criteria" vertex="1">
+          <mxGeometry height="120" width="235" x="1570" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="release" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D9D9D9;strokeColor=#7F7F7F;fontSize=13;arcSize=50;fontStyle=1" value="Ready for release / PR handoff&#xa;when quality gates pass" vertex="1">
+          <mxGeometry height="75" width="210" x="1585" y="585" as="geometry" />
+        </mxCell>
+
+        <mxCell id="support-lane" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#BFBFBF;dashed=1;fontSize=12;arcSize=10" value="" vertex="1">
+          <mxGeometry height="320" width="1700" x="50" y="735" as="geometry" />
+        </mxCell>
+        <mxCell id="support-label" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#404040" value="Anytime skills, KB support, and quick-dev integration" vertex="1">
+          <mxGeometry height="30" width="520" x="70" y="745" as="geometry" />
+        </mxCell>
+        <mxCell id="kb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBF7;strokeColor=#2E75B6;fontSize=12;arcSize=20;fontStyle=1" value="Test-suite intelligence via KB&#xa;&#xa;reverse-engineer-test-suite&#xa;build-knowledge-base&#xa;navigate-knowledge-base&#xa;&#xa;Replaces bespoke qe-code-scanner" vertex="1">
+          <mxGeometry height="145" width="255" x="80" y="805" as="geometry" />
+        </mxCell>
+        <mxCell id="audit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="audit-quality-coverage&#xa;&#xa;Anytime, read-mostly&#xa;Implementation package + quality traceability + tracker&#xa;Gap / drift report&#xa;Routes next actions" vertex="1">
+          <mxGeometry height="140" width="270" x="405" y="805" as="geometry" />
+        </mxCell>
+        <mxCell id="failures" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=12;arcSize=20;fontStyle=1" value="review-test-failures&#xa;&#xa;Anytime triage&#xa;One failure at a time&#xa;Classifies script / app defect / environment-data / flaky&#xa;Routes remediation" vertex="1">
+          <mxGeometry height="140" width="275" x="735" y="805" as="geometry" />
+        </mxCell>
+        <mxCell id="manage-bugs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A9D08E;strokeColor=#548235;fontSize=12;arcSize=20;fontStyle=1" value="manage-bugs&#xa;&#xa;Application defects or recurring environment issues are logged / tracked here after user approval" vertex="1">
+          <mxGeometry height="110" width="230" x="1075" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="quick-dev" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E7E6E6;strokeColor=#7F7F7F;fontSize=12;arcSize=20;fontStyle=1" value="Quick-dev policy&#xa;&#xa;Dedicated quality stage is bypassed. Quality folds into quick-dev spec: per-AC proof notes, §12.2a quality constraints, TDD, 3-dimension verification, completion gate.&#xa;&#xa;Audit + failure review remain optional anytime skills." vertex="1">
+          <mxGeometry height="160" width="370" x="1370" y="795" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#BFBFBF;fontSize=11;arcSize=10" value="Legend&#xa;Orange = live quality skill&#xa;Green = execution/support skill&#xa;Blue = artifact or KB support&#xa;Purple diamond = decision gate&#xa;Dashed arrow = optional / anytime / support path" vertex="1">
+          <mxGeometry height="120" width="230" x="1510" y="135" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-src-branch" edge="1" parent="1" source="src-branch" target="merged-stage" style="endArrow=classic;html=1;curved=1;strokeColor=#7F7F7F;strokeWidth=2;dashed=1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="530" y="110" />
+              <mxPoint x="1160" y="110" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-src-em" edge="1" parent="1" source="src-em" target="merged-stage" style="endArrow=classic;html=1;curved=1;strokeColor=#7F7F7F;strokeWidth=2;dashed=1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="210" />
+              <mxPoint x="1130" y="210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-src-dcc" edge="1" parent="1" source="src-dcc" target="merged-stage" style="endArrow=classic;html=1;curved=1;strokeColor=#7F7F7F;strokeWidth=2;dashed=1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-upstream-create" edge="1" parent="1" source="upstream" target="create-quality" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="planning gate GO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-create-doc" edge="1" parent="1" source="create-quality" target="quality-package" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-doc-review" edge="1" parent="1" source="quality-package" target="review-quality" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-review-go" edge="1" parent="1" source="review-quality" target="go-decision" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-go-amend" edge="1" parent="1" source="go-decision" target="amend-quality" style="endArrow=classic;html=1;strokeColor=#C55A11;strokeWidth=2;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="NO-GO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-amend-create" edge="1" parent="1" source="amend-quality" target="create-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="fix + re-run review">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="650" />
+              <mxPoint x="500" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-go-tc" edge="1" parent="1" source="go-decision" target="tc-decision" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="GO / accepted CONDITIONAL GO">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-tc-yes" edge="1" parent="1" source="tc-decision" target="execute-quality" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-tc-no" edge="1" parent="1" source="tc-decision" target="execute-increments" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="No: tests fold into INC-XXX TDD">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1525" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-execqual-execinc" edge="1" parent="1" source="execute-quality" target="execute-increments" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=3;fontSize=12;fontStyle=1;labelBackgroundColor=#FFFFFF" value="test artifacts ready / resume app work">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1690" y="720" />
+              <mxPoint x="1690" y="455" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-execinc-release" edge="1" parent="1" source="execute-increments" target="release" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-kb-create" edge="1" parent="1" source="kb" target="create-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="reuse-analysis grounding">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="705" />
+              <mxPoint x="470" y="705" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-kb-execqual" edge="1" parent="1" source="kb" target="execute-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="AI reuse gate">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="975" />
+              <mxPoint x="1350" y="735" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-kb-audit" edge="1" parent="1" source="kb" target="audit" style="endArrow=classic;html=1;strokeColor=#2E75B6;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="marker / tag verification">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-kb-failures" edge="1" parent="1" source="kb" target="failures" style="endArrow=classic;html=1;curved=1;strokeColor=#2E75B6;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="locator / fixture / prior-pattern lookup">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="995" />
+              <mxPoint x="810" y="995" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-audit-create" edge="1" parent="1" source="audit" target="create-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="coverage gap: amend design">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="760" />
+              <mxPoint x="540" y="575" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-audit-execqual" edge="1" parent="1" source="audit" target="execute-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="planned TC exists: execute it">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="720" y="760" />
+              <mxPoint x="1325" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-audit-execinc" edge="1" parent="1" source="audit" target="execute-increments" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="blocked on dev / inline tests">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1100" y="760" />
+              <mxPoint x="1600" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-execqual-failures" edge="1" parent="1" source="execute-quality" target="failures" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="failed run">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1220" y="760" />
+              <mxPoint x="900" y="760" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-execinc-failures" edge="1" parent="1" source="execute-increments" target="failures" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="CI / TDD failures">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1500" y="770" />
+              <mxPoint x="900" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-fail-script" edge="1" parent="1" source="failures" target="execute-quality" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="script / flaky: harden test">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1200" y="950" />
+              <mxPoint x="1450" y="735" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-fail-dev" edge="1" parent="1" source="failures" target="execute-increments" style="endArrow=classic;html=1;curved=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="inline test / code fix">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1400" y="980" />
+              <mxPoint x="1660" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-fail-bug" edge="1" parent="1" source="failures" target="manage-bugs" style="endArrow=classic;html=1;strokeColor=#C55A11;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="app defect / recurring env issue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-quick-audit" edge="1" parent="1" source="quick-dev" target="audit" style="endArrow=classic;html=1;curved=1;strokeColor=#7F7F7F;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="optional anytime">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1230" y="1010" />
+              <mxPoint x="540" y="1010" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-quick-failures" edge="1" parent="1" source="quick-dev" target="failures" style="endArrow=classic;html=1;curved=1;strokeColor=#7F7F7F;strokeWidth=2;dashed=1;fontSize=11;labelBackgroundColor=#FFFFFF" value="optional anytime">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1260" y="980" />
+              <mxPoint x="900" y="980" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="footer" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#7F7F7F" value="Internal — generated from current .agents/skills/quality implementation and _docs/qe-analysis-3-methods.md" vertex="1">
+          <mxGeometry height="20" width="780" x="60" y="1060" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+

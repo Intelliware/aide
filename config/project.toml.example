@@ -125,6 +125,13 @@ deployment_model           = "saas-multi-tenant"
 data_residency             = "us-eu-split"
 release_cadence            = "weekly"
 testing_strategy           = "tdd-required"
+# Quality-stage elicitation answers. Consumed by `create-quality-package`,
+# `execute-quality-increments`, `audit-quality-coverage`, and
+# `review-test-failures` so they don't re-ask per invocation.
+uses_test_case_increments  = true                 # opt into the TC-XXX per-test-case execution flow
+test_framework             = "cucumber-junit5"    # primary test framework — values are free-form but should match a registered category
+test_runner                = "maven-surefire"     # how the framework is invoked in CI
+records_testability_classification = true         # render the Step 0b testability table as a visible block (false = change-tracker summary only; the gate itself always runs)
 observability_stack        = "datadog"
 identity_provider          = "auth0"
 primary_database           = "postgres"

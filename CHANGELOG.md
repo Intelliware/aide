@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.5.2` |
+| Current artifact version | `1.6.0-beta` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,48 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.6.0-beta` — 2026-05-31
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-31 | Addition | skills | `.agents/skills/quality/{create-quality-package,review-quality-package,execute-quality-increments,audit-quality-coverage,review-test-failures}/` | New unified **quality** stage consolidating three earlier QE skill candidates (branch in-tree `.agents/skills/qe/`, EM-QE, DCC-QE) into a single stage with **5 skills**. `create-quality-package` + `review-quality-package` drive the Quality Package (quality strategy, test design traced to ACs, QE plan with automation/CI gates/test data/release gates). `execute-quality-increments` is the optional per-test-case TC-XXX executor. `audit-quality-coverage` and `review-test-failures` are independently invocable (read-only coverage audit; failed-run triage walk-through). DCC-QE's `qe-code-scanner` was deliberately not ported — its capability is delivered by `reverse-engineer-test-suite` + `navigate-knowledge-base --profile=test-suite`. See `_docs/qe-analysis-3-methods.md` for the full merge analysis and `_archive/qe-stage-pre-merge/README.md` for the archive note. | this release | ✅ Verified |
+| 2 | 2026-05-31 | Addition | skills | `.agents/skills/reverse-engineering/reverse-engineer-test-suite/SKILL.md` | New reverse-engineering skill for standalone test-automation repositories (Cucumber / Playwright / Cypress / Selenium / pytest / k6 / RestAssured / Karate). Part A documents internals for test engineers; Part B catalogues reusable assets (shared utilities, fixtures, page objects, step-defs, marker / tag vocabulary, environment / data contract, CI surface, ownership) into the KB with `kind: test-suite` frontmatter so `navigate-knowledge-base --profile=test-suite` finds it. Consumed by all four quality-stage authoring/operational skills for reuse cross-checks, drift detection, and triage lookups. | this release | ✅ Verified |
+| 3 | 2026-05-31 | Addition | compositions | `templates/compositions/re-test-suite-internal.yaml`, `templates/compositions/re-test-suite-consumer.yaml`, plus 26 new block files under `templates/blocks/reverse-eng/test-suite/{internal,consumer}/` | New RE compositions for the test-suite domain, fully populated with their block libraries. **Internal (Part A) — 16 blocks** (order 110..260): `suite-overview`, `runner-and-entry-points`, `project-structure-and-conventions`, `configuration-and-profiles`, `shared-utilities-catalogue`, `fixtures-and-test-data`, `page-objects-and-step-defs`, `spec-feature-inventory`, `marker-tag-vocabulary`, `auth-and-environment-entry`, `environment-matrix`, `parallelism-and-isolation`, `reporting-and-analytics`, `ci-integration`, `known-gaps-and-anti-patterns`, `glossary`. **Consumer (Part B) — 10 blocks** (order 110..200): `suite-purpose-and-scope`, `runner-and-invocation`, `shared-utilities-catalogue`, `fixtures-catalogue`, `page-objects-and-step-defs-catalogue`, `marker-tag-vocabulary`, `environment-and-data-contract`, `feature-inventory`, `ci-surface`, `ownership`. Every consumer-side block declares `kind: test-suite` in its frontmatter example so `navigate-knowledge-base --profile=test-suite` finds it. Satisfies `scripts/validate.js` Check H ("RE skill output-structure binding") cleanly with zero stub warnings. | this release | ✅ Verified |
+| 4 | 2026-05-31 | Addition | skill-config | `config/customizations/{create-quality-package,execute-quality-increments,audit-quality-coverage,review-test-failures}.toml.example` | Four new Layer-5 team customization examples for the quality-stage skills: stack pinning, NFR floors, per-category coverage floors with exempt-INC allowlist, per-TC exit gates, failure-category taxonomy extension, severity bands, KB reuse-analysis configuration. Replaces the legacy `create-qe-package.toml.example` (removed). | this release | ✅ Verified |
+| 5 | 2026-05-31 | Addition | config | `config/project.toml.example` | Added three new `[project.elicitation]` keys: `uses_test_case_increments` (opt into the TC-XXX flow), `test_framework`, `test_runner`. Consumed by the four quality-stage skills so they don't re-ask per invocation. Pre-existing `testing_strategy` key preserved. Backwards-compatible: unknown elicitation keys are tolerated. | this release | ✅ Verified |
+| 6 | 2026-05-31 | Addition | docs | `_archive/qe-stage-pre-merge/README.md` | Archive breadcrumb documenting what used to live at `.agents/skills/qe/`, why it was merged, where each source skill now lives, and the rationale for not porting `qe-code-scanner`. | this release | ✅ Verified |
+| 7 | 2026-05-31 | Addition | compositions | `templates/compositions/brownfield-quality-package.yaml` | Brownfield quality composition matching the greenfield quality package surface while documenting brownfield KB/source grounding through `create-quality-package` and `navigate-knowledge-base`. Keeps `config/customizations/create-quality-package.toml.example`'s brownfield composition option resolvable. | this release | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-31 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Inserted new `quality` stage at **order 4**; shifted execution / reverse-engineering / knowledge-base / quick-dev / jira / confluence / files-conversion to orders 5–11. Wired `create-quality-package` (gated by `review-quality-package`) between `review-implementation-package` and `execute-increments` in **both** greenfield and brownfield sequences. Added `audit-quality-coverage`, `review-test-failures`, and `execute-quality-increments` to the `anytime:` block. Validator Check B (workflow-graph resolution) clean. | this release | ✅ Verified |
+| 2 | 2026-05-31 | Source Update | docs | `README.md` | Added a `quality` row to the Stages table positioned between `planning` and `execution`. | this release | ✅ Verified |
+| 3 | 2026-05-31 | Source Update | skills | `.agents/skills/quick-dev/document-quick-change/SKILL.md` | Step 5 of Workflow now requires a per-AC **"How will this be proven?"** verification note and an explicit §12.2a **quality constraints** subsection (test framework / runner / coverage floor / lint rules / prohibited test patterns). Two new Common-mistakes entries reinforce both. Codifies the quick-dev quality-stage bypass policy. | this release | ✅ Verified |
+| 4 | 2026-05-31 | Source Update | skills | `.agents/skills/quick-dev/execute-quick-change/SKILL.md` | Added a new Overview subsection **"Quality stage is bypassed (by design)"** mapping each quality concern to its inline carrier and naming the six escalation triggers to the full quality stage. Cross-references `quality/README.md` and `quality-in-the-lifecycle.md`. Doc-only — no workflow steps changed. | this release | ✅ Verified |
+| 5 | 2026-05-31 | Source Update | docs | `.agents/skills/quality/README.md` | Skills table expanded to 5 rows. Added new sections: **"Test-suite intelligence via the knowledge base"** (codifies why `qe-code-scanner` is not ported; routes through `reverse-engineer-test-suite` + `navigate-knowledge-base`), **"No hard external-tool dependencies"** (the Atlassian-CLI Step-9 test), and an expanded Quick-dev section with an 8-row carrier table plus a 6-trigger escalation list. | this release | ✅ Verified |
+| 6 | 2026-05-31 | Source Update | docs | `.agents/skills/quality/create-quality-package/references/quality-in-the-lifecycle.md` | Stage matrix gained a **quick-dev row** documenting the compressed carriers (per-AC proof notes, §12.2a quality constraints, TDD + 3-dim verification, 4-lens review, Completion Confirmation Gate). Execution row references `review-test-failures`; KB row references `audit-quality-coverage`. Prose Quick-dev section restated with the 6 escalation triggers verbatim with `quality/README.md`. | this release | ✅ Verified |
+| 7 | 2026-05-31 | Source Update | docs | `tools/README.md`, `tools/packages/atlassian-cli/README.md` | Added "Status: optional companion tool" banners explicitly stating that the Atlassian CLI is **not** part of the A.I.D.E. framework and **not required** by any stage skill. Names every A.I.D.E. stage (requirements / design / planning / quality / execution / KB / quick-dev) and the five quality-stage skills as forbidden hard-dependents. Implements Step 9 / Option B of the QE merge plan. | this release | ✅ Verified |
+| 8 | 2026-05-31 | Source Update | skill-config | `config/customizations/README.md` | Extended the file-purpose table to list the four new quality-stage customization examples. | this release | ✅ Verified |
+| 9 | 2026-05-31 | Source Update | skills | `.agents/skills/{jira,confluence,files-conversion}/*/SKILL.md`, `.agents/skills/_registry/{skills.csv,skills.json}` | Normalized Jira, Confluence, and document-conversion skill descriptions to the framework's "Use when..." trigger style, fixed relative links to optional companion tool documentation, and regenerated the skill registry. Resolves the prior description-discipline warnings for those integration skills; only the `jira-get` line-count warning remains for that skill family. | this release | ✅ Verified |
+
+#### Removed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-31 | Removal | skill-config | `config/customizations/create-qe-package.toml.example` | Removed superseded customization for the legacy `create-qe-package` skill. Replaced by the four new `customizations/*-quality-*.toml.example` files. | this release | ✅ Verified |
+
+#### Branch Dependency
+
+Minor release on top of `1.5.2`. Pure additive: the new `quality` stage and its 5 skills do not alter any existing skill, composition, block, or schema. The `quick-dev` skills gained additional in-workflow prompts (per-AC verification notes, §12.2a quality-constraints subsection) but no structural changes — quick-dev specs authored under earlier versions remain valid; the new prompts only affect newly authored specs going forward. The `workflow-graph.yaml` re-ordering shifts stage `order` values (execution `4` → `5`, etc.) but stage IDs are unchanged, so any downstream tooling that resolves by ID continues to work; tooling that hard-codes numeric order values would need adjusting. The new `[project.elicitation]` keys (`uses_test_case_increments`, `test_framework`, `test_runner`) are tolerated as unknown by older project.toml files and ignored by skills that don't consume them.
+
+Validator state at release: 0 errors, 4 warnings (`templates/blocks/quality/index.md`, `templates/blocks/requirements/completeness-tracker.md`, `templates/blocks/requirements/index.md`, plus `jira-get` length >200 lines). Skill count: 45 → 48. New block count: +26 (test-suite internal 16 + consumer 10).
+
+---
 
 ### `1.5.2` — 2026-05-31
 

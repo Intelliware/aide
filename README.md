@@ -22,7 +22,7 @@ A.I.D.E. is consumed by copying its runtime folders out of this repo into wherev
 | Path | Purpose |
 |---|---|
 | `AGENTS.md` | Framework orientation file the IDE auto-attaches to every chat |
-| `.agents/` | All 32 skills + the committed `_registry/` (catalog + workflow graph) |
+| `.agents/` | All 48 skills + the committed `_registry/` (catalog + workflow graph) |
 | `config/` | Schemas + example TOMLs the skills reference |
 | `templates/` | Reusable section blocks + YAML compositions |
 | `references/` | Cross-cutting framework references loaded by skills on demand |
@@ -37,7 +37,7 @@ A.I.D.E. is consumed by copying its runtime folders out of this repo into wherev
 
 Open your AIDE folder alongside your project repo(s) in one multi-root workspace. The framework's skills sit at `.agents/skills/` — a default discovery root for both supported IDEs — so no `settings.json` edits, symlinks, or overlays are needed.
 
-To verify discovery: open the IDE's agent panel and type `/`. All 32 framework skills should appear in the picker with their descriptions.
+To verify discovery: open the IDE's agent panel and type `/`. All 48 framework skills should appear in the picker with their descriptions.
 
 > **Cross-host flat-discovery design.** Most agentskills.io hosts scan `<root>/<skill>/SKILL.md` (flat), while A.I.D.E. organises canonical skills under `<stage>/<skill>/`. The bridging scheme — **discovery shims** — is documented in [`.agents/skills/_registry/SHIMS.md`](.agents/skills/_registry/SHIMS.md). Shim generation and packaging scripts ship in a follow-up release.
 
@@ -51,7 +51,7 @@ GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specificatio
 - VSCode with the GitHub Copilot extension installed and signed in
 - Copilot in **agent mode** (Chat view → switch from "Ask" to "Agent"). Agent mode is required for skills that read multiple files or run scripts.
 
-**Verify discovery.** Open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 32 framework skills should appear in the picker with their descriptions.
+**Verify discovery.** Open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 48 framework skills should appear in the picker with their descriptions.
 
 **Framework orientation (automatic).** Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that AIDE's folder is the framework, not the user's project. **No project-side wiring required.**
 
@@ -72,7 +72,7 @@ Cursor adopted native [agentskills.io](https://agentskills.io) support around v2
 - Cursor IDE v2.3.x or later (skills support is bundled; no separate install)
 - Agent panel open and a model selected. Cursor's Agent reads skills automatically; slash invocation works in the Agent chat.
 
-**Verify discovery.** Open the Agent panel and type `/` — all 32 framework skills should appear in the picker with their descriptions. If any are missing, confirm the AIDE folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
+**Verify discovery.** Open the Agent panel and type `/` — all 48 framework skills should appear in the picker with their descriptions. If any are missing, confirm the AIDE folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
 **Framework orientation (automatic).** Cursor reads `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation. **No project-side wiring required.**
 
@@ -224,8 +224,9 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 | `requirements` | Requirements packages (`create-`, `review-`) |
 | `design` | Solution design packages (`create-`, `review-`) |
 | `planning` | Implementation packages broken into INC-XXX increments (`create-`, `review-`) |
+| `quality` | Quality packages: strategy + test design (traced to ACs) + QE plan (automation / CI gates / test data / release gates). Plus three anytime-invocable skills: `audit-quality-coverage`, `review-test-failures`, `execute-quality-increments` (optional TC-XXX flow) |
 | `execution` | Implemented code, increment-status, bug log, PR (`execute-increments`, `manage-bugs`, `create-pr`) |
-| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 7 domain skills) |
+| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 11 domain skills) |
 | `knowledge-base` | The global multi-repo KB (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) |
 | `quick-dev` | Lightweight scoped-change path (`document-`, `plan-`, `execute-quick-change`) |
 
@@ -241,7 +242,7 @@ See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` 
 
 Reverse engineering produces, per repo, a **Part A** (internal implementation docs) and a **Part B** (consumer-facing docs) artifact set. RE outputs are the primary input to `build-knowledge-base`, but they are also useful standalone — e.g., onboarding a new maintainer to an unfamiliar service.
 
-Entry point is `analyze-repository`: a thin dispatcher that classifies the repo (handling monorepos and hybrids) and names the next skill to invoke. The seven domain skills:
+Entry point is `analyze-repository`: a thin dispatcher that classifies the repo (handling monorepos and hybrids) and names the next skill to invoke. The eleven domain skills:
 
 | Domain | Skill | Typical target |
 |---|---|---|
@@ -252,6 +253,10 @@ Entry point is `analyze-repository`: a thin dispatcher that classifies the repo 
 | `database` | `reverse-engineer-database` | A schema, data model, or DB-layer service |
 | `mobile-app` | `reverse-engineer-mobile-app` | A specific mobile application (iOS, Android, cross-platform) |
 | `mobile-framework` | `reverse-engineer-mobile-framework` | A framework for *building* mobile apps (e.g., React Native, Flutter) |
+| `cobol-program` | `reverse-engineer-cobol-program` | COBOL / PL/I program source with executable procedure logic |
+| `copybook-library` | `reverse-engineer-copybook-library` | Mainframe record layouts and copybook data dictionaries |
+| `jcl-job` | `reverse-engineer-jcl-job` | Mainframe batch jobs, PROCs, INCLUDEs, and control cards |
+| `test-suite` | `reverse-engineer-test-suite` | A dedicated standalone test-automation repository |
 
 Each domain ships paired compositions in `templates/compositions/`: `re-<domain>-internal.yaml` (Part A) and `re-<domain>-consumer.yaml` (Part B).
 
