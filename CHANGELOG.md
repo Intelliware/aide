@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.4.6` |
+| Current artifact version | `1.5.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,44 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.5.0` — 2026-05-06
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-06 | Addition | skills | `.agents/skills/jira/{jira-get,jira-search,jira-extract-requirements}/` | Three new Jira skills: `jira-get` (single-issue fetch with cache), `jira-search` (JQL search with aggregation reports), `jira-extract-requirements` (Feature/Epic → markdown discovery package with L0 link traversal and staleness tracking). All three are optional integrations gated on the `atl` CLI being installed. | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-06 | Addition | skills | `.agents/skills/confluence/{confluence-fetch,confluence-extract-package}/` | Two new Confluence skills: `confluence-fetch` (single-page fetch with optional `--with-jira` enrichment), `confluence-extract-package` (page + L0 links → markdown discovery package with staleness tracking and graceful Jira coupling via `.jira.json`). | repo @ this commit | ✅ Verified |
+| 3 | 2026-05-06 | Addition | skills | `.agents/skills/files-conversion/document-convert/` | New universal document converter skill: Word/Excel/PDF → markdown with progressive-disclosure references for each format and structured analysis output. Optional integration gated on the `spt` CLI. | repo @ this commit | ✅ Verified |
+| 4 | 2026-05-06 | Addition | skills | `.agents/skills/_registry/workflow-graph.yaml` (stages 8/9/10) | Added `jira`, `confluence`, and `files-conversion` stages; positioned `jira-extract-requirements` and `confluence-extract-package` as `optional: true, role: discovery-input` in both greenfield and brownfield flows ahead of `create-requirements-package`; added `jira-get`, `jira-search`, `confluence-fetch`, `document-convert` to the anytime-utility whitelist. Discovery-input role preserves the requirements-package gate. | repo @ this commit | ✅ Verified |
+| 5 | 2026-05-06 | Addition | Multiple | `tools/packages/atlassian-cli/`, `tools/packages/sharepoint-cli/`, `tools/packages/shared-utils/` | New npm-workspace monorepo at `tools/` housing the optional CLIs that back the Jira / Confluence / document-convert skills, plus a shared-utils package for cross-cutting helpers. Workspace install is opt-in; skills probe for the CLI on PATH and fall back to `cd tools && npm run <cli> --` when not globally installed. | repo @ this commit | ✅ Verified |
+| 6 | 2026-05-06 | Addition | scripts | `scripts/build-registry.js`, `scripts/validate.js`, `scripts/test-validate.js` | Node.js parity implementations of the existing Python registry/validator scripts to support contributors without a Python toolchain. CRLF normalization in frontmatter parsers. | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-06 | Source Update | skills | `.agents/skills/{jira,confluence,files-conversion}/*/SKILL.md` (6 files) | Added the framework-standard `## When NOT to use` section to all six new skills, bringing skill-catalogue conformance to 42/42. Each section enumerates sibling-skill alternatives and the optional-CLI prerequisite. | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-06 | Source Update | skills | `.agents/skills/jira/jira-extract-requirements/references/OVERVIEW.md`, `.agents/skills/confluence/confluence-extract-package/references/OVERVIEW.md` | Rewrote "Position in workflow" sections to mark these skills as optional discovery inputs feeding Step 1 of `create-requirements-package`, removing earlier framing that implied they could bypass the requirements-package gate. | repo @ this commit | ✅ Verified |
+| 3 | 2026-05-06 | Source Update | skills | `.agents/skills/confluence/confluence-extract-package/SKILL.md` | Replaced thin `Related Skills` block with explicit `## Related skills` section documenting the upstream cache producers, the `.jira.json` runtime coupling with `confluence-fetch --with-jira`, the graceful-degradation contract when enrichment is absent, and the sibling (not fallback) relationship to `jira-extract-requirements`. | repo @ this commit | ✅ Verified |
+| 4 | 2026-05-06 | Source Update | skills | 8 files across `.agents/skills/{jira,confluence}/**` | Removed undocumented `GLOBAL_CLI` references in favor of a runtime probe-and-fallback pattern (`atl --version` → fallback to `cd tools && npm run atl --`), aligning skill behavior with the optional-integration philosophy and removing an implicit dependency on a never-defined config key. | repo @ this commit | ✅ Verified |
+| 5 | 2026-05-06 | Source Update | Multiple | `tools/packages/atlassian-cli/AI-INTEGRATION.md` | Rewrote AI integration guide (~85 lines) with accurate skill table, correct cache paths, correct skill-discovery path, and explicit optional-integration framing. Re-pointed inbound links from package README and FAQ. | repo @ this commit | ✅ Verified |
+| 6 | 2026-05-06 | Source Update | skills | `.agents/skills/files-conversion/document-convert/README.md` | Replaced misleading "consolidating three similar skills" claim (no such prior skills existed) with an honest description: handles three document formats through progressive disclosure of format-specific references. | repo @ this commit | ✅ Verified |
+| 7 | 2026-05-06 | Source Update | Multiple | `tools/README.md`, `tools/tools-install.prompt.md`, `tools/packages/atlassian-cli/docs/ARCHITECTURE.md`, `tools/packages/sharepoint-cli/README.md`, `tools/packages/shared-utils/README.md`, `tools/package.json`, `.env.example`, `.gitignore` | Cleanup of stale references to removed packages (`db-cli`, `figma-cli`); removed `npm run help` / `npm run info` script entries; added `tools/package-lock.json` and `tools/packages/*/package-lock.json` to `.gitignore`. | repo @ this commit | ✅ Verified |
+
+#### Removed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-06 | Removal | Multiple | `tools/packages/db-cli/`, `tools/packages/figma-cli/` | Removed two CLI packages that had zero references from any skill or top-level documentation. They can be reintroduced as proper optional integrations (skill + workflow-graph entry + AI-INTEGRATION) when there is a corresponding skill that needs them. | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-06 | Removal | Multiple | `tools/packages/atlassian-cli/docs/AI-INTEGRATION.md`, `tools/scripts/{show-help,show-info,README}.{js,md}` | Deleted stale duplicate AI-INTEGRATION (re-pointed inbound links) and redundant `show-help` / `show-info` helper scripts (content lived in `tools/README.md`). | repo @ this commit | ✅ Verified |
+
+#### Branch Dependency
+
+This release adds the optional Jira / Confluence / document-conversion integrations on top of `1.4.6`. Pure additive at the skill-catalogue level — no breaking changes to existing projects. The new skills enter the workflow as `optional: true, role: discovery-input` ahead of `create-requirements-package` and as anytime utilities; the requirements-package gate is preserved. The `tools/` workspace is opt-in and skills degrade gracefully when the underlying CLIs are not installed.
+
+---
 
 ### `1.4.6` — 2026-05-01
 

@@ -45,3 +45,24 @@ _bmad/**/*.user.toml
 
 # Claude Code local settings
 .claude/
+
+# Node.js dependencies
+node_modules/
+
+# Monorepo CLI tools (npm workspaces)
+# Each package has its own node_modules (symlinked from root)
+tools/packages/*/node_modules/
+tools/node_modules/
+# Lockfiles regenerated locally on `npm install`; not committed.
+tools/package-lock.json
+tools/packages/*/package-lock.json
+
+# Log files and directories
+_logs_/
+*.log
+
+# Environment files (tokens, secrets)
+.env
+
+# Cache directories (API responses, downloaded files)
+cache/

@@ -1,0 +1,93 @@
+{
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "id": "123456",
+  "self": "https://jira.example.com/rest/api/2/issue/123456",
+  "key": "CEAJ-3843",
+  "fields": {
+    "summary": "Implement OAuth2 authentication flow",
+    "description": "As a developer, I need to implement OAuth2 authentication so that users can securely log in to the application.\n\n*Acceptance Criteria:*\n* AC1: User can initiate OAuth2 login flow\n* AC2: Tokens are securely stored\n* AC3: Token refresh works automatically",
+    "issuetype": {
+      "self": "https://jira.example.com/rest/api/2/issuetype/10001",
+      "id": "10001",
+      "description": "A user story",
+      "iconUrl": "https://jira.example.com/secure/viewavatar?size=xsmall&avatarId=10315",
+      "name": "Story",
+      "subtask": false
+    },
+    "project": {
+      "self": "https://jira.example.com/rest/api/2/project/10000",
+      "id": "10000",
+      "key": "CEAJ",
+      "name": "EasyApply",
+      "projectTypeKey": "software"
+    },
+    "priority": {
+      "self": "https://jira.example.com/rest/api/2/priority/3",
+      "iconUrl": "https://jira.example.com/images/icons/priorities/medium.svg",
+      "name": "Medium",
+      "id": "3"
+    },
+    "status": {
+      "self": "https://jira.example.com/rest/api/2/status/10001",
+      "description": "This issue is being actively worked on",
+      "iconUrl": "https://jira.example.com/images/icons/statuses/inprogress.png",
+      "name": "In Progress",
+      "id": "10001",
+      "statusCategory": {
+        "self": "https://jira.example.com/rest/api/2/statuscategory/4",
+        "id": 4,
+        "key": "indeterminate",
+        "colorName": "yellow",
+        "name": "In Progress"
+      }
+    },
+    "assignee": {
+      "self": "https://jira.example.com/rest/api/2/user?username=john.doe",
+      "name": "john.doe",
+      "key": "john.doe",
+      "emailAddress": "john.doe@example.com",
+      "displayName": "John Doe",
+      "active": true
+    },
+    "reporter": {
+      "self": "https://jira.example.com/rest/api/2/user?username=jane.smith",
+      "name": "jane.smith",
+      "key": "jane.smith",
+      "emailAddress": "jane.smith@example.com",
+      "displayName": "Jane Smith",
+      "active": true
+    },
+    "created": "2026-04-01T10:00:00.000-0400",
+    "updated": "2026-04-15T14:30:00.000-0400",
+    "labels": [
+      "backend",
+      "security",
+      "api"
+    ],
+    "components": [
+      {
+        "self": "https://jira.example.com/rest/api/2/component/10000",
+        "id": "10000",
+        "name": "Authentication"
+      }
+    ],
+    "subtasks": [],
+    "comment": {
+      "comments": [
+        {
+          "self": "https://jira.example.com/rest/api/2/issue/123456/comment/456789",
+          "id": "456789",
+          "author": {
+            "name": "john.doe",
+            "displayName": "John Doe"
+          },
+          "body": "Started implementation. OAuth2 library selected.",
+          "created": "2026-04-10T09:00:00.000-0400"
+        }
+      ],
+      "maxResults": 1,
+      "total": 1,
+      "startAt": 0
+    }
+  }
+}

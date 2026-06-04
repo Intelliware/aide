@@ -44,12 +44,32 @@ stages:
   - id: quick-dev
     description: "Lightweight scoped-change path: document-quick-change, plan-quick-change, execute-quick-change."
     order: 7
+  - id: jira
+    description: "Jira integration utilities: fetch issues, search with JQL, and extract requirements packages from Jira epics/features."
+    order: 8
+  - id: confluence
+    description: "Confluence integration utilities: fetch pages and extract documentation packages from Confluence."
+    order: 9
+  - id: files-conversion
+    description: "Document conversion and analysis utilities: convert Word, Excel, and PDF to Markdown with structured analysis."
+    order: 10
 
 flows:
   greenfield:
     description: "Full SDLC from requirements through execution. Best for new projects with elaborate workflow."
     sequence:
       - skill: start-project
+      # Optional: use Jira or Confluence content as discovery input before requirements authoring.
+      # These skills extract raw content into a structured package; their output feeds
+      # Step 1 (discovery) of create-requirements-package — they do NOT replace it or its gate.
+      - skill: jira-extract-requirements
+        optional: true
+        role: discovery-input
+        condition: "Jira epic or feature available as requirements source"
+      - skill: confluence-extract-package
+        optional: true
+        role: discovery-input
+        condition: "Confluence documentation available as requirements source"
       - skill: create-requirements-package
         gates:
           - skill: review-requirements-package
@@ -89,6 +109,17 @@ flows:
         optional: true
         condition: "mainframe stack present (any of cobol-program, copybook-library, jcl-job in [[project.repos]])"
       - skill: verify-knowledge-base-coverage
+      # Optional: use Jira or Confluence content as discovery input before requirements authoring.
+      # These skills extract raw content into a structured package; their output feeds
+      # Step 1 (discovery) of create-requirements-package — they do NOT replace it or its gate.
+      - skill: jira-extract-requirements
+        optional: true
+        role: discovery-input
+        condition: "Jira epic or feature available as requirements source"
+      - skill: confluence-extract-package
+        optional: true
+        role: discovery-input
+        condition: "Confluence documentation available as requirements source"
       - skill: create-requirements-package
         # In brownfield mode this skill consumes the KB via navigate-knowledge-base.
         gates:
@@ -130,6 +161,10 @@ anytime:
   - manage-bugs
   - navigate-knowledge-base
   - detect-knowledge-base-drift
+  - jira-get
+  - jira-search
+  - confluence-fetch
+  - document-convert
 
 # Validation rules the registry generator (or task #8 validation) should enforce.
 # `every-flow-skill-must-resolve` skips dispatcher placeholders (any skill name

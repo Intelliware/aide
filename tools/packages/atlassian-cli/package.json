@@ -1,0 +1,46 @@
+{
+  "name": "@ea-workspace/atlassian-cli",
+  "version": "0.0.2",
+  "description": "CLI tool for caching raw Confluence and Jira responses as JSON for agent-driven analysis, plus creating and updating Jira issues with velocity tracking",
+  "main": "src/index.js",
+  "bin": {
+    "atl": "./bin/atl.js"
+  },
+  "scripts": {
+    "start": "node bin/atl.js",
+    "setup": "node setup.js",
+    "issue": "node src/standalone/fetch-jira-issue.js",
+    "page": "node src/standalone/fetch-confluence-page.js",
+    "related": "node src/standalone/fetch-related.js",
+    "create": "node src/standalone/create-jira-issue.js",
+    "status": "node src/standalone/update-jira-status.js",
+    "generate-mapping": "node src/standalone/generate-field-mapping.js",
+    "install-skills": "node install-skills.js",
+    "test": "jest",
+    "link": "npm link",
+    "unlink": "npm unlink -g"
+  },
+  "keywords": [
+    "confluence",
+    "jira",
+    "atlassian",
+    "cli",
+    "markdown",
+    "export",
+    "documentation"
+  ],
+  "author": "EasyApply Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TD-Universe/easyapply-ai-workspace",
+    "directory": "tools/packages/atlassian-cli"
+  },
+  "dependencies": {
+    "@ea-workspace/shared-utils": "^1.0.0",
+    "turndown": "^7.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

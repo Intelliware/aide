@@ -1,0 +1,98 @@
+{
+  "_comment": "Default status transition configuration - defines mandatory fields per status change",
+  "_usage": "Create project-specific overrides as status-transitions-{PROJECT}.json",
+  "transitions": {
+    "In Progress": {
+      "mandatoryFields": [
+        {
+          "field": "customfield_10015",
+          "name": "Start Date",
+          "type": "date",
+          "autoValue": "NOW"
+        }
+      ],
+      "validations": {
+        "requireAssignee": true
+      }
+    },
+    "Done": {
+      "mandatoryFields": [
+        {
+          "field": "customfield_10016",
+          "name": "End Date",
+          "type": "date",
+          "autoValue": "NOW"
+        },
+        {
+          "field": "resolution",
+          "name": "Resolution",
+          "type": "resolution",
+          "defaultValue": "Done"
+        }
+      ],
+      "validations": {
+        "requireSubtasksClosed": true
+      }
+    },
+    "In Review": {
+      "mandatoryFields": [
+        {
+          "field": "customfield_10017",
+          "name": "Review Start Date",
+          "type": "date",
+          "autoValue": "NOW"
+        }
+      ]
+    },
+    "Ready for QA": {
+      "mandatoryFields": [
+        {
+          "field": "customfield_10018",
+          "name": "QA Start Date",
+          "type": "date",
+          "autoValue": "NOW"
+        }
+      ],
+      "validations": {
+        "requireEnvironment": true
+      }
+    },
+    "Blocked": {
+      "mandatoryFields": [
+        {
+          "field": "customfield_10019",
+          "name": "Blocked Reason",
+          "type": "text",
+          "prompt": true
+        }
+      ]
+    }
+  },
+  "fieldTypes": {
+    "date": {
+      "format": "YYYY-MM-DD",
+      "allowNOW": true
+    },
+    "datetime": {
+      "format": "YYYY-MM-DDTHH:mm:ss.SSSZ",
+      "allowNOW": true
+    },
+    "text": {
+      "maxLength": 255
+    },
+    "textarea": {
+      "maxLength": 32767
+    },
+    "number": {
+      "type": "integer"
+    },
+    "resolution": {
+      "options": [
+        "Done",
+        "Won't Do",
+        "Duplicate",
+        "Cannot Reproduce"
+      ]
+    }
+  }
+}
