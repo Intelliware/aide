@@ -15,11 +15,11 @@ Convert the requirements package and (when present) the architecture baseline in
 ## Entry paths supported
 
 This step can be entered:
-- After Step 1 (with architecture baseline) — standard brownfield path.
-- Without Step 1 (greenfield, or brownfield with discovery intentionally skipped) — record empty/assumed baseline and proceed.
+- After Step 1 (with architecture baseline) — standard brownfield path. **This is the only valid brownfield entry.**
+- Without Step 1 (greenfield only) — record empty/assumed baseline and proceed.
 - After requirements changed — use the requirements `change-tracker.md` to scope updates only to affected sections (per the Requirements Version Tracking protocol in `references/solution-design-workflow.md`).
 
-Do not fail because Step 1 was skipped. Explain the confidence trade-off and proceed.
+**Brownfield guard:** If `project.toml` declares brownfield flow and `architecture-baseline.md` does not exist, STOP. Return to `steps/01-discovery.md` and complete it before proceeding. Do not silently assume an empty baseline in brownfield mode — that defeats the purpose of grounding the design in the existing architecture.
 
 ## Sub-steps (run in order)
 

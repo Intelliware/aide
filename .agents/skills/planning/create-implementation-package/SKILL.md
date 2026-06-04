@@ -66,6 +66,8 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Execute one step at a time. Read each step file only when starting that step.
 
+**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+
 0. **Scope the target source repo** (SoD only) — `steps/scope-target-repo.md`. No-op when the planning stage is in legacy mode.
 1. **Codebase analysis** (brownfield only) — `steps/codebase-analysis.md`
 2. **Test planning** — `steps/test-planning.md`

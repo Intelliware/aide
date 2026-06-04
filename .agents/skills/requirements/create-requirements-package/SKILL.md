@@ -9,7 +9,7 @@ description: "Use when the user asks to create, gather, build, write, or assembl
 
 Drives the requirements stage end-to-end: optional brownfield discovery, analysis of scope/dependencies/impacts/risks, structured writing of all 14 requirements sections, and assembly into a single `requirements-package.md` that becomes the stable business foundation for design and implementation. The skill is composition-aware — it resolves blocks against `templates/compositions/greenfield-requirements-package.yaml` (or `brownfield-enhancement-spec.yaml` / `quick-dev-spec.yaml` depending on the project's flow).
 
-The work is sequenced through five phases: discovery (Step 1, brownfield only), relevance gating (Step 2 — implicit, decides which of the 14 sections apply), analysis (Step 3), writing (Step 4), and review-handoff prep (Step 5). Each step has its own file under `steps/` and a deeper workflow reference under `references/`. The skill never fails because an upstream phase was skipped — Steps 1 and 3 are conditional on the project flow and on the entry path the user chose.
+The work is sequenced through five phases: discovery (Step 1, brownfield or when `force_discovery = true`), relevance gating (Step 2 — implicit, decides which of the 14 sections apply), analysis (Step 3), writing (Step 4), and review-handoff prep (Step 5). Each step has its own file under `steps/` and a deeper workflow reference under `references/`. The skill never fails because an upstream phase was skipped — Steps 1 and 3 are conditional on the project flow and on the entry path the user chose.
 
 ## When to use
 
@@ -42,8 +42,10 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference.
 
+**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+
 0. `steps/00-scope-target-repo.md` — (SoD only) determine the artifact's host repo and, for cross-cutting features, capture `affects_repos`. No-op when the requirements stage is in legacy mode.
-1. `steps/01-discovery.md` — brownfield discovery; produce `current-capability-baseline.md`. Skipped when the active composition is `greenfield-requirements-package.yaml`.
+1. `steps/01-discovery.md` — discovery; produce `current-capability-baseline.md`. Runs when brownfield mode is active OR when `force_discovery = true` is set in the skill customization. Skipped only when neither condition is met.
 2. **Relevance gate (implicit)** — after discovery (or directly after Step 0 in greenfield), review the 14 section blocks defined in the active composition's `blocks:` list, run the File Relevance Recommendation against gathered context, and mark each as Fill / Skip / N/A in the completeness tracker. Re-evaluate per-section during Step 4 using the Section Relevance Check (Step 0 of the 7-Step Workflow). User confirms or overrides.
 3. `steps/03-analysis.md` — scope, stakeholders, dependencies, impacts, constraints, gaps, assumptions, decisions, risks. Risk register must be complete before writing.
 4. `steps/04-writing.md` — fill the 14 section blocks per the active composition, applying the 7-Step per-file Workflow (relevance check, scope, draft, verify, traceability, refine, mark complete). Maintain the completeness tracker.

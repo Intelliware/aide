@@ -6,9 +6,11 @@
 framework. Every stage skill — requirements, design, planning, execution,
 quick-dev — needs to ground itself in the KB before doing real work, but the
 KB can hold hundreds of components and reading them all blows the agent's
-context. This skill performs the read pattern the root `CLAUDE.md` mandates:
-read `ARCHITECTURE.md` first, hit the Capability Index, walk `graph.json`
-one hop, return a minimal ranked list.
+context. This skill performs the read pattern the root `NAVIGATE.md`
+mandates (legacy KBs: `CLAUDE.md` — readers resolve `NAVIGATE.md` first
+and fall back to `CLAUDE.md` when it is absent): read `ARCHITECTURE.md`
+first, hit the Capability Index, walk `graph.json` one hop, return a
+minimal ranked list.
 
 The skill never writes. It is **idempotent and side-effect-free** — call it
 as often as needed during a stage. Callers consume the returned list how

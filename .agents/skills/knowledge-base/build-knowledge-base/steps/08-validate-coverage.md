@@ -70,11 +70,13 @@ least one Capability Index row in `ARCHITECTURE.md` § 4.
 ### 8e — Skeleton completeness
 
 - `<kb>/ARCHITECTURE.md` exists and has all sections.
-- `<kb>/CLAUDE.md` exists.
+- `<kb>/NAVIGATE.md` exists (or, for legacy KBs built before the rename,
+  `<kb>/CLAUDE.md` — readers resolve `NAVIGATE.md` first and fall back).
 - `<kb>/graph.json` exists and parses.
 - `<kb>/glossary.md` and `<kb>/change-tracker.md` exist.
 - For every `[[project.repos]]` entry, both
-  `repos/<code>/README.md` and `repos/<code>/CLAUDE.md` exist.
+  `repos/<code>/README.md` and `repos/<code>/NAVIGATE.md` exist (legacy
+  KBs: `CLAUDE.md` in place of `NAVIGATE.md` is acceptable).
 - `synthesized/01..10/` directories exist (may have only stub READMEs at
   this point).
 

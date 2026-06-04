@@ -29,6 +29,14 @@
 # touches is an enhancement to an existing system.
 default_composition = "brownfield-enhancement-spec"
 
+# Force discovery regardless of composition. When true, Step 1 (brownfield
+# discovery) always runs even if the active composition is
+# `greenfield-requirements-package.yaml`. Useful when the team wants the
+# full greenfield output structure but still needs a current-capability
+# baseline from the existing system. Defaults to false (discovery only runs
+# when the composition/flow is brownfield).
+force_discovery = false
+
 # Deepen elicitation. The framework default is "standard"; we want every
 # requirements run to ask the deeper questions (regulatory context, third-
 # party data flows, accessibility commitments).

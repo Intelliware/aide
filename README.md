@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.5.0
+**Version:** 1.5.2
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -38,6 +38,8 @@ A.I.D.E. is consumed by copying its runtime folders out of this repo into wherev
 Open your AIDE folder alongside your project repo(s) in one multi-root workspace. The framework's skills sit at `.agents/skills/` — a default discovery root for both supported IDEs — so no `settings.json` edits, symlinks, or overlays are needed.
 
 To verify discovery: open the IDE's agent panel and type `/`. All 32 framework skills should appear in the picker with their descriptions.
+
+> **Cross-host flat-discovery design.** Most agentskills.io hosts scan `<root>/<skill>/SKILL.md` (flat), while A.I.D.E. organises canonical skills under `<stage>/<skill>/`. The bridging scheme — **discovery shims** — is documented in [`.agents/skills/_registry/SHIMS.md`](.agents/skills/_registry/SHIMS.md). Shim generation and packaging scripts ship in a follow-up release.
 
 > **Currently supported hosts:** VSCode + GitHub Copilot (primary), Cursor IDE. Claude Code is currently not supported.
 

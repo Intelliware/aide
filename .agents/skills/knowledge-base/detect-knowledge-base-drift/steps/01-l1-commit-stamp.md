@@ -20,9 +20,21 @@ the component's `paths:`. Both conditions = suspect.
 
 ## Procedure
 
-1. **Capture current HEADs.** For each `[[project.repos]]` entry, run
-   `git -C <repo.path> rev-parse HEAD` and stash. (Cache by repo path
-   for the run.)
+1. **Capture current HEADs.** For each `[[project.repos]]` entry:
+   
+   1. **Test if path is a git submodule** by checking if `.git` is a
+      file (submodule) vs directory (standalone repo):
+      ```bash
+      if [ -f "<repo.path>/.git" ]; then
+        # Submodule: cd into directory first to ensure git operations
+        # resolve within submodule, not parent
+        cd <repo.path> && git rev-parse HEAD
+      else
+        # Standalone repo: use -C flag
+        git -C <repo.path> rev-parse HEAD
+      fi
+      ```
+   2. Stash the HEAD SHA. (Cache by repo path for the run.)
 
 2. **For each component file:**
 
@@ -32,9 +44,15 @@ the component's `paths:`. Both conditions = suspect.
    3. **Same-SHA fast-path:** if `start_ref == HEAD` for the component's
       repo, the component is up-to-date. Record `commits_since=0`,
       `paths_overlap=false`, `verdict=current`. Skip to next component.
-   4. **Run `git -C <repo.path> rev-list <start>..HEAD --count`.**
+   4. **Run git commands with submodule-awareness:**
+      - For submodules: `cd <repo.path> && git rev-list <start>..HEAD --count`
+      - For standalone repos: `git -C <repo.path> rev-list <start>..HEAD --count`
+      
       Stash as `commits_since`.
-   5. **Run `git -C <repo.path> diff --name-only <start> HEAD`.**
+   5. **Run git diff with submodule-awareness:**
+      - For submodules: `cd <repo.path> && git diff --name-only <start> HEAD`
+      - For standalone repos: `git -C <repo.path> diff --name-only <start> HEAD`
+      
       Cache the file list per (repo, start_ref) — multiple components on
       the same repo can reuse it.
    6. **Path overlap check.**

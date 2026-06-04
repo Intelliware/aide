@@ -30,3 +30,15 @@ Every skill ships exactly three reference files alongside `SKILL.md`:
 ## Discovery
 
 The skill catalog is generated from frontmatter into `_registry/skills.csv`. The hand-authored `_registry/workflow-graph.yaml` captures stage groupings, gates, and edges between skills. The `framework-navigator` skill (under `meta/`) consumes both for natural-language routing.
+
+## Host discovery (slash commands)
+
+Most Copilot / agentskills.io hosts (VS Code Copilot Chat, JetBrains Copilot Chat, Cursor, Claude Code, …) scan for skills at `.agents/skills/<skill>/SKILL.md` (flat). A.I.D.E. organises canonical skills under `<stage>/<skill>/`, so a tiny generator emits flat **discovery shims** alongside them. Run once with whichever runtime you have:
+
+```
+python3 scripts/build-skill-shims.py     # or:
+node scripts/build-skill-shims.js
+```
+
+Either runs identically on Windows / macOS / Linux without any IDE-specific setup. Both are also invoked automatically by the registry build (`python3 scripts/build-registry.py` or `node scripts/build-registry.js`). Shims are gitignored and regenerate idempotently. See `_registry/SHIMS.md` for the full design.
+

@@ -9,8 +9,13 @@ depends-on-prior: true
 ## Goal
 
 Create the entire directory skeleton, the per-repo `README.md` and
-`CLAUDE.md` files, and the seed files (`glossary.md`, `change-tracker.md`)
+`NAVIGATE.md` files, and the seed files (`glossary.md`, `change-tracker.md`)
 without yet emitting any component leaves.
+
+> **Legacy compatibility.** KBs built before this version emit the same
+> per-repo navigation file as `CLAUDE.md`. Readers fall back to
+> `CLAUDE.md` when `NAVIGATE.md` is absent, so legacy KBs continue to
+> work unmodified. New builds emit only `NAVIGATE.md`.
 
 ## Inputs
 
@@ -65,11 +70,13 @@ without yet emitting any component leaves.
         RE Part B
       - Doc pointers in § 6 ← relative paths into the source repo
    4. Write to `<kb>/repos/<repo.code>/README.md`.
-   5. Write `<kb>/repos/<repo.code>/CLAUDE.md` with a minimal navigation
+   5. Write `<kb>/repos/<repo.code>/NAVIGATE.md` with a minimal navigation
       header tailored to this repo's role: "When the user's task touches
       this repo, read this README first, then walk
       `<kb>/components/<repo.code>/*.md` and follow `consumed_by` /
-      `depends_on` outwards."
+      `depends_on` outwards." If a legacy `<kb>/repos/<repo.code>/CLAUDE.md`
+      already exists from a prior build, leave it in place — readers
+      fall back to it when `NAVIGATE.md` is absent.
 
 5. **Verify symlink integrity for `source-docs/`.** No writes — confirm
    the per-repo source-doc directories exist (already checked in step 1)
@@ -80,7 +87,8 @@ without yet emitting any component leaves.
 - All skeleton directories exist.
 - `glossary.md` and `change-tracker.md` are present at the KB root.
 - Every `[[project.repos]]` entry has both a `README.md` and a
-  `CLAUDE.md` under `repos/<code>/`.
+  `NAVIGATE.md` under `repos/<code>/` (legacy KBs may carry `CLAUDE.md`
+  instead — that is acceptable and not overwritten).
 - No component files have been written yet (that is step 3).
 
 ## Hand-off

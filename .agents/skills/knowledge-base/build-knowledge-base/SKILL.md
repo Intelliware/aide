@@ -9,7 +9,8 @@ Initial KB construction. Reads reverse-engineering Part A/B docs that have been
 deposited under `<knowledge_base_path>/source-docs/<repo-slug>/`, then
 **scaffolds the entire KB**: per-repo READMEs, per-component leaves with the
 mandatory frontmatter, the shared/ pass for entities and cross-cutting
-concerns, `graph.json`, `ARCHITECTURE.md`, the root `CLAUDE.md`, and the
+concerns, `graph.json`, `ARCHITECTURE.md`, the root `NAVIGATE.md` (legacy
+name: `CLAUDE.md` — readers fall back automatically), and the
 synthesized/ 10-folder structure preserved from the legacy aggregator.
 
 This skill replaces and extends `reverse-engineering/phases/build-knowledge-repository-phase.md`.
@@ -75,7 +76,7 @@ Execute one step at a time. Read the step file only when starting that step.
 4. **Shared pass** (entities + cross-cutting) — `steps/04-shared-pass.md`
 5. **Emit graph.json** — `steps/05-emit-graph.md`
 6. **Emit ARCHITECTURE.md** — `steps/06-emit-architecture-index.md`
-7. **Emit root CLAUDE.md** — `steps/07-emit-claude-md.md`
+7. **Emit root NAVIGATE.md** — `steps/07-emit-navigate-md.md`
 8. **Validate coverage** — `steps/08-validate-coverage.md`
 
 The synthesized/ 10-folder structure (preserved from the legacy aggregator)
@@ -92,11 +93,11 @@ The complete KB at `<knowledge_base_path>/`:
 ```
 <knowledge_base_path>/
 ├── ARCHITECTURE.md            # root index, conforms to kb-architecture.template.md
-├── CLAUDE.md                  # navigation instructions for AI agents
+├── NAVIGATE.md                # navigation instructions for AI agents (legacy: CLAUDE.md)
 ├── graph.json                 # machine-readable component dep graph
 ├── glossary.md                # initialised; populated from project.toml.glossary
 ├── change-tracker.md          # initialised empty
-├── repos/<repo-slug>/{README.md, CLAUDE.md}
+├── repos/<repo-slug>/{README.md, NAVIGATE.md}
 ├── components/<repo-slug>/<component-id>.md   # leaves with mandatory frontmatter
 ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/}
 ├── synthesized/01..10/        # 10-folder structure preserved from legacy aggregator

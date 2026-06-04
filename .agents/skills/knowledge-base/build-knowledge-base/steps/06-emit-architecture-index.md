@@ -108,4 +108,4 @@ combines `architecture-index` and `capability-index` blocks).
 
 ## Hand-off
 
-`steps/07-emit-claude-md.md`.
+`steps/07-emit-navigate-md.md`.

@@ -8,6 +8,13 @@ Run formal review only after `requirements-package.md` has been assembled by `cr
 
 Run reviews strictly in the order below. Do not skip ahead and do not run reviews in parallel. After each review, present findings and verdict to the user. A FAIL verdict halts the sequence until resolved.
 
+**MANDATORY — Create artifact files on disk after each review:**
+
+1. After presenting a review's findings and the user accepts the verdict, **immediately write** `review/<review-name>.md` to disk (at the output path declared in `INPUTS-OUTPUTS.md`). Create the `review/` directory if it does not already exist.
+2. After Review 10 (`review-requirements-readiness`) is complete and the user accepts the final verdict, **immediately write** `review/readiness-verdict.md` to disk with the APPROVED / CONDITIONAL / BLOCKED verdict and summary.
+3. Do NOT defer file creation to "after all reviews complete". Each file is written incrementally as the review progresses.
+4. Presenting findings only in chat without writing the corresponding file to disk is a **skill violation**.
+
 | Order | Review | Reference (in source skill) | What it checks |
 |---|---|---|---|
 | 1 | review-scope | `review-scope.md` | Scope is well-defined, bounded, free of creep |

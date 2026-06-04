@@ -4,9 +4,13 @@ sequence: 1
 depends-on-prior: false
 ---
 
-# Step 1 — Discovery (brownfield only)
+# Step 1 — Discovery
 
-Run only when the active composition or `project.toml` indicates brownfield mode (`project.default_flow = "brownfield"` or the composition is `brownfield-enhancement-spec.yaml`). Greenfield projects skip this step entirely and start at the relevance gate.
+Run when **any** of these conditions is true:
+- The active composition or `project.toml` indicates brownfield mode (`project.default_flow = "brownfield"` or the composition is `brownfield-enhancement-spec.yaml`).
+- `force_discovery = true` is set in the skill customization (`customizations/create-requirements-package.toml` or its `.user.toml` variant).
+
+If neither condition is met (pure greenfield, no `force_discovery`), skip this step entirely and start at the relevance gate.
 
 ## Purpose
 

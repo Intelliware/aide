@@ -71,6 +71,9 @@ the full SoD layout geometry.
 
 Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any FAIL until resolved.
 
+**CRITICAL — Write artifacts to disk immediately:**
+After each review verdict is accepted by the user, **immediately create** the file `review/<review-name>.md` on disk (under the output path declared in the Output table below). Do NOT wait until all ten reviews are complete. After Review 10, **immediately create** `review/readiness-verdict.md`. These files are mandatory deliverables — presenting findings only in chat without writing the files is a skill failure. If the `review/` directory does not exist, create it.
+
 | Order | Review | What it checks |
 |---|---|---|
 | 1 | review-scope | Scope is well-defined, bounded, free of creep |
@@ -101,6 +104,7 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 
 ## Common mistakes
 
+- **Not writing review files to disk.** Each review MUST produce a `review/<review-name>.md` file on disk immediately after the user accepts the verdict. The final `review/readiness-verdict.md` MUST be written after Review 10. Presenting results only in chat without creating the files is the most common failure mode of this skill.
 - Running reviews in parallel. The sequence depends on earlier verdicts being settled before later reviews run.
 - Skipping ahead. Every review depends on the verdict of the one before it.
 - Treating PASS WITH OBSERVATIONS as PASS. Observations must be logged and the user must explicitly accept them.

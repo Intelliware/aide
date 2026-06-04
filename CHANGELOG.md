@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.5.0` |
+| Current artifact version | `1.5.2` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,64 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.5.2` — 2026-05-31
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-31 | Addition | docs | `.agents/skills/_registry/SHIMS.md` | New design note documenting the cross-host **discovery-shim** scheme: why physical files instead of symlinks/junctions, ownership table (canonical `<stage>/<skill>/SKILL.md` vs generated flat `<skill>/SKILL.md` under `build/AIDE/`), intended generator behavior, manual-invocation commands, and the hidden `<!-- aide:generated-shim -->` marker safety invariant. Documentation only on this branch — the referenced generator and packaging scripts (`scripts/build-skill-shims.{py,js}`, `scripts/package-aide.{py,js}`, `scripts/install-skills.{py,js}`) and the README "Step 1 — Install the framework" rework land in a follow-up release. | cherry-picked from `feature/skill-shims-discovery` | ✅ Verified |
+| 2 | 2026-05-29 | Addition | skill-config | `config/customizations/create-requirements-package.toml.example` | New `force_discovery` boolean (default `false`) on the `create-requirements-package` customization. When `true`, Step 1 (brownfield discovery → `current-capability-baseline.md`) runs even when the active composition is `greenfield-requirements-package.yaml`. Lets teams that want the full greenfield output structure still demand a current-capability baseline against an existing system, without having to switch the project's flow to brownfield. | retro-changelog for PR #20 (`feat/add-force-discovery-create-req`, merged into `main` at `7f6682c`) | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-31 | Source Update | docs | `.agents/skills/README.md` | Added a "Host discovery (slash commands)" section explaining the canonical-vs-flat layout mismatch and pointing readers at the new `_registry/SHIMS.md` design note. References to `scripts/build-skill-shims.{py,js}` and `scripts/build-registry.{py,js}` describe the intended workflow once the scripts land. | cherry-picked from `feature/skill-shims-discovery` | ✅ Verified |
+| 2 | 2026-05-31 | Source Update | docs | `README.md` | Bumped version header `1.5.0` → `1.5.2` and added a one-line cross-reference in "Step 2 — Open it in your IDE" pointing at `.agents/skills/_registry/SHIMS.md` for the cross-host flat-discovery design. No change to Step 1 / installation workflow on this branch. | this commit | ✅ Verified |
+| 3 | 2026-05-29 | Source Update | skill | `.agents/skills/requirements/create-requirements-package/SKILL.md` | Updated the skill overview and Step 1 entry in the orchestration list to reflect that discovery now runs either when the project is brownfield **or** when `force_discovery = true` is set in the skill customization. Previously the description said "brownfield only". No behavior change to greenfield projects that do not set the flag. | retro-changelog for PR #20 (`feat/add-force-discovery-create-req`) | ✅ Verified |
+| 4 | 2026-05-29 | Source Update | skill | `.agents/skills/requirements/create-requirements-package/steps/01-discovery.md` | Retitled "Step 1 — Discovery (brownfield only)" → "Step 1 — Discovery" and rewrote the gating preamble to enumerate the two run conditions (brownfield mode OR `force_discovery = true`). Pure-greenfield projects without the flag still skip the step exactly as before. | retro-changelog for PR #20 (`feat/add-force-discovery-create-req`) | ✅ Verified |
+
+#### Branch Dependency
+
+Additive on top of `1.5.1`. Two independent change streams are bundled into this release:
+
+1. **Doc-only cherry-pick from `feature/skill-shims-discovery`** — adds `.agents/skills/_registry/SHIMS.md` and a "Host discovery (slash commands)" section in `.agents/skills/README.md`. No skill content changed; no frontmatter shape changed; no `<stage>/<skill>/` paths moved; no scripts added or modified. The companion shim generator, packaging script, user-global installer, registry-build integration, `.gitignore` rules, and Check J validator described in `_registry/SHIMS.md` will land in a separate follow-up release.
+2. **Retro-changelog for PR #20 (`feat/add-force-discovery-create-req`, merged at `7f6682c`)** — that PR landed on `main` without a changelog entry. The new `force_discovery` flag on `create-requirements-package` is opt-in (defaults to `false`), so projects that do not set it see no behavior change. Documented here so `main` becomes self-consistent again when this branch merges.
+
+Teams already on the framework continue to work unchanged whether or not they opt into either stream.
+
+---
+
+### `1.5.1` — 2026-05-21
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-19 | Addition | references | `references/ai-principles/write-discipline.md` | New cross-cutting AI principle codifying the write-discipline contract for `create-*` SDLC skills: three mandatory pre-skill prompts (acknowledgement mode, output structure, confirmation), the write-on-acknowledge invariant, back-revision protocol, and the "draft-in-chat-then-flush" anti-pattern warning. Referenced by the three create-package skills via a "Before Step 0" instruction. (PR #12, USWISO-5728) | repo @ this commit | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-19 | Source Update | skills | `.agents/skills/requirements/create-requirements-package/SKILL.md`, `.agents/skills/design/create-design-package/SKILL.md`, `.agents/skills/planning/create-implementation-package/SKILL.md` | Inserted a "Before Step 0" instruction in all three `create-*` SKILL.md files pointing at the new `references/ai-principles/write-discipline.md`, ensuring the three mandatory user prompts (acknowledgement mode, output structure, confirmation) fire before any package authoring begins. (PR #12, USWISO-5728) | repo @ this commit | ✅ Verified |
+| 2 | 2026-05-19 | Source Update | skills | `.agents/skills/design/create-design-package/SKILL.md`, `.agents/skills/design/create-design-package/steps/02-design.md` | Marked Step 1 discovery as **MANDATORY** for brownfield flows and added a brownfield guard to step 02 that halts execution when `architecture-baseline.md` is missing. Added a new "skipping discovery in brownfield mode" entry to the common-mistakes list. (PR #12, USWISO-5728) | repo @ this commit | ✅ Verified |
+| 3 | 2026-05-20 | Source Update | skills | `.agents/skills/requirements/review-requirements-package/SKILL.md`, `.agents/skills/requirements/review-requirements-package/references/review-workflow.md` | Hardened the review-requirements-package contract so that the `review/` directory and per-review artifact files are **always** written to disk. Each `review/<review-name>.md` is now written immediately after the user accepts that review's verdict (instead of being deferred to the end), and `review/readiness-verdict.md` is written immediately after Review 10. Presenting findings in chat without writing the files is now explicitly called out as a skill violation. (PR #16, USWISO-5730) | repo @ this commit | ✅ Verified |
+| 4 | 2026-05-21 | Restructure | skills | `.agents/skills/knowledge-base/build-knowledge-base/` (SKILL.md + steps 02, 06, 08 + 3 references), `.agents/skills/knowledge-base/build-knowledge-base/steps/07-emit-navigate-md.md` (renamed from `07-emit-claude-md.md`), `.agents/skills/knowledge-base/navigate-knowledge-base/` (SKILL.md + OVERVIEW.md) | Renamed the KB's agent-facing navigation document from `CLAUDE.md` to the host-neutral `NAVIGATE.md` (root + per-repo). Build-knowledge-base now emits `NAVIGATE.md`; navigate-knowledge-base implements a resolver pattern that reads `NAVIGATE.md` first and falls back to `CLAUDE.md` when absent, so KBs built before this version continue to work unmodified. Step file `07-emit-claude-md.md` renamed to `07-emit-navigate-md.md` (slug + handoff pointer updated). Validator coverage check in step 08 accepts either filename. Registry rebuilt (42 skills, no new warnings). | repo @ this commit | ✅ Verified |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-05-20 | Correction | skills | `.agents/skills/knowledge-base/detect-knowledge-base-drift/steps/01-l1-commit-stamp.md` | Made the L1 commit-stamp procedure submodule-aware: detects whether `.git` is a file (submodule) vs a directory (standalone repo) and switches between `cd <repo.path> && git <cmd>` and `git -C <repo.path> <cmd>` for the three git operations (`rev-parse HEAD`, `rev-list`, `diff --name-only`). Eliminates the 27 false-positive "broken SHA" findings observed across UI submodules in multi-repo workspaces. (PR #14) | repo @ this commit | ✅ Verified |
+
+#### Branch Dependency
+
+Patch release on top of `1.5.0` bundling three independent skill-hardening PRs (PR #12 / USWISO-5728, PR #14, PR #16 / USWISO-5730) plus the host-neutral KB navigation-file rename (`CLAUDE.md` → `NAVIGATE.md`). Pure additive — no breaking changes; existing requirements-, design-, and knowledge-base-package outputs remain valid, and KBs built before this version continue to function unmodified thanks to the resolver-pattern fallback in `navigate-knowledge-base`. The new write-discipline reference, review-on-disk guarantees, submodule-aware drift detection, and host-neutral navigation filename tighten skill behavior without altering any artifact shape, composition, or schema.
+
+---
 
 ### `1.5.0` — 2026-05-06
 

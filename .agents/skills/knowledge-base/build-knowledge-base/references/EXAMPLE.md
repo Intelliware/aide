@@ -78,9 +78,9 @@ acme-kb/
 ├── glossary.md                       # seeded from project.toml.glossary
 ├── change-tracker.md                 # initialised empty
 ├── repos/
-│   ├── api-orders/{README.md, CLAUDE.md}
-│   ├── api-billing/{README.md, CLAUDE.md}
-│   └── web-portal/{README.md, CLAUDE.md}
+│   ├── api-orders/{README.md, NAVIGATE.md}
+│   ├── api-billing/{README.md, NAVIGATE.md}
+│   └── web-portal/{README.md, NAVIGATE.md}
 ├── components/{api-orders/, api-billing/, web-portal/}/
 ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/}/
 └── synthesized/{01-architecture-overview/ … 10-repository-maintenance/}/
@@ -155,12 +155,13 @@ Renders `templates/blocks/knowledge-base/architecture-index.md` filling:
   `capability-index.md` block (also embedded as § 4).
 - `dependency_graph_mermaid_c4_l2` — generated from `graph.json`.
 
-### Step 7 — Emit root CLAUDE.md
+### Step 7 — Emit root NAVIGATE.md
 
-Tells Claude how to navigate this KB: read `ARCHITECTURE.md` first, hit
-the Capability Index (§ 4), open `graph.json` for blast radius, then open
-specific `components/<repo>/<component_id>.md` files. Never read the whole
-KB; always go through the capability lookup.
+Tells the AI agent how to navigate this KB: read `ARCHITECTURE.md` first,
+hit the Capability Index (§ 4), open `graph.json` for blast radius, then
+open specific `components/<repo>/<component_id>.md` files. Never read the
+whole KB; always go through the capability lookup. (Legacy KBs hold the
+same content at `CLAUDE.md`; readers fall back transparently.)
 
 ### Step 8 — Validate coverage
 

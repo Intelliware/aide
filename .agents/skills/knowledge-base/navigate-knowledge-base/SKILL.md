@@ -14,8 +14,14 @@ every stage's skills call it before grounding.
 
 The KB is markdown-first and traversed by agentic search; reading the whole
 thing is wasteful and pushes the agent into context-pressure failure modes.
-This skill performs the read pattern the root `CLAUDE.md` instructs:
+This skill performs the read pattern the root `NAVIGATE.md` instructs
+(legacy KBs: `CLAUDE.md` — see the navigation-file resolver below):
 
+0. **Resolve the navigation file.** Read `<knowledge_base_path>/NAVIGATE.md`
+   if it exists; otherwise read `<knowledge_base_path>/CLAUDE.md`. The same
+   fallback applies to per-repo navigation files under `repos/<code>/`.
+   This keeps KBs built before the `CLAUDE.md` → `NAVIGATE.md` rename
+   fully compatible without any per-KB migration step.
 1. Read `ARCHITECTURE.md` (§ 1–4) — cheap, always.
 2. Hit the Capability Index → narrow to a small set of `component_id`s.
 3. Walk `graph.json` one hop on `depends_on` / `consumed_by`.

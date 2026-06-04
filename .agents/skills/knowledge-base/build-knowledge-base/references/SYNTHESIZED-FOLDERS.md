@@ -19,8 +19,9 @@ defined 10 top-level folders for synthesised cross-cutting documentation:
 The new schema-driven KB makes most of this redundant — `ARCHITECTURE.md`
 subsumes 01/02/03/04/07, the per-component frontmatter subsumes 02/03/04,
 `shared/entities/` subsumes 05, `shared/cross-cutting/` subsumes 06,
-`shared/adrs/` subsumes 08, and `repos/<slug>/CLAUDE.md` plus the root
-`CLAUDE.md` subsume 09.
+`shared/adrs/` subsumes 08, and `repos/<slug>/NAVIGATE.md` plus the root
+`NAVIGATE.md` subsume 09 (legacy KBs may carry these as `CLAUDE.md` —
+readers fall back automatically).
 
 We preserve the 10-folder layout under `synthesized/` for two reasons:
 
@@ -41,7 +42,7 @@ We preserve the 10-folder layout under `synthesized/` for two reasons:
 | `06-cross-cutting-concerns/` | `shared/cross-cutting/` and `ARCHITECTURE.md` § 6 | `README.md` indexing the pointer pages under `shared/cross-cutting/`. |
 | `07-dependency-map/` | `graph.json` and `ARCHITECTURE.md` § 5 | `README.md` explaining how to query `graph.json` (jq snippets), pointing at the rendered Mermaid diagram. |
 | `08-architecture-decision-records/` | `shared/adrs/` | `README.md` listing all ADRs by number and status; ADR files themselves live under `shared/adrs/`. |
-| `09-onboarding-guide/` | Root `CLAUDE.md` and per-repo `CLAUDE.md` | `README.md` for human readers; the agent-facing instructions live in `CLAUDE.md`. |
+| `09-onboarding-guide/` | Root `NAVIGATE.md` and per-repo `NAVIGATE.md` (legacy KBs: `CLAUDE.md`) | `README.md` for human readers; the agent-facing instructions live in `NAVIGATE.md` (legacy: `CLAUDE.md`). |
 | `10-repository-maintenance/` | This skill's documentation, plus `change-tracker.md` | `README.md` describing the maintenance hooks (`update-knowledge-base`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`). |
 
 ## Authoring rules

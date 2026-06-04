@@ -41,8 +41,10 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference.
 
+**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+
 0. `steps/00-scope-target-repo.md` — (SoD only) inherit the artifact's host repo and `affects_repos` from the upstream requirements artifact. No-op when the design stage is in legacy mode.
-1. `steps/01-discovery.md` — brownfield only. Architecture-discovery → technical-debt-assessment → existing-architecture-assessment, producing `architecture-baseline.md`. Skipped for greenfield (record empty baseline assumption).
+1. `steps/01-discovery.md` — **MANDATORY for brownfield flows.** Architecture-discovery → technical-debt-assessment → existing-architecture-assessment, producing `architecture-baseline.md`. Skipped for greenfield only (record empty baseline assumption). Do NOT skip this step in brownfield mode — the architecture baseline is a prerequisite for design assembly.
 2. `steps/02-design.md` — scoping (which of the 14+ design blocks apply), then the 11-step design assembly with the 7-Step per-file Workflow, producing block files and assembling `design-package.md` (alias to `{paths.design_path}/{feature-id}-design.md`).
 3. **Assembly + review handoff** — final cross-reference pass (API contracts vs frontend/backend, database vs data requirements), update change tracker, hand off by name to `review-design-package`.
 
@@ -65,6 +67,7 @@ review-design-package
 ## Common mistakes
 
 - Reading every reference upfront. Read `steps/<n>.md` only when about to execute that step; read `references/<workflow>.md` only when the step says to.
+- **Skipping discovery (Step 1) in brownfield mode.** The architecture baseline is mandatory for brownfield flows. Without it, design decisions are ungrounded — the agent may propose solutions that conflict with the existing architecture, miss integration constraints, or duplicate existing patterns. Only greenfield projects skip discovery.
 - Skipping the scoping step in `steps/02-design.md`. Not every project needs every block — backend-only changes skip `design/frontend-design`; no-integration features skip `design/integration-design`.
 - Pinning "latest" as a version. Every framework, language, and database must have an explicit, pinned version.
 - API designs that omit error responses. Every endpoint must specify success and error contracts.
