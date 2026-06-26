@@ -69,7 +69,9 @@ Ask the user whether to proceed with codebase-grep fallback or
 pause to set up the KB.
 ### 2a.3 Scan the test suite (KB fallback / supplement)
 Whether or not the KB returned components, perform a focused
-codebase scan against the test-suite repos listed in `project.toml`.
+codebase scan against the resolved test-suite repo from `project.toml`
+(`[project.testing].qe_repo` when configured; otherwise the in-scope code
+repo fallback).
 The scan must be **type-based, not name-based** — duplicates rarely
 share a name. Match on:
 - **Interaction type** (e.g. `[WAIT]` / `[ASSERT]` / `[INPUT]`) — read
@@ -81,8 +83,8 @@ share a name. Match on:
 - **Naming neighbourhood** — utilities live in the same packages /
   directories as the artifact you are about to write; scan those
   paths first
-Cap the scan to the repos listed in `project.toml`; do not traverse
-arbitrary paths.
+Cap the scan to the resolved QE repo or fallback code repo listed in
+`project.toml`; do not traverse arbitrary paths or silently scan all repos.
 ### 2a.4 Decide the disposition
 For each candidate match, the agent assigns one of four dispositions
 (see `references/reuse-analysis.md` §3 for the decision table):

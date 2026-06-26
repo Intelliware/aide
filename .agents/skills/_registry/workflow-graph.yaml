@@ -85,8 +85,19 @@ flows:
         gates:
           - skill: review-implementation-package
             required: true
+      # The quality stage is user-elected, not mandated. At review-implementation-package
+      # GO the user picks one of two paths: quality-first (run create-quality-package and
+      # let review-quality-package gate execution) or execute-first (go straight to
+      # execute-increments; quality runs in parallel/deferred and is reconciled by
+      # audit-quality-coverage). The choice is a per-run conversational decision, not a
+      # project.toml setting. [project.testing].qe_repo only routes where QE-owned test
+      # artifacts are written and does NOT decide this fork.
       - skill: create-quality-package
+        optional: true
+        role: user-elected
+        condition: "user chose the quality-first path at review-implementation-package GO"
         gates:
+          # Binds execution only within the quality-first path.
           - skill: review-quality-package
             required: true
       - skill: execute-increments
@@ -141,8 +152,14 @@ flows:
         gates:
           - skill: review-implementation-package
             required: true
+      # Same user-elected quality fork as greenfield: quality-first vs execute-first,
+      # chosen per-run at review-implementation-package GO (not from project.toml).
       - skill: create-quality-package
+        optional: true
+        role: user-elected
+        condition: "user chose the quality-first path at review-implementation-package GO"
         gates:
+          # Binds execution only within the quality-first path.
           - skill: review-quality-package
             required: true
       - skill: execute-increments

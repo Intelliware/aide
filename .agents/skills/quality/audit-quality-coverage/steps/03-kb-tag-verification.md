@@ -20,7 +20,8 @@ available:
 
 1. A knowledge base (`{paths.knowledge_base_path}` configured in
    `project.toml`)
-2. The test-suite codebase on disk (repo paths from `project.toml`)
+2. The test-suite codebase on disk (`[project.testing].qe_repo` when
+  configured; otherwise the in-scope code repo fallback)
 
 If neither is available, skip with a clear note and recommend
 `build-knowledge-base` as the path to enable the check next time.
@@ -60,14 +61,17 @@ and recommend `detect-knowledge-base-drift` as a follow-up — but
 proceed with the check.
 
 **Codebase path (fallback):** When the KB is not configured or
-returns no test-suite component, search the test-suite repo
-directly using the marker scheme from 3a:
+returns no test-suite component, search the resolved test-suite repo
+directly using the marker scheme from 3a. Resolve that repo from
+`[project.testing].qe_repo` first; only use the code repo fallback when
+the field is unset:
 - For tag schemes: grep for the tag literal across test files
 - For naming schemes: grep for the ID in spec / scenario titles
 - For filename schemes: glob the filename pattern
 
-Cap the search to the repos listed in `project.toml`'s repo list;
-do not traverse arbitrary paths.
+Cap the search to the resolved QE repo (or fallback code repo) listed in
+`project.toml`; do not traverse arbitrary paths or silently fan out to all
+repos.
 
 ### 3c. Per-INC verification
 

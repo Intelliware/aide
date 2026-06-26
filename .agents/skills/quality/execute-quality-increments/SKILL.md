@@ -11,8 +11,8 @@ Executes an approved quality package one test-case increment at a time. The
 package may contain two kinds of increments — **scaffolding** (infrastructure
 / prep work: build-file changes, runner classes, shared utilities, test
 config) and **test-case** increments (the actual test artifacts). This skill
-handles both. For each increment it reads the plan, implements the artifacts
-into the target codebase, verifies correctness with fresh evidence, obtains
+handles both. For each increment it reads the plan, resolves the test-artifact
+target repo, implements the artifacts into that repo, verifies correctness with fresh evidence, obtains
 user sign-off, and updates the status tracker.
 
 This is the doing-side companion to `create-quality-package` /
@@ -59,7 +59,7 @@ logs it and routes to `execute-increments` or `manage-bugs`.
 | Per-increment files | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
 | Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Yes |
 | Review readiness verdict | `docs/<feature>/quality-package/review/readiness-verdict.md` | Yes (must be GO or accepted CONDITIONAL GO) |
-| Target codebase | filesystem (repo paths from `project.toml`) | Yes |
+| Test-artifact target repo | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to the in-scope code repo when unset | Yes |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base (when present) | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Recommended — grounds reuse cross-check on existing test utilities |
 
@@ -82,6 +82,13 @@ overview, and the relevant section blocks for full context. Confirm the
 review readiness verdict is GO or accepted CONDITIONAL GO. If not, halt and
 route to `review-quality-package`.
 
+**Target resolution rule:** Before writing any artifact, read `project.toml`.
+If `[project.testing].qe_repo` is set, resolve it to the matching
+`[[project.repos]].code` and use that repo as the default destination for
+QE-owned executable test artifacts. If it is unset, use the current in-scope
+code repo. If a TC-XXX file names a different target path, surface the
+deviation and wait for explicit user confirmation before writing.
+
 1. `steps/01-load-increment.md` — Load the next increment (scaffolding or
    test case), verify dependencies are completed, confirm prerequisites
 2. `steps/02a-reuse-cross-check.md` — **AI Gate.** For every shareable
@@ -96,7 +103,7 @@ route to `review-quality-package`.
    checklist + AI-Gate prompt template + decision table live in
    `references/reuse-analysis.md`.
 3. `steps/02-implement-artifacts.md` — Implement the artifacts in the
-   target codebase. Step 2a's per-artifact disposition drives **what
+  resolved test-artifact target repo. Step 2a's per-artifact disposition drives **what
    gets written**: `Reuse as-is` adds an import (no new file);
    `Extend in place` adds additive behaviour to an existing file;
    `Wrap with adapter` writes a thin shim; `Create new` follows the
@@ -121,7 +128,7 @@ Stop when the user has reached the end of the plan or requests a checkpoint.
 ## Output
 
 Per increment:
-- Generated artifacts written to the target codebase (build-file changes,
+- Generated artifacts written to the resolved test-artifact target repo (build-file changes,
   runner classes, configuration files, feature files, step definitions,
   fixtures, exports — whatever the increment plan specifies)
 - Updated `test-case-status.md` row (`not-started` → `in-progress` →
@@ -177,6 +184,10 @@ execution loop is complete. The user may then:
 - **Writing production code.** This skill writes test artifacts only. If
   the increment plan reveals a gap in production code, log it and route to
   `execute-increments` or `manage-bugs`.
+- **Ignoring `[project.testing].qe_repo`.** When a QE repo is configured,
+  it is the default destination for QE-owned artifacts. The code repo is
+  only the default when no QE repo is configured or when the user approves
+  a plan-specific deviation.
 - **Hard-coding tool names into prompts to the user.** The quality package
   already pins the test framework, runner, and build tool — read those
   values rather than assuming.

@@ -113,6 +113,13 @@ The detailed instructions, halt conditions, and verdict templates live in
   - If the team uses the TC-XXX test-case increment flow → `execute-quality-increments`
   - Otherwise → `execute-increments` (tests fold into application increments
     via TDD)
+  - This gate binds execution only when the team elected the **quality-first**
+    path at the `review-implementation-package` GO handoff. If the team chose
+    the **execute-first** path, `execute-increments` may already be running in
+    parallel — this verdict still governs the Quality Package's own readiness
+    but does not retroactively block coding. (`[project.testing].qe_repo` plays
+    no part in this routing; it only directs where QE-owned test artifacts are
+    written.)
 - If readiness verdict = NO-GO → back to `create-quality-package` to address the
   failing area, then re-run this skill
 

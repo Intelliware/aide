@@ -713,6 +713,50 @@ function checkH() {
   return [errors, warnings];
 }
 
+const WRITE_DISCIPLINE_REF = 'references/ai-principles/write-discipline.md';
+const PRECONDITIONS_HEADING_RE = /^##\s+Preconditions\b/m;
+// See validate.py — bound list is enumerated by write-discipline.md itself.
+const WRITE_DISCIPLINE_SKILLS = [
+  'create-requirements-package',
+  'create-design-package',
+  'create-implementation-package',
+];
+
+function checkJ() {
+  const errors = [];
+  const warnings = [];
+
+  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
+    return [errors, warnings];
+  }
+
+  const refAbs = path.join(REPO_ROOT, WRITE_DISCIPLINE_REF);
+  if (!fs.existsSync(refAbs) || !fs.statSync(refAbs).isFile()) {
+    errors.push(`${WRITE_DISCIPLINE_REF}: target file missing — every bound create-* skill cites this path; fix the path or restore the file.`);
+  }
+
+  const found = new Set();
+  const skillFiles = discoverFiles(SKILLS_ROOT, (name) => name === 'SKILL.md');
+  for (const skillMd of skillFiles) {
+    const skillName = path.basename(path.dirname(skillMd));
+    if (!WRITE_DISCIPLINE_SKILLS.includes(skillName)) continue;
+    found.add(skillName);
+    const rel = path.relative(REPO_ROOT, skillMd);
+    const text = fs.readFileSync(skillMd, 'utf-8');
+    if (!PRECONDITIONS_HEADING_RE.test(text)) {
+      errors.push(`${rel}: missing top-level \`## Preconditions\` section — bound create-* skills MUST declare write-discipline as a hard precondition (not as a bullet inside \`## Workflow\`).`);
+    }
+    if (!text.includes(WRITE_DISCIPLINE_REF)) {
+      errors.push(`${rel}: does not reference \`${WRITE_DISCIPLINE_REF}\` — bound create-* skills MUST cite the write-discipline contract.`);
+    }
+  }
+  for (const missing of WRITE_DISCIPLINE_SKILLS.filter(n => !found.has(n)).sort()) {
+    warnings.push(`.agents/skills/**/${missing}/SKILL.md: bound write-discipline skill not found on disk (renamed or removed?)`);
+  }
+
+  return [errors, warnings];
+}
+
 function checkSod(projectTomlPath, artifactPath = null) {
   const errors = [];
   const warnings = [];
@@ -733,14 +777,32 @@ function checkSod(projectTomlPath, artifactPath = null) {
   }
 
   const declaredRepos = new Set();
+  const repoRoles = {};
   const repos = (data.project && data.project.repos) || [];
   for (const repo of repos) {
     if (repo && repo.code) {
       declaredRepos.add(repo.code);
+      if (repo.role) {
+        repoRoles[repo.code] = repo.role;
+      }
     }
   }
 
   const stages = data.stages || {};
+  const proj = data.project || {};
+
+  // Rule 6a — optional QE repo target resolves to a declared repo
+  const testing = proj.testing || {};
+  const qeRepo = testing.qe_repo;
+  if (qeRepo !== undefined) {
+    if (typeof qeRepo !== 'string' || qeRepo.trim() === '') {
+      errors.push(`${projectTomlPath}: [project.testing].qe_repo must be a non-empty string matching one declared [[project.repos]].code.`);
+    } else if (!declaredRepos.has(qeRepo)) {
+      errors.push(`${projectTomlPath}: [project.testing].qe_repo = '${qeRepo}' references unknown repo — not declared in [[project.repos]].`);
+    } else if (!['test-automation', 'qe'].includes(repoRoles[qeRepo])) {
+      warnings.push(`${projectTomlPath}: [project.testing].qe_repo = '${qeRepo}' references repo role '${repoRoles[qeRepo]}'; expected 'test-automation' or 'qe' for a dedicated QE repo.`);
+    }
+  }
 
   // Rule 7 — dir XOR colocate per stage
   for (const [stageName, stageCfg] of Object.entries(stages)) {
@@ -804,7 +866,6 @@ function checkSod(projectTomlPath, artifactPath = null) {
   }
 
   // Rule 11 — artifact_subdir bare relative path
-  const proj = data.project || {};
   const asd = proj.artifact_subdir;
 
   if (asd !== undefined) {
@@ -1067,6 +1128,7 @@ function main() {
   const [eErr, eWarn] = checkE();
   const [gErr, gWarn] = checkG();
   const [hErr, hWarn] = checkH();
+  const [jErr, jWarn] = checkJ();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1077,12 +1139,14 @@ function main() {
     'Check E — block frontmatter integrity',
     'Check G — elicitation-pattern resolution',
     'Check H — RE skill output-structure binding',
+    'Check J — write-discipline binding (create-* skills)',
     'Check F — build-registry.js output',
   ];
 
   const bundles = [
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
-    [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [fErr, fWarn],
+    [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
+    [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {
@@ -1136,6 +1200,7 @@ function main() {
       toMarkdown(titles[4], eErr, eWarn),
       toMarkdown(titles[5], gErr, gWarn),
       toMarkdown(titles[6], hErr, hWarn),
+      toMarkdown(titles[7], jErr, jWarn),
       '## Check F — build-registry.js output',
       '',
     ];
@@ -1196,5 +1261,6 @@ module.exports = {
   checkF,
   checkG,
   checkH,
+  checkJ,
   checkSod
 };

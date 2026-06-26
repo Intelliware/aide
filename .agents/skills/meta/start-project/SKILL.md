@@ -7,7 +7,7 @@ description: "Use when the user says \"start a new project\", \"set up A.I.D.E.\
 
 ## Overview
 
-Single entry point for A.I.D.E. Detects whether a project is already bootstrapped, elicits the flow (greenfield / brownfield / quick-dev), captures the project's super-context (identity, paths, repos, glossary, elicitation answers), writes the canonical `project.toml` (committed) and optionally `project.user.toml` (gitignored), then hands off by name to the first skill of the chosen flow.
+Single entry point for A.I.D.E. Detects whether a project is already bootstrapped, elicits the flow (greenfield / brownfield / quick-dev), captures the project's super-context (identity, paths, repos, optional QE/test-artifact target, glossary, elicitation answers), writes the canonical `project.toml` (committed) and optionally `project.user.toml` (gitignored), then hands off by name to the first skill of the chosen flow.
 
 This is the only skill that creates `project.toml` from scratch — all other skills assume it already exists. Once bootstrapped, the project never re-runs this skill except to extend a multi-repo enumeration or change the default flow; for narrower edits the user invokes `customize-framework` instead.
 
@@ -40,7 +40,7 @@ Sequenced phases. Run one step at a time. Read each `steps/<n>.md` only when abo
 
 1. `steps/01-detect-existing.md` — check whether `project.toml` already exists; if yes, offer to extend, re-baseline, or abort. Hard gate before any further elicitation.
 2. `steps/02-elicit-flow.md` — pick the flow (greenfield / brownfield / quick-dev). Defaults to `framework.toml`'s `core.default_flow` when present.
-3. `steps/03-elicit-project-context.md` — `[project]`, `[project.paths]`, `[project.glossary]`, `[project.elicitation]`. Each field is asked individually with the schema's example as the prompt's anchor.
+3. `steps/03-elicit-project-context.md` — `[project]`, `[project.paths]`, `[project.testing]`, `[project.glossary]`, `[project.elicitation]`. Each field is asked individually with the schema's example as the prompt's anchor.
 4. `steps/04-elicit-repos.md` — only when the project is multi-repo (or when the flow is brownfield and the user confirms additional repos exist). Loops over `[[project.repos]]` entries.
 5. `steps/05-write-project-toml.md` — render `project.toml` (committed) and optionally `project.user.toml` (gitignored personal preferences); pre-populate `.gitignore` for the user-layer file.
 6. `steps/06-handoff.md` — invoke the first skill of the chosen flow by name.

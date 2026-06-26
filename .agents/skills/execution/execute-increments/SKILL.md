@@ -36,9 +36,12 @@ same turn. It never proceeds past a failed gate.
   "ship INC-XXX", "work the next increment", "start coding the package", or
   "run the AI gate / human gate"
 - An implementation package exists and `review-implementation-package` has
-  returned GO, and the quality package has returned GO from
-  `review-quality-package` (the test design and release gates this skill
-  implements)
+  returned GO. A Quality Package is **recommended but not required**: if one
+  exists on disk it must carry a `review-quality-package` GO before its release
+  gates are treated as binding exit criteria; if it is absent, the TDD loop
+  anchors on the Acceptance Criteria in the Requirements Package. Whether the
+  team runs the quality stage first is a per-run user decision made at the
+  `review-implementation-package` GO handoff, not a `project.toml` setting.
 - The user is ready to authorize coding
 
 ## When NOT to use
@@ -55,7 +58,7 @@ same turn. It never proceeds past a failed gate.
 | Input | Source | Required |
 |---|---|---|
 | Implementation package | resolved per stage mode (SoD: per-repo path; legacy: `{project.paths.implementation_package}/`) | Yes (with GO from review) |
-| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/`) | Yes (with GO from `review-quality-package`) — supplies the test design the TDD loop writes and the release gates that become exit criteria |
+| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/`) | **Recommended, not required.** When present, it must carry a `review-quality-package` GO before its release gates become binding exit criteria, and it supplies the test design the TDD loop writes. When absent, emit a one-time warning at increment start and proceed using the Acceptance Criteria from the Requirements Package as the test-design anchor. Running the quality stage first is a per-run user choice, not driven by `[project.testing].qe_repo` |
 | Target codebase | filesystem | Yes |
 | Test runner / build tools | environment | Yes |
 | project.toml | `{project-root}/project.toml` | Yes |

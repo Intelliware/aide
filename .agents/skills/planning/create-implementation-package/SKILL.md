@@ -62,11 +62,20 @@ See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
 
+## Preconditions (MUST run before any step)
+
+Before executing Step 0 — and before any codebase analysis, increment decomposition, or authoring work — the AI MUST:
+
+1. **Read and apply** `<AIDE root>/references/ai-principles/write-discipline.md`. "AIDE root" is the folder containing the framework `AGENTS.md` and the `.agents/` directory (typically `./AIDE/` in the user's workspace). The path is **not** skill-local — do not look for it under this skill's own `references/`.
+2. **Present the three mandatory user prompts** documented in that file: (a) acknowledgement mode (Interactive / One-pass), (b) output structure (Full structure / Combined), (c) confirmation of the write-on-acknowledge invariant.
+3. **Record the user's choices.** They govern every subsequent step.
+4. **Do not proceed to Step 0** until the user has explicitly confirmed.
+
+This is a hard precondition, not a style note. The `review-implementation-package` skill treats missing per-increment files (the failure mode the contract prevents) as a finding.
+
 ## Workflow
 
-Execute one step at a time. Read each step file only when starting that step.
-
-**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+Execute one step at a time. Read each step file only when starting that step. The preconditions above MUST already be satisfied before Step 0 starts.
 
 0. **Scope the target source repo** (SoD only) — `steps/scope-target-repo.md`. No-op when the planning stage is in legacy mode.
 1. **Codebase analysis** (brownfield only) — `steps/codebase-analysis.md`

@@ -47,7 +47,7 @@ appears under the workflow graph's `anytime:` block.
 | Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base | `{paths.knowledge_base_path}/` via `navigate-knowledge-base --profile=test-suite` (with `--profile-subkind=marker-vocabulary` and `--profile-subkind=feature-inventory` for the live drift check) | Optional but recommended — enables the live drift check |
-| Test suite codebase | filesystem (repos from `project.toml`) | Optional — enables direct marker search when the KB is unavailable |
+| Test suite codebase | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to in-scope code repo when unset | Optional — enables direct marker search when the KB is unavailable |
 See `references/INPUTS-OUTPUTS.md` for the full table.
 ## Verification rule (always-on)
 Before claiming completion, summarise the inputs found, the coverage
@@ -105,7 +105,8 @@ Selected per the gap type (the skill offers a choice; the user picks):
   `increment-status.md` but with no matching test-coverage row is a
   gap, not a pass.
 - **Hard-coding paths or tool names.** Every path comes from
-  `project.toml`; every marker/tag scheme comes from the quality
+  `project.toml`; prefer `[project.testing].qe_repo` for QE-owned test-suite
+  lookup when configured. Every marker/tag scheme comes from the quality
   package's `automation-and-cicd` block.
 - **Modifying existing trackers.** This skill is read-only; the only
   write is bootstrapping `test-case-status.md` when it does not exist.

@@ -6,7 +6,8 @@ depends-on-prior: false
 # Step 1 — Load Increment
 ## Purpose
 Load the next increment from the test-case plan, verify its dependencies
-are satisfied, and confirm prerequisites before implementation begins.
+are satisfied, resolve the default test-artifact target repo, and confirm
+prerequisites before implementation begins.
 ## Procedure
 ### 1a. Determine the next increment
 Read `test-case-status.md` and find the next increment with status
@@ -28,10 +29,21 @@ increment's Dependencies section has status `completed`. If any
 dependency is not completed, halt and report which dependencies are
 blocking.
 ### 1d. Confirm prerequisites
+Read `project.toml` before presenting the increment. Resolve the
+test-artifact target repo:
+
+1. If `[project.testing].qe_repo` is set, match it to a
+   `[[project.repos]].code` and use that repo as the default target.
+2. If it is unset, use the current in-scope code repo fallback.
+3. If the code is set but does not resolve, halt and route the user to fix
+   `project.toml` (or run `start-project` / `customize-framework`) before
+   continuing.
+
 Present the increment to the user:
 > **Next increment:** TC-XXX — {summary}
 > **Type:** {scaffolding | test-case}
 > **Category:** {category | N/A}
+> **Test-artifact target repo:** {repo-code and path — QE repo from `[project.testing].qe_repo` | code-repo fallback}
 > **Dependencies:** {list — all completed ✅}
 > **Prerequisites:** {infrastructure, services, environment, data, etc.}
 > **Estimated artifacts:** {N files — runner / fixture / feature / step-def / data}

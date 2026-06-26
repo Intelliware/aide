@@ -36,7 +36,7 @@ Run the verification checks listed in the increment's **Verification**
 section. Common checks:
 
 - **File exists** — confirm each artifact file was created at the correct
-  path
+  path in the resolved test-artifact target repo
 - **Syntax valid** — feature / spec files parse; step definitions / test
   classes compile; configuration / fixture files have valid format
 - **Wiring correct** — step definitions / matchers match the steps

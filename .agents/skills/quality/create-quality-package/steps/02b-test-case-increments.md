@@ -13,6 +13,13 @@ When the gate is `true`, decompose the test design from Step 2 into
 one at a time. The shape of every increment is governed by the
 `templates/blocks/quality/test-case-increment.md` block (the
 canonical 8-block shape projected onto QE artefacts).
+
+Before generating any `TC-XXX` file, resolve the default test-artifact
+target repo from `project.toml`: if `[project.testing].qe_repo` is set,
+use the matching `[[project.repos]].code` as the QE-owned artifact target;
+if it is unset, record that the plan falls back to the in-scope code repo.
+If the configured code does not resolve, halt and route the user to fix
+`project.toml` before continuing.
 ## Procedure
 ### 2b.1 Confirm the gate
 Read `project.toml` and confirm
@@ -44,6 +51,11 @@ quality package's automation-and-cicd block to derive what scaffolding
 is actually needed for the team's chosen framework + runner + build
 tool. If the package pins multiple frameworks (rare), produce
 scaffolding for each.
+
+Derive all scaffolding target paths relative to the resolved test-artifact
+target repo. Include the repo code in the presented scaffolding list so the
+user can see whether artifacts are targeting the QE repo or the code-repo
+fallback.
 Present the scaffolding-increment list to the user. Wait for
 acknowledgement.
 ### 2b.3 Derive test-case inventory
@@ -70,6 +82,10 @@ Ask:
 > **Categorised:** test-case increments under `plan/<category>/TC-XXX.md`
 > (scaffolding stays at `plan/TC-XXX.md`).
 Record the choice in the test-case-increment block.
+
+Also record the resolved test-artifact target repo in the block:
+`qe_repo = <repo-code>` when configured, or `fallback = code repo` when no
+QE repo is configured.
 ### 2b.5 Choose generation mode
 Ask:
 > How would you like to generate the increment files?
@@ -90,14 +106,19 @@ a `TC-XXX.md` file conforming to the 8-block shape defined in
 6. AI Gate
 7. Human Gate
 8. Success Criteria
-Place files per the plan layout chosen in 2b.4. If Option B was chosen,
+Place files per the plan layout chosen in 2b.4. Outcome paths in each
+`TC-XXX.md` must be relative to the resolved test-artifact target repo,
+unless the user explicitly approves a different repo for a specific
+increment. If Option B was chosen,
 present each file and wait for acknowledgement before generating the
 next.
 ### 2b.7 Generate plan-overview and status tracker
 After all increment files are written, generate:
 - **`plan/qe-plan-overview.md`** — lists all increments (scaffolding +
   test-case), their categories, dependencies, and a dependency graph
-  showing scaffolding → test-case ordering.
+  showing scaffolding → test-case ordering. Include the resolved
+  test-artifact target repo and whether it came from
+  `[project.testing].qe_repo` or the code-repo fallback.
 - **`plan/test-case-status.md`** — status tracker initialised per the
   columns defined in the test-case-increment block §4a.4. Every
   increment starts at `not-started`.

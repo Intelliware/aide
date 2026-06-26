@@ -8,8 +8,8 @@ depends-on-prior: true
 
 ## Purpose
 
-Implement the artifacts specified in the increment's plan into the target
-codebase, **after** Step 2a's KB-grounded reuse cross-check has been
+Implement the artifacts specified in the increment's plan into the resolved
+test-artifact target repo, **after** Step 2a's KB-grounded reuse cross-check has been
 completed and a disposition approved for every shareable artifact.
 
 ## Precondition
@@ -62,13 +62,19 @@ beyond what the plan specifies. If the plan is ambiguous, ask the user
 before proceeding. Record any approved deviation for step 5b
 (change-tracker).
 
+All paths are resolved relative to the test-artifact target repo selected in
+Step 1 (`[project.testing].qe_repo` when configured; otherwise the code repo
+fallback) unless the increment explicitly names another repo. If the plan's
+path points outside the resolved target, present the mismatch and wait for
+explicit confirmation before writing.
+
 ### 2c. Test-case increments
 
 Read the increment's **Artifact Plan** section. For each artifact listed:
 
-1. **Identify the target path** — the exact file path in the codebase
-   where the artifact will be created. Paths must respect the embedding
-   strategy declared in the quality package.
+1. **Identify the target path** — the exact file path in the resolved
+   test-artifact target repo where the artifact will be created. Paths must
+   respect the embedding strategy declared in the quality package.
 2. **Generate the content** — following the plan's description of what
    the file should contain, the test scenario, the test steps, and the
    expected results. Use the framework conventions documented in the
@@ -87,7 +93,8 @@ for acknowledgement, then write.
 Respect the framework conventions documented in the quality package:
 
 - Tag annotations match the declared tag vocabulary
-- Package / module / directory structure matches the embedding strategy
+- Package / module / directory structure matches the embedding strategy and
+   resolved target repo
 - Import paths and class / module / file names follow the project's
   naming conventions
 - Test data uses the builders / factories / fixtures created in
@@ -95,7 +102,7 @@ Respect the framework conventions documented in the quality package:
 - Logging / reporting hooks match the automation-and-cicd block
 
 Never assume a default toolchain (Java, Maven, Cucumber, Playwright, etc.).
-Read the pinned values from the quality package and the team's
+Read the pinned values from `project.toml`, the quality package, and the team's
 `config/customizations/execute-quality-increments.toml` if present.
 
 ## Next

@@ -58,6 +58,16 @@ implementation_package  = "{project-root}/.framework-output/implementation"
 knowledge_base_path     = "{project-root}/../knowledge-base-repo"
 
 
+# ─── [project.testing] — optional QE / test-artifact target ─────────────────
+# If this project has a dedicated QE or test-automation repository, set
+# `qe_repo` to the matching `[[project.repos]].code`. Quality-stage skills
+# that create or inspect QE-owned executable test artifacts prefer this repo.
+# If omitted, those skills fall back to the in-scope code repo.
+[project.testing]
+
+qe_repo = "qe-automation"
+
+
 # ─── [project.glossary] — terms used across the project ──────────────────────
 [project.glossary]
 
@@ -204,3 +214,10 @@ name = "Merchant Web Portal"
 path = "{project-root}/../web-portal"
 role = "ui"
 type = "react-vite-typescript"
+
+[[project.repos]]
+code = "qe-automation"
+name = "QE Automation Suite"
+path = "{project-root}/../qe-automation"
+role = "test-automation"
+type = "cucumber-junit5"

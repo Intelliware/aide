@@ -5,12 +5,12 @@
 | Failure set | yes | Hand-off from `execute-quality-increments` / `execute-increments` / a CI run, or user-provided | The failures to triage (scenarios, error messages, stack traces) |
 | Quality package automation-and-cicd block | yes | `docs/<feature>/quality-package/quality/automation-and-cicd.md` | Pinned evidence locations (report path, log path, screenshot path) — read here, never hard-coded in this skill |
 | Failure categories | yes | `references/failure-categories.md` (generic) + `templates/blocks/quality/failure-categories.md` (team-overridable block) | The classification taxonomy and remediation hints |
-| `project.toml` | yes | `{project-root}/project.toml` | Paths, repos, test-stack pins, team customisation overrides |
+| `project.toml` | yes | `{project-root}/project.toml` | Paths, repos, `[project.testing].qe_repo`, test-stack pins, team customisation overrides |
 | Per-test report data | recommended | path declared in automation-and-cicd (e.g. JUnit XML, Allure JSON, framework-native reporter output) | Per-test JSON / XML for deeper triage |
 | Execution log | recommended | path declared in automation-and-cicd | Full execution trace |
 | Screenshots / artifacts | recommended | path declared in automation-and-cicd | Visual / artefact evidence per failure |
 | Knowledge base | optional | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Cross-reference shared utilities, known patterns, prior-failure history |
-| Test suite codebase | optional | filesystem (repos from `project.toml`) | Direct lookup of locators / fixtures / shared helpers when the KB is unavailable |
+| Test suite codebase | optional | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to the in-scope code repo | Direct lookup of locators / fixtures / shared helpers when the KB is unavailable |
 ## Outputs
 | Output | Destination | Format | Notes |
 |---|---|---|---|

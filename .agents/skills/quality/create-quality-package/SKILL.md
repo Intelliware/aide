@@ -25,8 +25,11 @@ defined here become the exit criteria for the feature.
 
 ## When to use
 
-- An approved design package and a GO implementation package exist and the user
-  wants the test/quality plan before coding
+- An approved design package exists and the user wants the test/quality plan.
+  A GO implementation package is the normal input, but this skill may also be
+  authored earlier (quality-first or parallel) — when no implementation package
+  is on disk yet, it classifies and traces to ACs only and records `INC-XXX`
+  rows as `(pending)` for a later re-run
 - User says: "create the quality package", "plan the testing", "write the test
   strategy", "design the tests", "set up quality gates", "plan test automation",
   "start the quality stage"
@@ -49,7 +52,9 @@ See `references/INPUTS-OUTPUTS.md` for the full table. Required:
 - Approved `requirements-package.md` (acceptance criteria, NFRs) and its
   `change-tracker.md`
 - Approved design package (testing strategy, technical NFRs, security design)
-- GO implementation package (all `INC-XXX.md`, `increment-status.md`)
+- GO implementation package (all `INC-XXX.md`, `increment-status.md`) when
+  available; optional when authoring quality-first / in parallel before INCs
+  land (the `INC-XXX` traceability column is then recorded as `(pending)`)
 - `project.toml` (flow detection, paths, repo list, elicitation answers such as
   `testing_strategy`, `compliance_regime`)
 - Active composition YAML (`templates/compositions/greenfield-quality-package.yaml`)
@@ -74,6 +79,10 @@ are about to execute it; do not pre-load every reference.
    `partially-automatable` / `not-automatable — waived | manual | monitored` /
    `unclear`. Halts on `unclear` and routes back upstream. Output feeds Steps
    1–3 and `audit-quality-coverage`. Reference: `references/testability-classification.md`.
+   **When this skill is authored before the implementation package has landed on
+   disk (quality-first or parallel authoring), this step classifies the in-scope
+   ACs only**; the `INC-XXX` classification is deferred until the implementation
+   package lands and the skill is re-run.
 2. `steps/01-quality-strategy.md` — author the quality strategy: quality goals,
    risk-based scope, test levels (`test-approach`), entry/exit criteria and
    release gates, and the quality-metrics set.
@@ -82,7 +91,10 @@ are about to execute it; do not pre-load every reference.
    `INC-XXX`; record the traceability matrix and test data needs. Apply
    `references/reuse-analysis.md` when proposing shared utilities / fixtures
    / page objects so the design does not re-invent assets the KB or test-suite
-   already provide.
+   already provide. **When authored before the implementation package has landed
+   on disk, traceability rows trace to AC / FR / NFR only and the
+   `INC-XXX` column is recorded as `(pending)`** — to be filled on a re-run
+   once `INC-XXX.md` files exist.
 4. `steps/02b-test-case-increments.md` — **optional, gated.** Runs only when
    `project.elicitation.uses_test_case_increments == true`. Decomposes the
    test design into `TC-XXX` scaffolding + test-case increments executable by

@@ -96,9 +96,20 @@ The verdict is also recorded in
 
 ## Next skill
 
-- **GO** → `create-quality-package` (the quality stage authors the test/quality
-  plan before execution; its `review-quality-package` gate must return GO before
-  `execute-increments` runs)
+- **GO** → the user chooses one of two paths (the quality stage is **not**
+  mandated on the dev critical path; this is a per-run decision, not a config
+  switch):
+  - **Quality-first (synchronous gate)** → `create-quality-package`. The
+    quality stage authors the test/quality plan before execution; its
+    `review-quality-package` gate must return GO before `execute-increments`
+    runs. Recommended when the test design should shape or precede coding.
+  - **Execute-first (quality parallel or deferred)** → `execute-increments`
+    directly. The quality stage runs in parallel or later on its own cadence;
+    coverage is reconciled post-hoc by `audit-quality-coverage`.
+  - State the recommended path but **wait for the user to pick** — do not
+    auto-select from `project.toml`. (`[project.testing].qe_repo`, when set,
+    only routes where QE-owned test artifacts are written; it does **not**
+    decide this fork.)
 - **NO-GO** → back to `create-implementation-package` for rework, then re-run
   this skill
 

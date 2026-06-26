@@ -103,6 +103,10 @@ every row at `not-started`.
 Capture for downstream steps:
 - Test-stack pins (framework, runner, build tool) from
   `[project.elicitation]`
+- Test-suite lookup target from `[project.testing].qe_repo` when set,
+  resolved through `[[project.repos]]`; if unset, record the in-scope
+  code repo as the fallback. If set but unresolved, surface a project
+  config error before Step 3 rather than silently searching all repos.
 - Marker / tag conventions referenced in the automation-and-cicd block
 - KB path (`{paths.knowledge_base_path}`) — used by Step 3 if present
 
@@ -116,6 +120,7 @@ Summarise to the user:
 > - Quality package: <feature-id>-quality.md @ <version>
 > - Traceability matrix: <K> rows
 > - Test-case status tracker: <present | bootstrapped | not applicable — TC-XXX flow disabled>
+> - Test-suite lookup repo: <qe repo from `[project.testing].qe_repo` | code-repo fallback>
 > - KB drift check: <will run | skipped — KB not configured>
 >
 > Proceed to cross-reference?

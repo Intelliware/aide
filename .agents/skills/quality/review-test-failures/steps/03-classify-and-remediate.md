@@ -52,8 +52,10 @@ to:
 
 If no KB is configured, search the test-suite repo directly for the
 relevant artifact (the shared selector source, the fixture file,
-the shared step-definition). Cap the search to the repos listed in
-`project.toml`.
+the shared step-definition). Prefer `[project.testing].qe_repo` when it is
+configured; otherwise use the in-scope code repo fallback. Cap the search to
+that resolved repo; do not traverse arbitrary paths or silently scan all
+repos.
 
 ### 3c. Compute disposition + routing
 

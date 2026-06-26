@@ -6,8 +6,8 @@ depends-on-prior: true
 
 # Step 3 — Elicit project context
 
-Build the body of `[project]`, `[project.paths]`, `[project.glossary]`,
-and `[project.elicitation]`. Each sub-section is a discrete elicitation
+Build the body of `[project]`, `[project.paths]`, `[project.testing]`,
+`[project.glossary]`, and `[project.elicitation]`. Each sub-section is a discrete elicitation
 pass — do not collapse them into one mega-prompt.
 
 ## Purpose
@@ -23,9 +23,10 @@ unambiguous.
 |---|---|---|---|
 | 1 | `[project]` | `name`, `code`, `domain` | `description`, `default_flow` (set from step 02) |
 | 2 | `[project.paths]` | `knowledge_base_path` (greenfield/brownfield only) | `requirements_package`, `design_package`, `implementation_package` (defaults are fine) |
-| 3 | `[project.glossary]` | (none) | `references[]`, `entries[]` (term/definition/aliases/domain_specific) |
-| 4 | `[project.change_log]` | (none — `enabled` defaulted by flow) | `enabled`, `path`, `versioning_strategy`, `format`, `parts_affected_vocabulary` |
-| 5 | `[project.elicitation]` | (none) | answers to known decision-table codes — see list below |
+| 3 | `[project.testing]` | (none) | `qe_repo` — code of the dedicated QE/test-automation repo, when present |
+| 4 | `[project.glossary]` | (none) | `references[]`, `entries[]` (term/definition/aliases/domain_specific) |
+| 5 | `[project.change_log]` | (none — `enabled` defaulted by flow) | `enabled`, `path`, `versioning_strategy`, `format`, `parts_affected_vocabulary` |
+| 6 | `[project.elicitation]` | (none) | answers to known decision-table codes — see list below |
 
 ### Sub-step 1 — `[project]`
 
@@ -44,7 +45,26 @@ For `knowledge_base_path`: required for greenfield and brownfield;
 suppressed for quick-dev. Suggest `{project-root}/../<project-code>-knowledge-base`
 as the default sibling-repo layout.
 
-### Sub-step 3 — `[project.glossary]`
+### Sub-step 3 — `[project.testing]`
+
+Ask whether the project has a dedicated QE / test-automation repository
+that should receive QE-owned executable test artifacts by default.
+
+Prompt:
+
+> Does this project have a dedicated QE or test-automation repo for
+> feature files, step definitions, runners, fixtures, reports, or other
+> QE-owned executable test artifacts? If yes, provide the repo code you
+> want to use for `[project.testing].qe_repo`; if it is not listed yet,
+> Step 04 will add it to `[[project.repos]]`. If no, leave unset and
+> quality execution will fall back to the in-scope code repo.
+
+If the user provides a value, validate it against
+`^[a-z][a-z0-9-]*$` and carry it forward as `[project.testing].qe_repo`.
+Do **not** require the repo to exist yet at this step; Step 04 is
+responsible for ensuring a matching `[[project.repos]]` entry exists.
+
+### Sub-step 4 — `[project.glossary]`
 
 Two parallel sub-prompts:
 
@@ -54,7 +74,7 @@ Two parallel sub-prompts:
 
 Both are optional. Skip on `done`.
 
-### Sub-step 4 — `[project.change_log]`
+### Sub-step 5 — `[project.change_log]`
 
 Conditional. Asks whether the project will maintain a release-stream
 `CHANGELOG.md`. Distinct from per-package `CHANGE-TRACKER.md` (those
@@ -76,7 +96,7 @@ default; offer to skip and accept all defaults):
 
 Carry the resolved table forward to step 05.
 
-### Sub-step 5 — `[project.elicitation]`
+### Sub-step 6 — `[project.elicitation]`
 
 Pre-answers for decision-table codes used by composition gates. The
 canonical list (mirroring `project.toml.example`):
@@ -119,6 +139,7 @@ runner knows where to load them when authored.)
 
 - [ ] `[project]` required fields collected.
 - [ ] `[project.paths]` finalized (with KB path when applicable).
+- [ ] `[project.testing]` prompt run; `qe_repo` either captured or explicitly left unset.
 - [ ] Glossary sub-step run to its `done` exit.
 - [ ] Decision-table sub-step run; user offered the chance to skip
       remaining codes.

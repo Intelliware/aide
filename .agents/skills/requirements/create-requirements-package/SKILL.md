@@ -38,11 +38,20 @@ See `references/INPUTS-OUTPUTS.md` for the full table. Required:
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
 
+## Preconditions (MUST run before any step)
+
+Before executing Step 0 — and before any discovery, analysis, writing, or assembly work — the AI MUST:
+
+1. **Read and apply** `<AIDE root>/references/ai-principles/write-discipline.md`. "AIDE root" is the folder containing the framework `AGENTS.md` and the `.agents/` directory (typically `./AIDE/` in the user's workspace). The path is **not** skill-local — do not look for it under this skill's own `references/`.
+2. **Present the three mandatory user prompts** documented in that file: (a) acknowledgement mode (Interactive / One-pass), (b) output structure (Full structure / Combined), (c) confirmation of the write-on-acknowledge invariant.
+3. **Record the user's choices.** They govern every subsequent step.
+4. **Do not proceed to Step 0** until the user has explicitly confirmed.
+
+This is a hard precondition, not a style note. The `review-requirements-package` skill treats missing per-section files (the failure mode the contract prevents) as a finding.
+
 ## Workflow
 
-Sequenced phases. Run one step at a time. Do not pre-load every reference.
-
-**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+Sequenced phases. Run one step at a time. Do not pre-load every reference. The preconditions above MUST already be satisfied before Step 0 starts.
 
 0. `steps/00-scope-target-repo.md` — (SoD only) determine the artifact's host repo and, for cross-cutting features, capture `affects_repos`. No-op when the requirements stage is in legacy mode.
 1. `steps/01-discovery.md` — discovery; produce `current-capability-baseline.md`. Runs when brownfield mode is active OR when `force_discovery = true` is set in the skill customization. Skipped only when neither condition is met.

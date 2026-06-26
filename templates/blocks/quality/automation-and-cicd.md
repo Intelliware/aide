@@ -11,6 +11,13 @@ order-hint: 5
 
 ### 5.1 Automation stack (pinned)
 
+Record the default test-artifact target before listing tools:
+
+| Concern | Value |
+|---|---|
+| Default QE artifact repo | `[project.testing].qe_repo` value, or `code-repo fallback` when unset |
+| Artifact root | Repo-relative root for generated feature/spec files, step definitions, fixtures, runners, reports, and exports |
+
 Every tool and runner must have an explicit, pinned version — exactly as the
 design stage pins the production stack. No "latest".
 

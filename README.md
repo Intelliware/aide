@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.5.2
+**Version:** 1.6.5
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -15,31 +15,86 @@ Includes a global **knowledge-base** capability for multi-repo, large solutions:
 
 ### Step 1 — Install the framework
 
-A.I.D.E. is consumed by copying its runtime folders out of this repo into wherever you keep your project repos. Skills auto-discover from the copied location once an IDE picks it up — there is no build step or install command.
+A.I.D.E. installs by copying its runtime folders into an `AIDE/` directory in your workspace. The installation runbook is **tool-agnostic** and lives in [`INSTRUCTIONS.md`](INSTRUCTIONS.md) — give it to any coding agent (GitHub Copilot, Cursor, JetBrains AI Assistant, Claude, etc.) or follow it yourself.
 
-**Mandatory — copy these from this repo into your AIDE folder:**
+#### ⚠️ Required — paste these install rules *above* every prompt
 
-| Path | Purpose |
-|---|---|
-| `AGENTS.md` | Framework orientation file the IDE auto-attaches to every chat |
-| `.agents/` | All 48 skills + the committed `_registry/` (catalog + workflow graph) |
-| `config/` | Schemas + example TOMLs the skills reference |
-| `templates/` | Reusable section blocks + YAML compositions |
-| `references/` | Cross-cutting framework references loaded by skills on demand |
+Every install/update prompt below is a **two-block paste**: the rules block first, then the prompt. Do not paste a prompt without the rules — weaker models will otherwise probe GitHub anonymously over HTTP, hit a misleading `404`, and report the repo as "not found" when the real issue is missing credentials.
 
-**Optional:**
+**Rules block — copy verbatim:**
 
-- `README.md` — this file; useful for human reference, not consumed by skills.
+```text
+Install rules — follow these strictly, no exceptions:
+1. Preflight: before any fetch, run
+     git ls-remote <AIDE_SOURCE_URL>.git <AIDE_REF>
+   Substitute the actual URL and ref from the prompt below. The command must
+   print one line containing a SHA. Zero lines = ref doesn't exist on the
+   remote. A stderr error = auth or network. Show me the stderr verbatim and
+   stop — do not retry with a different transport.
+2. No HTTP fallbacks: never substitute Invoke-WebRequest, iwr, Invoke-RestMethod,
+   curl, wget, gh api, gh repo view, api.github.com, or raw.githubusercontent.com
+   for git. They are anonymous, return 404 (not 401) on private repos by design,
+   and lose the diagnostic stderr. A 404 from any of those is "auth missing",
+   not "repo missing".
+```
 
-**Don't copy** (framework-maintenance only): `scripts/`, `CLAUDE.md`, `CHANGELOG.md`, `_docs/`, `_archive/`, `_bmad/`. Grab `scripts/` later only if you decide to extend or modify the skills inside your AIDE copy — it contains `build-registry.py` (regenerates `_registry/skills.csv` + `skills.json` after skill edits) and `validate.py`.
+**Worked example — what your actual paste should look like:**
+
+```text
+Install rules — follow these strictly, no exceptions:
+1. Preflight: before any fetch, run
+     git ls-remote <AIDE_SOURCE_URL>.git <AIDE_REF>
+   ...
+2. No HTTP fallbacks: ...
+
+Install AIDE from https://github.com/TD-Universe/TD-EM-AIDE per its INSTRUCTIONS.md.
+```
+
+Paste both blocks into the agent chat in that order. The same rules block applies to every prompt in this README — install, update, and all override examples.
+
+#### One-line prompt — paste this into any agent chat (after the rules block above):
+
+> *"Install AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` per its `INSTRUCTIONS.md`."*
+
+The agent will fetch the repo, copy the mandatory subset (`AGENTS.md`, `.agents/`, `config/`, `templates/`, `references/`) into `./AIDE/`, skip framework-maintenance folders, create discovery shims at your workspace root so any agentskills.io host sees the skills, and verify the result.
+
+**Configurable variables.** All defaults are sensible — only mention a variable if you want to override it.
+
+| Variable          | Default                                     | What it controls                                                                            |
+|-------------------|---------------------------------------------|---------------------------------------------------------------------------------------------|
+| `AIDE_SOURCE_URL` | `https://github.com/TD-Universe/TD-EM-AIDE` | Where to fetch from. Use a fork, an internal mirror, or a local clone (`file:///abs/path`). |
+| `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to install.                                                      |
+| `AIDE_TARGET_DIR` | `./AIDE`                                    | Where in your workspace the framework lands.                                                |
+
+**Examples with overrides** (rules block above still applies — paste it first):
+
+> *"Install AIDE from `https://github.com/my-org/aide-fork` using `AIDE_REF=v1.5.2` per its `INSTRUCTIONS.md`."*
+
+> *"Install AIDE from `file:///c:/Users/me/repos/TD-EM-AIDE` into `AIDE_TARGET_DIR=./vendor/aide` per its `INSTRUCTIONS.md`."*
+
+See [`INSTRUCTIONS.md`](INSTRUCTIONS.md) for the full runbook, the deny-list of files that are never copied, discovery-shim behaviour, troubleshooting, and the machine-readable YAML manifest.
+
+#### Updating an existing install
+
+The install runbook is fully idempotent — re-running it *is* the update path. Each run sweeps the workspace-root shims under `./.agents/skills/`, refreshes `./AGENTS.md`, and re-copies the canonical tree into `AIDE/`. Hand-authored files (anything lacking the marker) are preserved.
+
+**One-line prompt — paste this into any agent chat to update** (rules block above still applies — paste it first):
+
+> *"Update AIDE in this workspace from `https://github.com/TD-Universe/TD-EM-AIDE` by re-running its `INSTRUCTIONS.md`."*
+
+The word **update** in the prompt tells the agent to skip the "overwrite or abort?" confirmation (see `INSTRUCTIONS.md` Step 2 — "update-intent exception") and just refresh in place.
+
+The same `AIDE_SOURCE_URL`, `AIDE_REF`, and `AIDE_TARGET_DIR` overrides apply. Use `AIDE_REF` to pin a specific release rather than tracking `main`:
+
+> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=v1.6.2` by re-running its `INSTRUCTIONS.md`."*
 
 ### Step 2 — Open it in your IDE
 
 Open your AIDE folder alongside your project repo(s) in one multi-root workspace. The framework's skills sit at `.agents/skills/` — a default discovery root for both supported IDEs — so no `settings.json` edits, symlinks, or overlays are needed.
 
-To verify discovery: open the IDE's agent panel and type `/`. All 48 framework skills should appear in the picker with their descriptions.
+To verify discovery: open the IDE's agent panel and type `/`. Every framework skill should appear in the picker with its description (the current full count is in `.agents/skills/_registry/skills.csv`).
 
-> **Cross-host flat-discovery design.** Most agentskills.io hosts scan `<root>/<skill>/SKILL.md` (flat), while A.I.D.E. organises canonical skills under `<stage>/<skill>/`. The bridging scheme — **discovery shims** — is documented in [`.agents/skills/_registry/SHIMS.md`](.agents/skills/_registry/SHIMS.md). Shim generation and packaging scripts ship in a follow-up release.
+> **Cross-host flat-discovery design.** Hosts (VS Code Copilot, JetBrains Copilot, Cursor, Claude Code, …) scan `.agents/skills/<skill>/SKILL.md` relative to each workspace folder root. A.I.D.E. organises canonical skills under `<stage>/<skill>/` inside `AIDE/`. The installation runbook ([`INSTRUCTIONS.md`](INSTRUCTIONS.md) Step 8) bridges the two by generating one **flat shim** per skill directly at the workspace root, so hosts see the right shape and the canonical files inside `AIDE/` stay unmodified. No symlinks, no junctions, no editor config. Design notes: [`.agents/skills/_registry/SHIMS.md`](.agents/skills/_registry/SHIMS.md).
 
 > **Currently supported hosts:** VSCode + GitHub Copilot (primary), Cursor IDE. Claude Code is currently not supported.
 
@@ -51,7 +106,7 @@ GitHub Copilot adopted the [agentskills.io](https://agentskills.io) specificatio
 - VSCode with the GitHub Copilot extension installed and signed in
 - Copilot in **agent mode** (Chat view → switch from "Ask" to "Agent"). Agent mode is required for skills that read multiple files or run scripts.
 
-**Verify discovery.** Open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — all 48 framework skills should appear in the picker with their descriptions.
+**Verify discovery.** Open Settings (⌘,), search for `chat.agentSkillsLocations`, and confirm `.agents/skills` is in the list of enabled discovery roots (it ships enabled by default). Then open Chat and type `/` — every framework skill should appear in the picker with its description.
 
 **Framework orientation (automatic).** Copilot auto-attaches `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation — how to invoke skills, the vocabulary to use, and a guard rail telling the model that AIDE's folder is the framework, not the user's project. **No project-side wiring required.**
 
@@ -72,7 +127,7 @@ Cursor adopted native [agentskills.io](https://agentskills.io) support around v2
 - Cursor IDE v2.3.x or later (skills support is bundled; no separate install)
 - Agent panel open and a model selected. Cursor's Agent reads skills automatically; slash invocation works in the Agent chat.
 
-**Verify discovery.** Open the Agent panel and type `/` — all 48 framework skills should appear in the picker with their descriptions. If any are missing, confirm the AIDE folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
+**Verify discovery.** Open the Agent panel and type `/` — every framework skill should appear in the picker with its description. If none appear, confirm the AIDE folder is listed in the workspace's folder list and that `.agents/skills/` exists at its root.
 
 **Framework orientation (automatic).** Cursor reads `AGENTS.md` from every workspace folder root, so simply having AIDE open as a workspace folder gives every chat the framework orientation. **No project-side wiring required.**
 

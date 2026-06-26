@@ -121,6 +121,13 @@ class TestSoDNegativeFixtures(unittest.TestCase):
             must_contain=["unknown repo", "not declared"],
         )
 
+    def test_rule6a_unknown_qe_repo(self) -> None:
+        """Rule 6a — `[project.testing].qe_repo` must resolve to `[[project.repos]].code`."""
+        self._expect_reject(
+            ["--project-toml", str(FIXTURES / "unknown-qe-repo.toml")],
+            must_contain=["project.testing", "qe_repo", "unknown repo", "not declared"],
+        )
+
 
 class TestSoDPositive(unittest.TestCase):
     """Clean SoD configs and legacy-mode configs must pass."""
@@ -217,6 +224,26 @@ class TestSoDPositive(unittest.TestCase):
             "--project-toml", str(toml),
             "--cross-cutting-artifact", str(artifact),
         ])
+
+    def test_qe_repo_known_repo_passes(self) -> None:
+        """Rule 6a passes when `[project.testing].qe_repo` names a declared QE repo."""
+        p = self._write_toml("""
+            [project]
+            code = "qe-ok"
+            [project.testing]
+            qe_repo = "qe-automation"
+
+            [[project.repos]]
+            code = "app"
+            path = "."
+            role = "api"
+
+            [[project.repos]]
+            code = "qe-automation"
+            path = "{project-root}/../qe-automation"
+            role = "test-automation"
+        """)
+        self._expect_accept(["--project-toml", str(p)])
 
 
 class TestSoDEdgeCases(unittest.TestCase):

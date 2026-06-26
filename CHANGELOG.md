@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.6.0-beta` |
+| Current artifact version | `1.6.2` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,85 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `1.6.5` — 2026-06-18
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-15 | Addition | references | `references/orientation/workspace-agents-coding-standards.md` | New host-agnostic coding-standards addendum spliced into the workspace-root `./AGENTS.md` managed block by Step 9 of the install runbook. Introduces a `## Coding standards (auto-enforced per repo)` heading that the runbook asserts on after every install/update, so every agentskills.io host sees the repo-wide coding standards directive without project-specific configuration. | branch `feature/code-standards-discovery` | ☐ Pending |
+
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-16 | Source Update | skills | `.agents/skills/planning/review-implementation-package/SKILL.md`, `.agents/skills/quality/review-quality-package/SKILL.md`, `.agents/skills/quality/create-quality-package/SKILL.md`, `.agents/skills/quality/create-quality-package/references/INPUTS-OUTPUTS.md`, `.agents/skills/execution/execute-increments/SKILL.md`, `.agents/skills/_registry/workflow-graph.yaml` | Made the quality stage **optional and user-elected** on the dev critical path, decoupled from any `project.toml` field. At `review-implementation-package` GO the user picks one of two paths per-run: (a) **quality-first** → `create-quality-package`, whose `review-quality-package` gate must return GO before `execute-increments`; or (b) **execute-first** → `execute-increments` directly, with the quality stage running in parallel/deferred and coverage reconciled post-hoc by `audit-quality-coverage`. `execute-increments` now treats the Quality Package as **recommended, not required** — when present it must carry a `review-quality-package` GO before its release gates bind; when absent it anchors TDD on Requirements-Package ACs. `create-quality-package` may be authored quality-first/in parallel before INCs land, classifying ACs only and recording the `INC-XXX` traceability column as `(pending)`. `review-quality-package` no longer branches on configuration. The workflow graph marks `create-quality-package` `optional: true` / `role: user-elected` in both greenfield and brownfield, with the `review-quality-package` gate binding only within the quality-first path. The choice is a conversational, per-run decision that is **not persisted**. `[project.testing].qe_repo` is now used **purely for artifact routing** (where QE-owned test files are written) and plays no part in the gate decision. | this change | ✅ Verified |
+
+#### Branch Dependency
+
+In-flight change pending versioning decision (patch vs. minor). The quality
+stage becomes a user-elected fork at `review-implementation-package` GO rather
+than a mandated gate; the decision is conversational and not persisted, and is
+fully independent of `[project.testing].qe_repo` (which now only routes
+QE-owned test artifacts). Projects that always elect the quality-first path see
+no change in the gate's force.
+| 1 | 2026-06-15 | Source Update | docs | `INSTRUCTIONS.md` (Step 9, Step 10 verification, Step 12 uninstall, Troubleshooting, machine-readable YAML manifest, `.aide-install.json` provenance schema) | Reworked Step 9 to publish AIDE's workspace-root `./AGENTS.md` as a **managed block** delimited by `<!-- aide:managed:begin … -->` / `<!-- aide:managed:end -->` sentinels instead of a whole-file generated copy. AIDE only writes between the sentinels; hand-authored content outside the block is preserved verbatim across installs and updates. Five write modes are now defined: `create`, `replace-in-place`, `migrate` (from the legacy `<!-- aide:generated-agents -->` whole-file marker), `prepend` (first adoption on a hand-authored file — no longer skipped), and `malformed-skip` (refuse to modify a corrupted block to avoid data loss). Step 9 also splices the new `references/orientation/workspace-agents-coding-standards.md` addendum into the block immediately before the stable `## What this folder is NOT` anchor; verification asserts the `## Coding standards (auto-enforced per repo)` heading landed. Sentinel detection matches the substrings `aide:managed:begin` / `aide:managed:end` (not the full banner literal) so the human-readable warning can be reworded in future releases without breaking installed workspaces. Step 10's verify list, Step 12's uninstall protocol, the troubleshooting "hand-authored file" entry, the YAML manifest's `aide_install.agents_md` section, and the `.aide-install.json` schema (`agents_md_block_begin`, `agents_md_block_end`, `agents_md_write_mode`) are all updated to match. Re-running the runbook on existing installs is fully idempotent. | branch `feature/code-standards-discovery` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `1.6.2`. Backwards-compatible: existing installs whose `./AGENTS.md` still begins with the legacy `<!-- aide:generated-agents -->` marker are auto-migrated to the managed-block format on the next install/update (write mode `migrate`); installs that already use the sentinels get an in-place block refresh (`replace-in-place`); hand-authored `./AGENTS.md` files that previously caused Step 9 to skip are now adopted via `prepend`, preserving the user's content below the block. The skill catalogue, workflow-graph stage ordering, composition shapes, and schemas are unchanged. Validator behavior unchanged.
+
+---
+
+### `1.6.2` — 2026-06-05
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-05 | Addition | config | `config/SCHEMAS.md`, `config/project.toml.example` | Added optional `[project.testing].qe_repo` to declare a dedicated QE/test-automation repository by `[[project.repos]].code`. Quality-stage artifact execution and test-suite lookup prefer this repo when configured, while preserving the previous code-repo fallback when unset. The repo role vocabulary now includes `test-automation` and `qe`, and the example project declares a `qe-automation` repo. | this release | ✅ Verified |
+| 2 | 2026-06-05 | Addition | validator | `scripts/validate.py`, `scripts/validate.js`, `scripts/test_validate.py`, `scripts/test_fixtures/sod-negatives/unknown-qe-repo.toml` | Added validator coverage for `[project.testing].qe_repo`: the field must be a non-empty string matching a declared `[[project.repos]].code`; Python and Node validators warn when the referenced repo is not role `test-automation` or `qe`. Regression tests cover both unknown and valid QE repo configurations. | this release | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-05 | Source Update | skills | `.agents/skills/meta/start-project/**` | `start-project` now elicits `[project.testing].qe_repo`, ensures the selected QE repo exists in `[[project.repos]]`, and renders the new section into `project.toml`. New projects can therefore declare the QE repo during bootstrap instead of relying on later manual edits. | this release | ✅ Verified |
+| 2 | 2026-06-05 | Source Update | skills, blocks | `.agents/skills/quality/**`, `templates/blocks/quality/{test-case-increment,automation-and-cicd}.md` | Quality-stage planning and execution now resolve QE-owned executable test artifacts to `[project.testing].qe_repo` when configured. `create-quality-package` records the resolved target in TC-XXX plans; `execute-quality-increments` writes to the QE repo by default; coverage audit and failure triage search the QE repo first. When no QE repo is configured, behavior falls back to the in-scope code repo. `execute-increments` is intentionally unchanged because it owns application TDD tests in the code repo. | this release | ✅ Verified |
+| 3 | 2026-06-05 | Source Update | docs | `README.md`, `CHANGELOG.md` | Bumped the visible framework version and changelog current artifact version from `1.6.1-beta` to the non-beta `1.6.2`; updated the README update example to use `AIDE_REF=v1.6.2`. | this release | ✅ Verified |
+
+#### Branch Dependency
+
+Patch release on top of `1.6.1-beta`. Backwards-compatible: projects without
+`[project.testing].qe_repo` keep the existing code-repo default for QE-owned
+test artifacts. Projects that opt in get a dedicated QE repo target for
+quality-stage executable artifacts and lookup operations. Application
+implementation execution remains unchanged: `execute-increments` continues to
+write dev-owned TDD tests in the code repo.
+
+### `1.6.1-beta` — 2026-06-05
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-05 | Addition | docs | `INSTRUCTIONS.md` | New tool-agnostic A.I.D.E. install/update/uninstall runbook. It defines git preflight and no-HTTP-fallback rules for private repos; mandatory vs optional copy sets; workspace-root flat skill-discovery shim generation; workspace-root `AGENTS.md` generation; verification, provenance, troubleshooting, and a machine-readable YAML manifest. The runbook is intentionally script-free so any coding agent can install A.I.D.E. into `AIDE/` and generate the workspace-root discovery surface without Python, Node, symlinks, junctions, or editor-specific configuration. | PR #28 (`feature/instructions-prompt`, commit `228d7d2`) | ✅ Verified |
+| 2 | 2026-06-05 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | Added validator Check J: the three package-authoring `create-*` skills (`create-requirements-package`, `create-design-package`, `create-implementation-package`) must each declare a top-level `## Preconditions` section and reference `references/ai-principles/write-discipline.md`; the validator also verifies the referenced write-discipline file exists. Python and Node validators carry the same bounded skill list and check semantics. | PR #28 (`feature/instructions-prompt`, commit `228d7d2`) | ✅ Verified |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-06-05 | Source Update | docs | `README.md` | Rewrote Getting Started Step 1 around the new `INSTRUCTIONS.md` runbook: install/update prompts now require the rules block first, document override variables (`AIDE_SOURCE_URL`, `AIDE_REF`, `AIDE_TARGET_DIR`), explain idempotent updates, and describe workspace-root flat shims plus generated `AGENTS.md` as the cross-host discovery/orientation mechanism. This release also corrects the visible README version header from `1.5.2` to `1.6.1-beta`. | PR #28 (`feature/instructions-prompt`, commit `228d7d2`) + this correction | ✅ Verified |
+| 2 | 2026-06-05 | Source Update | docs | `.agents/skills/_registry/SHIMS.md` | Reframed discovery shims from a future build-output/script scheme to the implemented install-runbook scheme: shims are generated at the consumer workspace root (`./.agents/skills/<skill>/SKILL.md`), canonical skills remain untouched under `AIDE/.agents/skills/<stage>/<skill>/SKILL.md`, stale marker-tagged shims are swept on reinstall, and a parallel generated `./AGENTS.md` uses the `<!-- aide:generated-agents -->` marker. | PR #28 (`feature/instructions-prompt`, commit `228d7d2`) | ✅ Verified |
+| 3 | 2026-06-05 | Source Update | skills, references, docs | `AGENTS.md`, `references/ai-principles/write-discipline.md`, `.agents/skills/{requirements,design,planning}/create-*-package/SKILL.md` | Elevated the write-discipline contract from a workflow note to a hard precondition for requirements, design, and implementation-package creation. The three skills now require reading `<AIDE root>/references/ai-principles/write-discipline.md`, presenting the three mandatory prompts, recording the user's choices, and halting before Step 0 until confirmed. The reference now clarifies that One-pass mode still writes each file before drafting the next, adds a per-section persistence checkpoint with independent verification, and adds a closing inventory check before handoff. `AGENTS.md` now advertises the same operational contract repo-wide. | PR #28 (`feature/instructions-prompt`, commit `228d7d2`) | ✅ Verified |
+| 4 | 2026-06-05 | Source Update | docs | `CHANGELOG.md` | Added this missing release entry for PR #28 and advanced the changelog current artifact version from `1.6.0-beta` to `1.6.1-beta`, restoring alignment between the latest main merge, the project changelog, and the visible README version. | this correction branch | ✅ Verified |
+
+#### Branch Dependency
+
+Patch-beta release on top of `1.6.0-beta`. This release is documentation and validation hardening: it does not change the skill catalogue shape, workflow graph stage ordering, composition schema, or package artifact shape. Existing installs continue to work, while new or updated installs should follow `INSTRUCTIONS.md` to generate workspace-root skill shims and the workspace-root `AGENTS.md` orientation file. The strengthened write-discipline preconditions affect only the three bound package-authoring skills and convert the already-required write-on-acknowledge behavior into a validator-enforced, pre-Step-0 contract.
 
 ### `1.6.0-beta` — 2026-05-31
 

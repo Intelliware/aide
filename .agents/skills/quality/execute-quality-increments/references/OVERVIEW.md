@@ -3,7 +3,9 @@
 ## Purpose
 
 Turns an approved quality package into working test artifacts in the
-target codebase. Operates one test-case increment at a time, handling both
+resolved test-artifact target repo. When `[project.testing].qe_repo` is
+configured, that QE repo is the default target; otherwise the skill falls
+back to the in-scope code repo. Operates one test-case increment at a time, handling both
 scaffolding increments (build-file changes, runner classes, shared
 utilities, test configuration) and test-case increments (feature files,
 step definitions, fixtures, exports).

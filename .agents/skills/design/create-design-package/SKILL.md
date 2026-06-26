@@ -37,11 +37,20 @@ See `references/INPUTS-OUTPUTS.md` for the full table. Required:
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
 
+## Preconditions (MUST run before any step)
+
+Before executing Step 0 — and before any discovery, design assembly, or handoff work — the AI MUST:
+
+1. **Read and apply** `<AIDE root>/references/ai-principles/write-discipline.md`. "AIDE root" is the folder containing the framework `AGENTS.md` and the `.agents/` directory (typically `./AIDE/` in the user's workspace). The path is **not** skill-local — do not look for it under this skill's own `references/`.
+2. **Present the three mandatory user prompts** documented in that file: (a) acknowledgement mode (Interactive / One-pass), (b) output structure (Full structure / Combined), (c) confirmation of the write-on-acknowledge invariant.
+3. **Record the user's choices.** They govern every subsequent step.
+4. **Do not proceed to Step 0** until the user has explicitly confirmed.
+
+This is a hard precondition, not a style note. The `review-design-package` skill treats missing per-block files (the failure mode the contract prevents) as a finding.
+
 ## Workflow
 
-Sequenced phases. Run one step at a time. Do not pre-load every reference.
-
-**Before Step 0:** Read and apply `references/ai-principles/write-discipline.md`. Present the three mandatory user prompts (acknowledgement mode, output structure, confirmation). Record the user's choices. These choices govern all subsequent steps. Do not proceed until the user confirms.
+Sequenced phases. Run one step at a time. Do not pre-load every reference. The preconditions above MUST already be satisfied before Step 0 starts.
 
 0. `steps/00-scope-target-repo.md` — (SoD only) inherit the artifact's host repo and `affects_repos` from the upstream requirements artifact. No-op when the design stage is in legacy mode.
 1. `steps/01-discovery.md` — **MANDATORY for brownfield flows.** Architecture-discovery → technical-debt-assessment → existing-architecture-assessment, producing `architecture-baseline.md`. Skipped for greenfield only (record empty baseline assumption). Do NOT skip this step in brownfield mode — the architecture baseline is a prerequisite for design assembly.

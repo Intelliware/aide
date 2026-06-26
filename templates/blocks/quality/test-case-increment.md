@@ -16,7 +16,9 @@ application `INC-XXX` increments executed by `execute-increments`'s TDD
 loop. The composition records the omission as `N/A` in the change tracker.
 When included, this block decomposes the test design from §3 into
 independently executable increments that `execute-quality-increments`
-processes one at a time. There are **two kinds of increments**:
+processes one at a time. Each plan records the resolved test-artifact
+target repo: `[project.testing].qe_repo` when configured, otherwise the
+in-scope code repo fallback. There are **two kinds of increments**:
 1. **Scaffolding increments** — preparatory work that makes the
    codebase (or a separate test project) ready for test execution.
    Examples: adding test-framework dependencies to the build file,
@@ -26,8 +28,9 @@ processes one at a time. There are **two kinds of increments**:
    builders, fixtures, page objects). Scaffolding increments always
    come first in the dependency chain.
 2. **Test-case increments** — each one is a **detailed implementation
-   plan** for producing the actual test artifacts and placing them in
-   their target locations within the codebase. An increment specifies
+  plan** for producing the actual test artifacts and placing them in
+  their target locations within the resolved test-artifact target repo.
+  An increment specifies
    exactly which files to create, what each file should contain, where
    it goes, and how to verify it works. The increment is the plan;
    `execute-quality-increments` turns it into real artifacts.
@@ -83,7 +86,7 @@ artifacts:
   `config/customizations/execute-quality-increments.toml`.
 **5. Outcome**
 - Lists every file the increment produces, with paths relative to the
-  project root.
+  resolved test-artifact target repo root.
 - Includes any out-of-tree exports (e.g. test-case CSV for an external
   tracker) the team uses, as declared in
   `quality/quality-metrics-and-reporting`.
@@ -122,6 +125,9 @@ artifacts:
 | Status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` |
 The plan layout (flat vs categorised) is the team's choice and is
 recorded in this block when the package is authored.
+The plan overview also records the test-artifact target repo code and
+whether it came from `[project.testing].qe_repo` or from the code-repo
+fallback.
 ### 4a.4 Status-tracker columns
 | Column | Notes |
 |---|---|
@@ -138,6 +144,9 @@ recorded in this block when the package is authored.
   embedding strategy (in-repo vs dedicated test repo) are pinned in
   `quality/automation-and-cicd` and may be overridden per team in
   `config/customizations/execute-quality-increments.toml`.
+- The default repo for QE-owned artifacts is pinned by
+  `[project.testing].qe_repo` when present. If absent, the executing skill
+  falls back to the in-scope code repo.
 - The framework name itself is read from `project.toml`
   (`[project.elicitation].test_framework`,
   `[project.elicitation].test_runner`) — never hard-coded into this

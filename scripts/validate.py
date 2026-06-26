@@ -19,6 +19,10 @@ task #8 -> task #9):
   I. Separation-of-duties (SoD) rule enforcement against a fixture
      project.toml (and optional cross-cutting artifact). Run with
      `--project-toml PATH` to evaluate rules 7–12 from `config/SCHEMAS.md`.
+  J. Write-discipline binding — every `create-*` SKILL.md MUST contain a
+     `## Preconditions` section that cites
+     `references/ai-principles/write-discipline.md`. Prevents silent
+     decay of the write-on-acknowledge contract.
 
 Hard errors fail the run (exit 1):
   - Composition references a non-existent block (A).
@@ -519,6 +523,73 @@ def check_h() -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+WRITE_DISCIPLINE_REF = "references/ai-principles/write-discipline.md"
+PRECONDITIONS_HEADING_RE = re.compile(r"^##\s+Preconditions\b", re.MULTILINE)
+
+# The write-discipline contract (references/ai-principles/write-discipline.md)
+# explicitly enumerates the three package-authoring skills it binds. Other
+# `create-*` skills (e.g. create-pr, create-quality-package) are intentionally
+# out of scope today — extending the contract is a deliberate edit to
+# write-discipline.md and a corresponding update to this list, not a silent
+# expansion via folder-name pattern matching.
+WRITE_DISCIPLINE_SKILLS = (
+    "create-requirements-package",
+    "create-design-package",
+    "create-implementation-package",
+)
+
+
+def check_j() -> tuple[list[str], list[str]]:
+    """J — write-discipline binding for package-authoring create-* skills.
+
+    For each skill enumerated in WRITE_DISCIPLINE_SKILLS, its SKILL.md MUST:
+
+      1. Contain a top-level `## Preconditions` section heading. A buried
+         bullet inside `## Workflow` does not satisfy this — the heading must
+         be top-level so it survives context decay and section-walking logic.
+      2. Reference `references/ai-principles/write-discipline.md` somewhere in
+         the file (typically inside the Preconditions section).
+
+    The two checks are deliberately separate so a partial regression (heading
+    present, reference removed; or reference present, heading demoted back to
+    a bullet) is still surfaced.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not SKILLS_ROOT.is_dir():
+        return errors, warnings
+    if not (REPO_ROOT / WRITE_DISCIPLINE_REF).is_file():
+        errors.append(
+            f"{WRITE_DISCIPLINE_REF}: target file missing — every bound "
+            f"create-* skill cites this path; fix the path or restore the file."
+        )
+    found: set[str] = set()
+    for skill_md in sorted(SKILLS_ROOT.rglob("SKILL.md")):
+        skill_name = skill_md.parent.name
+        if skill_name not in WRITE_DISCIPLINE_SKILLS:
+            continue
+        found.add(skill_name)
+        rel = skill_md.relative_to(REPO_ROOT)
+        text = skill_md.read_text(encoding="utf-8")
+        if not PRECONDITIONS_HEADING_RE.search(text):
+            errors.append(
+                f"{rel}: missing top-level `## Preconditions` section — "
+                f"bound create-* skills MUST declare write-discipline as a "
+                f"hard precondition (not as a bullet inside `## Workflow`)."
+            )
+        if WRITE_DISCIPLINE_REF not in text:
+            errors.append(
+                f"{rel}: does not reference `{WRITE_DISCIPLINE_REF}` — "
+                f"bound create-* skills MUST cite the write-discipline contract."
+            )
+    for missing in sorted(set(WRITE_DISCIPLINE_SKILLS) - found):
+        warnings.append(
+            f".agents/skills/**/{missing}/SKILL.md: bound write-discipline "
+            f"skill not found on disk (renamed or removed?)"
+        )
+    return errors, warnings
+
+
 def check_sod(
     project_toml_path: Path,
     artifact_path: Path | None = None,
@@ -543,6 +614,8 @@ def check_sod(
       Rule 12 — Cross-cutting artifact frontmatter must declare a non-empty
                  `affects_repos` array, and every code must resolve to a known
                  `[[project.repos]].code`.
+    Rule 6a — `[project.testing].qe_repo`, when set, must resolve to a
+             known `[[project.repos]].code`; non-QE repo roles warn.
     """
     import tomllib
 
@@ -561,13 +634,39 @@ def check_sod(
         return errors, warnings
 
     declared_repos: set[str] = set()
+    repo_roles: dict[str, str] = {}
     for repo in data.get("project", {}).get("repos", []) or []:
         if isinstance(repo, dict):
             code = repo.get("code")
             if isinstance(code, str) and code:
                 declared_repos.add(code)
+                role = repo.get("role")
+                if isinstance(role, str):
+                    repo_roles[code] = role
 
     stages = data.get("stages", {}) or {}
+
+    # Rule 6a — optional QE repo target resolves to a declared repo.
+    proj = data.get("project", {}) or {}
+    testing = proj.get("testing", {}) if isinstance(proj, dict) else {}
+    qe_repo = testing.get("qe_repo") if isinstance(testing, dict) else None
+    if qe_repo is not None:
+        if not isinstance(qe_repo, str) or not qe_repo.strip():
+            errors.append(
+                f"{project_toml_path}: [project.testing].qe_repo must be a "
+                f"non-empty string matching one declared [[project.repos]].code."
+            )
+        elif qe_repo not in declared_repos:
+            errors.append(
+                f"{project_toml_path}: [project.testing].qe_repo = '{qe_repo}' "
+                f"references unknown repo — not declared in [[project.repos]]."
+            )
+        elif repo_roles.get(qe_repo) not in {"test-automation", "qe"}:
+            warnings.append(
+                f"{project_toml_path}: [project.testing].qe_repo = '{qe_repo}' "
+                f"references repo role '{repo_roles.get(qe_repo)}'; expected "
+                f"'test-automation' or 'qe' for a dedicated QE repo."
+            )
 
     # Rule 7 — dir XOR colocate per stage.
     for stage_name, stage_cfg in stages.items():
@@ -638,7 +737,6 @@ def check_sod(
                 )
 
     # Rule 11 — artifact_subdir bare relative path.
-    proj = data.get("project", {}) or {}
     asd = proj.get("artifact_subdir") if isinstance(proj, dict) else None
     if asd is not None:
         if not isinstance(asd, str):
@@ -788,6 +886,7 @@ def main() -> int:
     e_err, e_warn = check_e()
     g_err, g_warn = check_g()
     h_err, h_warn = check_h()
+    j_err, j_warn = check_j()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -798,11 +897,13 @@ def main() -> int:
         "Check E — block frontmatter integrity",
         "Check G — elicitation-pattern resolution",
         "Check H — RE skill output-structure binding",
+        "Check J — write-discipline binding (create-* skills)",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
-        (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (f_err, f_warn),
+        (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
+        (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -830,6 +931,7 @@ def main() -> int:
                  "E — block frontmatter integrity",
                  "G — elicitation-pattern resolution",
                  "H — RE skill output-structure binding",
+                 "J — write-discipline binding (create-* skills)",
                  "F — build-registry sanity"],
                 bundles,
             )
@@ -856,6 +958,7 @@ def main() -> int:
             _md(titles[4], e_err, e_warn),
             _md(titles[5], g_err, g_warn),
             _md(titles[6], h_err, h_warn),
+            _md(titles[7], j_err, j_warn),
             "## Check F — build-registry.py output",
             "",
         ]

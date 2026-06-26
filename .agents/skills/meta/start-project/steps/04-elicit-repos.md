@@ -29,7 +29,8 @@ so this step is the moment to pick stable codes that survive renames.
      `project.toml`, or a token-prefixed path like
      `{project-root}/../api-orders`
    - `role` — one of `api`, `ui`, `mobile`, `framework`, `database`,
-     `infra`, `shared-library`, `tooling` (validated against the enum)
+     `infra`, `shared-library`, `tooling`, `test-automation`, `qe`
+     (validated against the enum)
    - `type` — optional free-form tech hint (e.g.
      `node-typescript-nest`, `dotnet-8`, `react-vite-typescript`)
    - `primary` — boolean. At most one entry may be `primary = true`;
@@ -37,6 +38,11 @@ so this step is the moment to pick stable codes that survive renames.
      a second entry primary, it asks which one wins and clears the
      other.
 3. After each entry, ask "another repo?" Loop until `done`.
+  If Step 03 captured `[project.testing].qe_repo`, confirm that the
+  final list contains a `[[project.repos]]` entry with that `code`.
+  If not, prompt to add it now. Recommend `role = "test-automation"`
+  for dedicated QE suites; allow `role = "qe"` when that is the team's
+  preferred vocabulary.
 4. When mode = `extend-repos`, the loop appends to (not replaces) the
    existing array; the merger's array-of-tables-by-code semantics mean
    adding a new `code` is a clean append, while reusing an existing
@@ -49,6 +55,7 @@ so this step is the moment to pick stable codes that survive renames.
 - `code` regex: `^[a-z][a-z0-9-]*$`
 - `code` uniqueness within the array
 - `role` ∈ allowed enum
+- `[project.testing].qe_repo`, when set, resolves to one repo entry
 - At most one `primary = true`
 - `path` resolves to an existing directory (warn but allow if not, in
   case the user is creating the directory imminently)
@@ -57,6 +64,8 @@ so this step is the moment to pick stable codes that survive renames.
 
 - An entry without a valid `code` blocks completion of this step.
 - A duplicate `code` re-prompts.
+- A captured `qe_repo` with no matching `[[project.repos]]` entry blocks
+  completion until the user adds the repo or clears `qe_repo`.
 - More than one `primary = true` re-prompts the second offender.
 
 ## Exit criteria

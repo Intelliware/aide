@@ -22,6 +22,7 @@ Materialize the canonical `project.toml`. Optionally materialize a
    `config/SCHEMAS.md` § 4 against the in-memory model:
    - `project.code` regex
    - `[[project.repos]]` `code` uniqueness
+   - `[project.testing].qe_repo` resolves to a declared repo code when set
    - at most one `primary = true`
    - `default_flow` ∈ enum
    - path tokens ∈ allowed set
@@ -32,8 +33,9 @@ Materialize the canonical `project.toml`. Optionally materialize a
    layout as the template:
    - replace the example's intro comment block with a single-line
      header: `# Managed by skills/meta/start-project. Edit manually or via skills/meta/customize-framework.`
-   - serialize `[project]`, `[project.paths]`, `[project.glossary]`,
-     `[project.elicitation]`, `[[project.repos]]` in that order
+   - serialize `[project]`, `[project.paths]`, `[project.testing]`,
+     `[project.glossary]`, `[project.elicitation]`, `[[project.repos]]`
+     in that order
    - omit empty subsections rather than emitting empty headers
    - preserve TOML idioms: triple-quoted strings for multi-line
      descriptions, ordinary strings for single-line, arrays-of-tables

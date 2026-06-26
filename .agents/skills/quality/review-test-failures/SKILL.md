@@ -64,7 +64,7 @@ the single `Failure triage` row it appends to the quality package's
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Per-test reports, execution log, screenshots | paths declared in automation-and-cicd | Recommended — drives evidence-first triage |
 | Knowledge base | `{paths.knowledge_base_path}/` via `navigate-knowledge-base --profile=test-suite` (with `--profile-subkind=shared-utilities` for locator / fixture lookup during classification) | Optional — cross-references shared utilities, known patterns, prior-failure history |
-| Test suite codebase | filesystem (repos from `project.toml`) | Optional — direct lookup of locators / fixtures / shared helpers when the KB is unavailable |
+| Test suite codebase | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to in-scope code repo when unset | Optional — direct lookup of locators / fixtures / shared helpers when the KB is unavailable |
 
 See `references/INPUTS-OUTPUTS.md` for the full table.
 
@@ -135,7 +135,9 @@ to invoke; the user picks):
   `manage-bugs`; it never writes to the bug log itself. The user
   confirms each bug at invocation time.
 - **Hard-coding paths or framework names.** Evidence locations come
-  from the quality package's `automation-and-cicd` block; the
+  from the quality package's `automation-and-cicd` block and the
+  resolved test-suite repo (`[project.testing].qe_repo` when set, otherwise
+  code-repo fallback); the
   category taxonomy can be overridden by the team. Read both; do
   not assume.
 - **Treating "all failures are app defects" as plausible.** A

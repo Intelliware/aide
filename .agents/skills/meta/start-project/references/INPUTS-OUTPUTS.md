@@ -15,6 +15,7 @@
 | `project.paths.design_package` | no | user input — defaults to `{project-root}/.framework-output/design` | `{project-root}/docs/design` |
 | `project.paths.implementation_package` | no | user input — defaults to `{project-root}/.framework-output/implementation` | `{project-root}/docs/implementation` |
 | `project.paths.knowledge_base_path` | yes (when flow ≠ quick-dev) | user input — sibling-repo path | `{project-root}/../knowledge-base-repo` |
+| `project.testing.qe_repo` | no | user input — code of dedicated QE/test-automation repo | `qe-automation` |
 | `project.glossary.references` | no | user input — list of paths | `["{project-root}/docs/glossary.md"]` |
 | `project.glossary.entries[]` | no | user input — `term`, `definition`, `aliases`, `domain_specific` | (see `EXAMPLE.md`) |
 | `project.elicitation.<code>` | no | user input — answers to known decision-table codes | `compliance_regime = "pci-dss"` |
@@ -44,7 +45,8 @@
 - `project.default_flow`, when set, is one of `greenfield`, `brownfield`, `quick-dev`.
 - All path-token references use one of `{project-root}`, `{framework-root}`, `{home}`, `{cwd}`.
 - `knowledge_base_path` is mandatory for greenfield and brownfield; optional (and unused) for quick-dev.
-- `[[project.repos]]` entries' `role` is one of: `api`, `ui`, `mobile`, `framework`, `database`, `infra`, `shared-library`, `tooling`.
+- `project.testing.qe_repo`, when set, matches one declared `[[project.repos]].code`.
+- `[[project.repos]]` entries' `role` is one of: `api`, `ui`, `mobile`, `framework`, `database`, `infra`, `shared-library`, `tooling`, `test-automation`, `qe`.
 
 The full validation list lives in `config/SCHEMAS.md` § 4. The skill
 checks each rule before writing; on failure, it surfaces the offending

@@ -12,9 +12,9 @@
 | Test-traceability matrix | yes | `docs/<feature>/quality-package/quality/traceability.md` | Primary source of "which test covers which INC / AC / FR / NFR" |
 | Test-design block | yes | `docs/<feature>/quality-package/quality/test-design.md` | Test levels per scope (the team's pyramid) — distinguishes which INCs require automated coverage vs. dev-owned-only |
 | Test-case status tracker | optional (bootstrapped if absent) | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | TC-XXX implementation status when the team uses the optional TC-XXX flow |
-| `project.toml` | yes | `{project-root}/project.toml` | Flow detection, paths, repo list, tag conventions |
+| `project.toml` | yes | `{project-root}/project.toml` | Flow detection, paths, repo list, `[project.testing].qe_repo`, tag conventions |
 | Knowledge base | optional — recommended | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Enables the live drift check in Step 3 |
-| Test suite codebase | optional | filesystem (repos from `project.toml`) | Direct marker / tag / spec-file search when the KB is unavailable |
+| Test suite codebase | optional | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to the in-scope code repo | Direct marker / tag / spec-file search when the KB is unavailable |
 
 ## Outputs
 

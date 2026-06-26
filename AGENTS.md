@@ -9,6 +9,19 @@ This folder is **A.I.D.E.**, a skills-based SDLC methodology framework conformin
 - Each skill's `SKILL.md` declares **when** to use it (the `description:` is the trigger). Detail lives in `references/`, loaded on demand. Don't pre-load `references/`.
 - Skill-to-skill handoffs happen by name (`## Next skill\n<name>`), never by `@`-include — this preserves context budget.
 
+## Operational contracts for `create-*` skills (MUST honour)
+
+Any `create-*` skill (`create-requirements-package`, `create-design-package`, `create-implementation-package`) MUST read and apply `<AIDE root>/references/ai-principles/write-discipline.md` **before** executing its first step. "AIDE root" is the folder containing this `AGENTS.md` and the `.agents/` directory — when AIDE is installed under `./AIDE/`, the file resolves to `./AIDE/references/ai-principles/write-discipline.md`.
+
+The contract enforces:
+
+1. The three mandatory user prompts (acknowledgement mode, output structure, confirmation) fire **before** Step 0.
+2. The **write-on-acknowledge invariant** — every artifact is written to disk as soon as it is complete; nothing is accumulated in conversation for a single bulk write at the end.
+3. The **per-section persistence checkpoint** — every section closes by confirming its file exists on disk before advancing.
+4. The **closing inventory check** — before any `## Next skill` handoff, the AI verifies every composition-expected artifact exists on disk with non-trivial content.
+
+Violating any of the above is a defect, not a style preference. The `review-*` skills treat missing per-section files as a finding.
+
 ## Vocabulary
 
 - **Stage** — SDLC-level grouping of work.
@@ -45,6 +58,6 @@ The single exception: if the user explicitly says they're working on A.I.D.E. it
 ## Where to find more
 
 - `README.md` — host setup, top-level layout, stages, knowledge-base architecture, vocabulary, maintenance scripts.
-- `.agents/skills/_registry/skills.csv` — generated catalog of every skill (48 of them) with description and stage.
+- `.agents/skills/_registry/skills.csv` — generated catalog of every skill with description and stage.
 - `.agents/skills/_registry/workflow-graph.yaml` — hand-authored stage flow / gates.
 - `_docs/requirements.md` — framework-internal requirements; not part of any shippable artifact.

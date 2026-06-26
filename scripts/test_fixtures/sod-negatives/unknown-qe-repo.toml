@@ -1,0 +1,10 @@
+[project]
+code = "unknown-qe-repo"
+
+[project.testing]
+qe_repo = "qe-automation"
+
+[[project.repos]]
+code = "app"
+path = "."
+role = "api"

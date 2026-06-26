@@ -269,6 +269,7 @@ This is the single richest layer. Sections:
 [project.change_log]       # release-stream CHANGELOG.md (conditional)
 [project.elicitation]      # answers to decision-table questions
 [[project.repos]]          # one entry per repository in this project
+[project.testing]          # optional QE/test-artifact target selection
 ```
 
 #### `[project]`
@@ -293,6 +294,17 @@ All paths may use the tokens in § 1.5. Relative paths resolve under
 | `design_package` | path | `"{project-root}/.framework-output/design"` | Where the design stage writes. |
 | `implementation_package` | path | `"{project-root}/.framework-output/implementation"` | Where the implementation stage writes. |
 | `knowledge_base_path` | path | _(no default)_ | Path to the KB repository. **Critical:** the KB lives in its own repo, so this path almost always points outside `{project-root}` (typically `"../knowledge-base"` for a sibling repo). Absolute paths are also valid. If unset, the KB-stage skills error early with a helpful message. |
+
+#### `[project.testing]`
+
+Optional table for project-wide test-artifact routing. Omit this table when
+the project has no dedicated QE/test-automation repository; quality-stage
+execution then falls back to the source/code repository exactly as earlier
+framework versions did.
+
+| Field | Type | Default | Purpose |
+|---|---|---|---|
+| `qe_repo` | string | _(unset)_ | Code of the `[[project.repos]]` entry that should receive QE-owned executable test artifacts by default. When set, `execute-quality-increments`, coverage drift checks, and failure triage prefer this repo for feature files, step definitions, runners, fixtures, reports, and marker lookup. When unset, they use the in-scope code repo fallback. |
 
 #### `[project.glossary]`
 
@@ -353,7 +365,7 @@ overrides.
 | `code` | string | yes | Stable short identifier (kebab-case). The merge key. |
 | `name` | string | yes | Human-readable name for headings. |
 | `path` | path | yes | Filesystem path to the repo. May be `"."` if it _is_ this project root. |
-| `role` | enum | yes | One of: `api`, `ui`, `mobile`, `framework`, `database`, `infra`, `shared-library`, `tooling`. Drives which RE templates and KB component types apply. |
+| `role` | enum | yes | One of: `api`, `ui`, `mobile`, `framework`, `database`, `infra`, `shared-library`, `tooling`, `test-automation`, `qe`. Drives which RE templates and KB component types apply. Use `test-automation` or `qe` for a dedicated QE repository referenced by `[project.testing].qe_repo`. |
 | `type` | string | no | Free-form technology hint (`"node-typescript-nest"`, `"dotnet-8"`, `"react-vite"`). Feeds tech-detection short-circuits in the brownfield flow. |
 | `primary` | bool | no | At most one repo may set `primary = true`; that repo is treated as the project's "home" for ambiguous operations. Defaults to the first entry if unset. |
 
@@ -534,6 +546,7 @@ skill's contract assumes these have already passed.
 4. `project.default_flow`, when set, is one of the three flow values.
 5. Every path token used (`{project-root}` etc.) is one of the four defined in § 1.5.
 6. `_suppress = true` only appears in array-of-table entries with a `code` or `id`.
+6a. `[project.testing].qe_repo`, when set, must be a non-empty string matching one declared `[[project.repos]].code`. Warn when the referenced repo's `role` is not `test-automation` or `qe`.
 
 **Config — separation-of-duties (SoD):**
 
