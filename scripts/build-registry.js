@@ -63,7 +63,7 @@ const REGISTRY_DIR = path.join(SKILLS_ROOT, '_registry');
 const CSV_PATH = path.join(REGISTRY_DIR, 'skills.csv');
 const JSON_PATH = path.join(REGISTRY_DIR, 'skills.json');
 
-const CSV_COLUMNS = ['canonical_id', 'name', 'description', 'stage', 'package', 'path'];
+const CSV_COLUMNS = ['canonical_id', 'name', 'description', 'stage', 'package', 'path', 'origin'];
 
 /**
  * Parse the YAML frontmatter of a SKILL.md file.
@@ -159,33 +159,58 @@ function findSkillFiles(dir, files = []) {
 }
 
 /**
- * Walk .agents/skills/** /SKILL.md and return one record per skill
+ * Origin label for an extra root: aide-addon.toml [addon].name, else dir name.
  */
-function discoverSkills(verbose = false) {
-  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
-    console.error(`ERROR: skills directory not found at ${SKILLS_ROOT}`);
-    process.exit(1);
+function addonName(addonRoot) {
+  const manifest = path.join(addonRoot, 'aide-addon.toml');
+  if (fs.existsSync(manifest)) {
+    try {
+      const text = fs.readFileSync(manifest, 'utf-8');
+      const section = text.split(/^\s*\[addon\]\s*$/m)[1];
+      const m = section && section.match(/^\s*name\s*=\s*["']([^"']+)["']/m);
+      if (m) return m[1];
+    } catch (_) { /* fall through to dir name */ }
   }
+  return path.basename(addonRoot);
+}
 
+/**
+ * Read [registry].extra_skill_roots from framework.toml, if present.
+ * Lightweight scan (no TOML dependency).
+ */
+function configExtraRoots() {
+  const frameworkToml = path.join(REPO_ROOT, 'framework.toml');
+  if (!fs.existsSync(frameworkToml)) return [];
+  try {
+    const text = fs.readFileSync(frameworkToml, 'utf-8');
+    const m = text.match(/extra_skill_roots\s*=\s*\[([^\]]*)\]/);
+    if (!m) return [];
+    return m[1].split(',')
+      .map(s => s.trim().replace(/^["']|["']$/g, ''))
+      .filter(Boolean);
+  } catch (_) {
+    return [];
+  }
+}
+
+/**
+ * Return one record per SKILL.md under skillsRoot (a `.agents/skills` dir).
+ */
+function discoverInRoot(skillsRoot, pathBase, origin, verbose) {
   const records = [];
-  const skillFiles = findSkillFiles(SKILLS_ROOT).sort();
+  const skillFiles = findSkillFiles(skillsRoot).sort();
 
   for (const skillPath of skillFiles) {
-    const rel = path.relative(REPO_ROOT, skillPath);
-    const parts = rel.split(path.sep);
-    
-    // (".agents", "skills", "<stage>", "<skill>", "SKILL.md")
-    // or (".agents", "skills", "<category>", "<skill>", "SKILL.md")
-    if (parts.length < 5 || parts[0] !== '.agents' || parts[1] !== 'skills') {
-      continue;
-    }
+    const parts = path.relative(skillsRoot, skillPath).split(path.sep);
+    // ("<stage>", "<skill>", "SKILL.md")
+    if (parts.length < 3) continue;
 
-    const stage = parts[2];
-    if (stage.startsWith('_')) {
-      continue; // skip _registry/, _archive/, etc.
-    }
+    const stage = parts[0];
+    if (stage.startsWith('_')) continue; // skip _registry/, _archive/, etc.
 
     const folder = parts[parts.length - 2];
+    let pathStr = path.relative(pathBase, skillPath);
+    if (pathStr.startsWith('..')) pathStr = skillPath; // outside base → absolute
     const text = fs.readFileSync(skillPath, 'utf-8');
     const fm = parseFrontmatter(text);
 
@@ -193,14 +218,47 @@ function discoverSkills(verbose = false) {
       stage,
       folder,
       frontmatter: fm,
-      path: rel,
+      path: pathStr,
       absPath: skillPath,
-      lineCount: text.split('\n').length
+      lineCount: text.split('\n').length,
+      origin
     });
 
     if (verbose) {
-      console.log(`  parsed ${rel} (name=${fm.name || '<missing>'}, lines=${records[records.length - 1].lineCount})`);
+      console.log(`  parsed [${origin}] ${pathStr} (name=${fm.name || '<missing>'}, lines=${records[records.length - 1].lineCount})`);
     }
+  }
+
+  return records;
+}
+
+/**
+ * Walk core .agents/skills/** /SKILL.md plus any add-on extra roots.
+ */
+function discoverSkills(verbose = false, extraRoots = []) {
+  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
+    console.error(`ERROR: skills directory not found at ${SKILLS_ROOT}`);
+    process.exit(1);
+  }
+
+  let records = discoverInRoot(SKILLS_ROOT, REPO_ROOT, 'core', verbose);
+
+  for (const spec of extraRoots) {
+    let addonRoot = path.resolve(spec.replace(/^~/, process.env.HOME || ''));
+    let skillsDir = path.join(addonRoot, '.agents', 'skills');
+    if (!fs.existsSync(skillsDir) || !fs.statSync(skillsDir).isDirectory()) {
+      // Allow pointing directly at a `.agents/skills` dir.
+      skillsDir = addonRoot;
+      if (path.basename(addonRoot) === 'skills') {
+        addonRoot = path.dirname(path.dirname(addonRoot));
+      }
+    }
+    if (!fs.existsSync(skillsDir) || !fs.statSync(skillsDir).isDirectory()) {
+      console.error(`WARN: extra skill root not found: ${spec}`);
+      continue;
+    }
+    const origin = addonName(addonRoot);
+    records = records.concat(discoverInRoot(skillsDir, addonRoot, origin, verbose));
   }
 
   return records;
@@ -267,12 +325,16 @@ function toRows(records) {
       description: fm.description || '',
       stage: rec.stage,
       package: '',
-      path: rec.path
+      path: rec.path,
+      origin: rec.origin || 'core'
     });
   }
 
-  // Sort by stage, then canonical_id
+  // Sort core-first, then by stage, then canonical_id
   rows.sort((a, b) => {
+    const aCore = a.origin === 'core' ? 0 : 1;
+    const bCore = b.origin === 'core' ? 0 : 1;
+    if (aCore !== bCore) return aCore - bCore;
     if (a.stage !== b.stage) {
       return a.stage.localeCompare(b.stage);
     }
@@ -333,9 +395,20 @@ function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const verbose = args.includes('--verbose');
+  const cliRoots = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--extra-skill-root' && args[i + 1]) {
+      cliRoots.push(args[i + 1]);
+      i++;
+    }
+  }
+  const extraRoots = cliRoots.concat(configExtraRoots());
 
   console.log(`Scanning ${path.relative(REPO_ROOT, SKILLS_ROOT)}/ ...`);
-  const records = discoverSkills(verbose);
+  if (extraRoots.length) {
+    console.log(`Extra skill roots: ${extraRoots.join(', ')}`);
+  }
+  const records = discoverSkills(verbose, extraRoots);
 
   if (!records.length) {
     console.error('ERROR: no SKILL.md files found.');
@@ -383,4 +456,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { parseFrontmatter, discoverSkills, validate, toRows };
+module.exports = { parseFrontmatter, discoverSkills, discoverInRoot, addonName, configExtraRoots, validate, toRows };

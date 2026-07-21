@@ -68,7 +68,7 @@ REGISTRY_DIR = SKILLS_ROOT / "_registry"
 CSV_PATH = REGISTRY_DIR / "skills.csv"
 JSON_PATH = REGISTRY_DIR / "skills.json"
 
-CSV_COLUMNS = ("canonical_id", "name", "description", "stage", "package", "path")
+CSV_COLUMNS = ("canonical_id", "name", "description", "stage", "package", "path", "origin")
 
 
 def parse_frontmatter(text: str) -> dict[str, str]:
@@ -133,33 +133,89 @@ def _unquote(value: str) -> str:
     return value
 
 
-def discover_skills(verbose: bool = False) -> list[dict[str, object]]:
-    """Walk .agents/skills/**/SKILL.md and return one record per skill."""
-    if not SKILLS_ROOT.is_dir():
-        sys.stderr.write(f"ERROR: skills directory not found at {SKILLS_ROOT}\n")
-        sys.exit(1)
+def _addon_name(addon_root: Path) -> str:
+    """Origin label for an extra root: aide-addon.toml [addon].name, else dir name."""
+    manifest = addon_root / "aide-addon.toml"
+    if manifest.is_file():
+        try:
+            import tomllib  # Python 3.11+
+            data = tomllib.loads(manifest.read_text(encoding="utf-8"))
+            name = data.get("addon", {}).get("name")
+            if name:
+                return str(name)
+        except Exception:
+            pass  # fall through to dir name
+    return addon_root.name
+
+
+def _config_extra_roots() -> list[str]:
+    """Read [registry].extra_skill_roots from framework.toml, if present."""
+    framework_toml = REPO_ROOT / "framework.toml"
+    if not framework_toml.is_file():
+        return []
+    try:
+        import tomllib  # Python 3.11+
+        data = tomllib.loads(framework_toml.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    roots = data.get("registry", {}).get("extra_skill_roots", [])
+    return [str(r) for r in roots] if isinstance(roots, list) else []
+
+
+def _discover_in_root(
+    skills_root: Path, path_base: Path, origin: str, verbose: bool
+) -> list[dict[str, object]]:
+    """Return one record per SKILL.md under skills_root (a `.agents/skills` dir)."""
     records: list[dict[str, object]] = []
-    for skill_md in sorted(SKILLS_ROOT.rglob("SKILL.md")):
-        rel = skill_md.relative_to(REPO_ROOT)
-        parts = rel.parts  # (".agents", "skills", "<stage>", "<skill>", "SKILL.md")
-        if len(parts) < 5 or parts[0] != ".agents" or parts[1] != "skills":
+    for skill_md in sorted(skills_root.rglob("SKILL.md")):
+        parts = skill_md.relative_to(skills_root).parts  # ("<stage>", "<skill>", "SKILL.md")
+        if len(parts) < 3:
             continue
-        stage = parts[2]
+        stage = parts[0]
         if stage.startswith("_"):
             continue  # skip _registry/, _archive/, etc.
         folder = parts[-2]
+        # Path column: relative to the origin repo root when possible, else absolute.
+        try:
+            path_str = str(skill_md.relative_to(path_base))
+        except ValueError:
+            path_str = str(skill_md)
         text = skill_md.read_text(encoding="utf-8")
         fm = parse_frontmatter(text)
         records.append({
             "stage": stage,
             "folder": folder,
             "frontmatter": fm,
-            "path": str(rel),
+            "path": path_str,
             "abs_path": skill_md,
             "line_count": len(text.splitlines()),
+            "origin": origin,
         })
         if verbose:
-            print(f"  parsed {rel} (name={fm.get('name', '<missing>')}, lines={records[-1]['line_count']})")
+            print(f"  parsed [{origin}] {path_str} (name={fm.get('name', '<missing>')}, lines={records[-1]['line_count']})")
+    return records
+
+
+def discover_skills(
+    verbose: bool = False, extra_roots: list[str] | None = None
+) -> list[dict[str, object]]:
+    """Walk core `.agents/skills/**/SKILL.md` plus any add-on extra roots."""
+    if not SKILLS_ROOT.is_dir():
+        sys.stderr.write(f"ERROR: skills directory not found at {SKILLS_ROOT}\n")
+        sys.exit(1)
+    records = _discover_in_root(SKILLS_ROOT, REPO_ROOT, "core", verbose)
+    for spec in extra_roots or []:
+        addon_root = Path(spec).expanduser().resolve()
+        skills_dir = addon_root / ".agents" / "skills"
+        if not skills_dir.is_dir():
+            # Allow pointing directly at a `.agents/skills` dir.
+            skills_dir = addon_root
+            addon_root = addon_root.parent.parent if addon_root.name == "skills" else addon_root
+        if not skills_dir.is_dir():
+            sys.stderr.write(f"WARN: extra skill root not found: {spec}\n")
+            continue
+        origin = _addon_name(addon_root)
+        records += _discover_in_root(skills_dir, addon_root, origin, verbose)
     return records
 
 
@@ -203,15 +259,16 @@ def to_rows(records: list[dict[str, object]]) -> list[dict[str, str]]:
             "stage": str(rec["stage"]),
             "package": "",
             "path": str(rec["path"]),
+            "origin": str(rec.get("origin", "core")),
         })
-    rows.sort(key=lambda r: (r["stage"], r["canonical_id"]))
+    rows.sort(key=lambda r: (r["origin"] != "core", r["stage"], r["canonical_id"]))
     return rows
 
 
 def write_csv(rows: list[dict[str, str]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as fh:
-        writer = csv.DictWriter(fh, fieldnames=list(CSV_COLUMNS))
+        writer = csv.DictWriter(fh, fieldnames=list(CSV_COLUMNS), lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(row)
@@ -220,17 +277,31 @@ def write_csv(rows: list[dict[str, str]], path: Path) -> None:
 def write_json(rows: list[dict[str, str]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {"version": 1, "skills": rows}
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate the skill registry CSV/JSON.")
     parser.add_argument("--dry-run", action="store_true", help="Do not write files.")
     parser.add_argument("--verbose", action="store_true", help="Print per-skill progress.")
+    parser.add_argument(
+        "--extra-skill-root",
+        action="append",
+        default=[],
+        metavar="PATH",
+        help="Path to an add-on repo (or its .agents/skills dir) to include. "
+             "Repeatable. Merged with framework.toml [registry].extra_skill_roots.",
+    )
     args = parser.parse_args()
 
+    extra_roots = list(args.extra_skill_root) + _config_extra_roots()
+
     print(f"Scanning {SKILLS_ROOT.relative_to(REPO_ROOT)}/ ...")
-    records = discover_skills(verbose=args.verbose)
+    if extra_roots:
+        print(f"Extra skill roots: {', '.join(extra_roots)}")
+    records = discover_skills(verbose=args.verbose, extra_roots=extra_roots)
     if not records:
         sys.stderr.write("ERROR: no SKILL.md files found.\n")
         return 1

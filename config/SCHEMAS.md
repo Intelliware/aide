@@ -231,6 +231,7 @@ suppression, custom blocks).
 | `regenerate_on_install` | bool | `true` | Skill-manifest regeneration on installer runs. |
 | `regenerate_on_skill_change` | bool | `true` | Watch SKILL.md frontmatter and regenerate when descriptions change. |
 | `manifest_path` | path | `"{framework-root}/_config/skill-manifest.csv"` | Where the registry generator writes its output. |
+| `extra_skill_roots` | array of path | `[]` | Additional add-on repos (or `.agents/skills` dirs) whose skills the registry generator should include alongside core. Each is scanned for `SKILL.md` files and tagged with an `origin` (from the add-on's `aide-addon.toml` `[addon].name`, else the dir name) in the generated `skills.csv`/`skills.json`. Also settable per-run via `build-registry.py --extra-skill-root PATH`. Core skills carry `origin = "core"`. |
 
 ### 2.2 Layer 2 — `framework.user.toml`
 
@@ -437,6 +438,37 @@ halt with a clear "add-on not installed" message pointing at `setup_doc`. If no
 `[tools.<name>]` block matches at all, a skill packaged with an in-repo `tools/`
 dir MAY fall back to the literal `cd tools && npm run <cli> --` form for
 backward compatibility.
+
+### 2.7 The add-on manifest — `aide-addon.toml`
+
+Each add-on repo carries an `aide-addon.toml` at its root so the framework can
+**enumerate** what an installed add-on provides (rather than infer it). It is
+read by `build-registry.py`/`.js` to label the add-on's skills and by humans as
+the add-on's contents contract.
+
+**Location:** `<addon-root>/aide-addon.toml`.
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `[addon].name` | string | yes | Short identifier used as the `origin` tag on this add-on's skills in the registry (e.g. `atlassian`). |
+| `[addon].description` | string | no | One-line summary of the add-on. |
+| `[addon].provides_skills` | array of string | no | Skill names the add-on contributes (documentation / sanity-check aid). |
+| `[addon].registers_tools` | array of string | no | The `[tools.<name>]` identifiers a consuming project is expected to declare (see § 2.6). |
+
+Example:
+
+```toml
+[addon]
+name = "atlassian"
+description = "JIRA + Confluence extraction via the Atlassian CLI"
+provides_skills = ["jira-get", "jira-search", "jira-extract-requirements",
+                   "confluence-fetch", "confluence-extract-package"]
+registers_tools = ["atlassian"]
+```
+
+An add-on is **discovered** by the host's multi-root `.agents/skills/` scan when
+opened as a workspace folder — the manifest does not drive discovery; it drives
+enumeration and registry labelling.
 
 ---
 
