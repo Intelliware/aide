@@ -46,6 +46,13 @@ elicitation_depth = "deep"
 # we always want John (the PM persona) for requirements work.
 preferred_persona = "john"
 
+# Source adapter (OPTIONAL). Names an installed add-on skill that seeds the
+# Step 1 discovery change-description from an external system — e.g. pull an
+# enhancement spec from a Confluence page. Requires the corresponding add-on
+# repo to be installed (see config/SCHEMAS.md § 2.6 and
+# references/orientation/source-adapters.md). Unset = capture by elicitation.
+# discovery_source = "confluence-extract-package"
+
 
 # ─── Table recursive-merge ───────────────────────────────────────────────────
 # Tables recursive-merge: keys NOT mentioned here are inherited.

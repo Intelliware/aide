@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# customizations/document-quick-change.toml — Layer 5 (team)
+#
+# COMMITTED. Team-edited. Example for the `document-quick-change` skill (the
+# first quick-dev skill — captures the combined lightweight spec).
+#
+# This example expresses a team that pulls the change's requirements straight
+# from a JIRA story instead of hand-capturing them, using an installed
+# Atlassian add-on.
+#
+# A sibling `document-quick-change.user.toml` (gitignored) can do the same at
+# higher precedence for your personal overrides.
+#
+# See config/SCHEMAS.md § 2.6 (tool resolution) and
+# references/orientation/source-adapters.md (the source-adapter convention).
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Source adapter (OPTIONAL) ───────────────────────────────────────────────
+# Names an installed add-on skill that seeds the quick-dev spec's existing-
+# artifact intake (Step 3) from an external system. Here: pull a JIRA story
+# into a structured package on disk and seed the spec from it.
+#
+# Requires the Atlassian add-on repo to be installed and discoverable, plus a
+# matching [tools.atlassian] block in project.toml. If the adapter is set but
+# not installed, the skill surfaces the gap and falls back to asking you
+# directly. Unset (the default) = capture by direct elicitation.
+
+requirements_source = "jira-extract-requirements"
