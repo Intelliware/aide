@@ -2,24 +2,6 @@
   "version": 1,
   "skills": [
     {
-      "canonical_id": "confluence-extract-package",
-      "name": "confluence-extract-package",
-      "description": "Use when the user asks to extract a Confluence package, download a Confluence page plus linked pages, build a package from Confluence page {ID}, or gather discovery input from Confluence. Given a Confluence page ID or URL, extracts the main page plus all linked pages and Jira issues (L0 only), checks for related Jira packages, performs staleness checks, and prints a Package Update Report.",
-      "stage": "confluence",
-      "package": "",
-      "path": ".agents/skills/confluence/confluence-extract-package/SKILL.md",
-      "origin": "core"
-    },
-    {
-      "canonical_id": "confluence-fetch",
-      "name": "confluence-fetch",
-      "description": "Use when the user asks to fetch, view, cache, or analyze a single Confluence page by ID or URL; says 'fetch Confluence page', 'show me page {ID}', 'read this Confluence URL', or needs raw page JSON and metadata for agent analysis. Saves the raw JSON response and metadata, then lets the agent generate markdown analysis when needed.",
-      "stage": "confluence",
-      "package": "",
-      "path": ".agents/skills/confluence/confluence-fetch/SKILL.md",
-      "origin": "core"
-    },
-    {
       "canonical_id": "create-design-package",
       "name": "create-design-package",
       "description": "Use when the user asks to create, build, write, or assemble a design package; says 'create the design package', 'design the solution', 'build the technical blueprint', 'create the architecture', 'how should we build this', 'start the design stage', 'choose the technology stack', 'design the API/database/frontend/backend'. Drives the full design stage: optional architecture-baseline discovery (brownfield), 11-step design assembly with C4 diagrams, technology pinning, traceability back to requirements — handing off to review-design-package.",
@@ -62,42 +44,6 @@
       "stage": "execution",
       "package": "",
       "path": ".agents/skills/execution/manage-bugs/SKILL.md",
-      "origin": "core"
-    },
-    {
-      "canonical_id": "document-convert",
-      "name": "document-convert",
-      "description": "Use when the user asks to convert or analyze a Word (.docx), Excel (.xlsx/.xls), or PDF (.pdf) document; says 'convert this document', 'analyze this spreadsheet', 'turn this PDF into markdown', or needs document content transformed into markdown with structured analysis. Auto-detects format, converts to markdown, analyzes content, and generates actionable structured reports rather than only raw tables.",
-      "stage": "files-conversion",
-      "package": "",
-      "path": ".agents/skills/files-conversion/document-convert/SKILL.md",
-      "origin": "core"
-    },
-    {
-      "canonical_id": "jira-extract-requirements",
-      "name": "jira-extract-requirements",
-      "description": "Use when the user asks to extract requirements from Jira, create a requirements package from a Jira Feature/Epic, build requirements from Jira, or says 'extract requirements for {KEY}'. Fetches the Jira issue, detects issue type, prompts for output location, saves raw data to cache, creates a structured markdown requirements package, performs staleness checks, and prints a Package Update Report.",
-      "stage": "jira",
-      "package": "",
-      "path": ".agents/skills/jira/jira-extract-requirements/SKILL.md",
-      "origin": "core"
-    },
-    {
-      "canonical_id": "jira-get",
-      "name": "jira-get",
-      "description": "Use when the user asks to fetch, view, cache, or analyze a single Jira issue by key; says 'fetch PROJ-123', 'show me Jira issue {KEY}', 'get this Jira ticket', or needs raw Jira issue JSON and metadata for agent analysis. Saves the raw JSON response, metadata, and agent-generated markdown analysis by default to cache/jira/{projectKey}/{ISSUE_KEY}/.",
-      "stage": "jira",
-      "package": "",
-      "path": ".agents/skills/jira/jira-get/SKILL.md",
-      "origin": "core"
-    },
-    {
-      "canonical_id": "jira-search",
-      "name": "jira-search",
-      "description": "Use when the user asks to search Jira issues, run a JQL query, find issues by status, assignee, project, sprint, labels, or custom criteria, or says 'show me all issues matching...'. Translates search intent into JQL where needed, returns multiple issues with summaries, and generates search reports.",
-      "stage": "jira",
-      "package": "",
-      "path": ".agents/skills/jira/jira-search/SKILL.md",
       "origin": "core"
     },
     {

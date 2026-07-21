@@ -47,32 +47,24 @@ stages:
   - id: quick-dev
     description: "Lightweight scoped-change path: document-quick-change, plan-quick-change, execute-quick-change."
     order: 8
-  - id: jira
-    description: "Jira integration utilities: fetch issues, search with JQL, and extract requirements packages from Jira epics/features."
-    order: 9
-  - id: confluence
-    description: "Confluence integration utilities: fetch pages and extract documentation packages from Confluence."
-    order: 10
-  - id: files-conversion
-    description: "Document conversion and analysis utilities: convert Word, Excel, and PDF to Markdown with structured analysis."
-    order: 11
+  # Integration tooling (Jira/Confluence extraction, document conversion) is no
+  # longer part of core — it ships as a separate ADD-ON REPO (see
+  # _docs/pluggable-tool-addons-proposal.md). When an add-on is installed and
+  # registered via [registry].extra_skill_roots, its skills appear in the
+  # registry tagged with the add-on's origin; flows consume them through the
+  # source-adapter convention (references/orientation/source-adapters.md), not
+  # through hardcoded stages here.
 
 flows:
   greenfield:
     description: "Full SDLC from requirements through execution. Best for new projects with elaborate workflow."
     sequence:
       - skill: start-project
-      # Optional: use Jira or Confluence content as discovery input before requirements authoring.
-      # These skills extract raw content into a structured package; their output feeds
-      # Step 1 (discovery) of create-requirements-package — they do NOT replace it or its gate.
-      - skill: jira-extract-requirements
-        optional: true
-        role: discovery-input
-        condition: "Jira epic or feature available as requirements source"
-      - skill: confluence-extract-package
-        optional: true
-        role: discovery-input
-        condition: "Confluence documentation available as requirements source"
+      # Optional discovery input from Jira/Confluence is provided by an installed
+      # tool ADD-ON (not core). When configured, create-requirements-package seeds
+      # Step 1 discovery from the add-on via the source-adapter convention
+      # (discovery_source; see references/orientation/source-adapters.md). The
+      # adapter only seeds intake — it does NOT replace the step or its gate.
       - skill: create-requirements-package
         gates:
           - skill: review-requirements-package
@@ -128,17 +120,10 @@ flows:
         optional: true
         condition: "mainframe stack present (any of cobol-program, copybook-library, jcl-job in [[project.repos]])"
       - skill: verify-knowledge-base-coverage
-      # Optional: use Jira or Confluence content as discovery input before requirements authoring.
-      # These skills extract raw content into a structured package; their output feeds
-      # Step 1 (discovery) of create-requirements-package — they do NOT replace it or its gate.
-      - skill: jira-extract-requirements
-        optional: true
-        role: discovery-input
-        condition: "Jira epic or feature available as requirements source"
-      - skill: confluence-extract-package
-        optional: true
-        role: discovery-input
-        condition: "Confluence documentation available as requirements source"
+      # Optional discovery input from Jira/Confluence is provided by an installed
+      # tool ADD-ON (not core), consumed via the source-adapter convention
+      # (discovery_source; see references/orientation/source-adapters.md). The
+      # adapter only seeds Step 1 discovery — it does NOT replace it or its gate.
       - skill: create-requirements-package
         # In brownfield mode this skill consumes the KB via navigate-knowledge-base.
         gates:
@@ -197,10 +182,9 @@ anytime:
   - audit-quality-coverage
   - review-test-failures
   - execute-quality-increments
-  - jira-get
-  - jira-search
-  - confluence-fetch
-  - document-convert
+  # Jira/Confluence/document-convert utilities are provided by an installed tool
+  # ADD-ON (not core). When the add-on is registered via
+  # [registry].extra_skill_roots they are invocable anytime like these.
 
 # Validation rules the registry generator (or task #8 validation) should enforce.
 # `every-flow-skill-must-resolve` skips dispatcher placeholders (any skill name

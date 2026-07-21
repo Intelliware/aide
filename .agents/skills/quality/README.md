@@ -100,11 +100,12 @@ see `create-quality-package/references/reuse-analysis.md`.
 ## No hard external-tool dependencies
 
 By design, **no skill in this stage hard-depends on any external CLI or
-service** — not the Atlassian CLI (`tools/packages/atlassian-cli/`), not the
-SharePoint CLI, not Jira, not Confluence, not any vendor test platform. Those
-tools are optional companions exposed through the `jira-*` / `confluence-*` /
-document-conversion skills, which gate on presence and halt cleanly when the
-tool is missing.
+service** — not the Atlassian CLI, not the SharePoint CLI, not Jira, not
+Confluence, not any vendor test platform. Those integrations are no longer in
+core at all: they ship as a separate **tool add-on** (the `jira-*` /
+`confluence-*` / `document-convert` skills), installed and wired per
+`_docs/pluggable-tool-addons-proposal.md`. Quality skills never assume they are
+present.
 
 Quality-stage skills must remain runnable on a vanilla checkout with no
 external credentials configured. If a future contribution introduces a hard

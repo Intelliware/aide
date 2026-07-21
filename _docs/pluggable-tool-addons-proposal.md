@@ -2,8 +2,8 @@
 
 | Field | Value |
 |---|---|
-| Status | Design proposal — key decisions locked (§9) |
-| Date | 2026-07-13 |
+| Status | **Implemented** on `mm/AIDE-core-changes` (Phases 1–5); tooling extracted to the `aide-addons` repo |
+| Date | 2026-07-13 (implemented 2026-07-21) |
 | Foundation | Builds on framework 1.6.5 (multi-root discovery, 5-layer config, managed-block AGENTS.md install runbook) |
 | Backward compatibility | **Hard requirement.** Existing projects that keep JIRA/Confluence/doc-conversion in-repo, and projects that use none of them, must continue working with no change. |
 | Scope | Move integration tooling out of core A.I.D.E. into one or more separately-versioned **add-on repos**, discovered as sibling workspace folders and wired into flows via config. |
@@ -251,3 +251,30 @@ Phases 1–3 land in core with zero extraction and full backward compatibility; 
 3. **Missing add-on — decided.** **No stub skills.** Once extracted, an add-on skill exists only when its repo is installed and discovered; a bare `/jira-get` without the add-on is simply an unknown command. The "install the add-on" hint is surfaced by the flow's adapter-missing branch (§4.2 step 4), where the user has expressed intent, not by a core stub.
 
 No open questions remain; the proposal is ready for implementation planning (Phase 1).
+
+---
+
+## 10. Implementation notes (as built)
+
+Implemented across five commits on `mm/AIDE-core-changes`, plus a new sibling
+repo `aide-addons`. Deviations from the plan above, all deliberate:
+
+- **One add-on repo, not per-vendor.** All integration tooling (Atlassian +
+  SharePoint skills and CLIs, sharing `shared-utils`) lives in a single
+  `aide-addons` repo with manifest `[addon].name = "atlassian-sharepoint"`.
+- **Quick-dev hook is `document-quick-change`, not `plan-quick-change`.** The
+  requirements-import point is the spec's existing-artifact intake (Step 3 of
+  `document-quick-change`), which is where tickets/PRs are already gathered.
+  `plan-quick-change` only reads the finished spec, so it carries no adapter.
+- **`{workspace}` token added** to `config/SCHEMAS.md` §1.5 for sibling-repo
+  resolution; `[tools.*]` documented in §2.6, `aide-addon.toml` in §2.7.
+- **Doc links preserved for free.** Because `tools/` moved to the add-on repo
+  root (same `.agents/skills/ → tools/` geometry as core), the skills'
+  `../../../../tools/…` links resolve unchanged; only the CLI *invocation* text
+  became config-driven (`[tools.*].install_root`).
+- **Registry parity fix.** `build-registry.py` was pinned to LF + `ensure_ascii=
+  False` so it and `build-registry.js` now produce byte-identical output; both
+  gained `--extra-skill-root` and an `origin` column.
+- **The whole `tools/` dir was add-on tooling** — including
+  `organize-requirements-package.js` (it organizes a fetched *Confluence* page
+  tree), so nothing from `tools/` stayed in core.

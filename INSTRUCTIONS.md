@@ -135,7 +135,7 @@ Do **not** copy these (framework-maintenance only, or self-referential):
 
 ```
 scripts/    CLAUDE.md    CHANGELOG.md    _docs/    _archive/    _bmad/
-tools/      .git/        .github/        INSTRUCTIONS.md
+.git/       .github/     INSTRUCTIONS.md
 ```
 
 ### Step 8 — Generate flat skill-discovery shims at the workspace root
@@ -326,7 +326,7 @@ Confirm all the following exist:
 - `./AGENTS.md` — contains the `aide:managed:begin` and `aide:managed:end` sentinel lines (one each, begin before end; a *sentinel line* starts with the marker after optional leading whitespace — prose that merely mentions the substring does not count).
 - `./AGENTS.md` — contains the heading `## Coding standards (auto-enforced per repo)` **inside** the managed block (Step 9 addendum splice landed), and the SOT comment that opens the addendum source is **not** present (Step 9.2 strip succeeded). Skip both assertions only if `${AIDE_TARGET_DIR}/references/orientation/workspace-agents-coding-standards.md` is missing (older AIDE install).
 
-**Assert the canonical tree was not polluted.** List the immediate children of `${AIDE_TARGET_DIR}/.agents/skills/`. Every entry must be either a stage folder (`meta`, `requirements`, `design`, `planning`, `execution`, `reverse-engineering`, `knowledge-base`, `quick-dev`, `jira`, `confluence`, `files-conversion`, …) or `_registry`. If you see a flat skill folder there (e.g. `${AIDE_TARGET_DIR}/.agents/skills/start-project/`), Step 8 wrote shims to the wrong place — delete those flat folders from inside `AIDE/` and re-run Step 8 with the destination correctly resolved to `./.agents/skills/` at the workspace root.
+**Assert the canonical tree was not polluted.** List the immediate children of `${AIDE_TARGET_DIR}/.agents/skills/`. Every entry must be either a stage folder (`meta`, `requirements`, `design`, `planning`, `execution`, `reverse-engineering`, `knowledge-base`, `quick-dev`, …; plus any stage folders contributed by installed add-ons, e.g. `jira`, `confluence`, `files-conversion`) or `_registry`. If you see a flat skill folder there (e.g. `${AIDE_TARGET_DIR}/.agents/skills/start-project/`), Step 8 wrote shims to the wrong place — delete those flat folders from inside `AIDE/` and re-run Step 8 with the destination correctly resolved to `./.agents/skills/` at the workspace root.
 
 If any of the required files are missing or the assertion fails, report which and stop — do not silently continue.
 
@@ -444,7 +444,6 @@ aide_install:
     - _docs/
     - _archive/
     - _bmad/
-    - tools/
     - .git/
     - .github/
     - INSTRUCTIONS.md
