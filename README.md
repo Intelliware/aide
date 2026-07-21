@@ -26,7 +26,8 @@ Every install/update prompt below is a **two-block paste**: the rules block firs
 ```text
 Install rules — follow these strictly, no exceptions:
 1. Preflight: before any fetch, run
-     git ls-remote <AIDE_SOURCE_URL>.git <AIDE_REF>
+     git ls-remote <AIDE_SOURCE_URL> <AIDE_REF>
+   When using github.com make sure the URL ends in ".git"
    Substitute the actual URL and ref from the prompt below. The command must
    print one line containing a SHA. Zero lines = ref doesn't exist on the
    remote. A stderr error = auth or network. Show me the stderr verbatim and
@@ -38,16 +39,16 @@ Install rules — follow these strictly, no exceptions:
    not "repo missing".
 ```
 
-**Worked example — what your actual paste should look like:**
+**Example — what your actual paste should look like (replace AIDE_SOURCE_URL with the URL for your Github,  Azure DevOps, or GitLab URL, make sure you are authenticated to it) :**
 
 ```text
 Install rules — follow these strictly, no exceptions:
 1. Preflight: before any fetch, run
-     git ls-remote <AIDE_SOURCE_URL>.git <AIDE_REF>
+     git ls-remote <AIDE_SOURCE_URL> <AIDE_REF>
    ...
 2. No HTTP fallbacks: ...
 
-Install AIDE from https://github.com/TD-Universe/TD-EM-AIDE per its INSTRUCTIONS.md.
+Install AIDE from <AIDE_SOURCE_URL> per its INSTRUCTIONS.md.
 ```
 
 Paste both blocks into the agent chat in that order. The same rules block applies to every prompt in this README — install, update, and all override examples.

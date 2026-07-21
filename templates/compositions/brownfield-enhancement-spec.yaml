@@ -2,9 +2,17 @@
 #
 # A SINGLE-document spec that spans requirements + design + planning. Used for
 # enhancements to an existing system where producing three separate packages
-# is overkill. Picks the leanest essential blocks from each stage.
+# is overkill.
 #
-# Total block count: ~16 (deliberately tight).
+# Requirements-parity principle: the REQUIREMENTS portion mirrors the greenfield
+# requirements shape block-for-block. Brownfield differs from greenfield only in
+# that the pre-existing foundation is DISCOVERED (current-capability-baseline,
+# KB) rather than authored — so foundation-level detail is not restated, and
+# sections that describe only the change are delta-gated (include-if the
+# enhancement touches that dimension). Nothing is removed outright; a requirement
+# authored here should end up equivalent in scope to the greenfield equivalent.
+#
+# Design + planning stay deliberately lean (single increment).
 
 name: brownfield-enhancement-spec
 description: Combined req+design+plan spec in one artifact for enhancing an existing system.
@@ -21,19 +29,69 @@ blocks:
   - slug: requirements/executive-summary-business-context
     optional: false
     order: 2
+  - slug: requirements/business-objectives-success-criteria
+    optional: false
+    order: 2.5
+    notes: |
+      The enhancement's OWN objective and success criteria (the "why now" and
+      definition-of-done). Required — an enhancement always has an objective,
+      even though the product's overall objectives are pre-existing foundation.
+      Kept lean: reference existing product objectives rather than restating
+      them; capture only what this change adds or moves.
+  - slug: requirements/stakeholders-personas
+    optional: true
+    order: 2.6
+    include-if: "project.elicitation.changes_personas == true"
+    notes: |
+      Delta-gated on changes_personas — existing personas live in the KB /
+      discovery baseline and are NOT restated. Included only when the
+      enhancement introduces a NEW persona or role, or materially changes an
+      existing one; capture only the delta.
 
-  # ---- Requirements core (lean) ----
+  # ---- Requirements core (mirrors greenfield; foundation is discovered, delta is gated) ----
   - slug: requirements/functional-requirements
     optional: false
     order: 3
+  - slug: requirements/functional-specifications
+    optional: true
+    order: 3.5
+    include-if: "project.elicitation.has_complex_workflows == true"
+    notes: |
+      Workflow-level HOW behind the functional requirements. Included only when
+      the enhancement introduces or changes a complex workflow; a simple change
+      is fully described by functional-requirements alone.
   - slug: requirements/business-logic-rules
-    optional: false
+    optional: true
     order: 4
     include-if: "project.elicitation.has_business_rules == true"
+  - slug: requirements/user-journeys
+    optional: true
+    order: 4.5
+    include-if: "project.elicitation.has_ui == true"
+    notes: |
+      End-to-end user flows the enhancement adds or changes. Delta-gated on
+      has_ui — a change with no user-facing surface reuses the pre-existing
+      journeys captured in discovery rather than restating them.
+  - slug: requirements/views-dashboards
+    optional: true
+    order: 4.6
+    include-if: "project.elicitation.has_ui == true"
+    notes: |
+      Information architecture (WHAT to show, not HOW it looks) for views the
+      enhancement adds or changes. Gated on has_ui — non-UI changes reuse the
+      pre-existing views.
   - slug: requirements/data-requirements
-    optional: false
+    optional: true
     order: 5
     include-if: "project.elicitation.touches_data == true"
+  - slug: requirements/permissions-access-control
+    optional: true
+    order: 5.5
+    include-if: "project.elicitation.has_authn_authz == true"
+    notes: |
+      Roles and access rules the enhancement adds or changes. Mirrors the
+      greenfield gate (has_authn_authz). A change that introduces a NEW trust
+      boundary should also flip changes_security_boundary (design/security-design).
   - slug: requirements/non-functional-requirements
     optional: true
     order: 6
@@ -106,10 +164,20 @@ elicitation:
     required: true
 
 decision-gates:
+  - block: requirements/stakeholders-personas
+    include-if: "project.elicitation.changes_personas == true"
+  - block: requirements/functional-specifications
+    include-if: "project.elicitation.has_complex_workflows == true"
   - block: requirements/business-logic-rules
     include-if: "project.elicitation.has_business_rules == true"
+  - block: requirements/user-journeys
+    include-if: "project.elicitation.has_ui == true"
+  - block: requirements/views-dashboards
+    include-if: "project.elicitation.has_ui == true"
   - block: requirements/data-requirements
     include-if: "project.elicitation.touches_data == true"
+  - block: requirements/permissions-access-control
+    include-if: "project.elicitation.has_authn_authz == true"
   - block: requirements/non-functional-requirements
     include-if: "project.elicitation.changes_nfrs == true"
   - block: design/api-design
@@ -124,6 +192,29 @@ notes: |
   a single document for enhancements. Planning section uses a SINGLE increment;
   if the change spans multiple increments use greenfield-implementation-package
   per increment instead.
+
+  Requirements parity: the requirements blocks above match the greenfield
+  requirements package block-for-block (executive-summary, business-objectives,
+  stakeholders-personas, functional-requirements, functional-specifications,
+  business-logic-rules, user-journeys, views-dashboards, data-requirements,
+  permissions-access-control, non-functional-requirements, assumptions/
+  constraints, acceptance-criteria). The ONLY brownfield difference is that the
+  pre-existing foundation is DISCOVERED (current-capability-baseline + KB) rather
+  than authored, so every section that describes only the foundation is
+  delta-gated with include-if — it renders only when the enhancement actually
+  touches that dimension:
+    - stakeholders-personas  -> changes_personas   (new persona/role introduced)
+    - functional-specifications -> has_complex_workflows
+    - business-logic-rules   -> has_business_rules
+    - user-journeys          -> has_ui
+    - views-dashboards       -> has_ui
+    - data-requirements      -> touches_data
+    - permissions-access-control -> has_authn_authz
+    - non-functional-requirements -> changes_nfrs
+  A brownfield requirement therefore ends up equivalent in scope to its
+  greenfield counterpart for whatever the change touches, and silent on the
+  untouched foundation. The changes_personas flag is flipped by the
+  impact-assessment elicitation prompt; the rest are established project flags.
 
   Brownfield projects must already have a knowledge-base instance under
   paths.knowledge_base_path so traceability can link new increments back to
