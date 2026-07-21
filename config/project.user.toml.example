@@ -16,7 +16,7 @@
 # Higher-precedence than project.toml; lower-precedence than the
 # customizations/<skill>.user.toml files. See SCHEMAS.md § 1.1.
 #
-# Path tokens: {project-root}, {framework-root}, {home}, {cwd}.
+# Path tokens: {project-root}, {framework-root}, {home}, {cwd}, {workspace}.
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -34,6 +34,16 @@ default_flow = "quick-dev"
 # even when the team has not standardized.
 [project.elicitation]
 testing_strategy = "tdd-required"
+
+
+# ─── [tools.<name>] — override only the local add-on path ────────────────────
+# project.toml declares WHICH add-on tools the team uses; here you override
+# only where YOUR clone lives, when it differs from the team default. Because
+# [tools.*] is a table, unmentioned keys (cli, run_script, …) inherit from
+# project.toml. See config/SCHEMAS.md § 2.6.
+
+# [tools.atlassian]
+# install_root = "{home}/dev/aide-addons/tools"
 
 
 # ─── [user] — project-scoped personal preferences ────────────────────────────
