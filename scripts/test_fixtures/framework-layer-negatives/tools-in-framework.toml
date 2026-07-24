@@ -1,0 +1,12 @@
+# NEGATIVE FIXTURE — framework-layer [tools.*] guardrail (config/SCHEMAS.md § 2.6).
+# A framework-layer config (framework.toml / framework.user.toml) must NOT
+# declare [tools.<name>] tables — add-on tool resolution is a project-layer
+# concern only. `scripts/validate.py --framework-toml <this>` must REJECT it.
+
+[core]
+default_flow = "greenfield"
+
+[tools.demo]
+cli = "demo-cli"
+run_script = "demo"
+install_root = "{workspace}/aide-addons/tools"

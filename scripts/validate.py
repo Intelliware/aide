@@ -789,6 +789,38 @@ def check_sod(
     return errors, warnings
 
 
+def check_tools_layer(framework_toml_path: Path) -> tuple[list[str], list[str]]:
+    """K — framework-layer guardrail: `[tools.*]` is a project-layer concern.
+
+    Per `config/SCHEMAS.md` § 2.6, framework-layer configs (`framework.toml` /
+    `framework.user.toml`) MUST NOT declare `[tools.<name>]` tables — add-on
+    tool resolution is a project-layer concern only and `framework.*` cannot
+    override it. Loads the given framework-layer TOML and errors if any
+    `[tools.*]` table is present.
+    """
+    import tomllib
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not framework_toml_path.exists():
+        errors.append(f"{framework_toml_path}: file does not exist")
+        return errors, warnings
+    try:
+        with framework_toml_path.open("rb") as fh:
+            data = tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        errors.append(f"{framework_toml_path}: TOML parse error — {exc}")
+        return errors, warnings
+    tools = data.get("tools")
+    if isinstance(tools, dict) and tools:
+        names = ", ".join(sorted(str(k) for k in tools.keys()))
+        errors.append(
+            f"{framework_toml_path}: framework layer must not declare [tools.*] "
+            f"(found: [tools.{names}]) — `[tools.<name>]` is a project-layer concern "
+            f"only; framework.* cannot override it (config/SCHEMAS.md § 2.6)."
+        )
+    return errors, warnings
+
+
 def check_f() -> tuple[list[str], list[str], str]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -863,7 +895,27 @@ def main() -> int:
             "list of declared [[project.repos]] codes)."
         ),
     )
+    parser.add_argument(
+        "--framework-toml",
+        type=str,
+        help=(
+            "Path to a framework.toml / framework.user.toml fixture. Switches the "
+            "validator into framework-layer guardrail mode (Check K): errors if the "
+            "file declares any [tools.*] table (a project-layer-only concern per "
+            "config/SCHEMAS.md § 2.6). Exits non-zero on violation. Skips A-H."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.framework_toml:
+        ftoml = Path(args.framework_toml)
+        print(f"validate.py — framework-layer guardrail check against {ftoml}")
+        k_err, k_warn = check_tools_layer(ftoml)
+        _print("Check K — framework-layer [tools.*] guardrail", k_err, k_warn)
+        print("\n=== Summary ===")
+        print(f"  errors:   {len(k_err)}")
+        print(f"  warnings: {len(k_warn)}")
+        return 0 if not k_err else 1
 
     if args.project_toml:
         ptoml = Path(args.project_toml)

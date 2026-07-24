@@ -37,6 +37,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VALIDATE = REPO_ROOT / "scripts" / "validate.py"
 FIXTURES = REPO_ROOT / "scripts" / "test_fixtures" / "sod-negatives"
+FRAMEWORK_LAYER_FIXTURES = REPO_ROOT / "scripts" / "test_fixtures" / "framework-layer-negatives"
 
 
 def run_validate(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
@@ -292,6 +293,33 @@ class TestDefaultModeRegression(unittest.TestCase):
         self.assertNotIn(
             "Check I", out,
             "default-mode output should not run Check I (SoD fixture mode)",
+        )
+
+
+class TestFrameworkLayerGuardrail(unittest.TestCase):
+    """Check K — `[tools.*]` is a project-layer concern; framework.* must not declare it."""
+
+    def test_reject_tools_in_framework_layer(self) -> None:
+        """A framework-layer config declaring [tools.*] must be rejected."""
+        proc = run_validate(
+            "--framework-toml",
+            str(FRAMEWORK_LAYER_FIXTURES / "tools-in-framework.toml"),
+        )
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"validator should reject [tools.*] in a framework layer but exited 0.\noutput:\n{out}",
+        )
+        for needle in ("tools", "project-layer"):
+            self.assertIn(needle, out, f"output missing '{needle}'.\noutput:\n{out}")
+
+    def test_accept_clean_framework_layer(self) -> None:
+        """A framework-layer config with no [tools.*] must pass."""
+        proc = run_validate("--framework-toml", str(REPO_ROOT / "config" / "framework.toml.example"))
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"validator should accept a clean framework layer but exited {proc.returncode}.\noutput:\n{out}",
         )
 
 

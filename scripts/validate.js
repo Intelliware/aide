@@ -1013,6 +1013,33 @@ function parseSimpleToml(text) {
   return result;
 }
 
+// K — framework-layer guardrail: `[tools.*]` is a project-layer concern.
+// Per config/SCHEMAS.md § 2.6, framework-layer configs (framework.toml /
+// framework.user.toml) MUST NOT declare [tools.<name>] tables — add-on tool
+// resolution is a project-layer concern only and framework.* cannot override
+// it. Errors if any [tools.*] table is present.
+function checkToolsLayer(frameworkTomlPath) {
+  const errors = [];
+  const warnings = [];
+  if (!fs.existsSync(frameworkTomlPath)) {
+    errors.push(`${frameworkTomlPath}: file does not exist`);
+    return [errors, warnings];
+  }
+  let data;
+  try {
+    data = parseSimpleToml(fs.readFileSync(frameworkTomlPath, 'utf-8'));
+  } catch (err) {
+    errors.push(`${frameworkTomlPath}: TOML parse error — ${err.message}`);
+    return [errors, warnings];
+  }
+  const tools = data.tools;
+  if (tools && typeof tools === 'object' && !Array.isArray(tools) && Object.keys(tools).length > 0) {
+    const names = Object.keys(tools).sort().join(', ');
+    errors.push(`${frameworkTomlPath}: framework layer must not declare [tools.*] (found: [tools.${names}]) — \`[tools.<name>]\` is a project-layer concern only; framework.* cannot override it (config/SCHEMAS.md § 2.6).`);
+  }
+  return [errors, warnings];
+}
+
 function checkF() {
   const errors = [];
   const warnings = [];
@@ -1099,6 +1126,19 @@ function main() {
 
   const crossCuttingIdx = args.indexOf('--cross-cutting-artifact');
   const crossCuttingPath = crossCuttingIdx >= 0 ? args[crossCuttingIdx + 1] : null;
+
+  const frameworkTomlIdx = args.indexOf('--framework-toml');
+  const frameworkTomlPath = frameworkTomlIdx >= 0 ? args[frameworkTomlIdx + 1] : null;
+
+  if (frameworkTomlPath) {
+    console.log(`validate.js — framework-layer guardrail check against ${frameworkTomlPath}`);
+    const [kErr, kWarn] = checkToolsLayer(frameworkTomlPath);
+    printCheck('Check K — framework-layer [tools.*] guardrail', kErr, kWarn);
+    console.log('\n=== Summary ===');
+    console.log(`  errors:   ${kErr.length}`);
+    console.log(`  warnings: ${kWarn.length}`);
+    return kErr.length > 0 ? 1 : 0;
+  }
 
   if (projectTomlPath) {
     const ptoml = projectTomlPath;
