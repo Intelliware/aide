@@ -2,8 +2,8 @@
 
 **Owner:** mike.moerman@electricmind.com
 **Authored:** 2026-04-26
-**Last revised:** 2026-04-30 — synchronised with the actual scope of `mm/add-ack-cobol-repo` (**1.4.5** = ack-restoration **1.4.0** + COBOL/mainframe RE **1.3.0** merged forward + separation-of-duties scaffold). YOLO execution mode imported from `mm/add-all`. Tests for layers not on this branch (1.1.0 solution-context, 1.2.0 adversarial review) are intentionally absent — re-add them when those branches land.
-**Scope:** End-to-end manual exercise of every skill shipped under `.agents/skills/`. The plan establishes the canonical skill count dynamically in **A.0** (`<SKILL_COUNT>`) so subsequent steps stop hard-coding the total; at the time of authoring this resolves to **36 skills across 8 stages** but additions / removals on the branch will reflow without further plan edits. Anchored on Next.js as the framework being reverse-engineered into the central knowledge base; one mainframe sample (plus a small CICS+DB2 supplementary repo) added in Phase C to exercise the 1.3.0 mainframe RE layer. The SoD scaffold is covered statically in A.6 and observed at runtime through D-stage Step-0 no-op assertions (legacy mode) plus an optional D.2-SoD variant that exercises the active SoD path.
+**Last revised:** 2026-07-23 — retargeted to `mm/AIDE-core-changes`. This branch carries everything from `mm/add-ack-cobol-repo` (ack-restoration 1.4.0 + COBOL/mainframe RE 1.3.0 + separation-of-duties scaffold) **plus** the post-1.4.5 core changes: a new **`quality/` stage** (5 skills), a new **`reverse-engineer-test-suite`** RE skill, the **pluggable add-on layer** (`aide-addon.toml` manifest, `extra_skill_roots`, `[tools.*]` resolution, `{workspace}` token), and the **source-adapter convention**. Skill count reflows from 36→**42** and stages from 8→**9**. Static counts that were hard-pinned for the old tree are re-pinned here (A.5 Grep1 4→8, Grep2 9→10); new static coverage for the add-on/source-adapter layer lives in A.8–A.10; the new RE skill is C.8.4; the quality stage is a new **Phase Q** slotted at the D.7 user-elected GO. Tests for layers still not on this branch (1.1.0 solution-context, 1.2.0 adversarial review) remain intentionally absent.
+**Scope:** End-to-end manual exercise of every skill shipped under `.agents/skills/`. The plan establishes the canonical skill count dynamically in **A.0** (`<SKILL_COUNT>`) so subsequent steps stop hard-coding the total; on `mm/AIDE-core-changes` this resolves to **42 skills across 9 stages** but additions / removals on the branch will reflow without further plan edits. Anchored on Next.js as the framework being reverse-engineered into the central knowledge base; one mainframe sample (plus a small CICS+DB2 supplementary repo) added in Phase C to exercise the 1.3.0 mainframe RE layer. The SoD scaffold is covered statically in A.6 and observed at runtime through D-stage / Q-stage Step-0 no-op assertions (legacy mode) plus an optional D.2-SoD variant that exercises the active SoD path. The add-on and source-adapter layers are covered statically in A.8–A.10.
 
 > **Skill home for `analyze-repository`.** It lives under `.agents/skills/reverse-engineering/` (it's the dispatcher for the RE stage), not under `meta/`. Phase B's "Meta skills" preamble correctly excludes it; Phase C is its home (C.1 / C.1m).
 
@@ -95,11 +95,15 @@ The narrative is the part the operator reads first; the table and ledger are the
 
 ## 1. Goals
 
-1. Verify each of the **`<SKILL_COUNT>`** framework skills (resolved in A.0; 36 at the time of authoring) behaves per its `SKILL.md` description on a realistic input.
+1. Verify each of the **`<SKILL_COUNT>`** framework skills (resolved in A.0; 42 on `mm/AIDE-core-changes`) behaves per its `SKILL.md` description on a realistic input.
 2. Validate the agentskills.io frontmatter, `references/` progressive-disclosure pattern, and `steps/` decomposition.
 3. Exercise all three flows (greenfield, brownfield, quick-dev) end-to-end.
 4. Build a usable Next.js-anchored knowledge base from open-source repos that span all 10 reverse-engineering domains (the original 7 plus 3 mainframe domains added in 1.3.0).
-5. Verify the post-1.0.1 additions actually present on `mm/add-ack-cobol-repo` land coherently:
+5. Verify the additions present on `mm/AIDE-core-changes` land coherently:
+   - **Quality stage (9th stage, new)** — the 5 `quality/` skills (`create-quality-package`, `review-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) run end-to-end at the user-elected quality fork (Phase Q); `greenfield-quality-package.yaml` + `brownfield-quality-package.yaml` compositions resolve; the quality create/execute skills carry the ack-restoration sentinels and `create-quality-package` carries the SoD Step 0.
+   - **`reverse-engineer-test-suite` (new RE skill)** — `analyze-repository` can route a dedicated/embedded test suite to it (C.8.4); it emits Part A (`re-test-suite-internal.yaml`, ~16 blocks) + Part B (`re-test-suite-consumer.yaml`, ~10 blocks).
+   - **Pluggable add-on layer (new)** — `config/SCHEMAS.md` documents `extra_skill_roots`, the `[tools.<name>]` resolution table (§2.6), the `aide-addon.toml` manifest (§2.7), and the `{workspace}` token; `build-registry.py --extra-skill-root` tags add-on skills with an `origin` while core stays `origin = "core"`; `framework.*` cannot override `[tools.*]` (project-layer only). Covered statically + dynamically in A.9–A.10.
+   - **Source-adapter convention (new)** — `references/orientation/source-adapters.md` documents the unset/discoverable/not-discoverable resolution; `document-quick-change` reads `requirements_source` and `create-requirements-package` reads `discovery_source`, both from skill customization; adapters seed intake without replacing gates. Covered statically in A.8.
    - **1.3.0 mainframe RE layer** — `analyze-repository` classifies a small COBOL/copybook/JCL sample to the right new domain; the 3 new RE skills emit lineage feed-files; `build-mainframe-data-lineage` aggregates them into `<KB>/lineage/mainframe/` with the design-doc coverage rules satisfied.
    - **Acknowledgement restoration (1.4.0, already integrated on this branch)** — every SDLC create/execute SKILL.md carries a top-level `## Verification rule (always-on)` section; every step file ends with `## Acknowledgement checkpoint`; the 4 large block templates carry the `AUTHORING RULE — sub-section acknowledgement` HTML-comment block; `Section relevance check` is unconditional in process.md and step files.
    - **Separation-of-duties (SoD) scaffold (new on this branch as part of 1.4.5)** — six SDLC skills carry a Step 0 (`scope-target-repo`) that is a no-op in legacy mode and resolves an SoD path + role-permission check when SoD fields are configured; `templates/blocks/shared/affects-repos.md` exists and is wired as optional into the two greenfield compositions; `config/SCHEMAS.md` documents the SoD fields (`dir`, `colocate_with_source`, `write_role`, `output`, `[project].artifact_subdir`, `[user].role`) and validation rules 7–12; `.example` files demonstrate SoD config; the `_cross-cutting/` directory + `affects_repos` frontmatter contract are documented.
@@ -117,7 +121,7 @@ The narrative is the part the operator reads first; the table and ledger are the
 
 | Item | Value |
 |---|---|
-| Framework repo | `~/Dev/A.I.D.E.` (this repo, `mm/add-ack-cobol-repo` branch — **1.4.5** = ack 1.4.0 + cobol 1.3.0 + SoD scaffold) |
+| Framework repo | `~/Dev/AIDE` (this repo, `mm/AIDE-core-changes` branch — 1.4.5 base = ack 1.4.0 + cobol 1.3.0 + SoD scaffold, **plus** quality stage + `reverse-engineer-test-suite` + add-on layer + source-adapters) |
 | Test sandbox root | `~/Dev/framework-tests/` (created during Phase A) |
 | Greenfield sandbox project | `~/Dev/framework-tests/recipes-app/` |
 | Knowledge-base repo | `~/Dev/framework-tests/recipes-kb/` (sibling repo, separate from the sandbox app) |
@@ -149,12 +153,13 @@ A YOLO run will halt on any missing dependency at first use. Install before A.0:
 
 | Phase | Wall-clock (step-by-step) | Wall-clock (YOLO best case) | Disk |
 |---|---|---|---|
-| A | 30–45 min | 10 min | trivial |
+| A (incl. A.8–A.10) | 40–55 min | 12 min | trivial |
 | B | 45–60 min | 20 min | trivial |
-| C (incl. mainframe) | 6–10 hours | 3–5 hours | 1–3 GB (10 shallow clones) |
+| C (incl. mainframe + C.8.4 test-suite) | 6.5–11 hours | 3.5–5.5 hours | 1–3 GB (9 shallow clones) |
 | D (greenfield SDLC) | 4–6 hours | 2–3 hours | < 100 MB |
+| Q (quality stage) | 1.5–2.5 hours | 45–90 min | trivial |
 | E (quick-dev) | 30–45 min | 15 min | trivial |
-| **Total** | **~12–18 hours** across 2–3 sittings | **~6–9 hours** in one long sitting | ~3 GB peak |
+| **Total** | **~14–21 hours** across 2–3 sittings | **~7–11 hours** in one long sitting | ~3 GB peak |
 
 Numbers are estimates — the plan has never been run end-to-end. Track actuals in `_docs/skills-test-results.md` and refine.
 
@@ -176,6 +181,7 @@ Selected to exercise all 10 domain RE skills (7 modern-stack + 3 mainframe added
 | 8 | cobol-program | `reverse-engineer-cobol-program` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `COBOL/` dir (SAM1.cbl, SAM2.cbl, PSAM1.cbl); supplementary [`pratikdastw/hlasm_cics_cobol_sample`](https://github.com/pratikdastw/hlasm_cics_cobol_sample) (CUSTDB2.CBL, CUSTMAIN.CBL) | zopeneditor-sample exercises DIVISION-by-DIVISION extraction, CALL chain (SAM1→SAM2), and copybook resolution against COPYLIB / COPYLIB-MVS. The CICS+DB2 supplementary repo adds `EXEC SQL` + `EXEC CICS` host-variable inventory coverage that zopeneditor-sample lacks. Emits the `program-call-graph.mmd` + `program-data-bindings.json` lineage feed-files needed by C.9.4. |
 | 9 | copybook-library | `reverse-engineer-copybook-library` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `COPYBOOK/` + `COPYLIB/` + `COPYLIB-MVS/` (CUSTCOPY.cpy, TRANREC.cpy, …) | Verifies REDEFINES variants (TRANREC) are preserved, OCCURS clauses (CUSTCOPY) are expanded into indexed positions, and the local-vs-MVS library duplication (`COPYLIB` ↔ `COPYLIB-MVS`) fires the divergent-layout detector. Emits `copybook-record-graph.json` + `data-dictionary.md` + `copybook-conflicts.md`. |
 | 10 | jcl-job | `reverse-engineer-jcl-job` | [`IBM/zopeneditor-sample`](https://github.com/IBM/zopeneditor-sample) — `JCL/` + `JCLLIB/` + `JCLPROC/` (ALLOCATE.jcl, RUN.jcl, INCLUDE.jcl, RUNASAM1.jcl, COMPROC.jcl) | Verifies PROC expansion (COMPROC), `INCLUDE MEMBER=` resolution, DD inventory, and condition-code restart points. **Known coverage gap:** zopeneditor-sample has no GDG-roll example; that pass-criterion in C.8.3 is downgraded to "GDG-handling code path executes without error against jobs that have no GDGs." Emits `job-flow.mmd` + `dataset-io.json` lineage feed-files. |
+| 11 | test-suite | `reverse-engineer-test-suite` | [`honojs/hono`](https://github.com/honojs/hono) — its `src/**/*.test.ts` + `runtime-tests/` (reuses the C.3 clone) | Cohesive Vitest suite spanning unit + multi-runtime integration tests. Exercises test-framework detection, suite-layout mapping, and the run/extend consumer docs. No 11th clone needed. |
 
 Mirror choices (used only if a primary candidate is unavailable / too large): [`nestjs/nest`](https://github.com/nestjs/nest) (api-framework), [`makeplane/plane`](https://github.com/makeplane/plane) (web-app), [`mantinedev/mantine`](https://github.com/mantinedev/mantine) (ui-framework), [`expo/expo`](https://github.com/expo/expo) (mobile-framework). For the mainframe slice, mirror options are [`openmainframeproject/cobol-programming-course`](https://github.com/openmainframeproject/cobol-programming-course) (larger, course-oriented) or [`dscobol/Cobol-Projects`](https://github.com/dscobol/Cobol-Projects) (Hercules/MVS-flavoured, includes VSAM); the design point is breadth (cobol + copybook + JCL all present) not size.
 
@@ -252,7 +258,7 @@ echo "SKILL_COUNT=$SKILL_COUNT  STAGE_COUNT=$STAGE_COUNT"
 ### A.2  Validator  —  cross-references + workflow graph
 **Trigger:** `python3 scripts/validate.py`
 **Inputs:** Registry, `workflow-graph.yaml`, all SKILL.md frontmatter, all `templates/compositions/*.yaml`.
-**Expected outputs:** Clean run — 0 errors and ≤ 2 pre-existing warnings (the empty-`requires-decision-from` notes on `templates/blocks/requirements/{completeness-tracker,index}.md`, both legitimate and well-known). All 8 checks (A–H) report `(no findings)` or only the known noise.
+**Expected outputs:** Clean run — 0 errors and ≤ 3 pre-existing warnings (the empty-`requires-decision-from` notes on `templates/blocks/requirements/{completeness-tracker,index}.md` **and** `templates/blocks/quality/index.md` — the last added by the new quality stage; all three are legitimate index/tracking blocks). All 8 checks (A–H) report `(no findings)` or only the known noise.
 
 The validator's checks of interest for this step:
 - **Check A** (post-F-002): orphan-block detection counts both composition `blocks:` lists AND direct `templates/blocks/<slug>.md` references inside skill markdown. Should produce no orphan warnings.
@@ -264,7 +270,7 @@ The validator's checks of interest for this step:
 - [ ] [auto] Exactly 0 Check D phase-vocab warnings (the 9 pragma-bearing files mask their own; new violations would surface here)
 - [ ] [auto] Check A reports no orphan blocks (post-F-002 wider lookup) — note `templates/blocks/shared/affects-repos.md` is referenced by both greenfield-requirements-package and greenfield-design-package compositions, so it must NOT show as orphan.
 - [ ] [auto] Check H reports no missing-sentinel or missing-composition findings (post-F-005)
-- [ ] [auto] Total warnings ≤ 2, all on the known empty-`requires-decision-from` block frontmatter
+- [ ] [auto] Total warnings ≤ 3, all on the known empty-`requires-decision-from` index/tracking blocks (`requirements/completeness-tracker`, `requirements/index`, `quality/index`)
 - [ ] [auto] No unresolved skill references in workflow-graph (Check B)
 - [ ] [auto] **Pragma debt observation** (not a fail criterion). Run `grep -rln "<!-- validate: allow-phase-vocab -->" .agents/skills/ templates/ _docs/` and append the file list to `_docs/skills-test-results.md` under a `Pragma debt — A.2` heading. The list is expected to contain ~9 files at the time of authoring; the goal is to *surface* this debt each test pass so it doesn't quietly grow. If the count exceeds 12, flag NEEDS-REVIEW so the operator can decide whether the new exemptions are legitimate or need follow-up issues.
 
@@ -299,6 +305,7 @@ find .agents/skills -name SKILL.md -type f -exec awk 'END {if (NR > 200) print F
 **Pass criteria:**
 - [ ] [auto] All listed blocks resolve to a real file
 - [ ] [auto] The optional `shared/affects-repos` block resolves and carries `optional: true` in the composition (the SoD-scaffold block is intentionally optional, fired only on cross-cutting features).
+- [ ] [auto] **(new compositions on this branch)** `greenfield-quality-package.yaml`, `brownfield-quality-package.yaml`, `re-test-suite-internal.yaml`, and `re-test-suite-consumer.yaml` all resolve every block to a real file (spot-confirm by hand; the A.2 validator sweep is the authoritative global check).
 **Rollback:** none.
 
 ### A.5  Acknowledgement sentinels  —  static grep for the ack restoration on this branch
@@ -322,16 +329,16 @@ grep -L "if relevance is in question" \
   .agents/skills/design/create-design-package/references/process.md
 ```
 **Inputs:** Read-only over the branch tree.
-**Expected outputs (numerics resolved from the working tree at authoring time; re-resolve if the branch evolves):**
-- **Grep 1** returns exactly **4** SKILL.md files: `requirements/create-requirements-package`, `design/create-design-package`, `planning/create-implementation-package`, `execution/execute-increments`.
-- **Grep 2** returns exactly **9** step files (one or more per ack-bearing skill — at authoring: 9 files distributed across the 4 SDLC create/execute skills' `steps/` directories).
+**Expected outputs (numerics re-pinned for `mm/AIDE-core-changes`; re-resolve if the branch evolves):**
+- **Grep 1** returns exactly **8** SKILL.md files: `requirements/create-requirements-package`, `design/create-design-package`, `planning/create-implementation-package`, `execution/execute-increments`, and the **4 quality skills** that carry the verification rule — `quality/create-quality-package`, `quality/execute-quality-increments`, `quality/audit-quality-coverage`, `quality/review-test-failures`. (Was 4 before the quality stage landed.)
+- **Grep 2** returns exactly **10** step files distributed across the ack-bearing skills' `steps/` directories — the 9 pre-quality files plus `quality/create-quality-package/steps/02b-test-case-increments.md`.
 - **Grep 3** returns exactly **4** block templates: `templates/blocks/requirements/functional-requirements.md`, `templates/blocks/requirements/business-logic-rules.md`, `templates/blocks/design/api-design.md`, `templates/blocks/design/database-design.md`.
 - **Grep 4** returns exactly **4** files: `requirements/.../references/process.md`, `requirements/.../steps/04-writing.md`, `design/.../references/process.md`, `design/.../steps/02-design.md` (the unconditional-relevance edit lives in BOTH process.md and the step that draws on it).
 - **Grep 5** (`grep -L`) returns **both** named `process.md` files (i.e., neither contains the deprecated phrase). If either path is *omitted* from the output, the deprecated conditional survived the merge — FAIL.
 
 **Pass criteria:**
-- [ ] [auto] Grep 1 file count == 4
-- [ ] [auto] Grep 2 file count == 9 (re-pin if the branch evolves; this is brittle by design — surfacing drift is the point)
+- [ ] [auto] Grep 1 file count == 8 (4 SDLC create/execute + 4 quality skills; re-pin if the branch evolves)
+- [ ] [auto] Grep 2 file count == 10 (re-pin if the branch evolves; this is brittle by design — surfacing drift is the point)
 - [ ] [auto] Grep 3 file count == 4 (exact paths above)
 - [ ] [auto] Grep 4 file count == 4 (process.md + step files in both stages)
 - [ ] [auto] Grep 5 lists both target paths (i.e., the deprecated conditional clause is absent from both)
@@ -348,15 +355,19 @@ grep -l "Step 0 — Scope the requirements artifact" .agents/skills/requirements
 grep -l "Step 0 — Scope the design artifact"        .agents/skills/design/create-design-package/steps/00-scope-target-repo.md
 grep -l "Step 0 — Scope the target source repo"     .agents/skills/planning/create-implementation-package/steps/scope-target-repo.md
 grep -l "Step 0 — Scope the target source repo"     .agents/skills/execution/execute-increments/steps/00-scope-target-repo.md
+grep -l "Step 0 — Scope the target repo (SoD only)" .agents/skills/quality/create-quality-package/steps/00-scope-target-repo.md
 grep -l "Step 0 — Locate the upstream artifact (SoD only)" .agents/skills/requirements/review-requirements-package/SKILL.md
 grep -l "Step 0 — Locate the upstream artifact (SoD only)" .agents/skills/design/review-design-package/SKILL.md
+grep -l "Step 0 — Locate the upstream artifact (SoD only)" .agents/skills/quality/review-quality-package/SKILL.md
 
 # Shared affects-repos block + its frontmatter contract
 test -f templates/blocks/shared/affects-repos.md && grep -E "^slug: affects-repos|^applies-to:|^optional: true" templates/blocks/shared/affects-repos.md
 
-# Composition wiring
+# Composition wiring (now 4 compositions: requirements + design + both quality)
 grep -A1 "shared/affects-repos" templates/compositions/greenfield-requirements-package.yaml
 grep -A1 "shared/affects-repos" templates/compositions/greenfield-design-package.yaml
+grep -A1 "shared/affects-repos" templates/compositions/greenfield-quality-package.yaml
+grep -A1 "shared/affects-repos" templates/compositions/brownfield-quality-package.yaml
 
 # SCHEMAS.md SoD section
 grep -E "(Separation-of-duties \(SoD\) fields|colocate_with_source|write_role|artifact_subdir)" config/SCHEMAS.md
@@ -410,9 +421,10 @@ The six SDLC skills implement Step 0 in *three* different shapes:
 The triple shape is *not* a defect to fix in this test pass — it reflects three different upstream conventions (numeric-prefixed steps in requirements/design/execution, descriptive-named steps in planning, no separate `steps/` for review skills). It IS something an operator should be aware of so the A.6 grep commands aren't mysterious. If the team later decides to unify, it's a refactor for a separate branch.
 
 **Pass criteria:**
-- [ ] [auto] All 6 SDLC skills carry the SoD-aware Step 0 — verify by running every `grep -l` from the trigger block above and confirming each returns its target path. Three shapes are accepted (numeric-prefixed step file, descriptive-named step file, heading inside SKILL.md) per the inconsistency note above.
-- [ ] [auto] `templates/blocks/shared/affects-repos.md` exists and declares `slug: affects-repos`, `applies-to: [greenfield-requirements-package, greenfield-design-package]`, `optional: true`.
-- [ ] [auto] The Python verifier above prints `order=0.5, optional=True` for both compositions.
+- [ ] [auto] All **8** SoD-aware skills carry the Step 0 — verify by running every `grep -l` from the trigger block above and confirming each returns its target path. The set is: 5 create/execute skills with a scope-target-repo step (`create-requirements-package`, `create-design-package`, `create-implementation-package` [descriptive-named `steps/scope-target-repo.md`], `execute-increments`, `create-quality-package`) + 3 review skills with the `## Step 0 — Locate the upstream artifact (SoD only)` heading inside `SKILL.md` (`review-requirements-package`, `review-design-package`, `review-quality-package`). Three shapes are accepted per the inconsistency note above.
+- [ ] [auto] `templates/blocks/shared/affects-repos.md` exists and declares `slug: affects-repos`, `optional: true`.
+- [ ] [auto] The Python verifier above (extended to all 4 compositions) prints `order=0.5, optional=True` for `greenfield-requirements-package`, `greenfield-design-package`, `greenfield-quality-package`, and `brownfield-quality-package`.
+- [ ] [user] **(drift observation, not a hard gate)** `affects-repos.md`'s `applies-to:` frontmatter lists only `[greenfield-requirements-package, greenfield-design-package]`, but the block is now wired into **4** compositions (both quality packages added it). Record this `applies-to`-vs-wiring discrepancy in the results ledger as a follow-up for the framework maintainer; do NOT fail A.6 on it (the block still resolves and renders correctly in all 4).
 - [ ] [auto] `config/SCHEMAS.md` contains a `Separation-of-duties (SoD) fields` heading; the `[stages.<stage>]` table lists all four SoD columns (`dir`, `colocate_with_source`, `write_role`, `output`); `[project].artifact_subdir` row is present; `[user].role` row is present.
 - [ ] [auto] `config/SCHEMAS.md` contains the SoD validation rules numbered 7–12 (one mode per stage; `dir` exclusive of `colocate_with_source`; `write_role` enum; `[project].artifact_subdir` is a bare relative path; cross-cutting artifact frontmatter `affects_repos` validation).
 - [ ] [auto] `config/SCHEMAS.md` § 5 documents the dir-mode AND colocate-mode layout geometries (both subsections present); the dir-mode subsection mentions the `_cross-cutting/` directory; the colocate-mode subsection notes that no `_cross-cutting/` directory exists in colocate mode.
@@ -443,6 +455,110 @@ The triple shape is *not* a defect to fix in this test pass — it reflects thre
 > **Note: this step depends on the validator actually implementing rules 7–12.** If `scripts/validate.py` doesn't currently enforce them (only `config/SCHEMAS.md` documents them), this step will FAIL as written — and that's the *correct* signal: the rules exist on paper but not in code. Capture the FAIL with a note, then file a follow-up issue. Don't paper over this by downgrading to `[user]`.
 
 **Rollback:** `rm -rf scripts/test_fixtures/sod-negatives/`. (Note: the fixtures are now regression-test data for `scripts/test_validate.py` and live as committed test artifacts; in practice you don't roll them back — you only roll back transient working-tree edits to them. Listed here for shape-symmetry with the other A.* steps.)
+
+### A.8  Source-adapter convention  —  static checks for the optional source-adapter seam (new)
+**Trigger:** file-existence + greps over the convention spec and its two consuming skills:
+```
+# 1 — the convention spec exists
+test -f references/orientation/source-adapters.md
+
+# 2 — the spec documents the three-way resolution (unset / discoverable / not-discoverable)
+grep -Ei "unset|discoverable|not (installed|discoverable)|fall back" references/orientation/source-adapters.md
+
+# 3 — document-quick-change reads `requirements_source`
+grep -n "requirements_source" .agents/skills/quick-dev/document-quick-change/SKILL.md
+
+# 4 — create-requirements-package reads `discovery_source`
+grep -n "discovery_source" .agents/skills/requirements/create-requirements-package/SKILL.md
+
+# 5 — the .example customizations demonstrate the keys
+grep -n "requirements_source" config/customizations/document-quick-change.toml.example
+grep -n "discovery_source"    config/customizations/create-requirements-package.toml.example
+```
+**Inputs:** Read-only over the branch tree.
+**Expected outputs:** Every check resolves to a hit.
+
+**Pass criteria:**
+- [ ] [auto] `references/orientation/source-adapters.md` exists and its body covers all three resolution states (unset → normal elicitation; set + discoverable → hand off by name to the adapter, which writes a structured package to disk cache the consuming skill then folds into intake; set but not discoverable → surface the gap + name the add-on + offer manual elicitation, never silent skip / hard fail).
+- [ ] [auto] `document-quick-change/SKILL.md` references `requirements_source`; `create-requirements-package/SKILL.md` references `discovery_source`.
+- [ ] [auto] Both `.example` customization files demonstrate their respective key (commented is acceptable — the point is the key is discoverable to a user).
+- [ ] [user] The spec makes clear the adapter **seeds** intake and does **not** replace gates (brownfield discovery still runs Step 1 + `review-requirements-package`; quick-dev still runs the clarity gate).
+
+**Rollback:** none — read-only.
+
+### A.9  Add-on registry manifest + `extra_skill_roots`  —  static + dynamic (new)
+**Trigger:** static greps over `config/SCHEMAS.md` + a dynamic build-registry run against a throwaway add-on.
+```
+# Static: SCHEMAS.md documents the add-on surfaces
+grep -n "extra_skill_roots" config/SCHEMAS.md
+grep -nE "2\.6 The \`\[tools\.<name>\]\` table|2\.7 The add-on manifest — \`aide-addon.toml\`" config/SCHEMAS.md
+grep -n "aide-addon.toml" config/SCHEMAS.md
+grep -n "origin" config/SCHEMAS.md
+
+# build-registry.py supports the flag
+python3 scripts/build-registry.py --help 2>&1 | grep -- "--extra-skill-root" || grep -n "extra-skill-root\|extra_skill_root" scripts/build-registry.py
+```
+**Dynamic sub-step (throwaway add-on, then roll back):**
+```
+# NOTE: discovery requires the nested `<stage>/<skill>/SKILL.md` layout (≥3 path
+# parts under .agents/skills). A skill placed directly at skills/<skill>/SKILL.md
+# is silently skipped — so the throwaway add-on carries a stage dir (`addon-stage/`).
+TMP=$(mktemp -d)
+mkdir -p "$TMP/.agents/skills/addon-stage/addon-demo/references"
+cat > "$TMP/aide-addon.toml" <<'TOML'
+[addon]
+name = "demo-addon"
+description = "Throwaway add-on for A.9"
+provides_skills = ["addon-demo"]
+TOML
+cat > "$TMP/.agents/skills/addon-stage/addon-demo/SKILL.md" <<'MD'
+---
+name: addon-demo
+description: "Use when the operator is exercising the A.9 add-on registry test — a throwaway skill that proves extra_skill_roots origin tagging works as intended in this scenario."
+---
+# addon-demo
+Throwaway skill for the A.9 dynamic check.
+MD
+# copy the trio so the skill is registry-legal
+for f in OVERVIEW INPUTS-OUTPUTS EXAMPLE; do echo "# $f" > "$TMP/.agents/skills/addon-stage/addon-demo/references/$f.md"; done
+
+# dry-run so we don't mutate the committed registry
+python3 scripts/build-registry.py --extra-skill-root "$TMP" --dry-run --verbose 2>&1 | grep -i "addon-demo\|demo-addon\|skills found"
+rm -rf "$TMP"
+```
+**Inputs:** Read-only over the branch tree + a throwaway temp dir.
+**Expected outputs:** SCHEMAS.md documents all four surfaces; `build-registry.py` accepts `--extra-skill-root`; the dry-run surfaces `addon-demo` tagged with origin `demo-addon` (from the manifest's `[addon].name`), while core skills remain `origin = "core"`.
+
+**Pass criteria:**
+- [ ] [auto] `config/SCHEMAS.md` documents `extra_skill_roots` (array of path), the `[tools.<name>]` table (§2.6), the `aide-addon.toml` manifest (§2.7), and the `origin` tagging rule (core skills = `origin = "core"`).
+- [ ] [auto] `scripts/build-registry.py` accepts `--extra-skill-root` (help text or source reference).
+- [ ] [auto] The dry-run with `--extra-skill-root <tmp>` includes the throwaway `addon-demo` skill and tags it with origin `demo-addon` (from the manifest), NOT `core`.
+- [ ] [auto] The dry-run does **not** mutate the committed `skills.csv` / `skills.json` (`git diff --quiet .agents/skills/_registry/` after the run).
+- [ ] [user] Operator confirms a real add-on repo would be discoverable this way (no core edits required to register an add-on skill).
+
+**Rollback:** `rm -rf "$TMP"` (done inline); `git checkout -- .agents/skills/_registry/` if the dry-run guard was bypassed.
+
+### A.10  `{workspace}` token + `[tools.*]` layer guardrail  —  static (new)
+**Trigger:** greps over `config/SCHEMAS.md` and the `.example` config files.
+```
+# {workspace} token documented
+grep -n "{workspace}" config/SCHEMAS.md
+# [tools.*] is project-layer only — framework.* cannot override it.
+# (The text is "**cannot** override `[tools.*]` — ... project-layer concern only", so
+#  match on "project-layer concern", not the markdown-bolded "cannot override".)
+grep -niE "project-layer concern|override .*\[tools" config/SCHEMAS.md
+# install_root uses the {workspace} token in the documented default
+grep -n "install_root" config/SCHEMAS.md
+```
+**Inputs:** Read-only.
+**Expected outputs:** `{workspace}` documented as the common parent of workspace roots (fallback: parent of `{framework-root}`); `[tools.*]` documented as project-layer-only (framework layer cannot override); `install_root` default references `{workspace}`.
+
+**Pass criteria:**
+- [ ] [auto] `config/SCHEMAS.md` documents the `{workspace}` token semantics (common parent of the multi-root workspace; fallback to parent of `{framework-root}`).
+- [ ] [auto] `config/SCHEMAS.md` states that `[tools.*]` is a project-layer concern and `framework.*` **cannot** override it.
+- [ ] [user] **(dynamic guardrail — best-effort)** If `scripts/validate.py` enforces the "framework layer must not set `[tools.*]`" rule, add a negative fixture (a `framework.toml` with a `[tools.demo]` block) and confirm the validator rejects it. If the validator does not yet enforce this, record NEEDS-REVIEW with a follow-up issue ("layer guardrail documented but not enforced") rather than fabricating a pass.
+
+**Rollback:** delete any negative fixture created for the dynamic guardrail.
 
 > **End of Phase A — run the §11 teardown checklist** (status sweep + Phase-A-specific rollbacks) before moving to Phase B.
 
@@ -507,11 +623,11 @@ git init -q
 ### B.5  scaffold-documentation  —  set up RE doc skeleton
 **Trigger phrase:** "Scaffold the docs structure for a brownfield reverse-engineering of `vercel/commerce`."
 **Inputs:** `project.toml` (B.4 state).
-**Expected outputs:** Empty doc tree under `docs/reverse-engineering/vercel-commerce/` with placeholders matching the RE composition.
+**Expected outputs:** Empty doc tree with placeholders matching the RE composition. **Path note:** `scaffold-documentation/SKILL.md` writes Part A per the RE skill's own scheme — `<target>/docs/<re-domain>-internal/` (e.g. `web-app-internal/`) and Part B under `<knowledge_base_path>/source-docs/<repo-slug>/<re-domain>-consumer/`. The exact root may be nested under a per-repo folder (e.g. `docs/reverse-engineering/vercel-commerce/web-app-internal/`); assert the composition-shaped subtree exists, not a specific hard-coded root.
 **Pass criteria:**
-- [ ] [auto] Folder tree matches the composition
+- [ ] [auto] Folder tree matches the composition (the `<re-domain>-internal/` + `<re-domain>-consumer/` subtrees exist with one placeholder per non-gated block)
 - [ ] [auto] No content authored yet (structure only)
-**Rollback:** `rm -rf docs/reverse-engineering`.
+**Rollback:** `rm -rf docs/reverse-engineering docs/*-internal` (and the scaffolded Part-B subtree under the KB).
 
 ### B.6  shard-document  —  split a fat markdown file
 **Setup:** Create a 400-line markdown file `docs/SAMPLE.md` with multiple H2 sections.
@@ -521,14 +637,14 @@ git init -q
 - [ ] [auto] One file per H2
 - [ ] [auto] Section bodies preserved intact
 - [ ] [user] Original file resolution explicit (not silent)
-**Rollback:** `git checkout -- docs/`.
+**Rollback:** `rm -rf docs/sample docs/SAMPLE.md` (the sandbox is `git init`-only with no commit, so `git checkout -- docs/` has no baseline to restore to — use `rm`, or seed an initial commit in the prep block if you prefer `git checkout`).
 
 ### B.7  track-change  —  log an edit to the change tracker
 **Trigger phrase:** "Log this scaffold work into the change tracker."
 **Expected outputs:** `CHANGE-TRACKER.md` initialised at the right path with one entry.
 **Pass criteria:**
 - [ ] [auto] Entry has Parts Affected, source-version, verification status
-- [ ] [auto] Format matches `templates/blocks/meta/` change-tracker block
+- [ ] [auto] Format matches the `templates/blocks/shared/change-log.md` block (the canonical change-tracker block the skill uses)
 **Rollback:** `git checkout -- CHANGE-TRACKER.md` (or delete).
 
 ### B.8  verify-source  —  audit one assembled artifact
@@ -784,7 +900,7 @@ git -C ~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample  gc --aggressive
 
 **Pass criteria:**
 - [ ] [auto] Both mainframe clones exist and are shallow (`is-shallow-repository == true` for each).
-- [ ] [auto] Supplementary `copybook-record-graph.json` exists at `recipes-kb/source-docs/hlasm-cics-cobol-sample/` and contains at least one node from `CUSTDEF.CPY` (verify with `jq '.nodes | length > 0' .../copybook-record-graph.json` returning `true`, plus `jq '[.nodes[] | select(.copybook == "CUSTDEF")] | length > 0' ...` returning `true`).
+- [ ] [auto] Supplementary `copybook-record-graph.json` exists at `recipes-kb/source-docs/hlasm-cics-cobol-sample/` and contains at least one record from `CUSTDEF.CPY`. The canonical top-level key is `records[]` (per `reverse-engineer-copybook-library/references/INPUTS-OUTPUTS.md`), each entry carrying a `copybook` field — verify with `jq '.records | length > 0' .../copybook-record-graph.json` returning `true`, plus `jq '[.records[] | select(.copybook == "CUSTDEF")] | length > 0' ...` returning `true`. (Earlier plan revisions queried `.nodes[]`, which diverged from the skill's declared schema — see results follow-up.)
 - [ ] [auto] Supplementary `data-dictionary.md` lists the field names from `CUSTDEF.CPY`.
 - [ ] [user] Operator confirms `CUSTDEF.CPY` was ingested correctly (visual inspection of one or two field entries).
 
@@ -850,6 +966,25 @@ git -C ~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample  gc --aggressive
 - [ ] [auto] `job-flow.mmd` parses as Mermaid and shows step→step edges with DD I/O annotated.
 
 **Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/jcl-job-consumer recipes-kb/source-docs/zopeneditor-sample/{job-flow.mmd,dataset-io.json} && rm -rf <oss-clones>/zopeneditor-sample/JCL/docs/jcl-job-internal`.
+
+### C.8.4  reverse-engineer-test-suite  —  the Hono test suite (new RE skill)
+**Trigger phrase:** "Reverse-engineer the test suite at `~/Dev/framework-tests/oss-clones/hono` (the runtime + src test files)."
+
+> **Repo choice.** `reverse-engineer-test-suite` targets a dedicated/standalone test project, but its `SKILL.md` scopes it to "any standalone test project — regardless of stack," which covers a cohesive embedded suite. We reuse the already-cloned `hono` repo (well-structured Vitest suite across `src/**/*.test.ts` + `runtime-tests/`) rather than add an 11th clone. If you prefer a stricter "dedicated repo" exercise, swap in a standalone test repo and update the trigger path; the pass criteria are unchanged.
+
+**Inputs:** The `hono` shallow clone from C.1 (already present). No new clone.
+**Expected outputs:**
+- **Part A**: tree at `<repo>/docs/test-suite-internal/<NN>-<bare-slug>.md` per `re-test-suite-internal.yaml` (16 blocks; **note:** this composition currently declares NO `decision-gates` and every block `optional: false`, so all 16 render — blocks that don't apply to a given suite type carry explicit "not applicable" content rather than being omitted. See results follow-up: the framework may want to add suite-type gates).
+- **Part B**: tree at `recipes-kb/source-docs/hono/test-suite-consumer/<NN>-<bare-slug>.md` per `re-test-suite-consumer.yaml` (10 blocks, each carrying `kind: test-suite` frontmatter). **Path note:** `re-test-suite-consumer.yaml` / the SKILL.md declare a *default* Part-B path of `{knowledge_base_path}/components/<test-suite-id>/<component>.md`; this test writes to the `source-docs/<repo>/test-suite-consumer/` sibling layout instead (so C.9 build-knowledge-base can consume it uniformly with the other RE Part-B trees). Reconcile the default with the source-docs convention — see results follow-up.
+
+**Pass criteria** (in addition to the universal Phase-C criteria above):
+- [ ] [auto] Part A identifies the test framework/runner (Vitest) and the suite layout (unit vs runtime-tests), with concrete file paths.
+- [ ] [auto] Part B documents how a consumer runs the suite (install, run command, watch/CI invocation) and how to add a new test.
+- [ ] [user] Suite-type classification is accurate (Hono is primarily a unit/integration suite, not E2E/BDD) — gated blocks for suite types that don't apply are absent from disk, not stubbed.
+
+**Rollback:** `rm -rf recipes-kb/source-docs/hono/test-suite-consumer && rm -rf <oss-clones>/hono/docs/test-suite-internal`.
+
+> **Note:** the earlier `hono` output at `recipes-kb/source-docs/hono/api-framework-consumer/` (from C.3) is a **sibling** of this step's `test-suite-consumer/` tree under the same `hono/` dir. Both coexist — one clone, two RE domains. C.9 will map both.
 
 ### C.9  build-knowledge-base  —  scaffold the KB
 **Trigger:** "From `~/Dev/framework-tests/recipes-app/` (where `project.toml` lives), build the knowledge base into `../recipes-kb/` from the source-docs already deposited under that path."
@@ -984,7 +1119,7 @@ cd       ~/Dev/framework-tests/recipes-app-gf
 git init -q
 ```
 
-> **Note on SoD scaffold observation in Phase D.** The SoD scaffold is opt-in: a project that does not declare `[stages.<stage>].dir` or `colocate_with_source` runs in legacy mode and Step 0 is a no-op. The Recipes greenfield sandbox is **legacy mode** by default, so D.2 / D.4 / D.6 / D.8 each carry an `[auto]` criterion that Step 0 announced "stage in legacy mode — no-op" and proceeded to Step 1 without prompting. Optionally exercise the SoD path by configuring `[stages.requirements].dir = "ba-repo"` mid-pass (see the optional D.2-SoD variant); the operator records the divergence as a NEEDS-REVIEW.
+> **Note on SoD scaffold observation in Phase D.** The SoD scaffold is opt-in: a project that does not declare `[stages.<stage>].dir` or `colocate_with_source` runs in legacy mode and Step 0 is a no-op. The Recipes greenfield sandbox is **legacy mode** by default, so D.2 / D.4 / D.6 / D.8 each carry an `[auto]` criterion that Step 0 announced its legacy-mode early-out (semantic match, not verbatim — wording varies, e.g. "…is in legacy mode. Skip this step entirely") and proceeded to Step 1 without prompting. Optionally exercise the SoD path by configuring `[stages.requirements].dir = "ba-repo"` mid-pass (see the optional D.2-SoD variant); the operator records the divergence as a NEEDS-REVIEW.
 
 ### Phase D rollback protocol — captured SHAs and stash-first hard resets
 
@@ -1027,7 +1162,7 @@ Several steps below (D.8, D.10, E.3) use `git reset` for rollback. To make rollb
 - [ ] [auto] Each FR has at least one AC (count check)
 - [ ] [user] FRs are testable (judgment on whether the AC actually makes the FR testable)
 - [ ] [auto] No `[NEEDS CLARIFICATION:]` markers left
-- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first, observed the project's `[stages.requirements]` has neither `dir` nor `colocate_with_source`, announced "stage in legacy mode — no-op" (verbatim phrase from the step body's §1), and proceeded to Step 1 without asking the operator any scoping question.
+- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first, observed the project's `[stages.requirements]` has neither `dir` nor `colocate_with_source`, announced its legacy-mode early-out (semantic match, not verbatim — the Step-0 body declares the stage is in legacy mode and no-ops/skips; wording varies, e.g. "…is in legacy mode. Skip this step entirely"), and proceeded to Step 1 without asking the operator any scoping question.
 - [ ] [auto] **(SoD scaffold)** No `_cross-cutting/` directory was created and no `affects_repos` frontmatter was emitted in the requirements artifact (the `shared/affects-repos` block is `optional: true` in the composition, so legacy-mode renders without it).
 - [ ] [user] **(ack-restoration — observable, not interpretive)** Before drafting begins, the agent emits a chat message that contains BOTH the verbatim heading `## Verification rule (always-on)` AND the rule's first sentence as it appears in the SKILL.md (operator can copy-paste from `requirements/create-requirements-package/SKILL.md` and grep the transcript). Acceptance: substring match, not paraphrase.
 - [ ] [user] **(ack-restoration)** Section relevance check fires unconditionally for every block — operator is asked one of {Yes / No (with reason) / Skip / Not sure} for **every** composition block, not only when relevance is in question. Acceptance: operator counts the prompts and confirms the count equals the number of composition blocks (≈ the row count from running the A.6 yaml verifier against `greenfield-requirements-package.yaml`).
@@ -1082,8 +1217,8 @@ And create `project.user.toml` with `[user] role = "BA"`.
 **Pass criteria:**
 - [ ] [auto] C4 diagrams render (Mermaid syntax valid)
 - [ ] [auto] Every FR appears in the traceability matrix
-- [ ] [auto] Tech-stack versions pinned, not "latest" (regex match — no bare `latest` / `*` / `^`-only constraints)
-- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first and announced "stage in legacy mode — no-op" before proceeding to Step 1.
+- [ ] [auto] Tech-stack versions pinned, not "latest" (regex match — no bare `latest` / `*` / `^`-only constraints). **Note:** the pins apply to *runtime* deps; `@types/*` packages track but do not always publish a version equal to their runtime counterpart (e.g. `@types/react-dom` has no `19.2.8`), so `@types` pins may legitimately differ from the runtime pin — check `@types` against npm at install time rather than assuming version equality.
+- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first and announced its legacy-mode early-out (semantic match, not verbatim — wording varies, e.g. "…is in legacy mode. Skip this step entirely") before proceeding to Step 1.
 - [ ] [user] **(ack-restoration — observable)** Same four observable ack-criteria as D.2, applied to design:
    1. Agent emits the verbatim `## Verification rule (always-on)` heading + first sentence from `design/create-design-package/SKILL.md` before drafting.
    2. Unconditional relevance check fires once per composition block in `greenfield-design-package.yaml` (count must equal block count).
@@ -1107,7 +1242,7 @@ And create `project.user.toml` with `[user] role = "BA"`.
 - [ ] [auto] Each increment has all 8 canonical sections
 - [ ] [user] Order is executable (no forward dependencies)
 - [ ] [auto] FR coverage matrix complete
-- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/scope-target-repo.md`) ran first and announced "stage in legacy mode — no-op".
+- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/scope-target-repo.md`) ran first and announced its legacy-mode early-out (semantic match, not verbatim — wording varies, e.g. "…is in legacy mode. Skip this step entirely").
 - [ ] [user] **(ack-restoration — observable)** Two observable assertions for planning (no iterative-block list, so the per-item loop doesn't apply):
    1. Agent emits the verbatim `## Verification rule (always-on)` heading + first sentence from `planning/create-implementation-package/SKILL.md` before drafting.
    2. Each step file's final action is the `## Acknowledgement checkpoint` summarise-and-wait gate (operator confirms a real pause-and-await, not a printed-and-continued).
@@ -1119,6 +1254,7 @@ And create `project.user.toml` with `[user] role = "BA"`.
 **Pass criteria:**
 - [ ] [auto] Per-increment verdict
 - [ ] [auto] Increment-shape compliance confirmed
+- [ ] [user] The GO verdict names the quality fork the operator must elect (quality-first vs execute-first). In this test bed we take execute-first through Phase D, then exercise the quality stage as **Phase Q** after D.10 (see the Phase Q preamble).
 **Rollback:** none.
 
 ### D.8  execute-increments  —  ship INC-001
@@ -1134,7 +1270,7 @@ git -C ~/Dev/framework-tests/recipes-app-gf rev-parse HEAD 2>/dev/null > _docs/.
 - [ ] [auto] Tests pass (test-runner exit code 0)
 - [ ] [auto] Increment-status file updated
 - [ ] [auto] Closing handoff to `update-knowledge-base` emitted
-- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first and announced "stage in legacy mode — no-op". For execution, this also covers the per-repo invocation loop being collapsed to a single repo.
+- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first and announced its legacy-mode early-out (semantic match, not verbatim — wording varies, e.g. "…is in legacy mode. Skip this step entirely"). For execution, this also covers the per-repo invocation loop being collapsed to a single repo.
 - [ ] [user] **(ack-restoration — observable)** Agent emits the verbatim `## Verification rule (always-on)` heading + first sentence from `execution/execute-increments/SKILL.md` before executing. The `## Acknowledgement checkpoint` summarise-and-wait gate fires at the end of `02-execute-plan.md` specifically (gates 03/04/05 already had strict halts pre-ack-restoration; the Stage-1 reinforcement was 02 only).
 
 **Rollback (stash-protected per Phase-D protocol):**
@@ -1206,9 +1342,78 @@ git -C ~/Dev/framework-tests/recipes-app-gf reset --soft "$(cat _docs/.sha-pre-d
 
 ---
 
+## Phase Q — Quality stage on the Recipes app (new 9th stage)
+
+Sandbox: continues from D.10's repo state (`recipes-app-gf/`, with the D.2 requirements, D.4 design, D.6 implementation package, and D.8's shipped INC-001 all on disk).
+
+> **Why a dedicated phase rather than a mid-D fork.** The framework treats the quality stage as *user-elected at the `review-implementation-package` GO* (D.7): quality-first (gate quality before executing) or execute-first (execute, then reconcile via `audit-quality-coverage`). To keep the YOLO run linear, this test bed exercises the quality stage as a dedicated Phase Q *after* Phase D — which lets us cover **both** paths in one pass: Q.1/Q.2 exercise the quality-first authoring+gate, and Q.4 exercises the execute-first reconciliation audit against the already-shipped INC-001. Record in the ledger that the fork itself was not taken conversationally at D.7 (a linear-run simplification, not a defect).
+>
+> **SoD legacy-mode note.** The `recipes-app-gf` project is legacy mode (no `[stages.quality]` SoD config), so `create-quality-package`'s Step 0 is a no-op — same assertion shape as D.2/D.4/D.6/D.8.
+
+### Q.1  create-quality-package  —  full quality stage
+**Trigger phrase:** "Create the quality package for Recipes."
+**Inputs:** The requirements package (D.2), design package (D.4), and implementation package (D.6) on disk under `recipes-app-gf/docs/`.
+**Expected outputs:** Quality package on disk per `templates/compositions/greenfield-quality-package.yaml` (~17 blocks) — quality strategy, test design traced to the D.2 acceptance criteria, TC-XXX test-case increments, QE plan / environment, risk-based prioritisation.
+**Pass criteria:**
+- [ ] [auto] All composition blocks present per `greenfield-quality-package.yaml`.
+- [ ] [auto] Test design traces to acceptance criteria — every FR/AC from the requirements package maps to ≥1 test case (coverage matrix present).
+- [ ] [auto] At least one TC-XXX test-case increment defined in the reduced increment shape.
+- [ ] [auto] **(SoD scaffold, legacy-mode behaviour)** Step 0 (`steps/00-scope-target-repo.md`) ran first, observed `[stages.quality]` has neither `dir` nor `colocate_with_source`, announced its legacy-mode early-out (semantic match, not verbatim — wording varies, e.g. "…is in legacy mode. Skip this step entirely"), and proceeded without a scoping prompt.
+- [ ] [user] **(ack-restoration — observable)** Agent emits the verbatim `## Verification rule (always-on)` heading + first sentence from `quality/create-quality-package/SKILL.md` before drafting; the unconditional relevance check fires once per composition block; the per-item loop fires on the test-case-increments block (`steps/02b-test-case-increments.md`: state → draft → "Approve, change, or skip?" → wait); each step file ends with the `## Acknowledgement checkpoint` summarise-and-wait gate.
+**Rollback:** `rm -rf ~/Dev/framework-tests/recipes-app-gf/docs/quality`.
+
+### Q.2  review-quality-package  —  gate
+**Trigger phrase:** "Review the quality package."
+**Expected outputs:** GO / NO-GO verdict with findings on coverage completeness, test-design quality, traceability, and risk coverage.
+**Pass criteria:**
+- [ ] [auto] One overall verdict.
+- [ ] [user] Findings cite specific test cases / FR IDs / coverage gaps (no rubber-stamp).
+- [ ] [auto] **(SoD scaffold, legacy-mode)** Review-skill Step 0 (`## Step 0 — Locate the upstream artifact (SoD only)` in the SKILL.md) ran, observed legacy mode, and resolved the artifact path via `[project.paths]`.
+**Rollback:** none.
+
+### Q.3  execute-quality-increments  —  implement one TC-XXX
+**Pre-step (mandatory — captures rollback target):**
+```
+git -C ~/Dev/framework-tests/recipes-app-gf rev-parse HEAD > _docs/.sha-pre-q3
+```
+**Trigger phrase:** "Execute the first quality increment (TC-001)."
+**Expected outputs:** The TC-XXX test artifacts implemented under `recipes-app-gf/` (test files added/expanded), test-runner invoked, increment-status updated.
+**Pass criteria:**
+- [ ] [auto] Test files for TC-001 exist and the test runner exits 0 (or documents expected reds if TC-001 targets an unbuilt behaviour — record which).
+- [ ] [auto] Quality increment-status file updated to reflect TC-001 done.
+- [ ] [user] The implemented tests actually exercise the acceptance criteria they claim to (operator adjudicates one test).
+**Rollback (stash-protected per Phase-D protocol):**
+```
+git -C ~/Dev/framework-tests/recipes-app-gf stash push -u -m "q3-pre-rollback" || true
+git -C ~/Dev/framework-tests/recipes-app-gf reset --hard "$(cat _docs/.sha-pre-q3)"
+```
+
+### Q.4  audit-quality-coverage  —  read-only coverage audit (execute-first reconciliation)
+**Trigger phrase:** "Audit test coverage against the implementation package."
+**Inputs:** The D.6 implementation package (INC-XXX) + D.8's shipped INC-001 + the Q.1 quality package.
+**Expected outputs:** A read-only coverage report mapping each implementation increment (INC-XXX) to its test coverage, flagging any increment with no covering test case.
+**Pass criteria:**
+- [ ] [auto] Report enumerates every INC-XXX from the implementation package with a covered / uncovered verdict.
+- [ ] [auto] The audit writes no code and mutates no increment (read-only — verify working tree unchanged after the run except the report file).
+- [ ] [user] Uncovered increments (if any) are correctly identified (operator adjudicates against the actual test files).
+**Rollback:** report is informational — `rm -f` the report file if one was written; nothing else to roll back.
+
+### Q.5  review-test-failures  —  triage a failing run
+**Setup:** Introduce a deliberate failing test (e.g., flip one assertion in a TC-001 test so it fails, or point the skill at a captured failing run log). Capture the pre-edit state so it can be restored.
+**Trigger phrase:** "Review the test failures and triage them."
+**Expected outputs:** A triage of the failed scenario(s) — root-cause hypothesis, severity, and a recommended action (fix code / fix test / defer), optionally linked to `manage-bugs`.
+**Pass criteria:**
+- [ ] [auto] Each failing scenario gets a triage entry with a root-cause hypothesis + recommended action.
+- [ ] [user] The root-cause hypothesis is plausible for the injected failure (operator adjudicates) — not a generic "re-run it".
+**Rollback:** restore the flipped assertion (`git checkout -- <test-file>`).
+
+> **End of Phase Q — run the §11 teardown checklist** (status sweep + stash-list inspection for `q3-pre-rollback`). Phase E continues from this repo state.
+
+---
+
 ## Phase E — Quick-dev on the Recipes app
 
-Sandbox: continues from D.10's repo state.
+Sandbox: continues from Phase Q's repo state (which continues from D.10).
 
 ### E.1  document-quick-change  —  spec the cookTime feature
 **Trigger phrase:** "Quick change: add a `cookTime` field to recipes and surface it on the list view."
@@ -1285,6 +1490,7 @@ When converting a step-by-step run to a YOLO run mid-pass, carry the verdict led
 | reverse-engineer-database | C.6 | |
 | reverse-engineer-mobile-app | C.7 | |
 | reverse-engineer-mobile-framework | C.8 | |
+| reverse-engineer-test-suite | C.8.4 | **new on this branch**; targets the Hono Vitest suite |
 | reverse-engineer-copybook-library | C.8.1, **C.8.0 sub-step 2** | new in 1.3.0; 2 invocations (primary + supplementary CICS+DB2 prereq pass) |
 | reverse-engineer-cobol-program | C.8.2 (primary + supplementary) | new in 1.3.0; 2 invocations within one step |
 | reverse-engineer-jcl-job | C.8.3 | new in 1.3.0 |
@@ -1303,6 +1509,11 @@ When converting a step-by-step run to a YOLO run mid-pass, carry the verdict led
 | execute-increments | D.8 | ack-restoration on `02-execute-plan.md`; SoD legacy-mode no-op |
 | manage-bugs | D.9a (mid-increment), D.9b (standalone) | both modes exercised explicitly |
 | create-pr | D.10 | |
+| create-quality-package | Q.1 | **new quality stage**; ack-restoration + SoD legacy-mode no-op observed |
+| review-quality-package | Q.2 | **new quality stage**; SoD legacy-mode no-op observed |
+| execute-quality-increments | Q.3 | **new quality stage** |
+| audit-quality-coverage | Q.4 | **new quality stage**; execute-first reconciliation audit (read-only) |
+| review-test-failures | Q.5 | **new quality stage**; triage of an injected failing test |
 | document-quick-change | E.1 | |
 | plan-quick-change | E.2 | |
 | execute-quick-change | E.3 | |
@@ -1311,7 +1522,7 @@ When converting a step-by-step run to a YOLO run mid-pass, carry the verdict led
 
 ## 10. Out-of-band utilities not separately listed as steps
 
-`framework-navigator` is exercised twice (B.2 + B.3); the registry/validator scripts (`scripts/build-registry.py`, `scripts/validate.py`) are exercised in A.1 + A.2 + A.7; the ack-restoration sentinels are statically grep-checked in A.5; the SoD scaffold sentinels (Step-0 placement, `affects-repos` block, SCHEMAS.md SoD section, composition wiring, `.example` files) are statically checked in A.6, validated dynamically against deliberately-broken fixtures in A.7 (rules 7–12), and observed at runtime in D.2 / D.3 / D.4 / D.5 / D.6 / D.8 (legacy-mode no-op) and in the optional D.2-SoD variant (active-mode prompts and permission check).
+`framework-navigator` is exercised twice (B.2 + B.3); the registry/validator scripts (`scripts/build-registry.py`, `scripts/validate.py`) are exercised in A.1 + A.2 + A.7 + A.9; the ack-restoration sentinels are statically grep-checked in A.5; the SoD scaffold sentinels (Step-0 placement, `affects-repos` block, SCHEMAS.md SoD section, composition wiring, `.example` files) are statically checked in A.6, validated dynamically against deliberately-broken fixtures in A.7 (rules 7–12), and observed at runtime in D.2 / D.3 / D.4 / D.5 / D.6 / D.8 + Q.1 / Q.2 (legacy-mode no-op) and in the optional D.2-SoD variant (active-mode prompts and permission check). The source-adapter convention is statically checked in A.8; the pluggable add-on layer (`extra_skill_roots`, `aide-addon.toml` manifest, `[tools.*]` resolution, `{workspace}` token) is statically + dynamically checked in A.9–A.10.
 
 ## 11. Per-phase teardown checklist
 
@@ -1320,7 +1531,7 @@ At the end of each phase, run this consolidated sweep before moving on. The goal
 ### 11.1  Status sweep (every phase)
 ```
 # 1. Framework repo — should be clean (or only have intentional plan / results edits).
-git -C ~/Dev/theframework status --short
+git -C ~/Dev/AIDE status --short
 
 # 2. Sandbox project shell(s) — clean if all step rollbacks ran; surface deltas otherwise.
 git -C ~/Dev/framework-tests/recipes-app    status --short 2>/dev/null
@@ -1340,6 +1551,7 @@ Append the output of each command to the results file under the phase's teardown
 | B | `recipes-app/{project.toml, project.user.toml, CHANGE-TRACKER.md, docs/}` reflect only steps you ran. The B.4 brownfield flag remains set (Phase C depends on it). |
 | C | `recipes-kb/source-docs/<repo>/` populated for every RE step that ran. `oss-clones/` clones are still shallow (`git rev-parse --is-shallow-repository` per repo). The KB itself (`recipes-kb/{ARCHITECTURE.md, components/, repos/, ...}`) is intact unless C.9 rollback ran. C.12 / C.13 / C.13b setup commits are reset against `_docs/.sha-pre-c12`. |
 | D | `recipes-app-gf/` reset against `_docs/.sha-pre-d8` / `.sha-pre-d10` / `.sha-pre-e3` if you intend to teardown to a clean greenfield (or leave the artefacts in place if you want a follow-up sitting). `git stash list` inspected for any `*-pre-rollback` entries to restore. |
+| Q | `recipes-app-gf/docs/quality/` populated by Q.1 (retain for reference or remove via Q.1 rollback). `recipes-app-gf/` reset against `_docs/.sha-pre-q3` if the Q.3 test increment should be undone; Q.5's flipped assertion restored via `git checkout`. `git stash list` inspected for `q3-pre-rollback`. |
 | E | `recipes-app-gf/` working tree clean (E.3's commit-and-clean-tree criterion). `docs/cook-time/` either retained for reference or removed via E.1 + E.2 rollbacks. |
 
 ### 11.3  Stash inspection (Phase D / E only)
@@ -1353,4 +1565,4 @@ For each `*-pre-rollback` entry, decide: pop and inspect (if the work is worth r
 
 ---
 
-**End of plan.** Begin with Phase A.0 against the `mm/add-ack-cobol-repo` branch (resolves `<SKILL_COUNT>`), then proceed to A.1. After each phase ends, run §11's teardown checklist before moving to the next phase.
+**End of plan.** Begin with Phase A.0 against the `mm/AIDE-core-changes` branch (resolves `<SKILL_COUNT>` = 42), then proceed through A.1 → A.10, B, C (through C.8.4), D, **Q**, E. After each phase ends, run §11's teardown checklist before moving to the next phase.
