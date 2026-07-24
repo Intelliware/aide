@@ -29,6 +29,25 @@ package rather than under a SoD path.
 
 ## Procedure
 
+### 0b.0 Resolve the package gate flags (do this first)
+
+The quality composition gates four blocks on `[project.elicitation]` flags
+that `start-project` does not seed. If they are left unset the gated blocks
+**silently omit** — most damagingly the test-case-increment block. So resolve
+all four explicitly before anything else; never leave the omission implicit:
+
+| Flag | Gated block(s) | How to resolve |
+|---|---|---|
+| `uses_test_case_increments` | `test-case-increment` (Step 2b) | Read from `project.toml`; if unset, **default `true`** for a full greenfield/brownfield SDLC (the quality stage is built around TC-XXX increments) and confirm with a one-line prompt. |
+| `has_nfrs` | `nonfunctional-quality` | **Derive**: `true` iff the requirements package declares ≥ 1 NFR. No prompt needed. |
+| `records_testability_classification` | `testability-classification` (visible table) | Default `true` (this step always runs; the flag only controls whether the table is rendered vs. summarised into the change tracker per 0b.4). |
+| `uses_team_failure_categories` | team failure-category block | Default `false` (team-specific vocabulary; opt-in only). Resolve `true` only if `project.toml` sets it. |
+
+Record the four resolved values in the change tracker so the review can see
+which blocks were included/omitted and why. If the user wants a choice to be
+sticky across future packages, offer to persist it to `[project.elicitation]`
+via `customize-framework`. Then proceed.
+
 ### 0b.1 Load the inputs
 
 Read the implementation package (every `INC-XXX.md` + `increment-status.md`),
