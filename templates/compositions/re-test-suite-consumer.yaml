@@ -14,11 +14,16 @@ description: Reverse-engineering KB consumer view of a standalone test-automatio
 applies-to-flow: reverse-eng
 package-type: re-consumer
 
-default-output-path: "{paths.knowledge_base_path}/components/<test-suite-id>/"
+default-output-path: "{paths.knowledge_base_path}/source-docs/{repo-slug}/test-suite-consumer/"
 default-output-shape: tree
-# Path resolves under the KB. Tree shape: one .md file per logical
-# component. Every file MUST declare `kind: test-suite` in its YAML
-# frontmatter so `navigate-knowledge-base --profile=test-suite` finds it.
+# Path resolves under the KB as a SIBLING of the other RE consumer trees
+# (`source-docs/<repo-slug>/<domain>-consumer/`), so `build-knowledge-base`
+# consumes it uniformly with every other Part-B tree. Tree shape: one .md
+# file per block, named `<NN>-<bare-slug>.md` (NN = 1-based zero-padded
+# position in the full order-sorted block list; <bare-slug> strips the
+# `reverse-eng/test-suite/consumer/` prefix). Every file MUST declare
+# `kind: test-suite` in its YAML frontmatter so
+# `navigate-knowledge-base --profile=test-suite` finds it.
 
 blocks:
   - slug: reverse-eng/test-suite/consumer/suite-purpose-and-scope

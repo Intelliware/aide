@@ -93,7 +93,7 @@ Output is **bound to the composition's block list** — do not invent file names
 **Part B (consumer)** renders as a tree under `<knowledge_base_path>/source-docs/<repo-slug>/copybook-library-consumer/`, against `templates/compositions/re-copybook-library-consumer.yaml`.
 
 Per-block file naming (applies to BOTH parts): `<NN>-<bare-slug>.md`, where:
-- `<NN>` is the 1-based, zero-padded sort index after sorting blocks by their `order` value (first block → `01`, second → `02`, etc.).
+- `<NN>` is the 1-based, zero-padded position of the block in the **full** `order`-sorted block list (first block → `01`, second → `02`, …). The index is assigned over the complete list **before** decision-gating, so a gated-out block leaves a **numbering gap** — survivors keep their full-list index and are **not** renumbered contiguously (e.g. if the block at `03` is omitted, the next rendered file is still `04-…`, not `03-…`).
 - `<bare-slug>` is the block slug with the `reverse-eng/copybook-library/internal/` (or `…/consumer/`) prefix stripped.
 - Block content shape comes from `templates/blocks/reverse-eng/copybook-library/<part>/<bare-slug>.md`. Extracted source content fills the rendered block; the block's structural shape is preserved.
 - A block whose `decision-gates: include-if:` evaluates false is **omitted entirely** — do not author an empty placeholder.
