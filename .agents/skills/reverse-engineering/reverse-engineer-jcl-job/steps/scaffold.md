@@ -39,7 +39,7 @@ Confirm the discovery output. Read or create `extraction-status.md`. Confirm sch
 
 Based on the documentation model (Part A, Part B for jcl-job) and the inventory:
 
-1. Generate the complete directory tree for both parts plus the two mandatory feed-files at the Part-A root
+1. Generate the complete directory tree for both parts plus the two mandatory feed-files at the Part-B root (the KB `source-docs/<slug>/` directory)
 2. For each file, show file path, section headers, and inventory items mapped to each section
 3. Recommend the extraction order: per-job step reference → PROC expansion → DD inventory → cross-cutting → consumer guide
 
@@ -51,7 +51,7 @@ After user approval:
 
 1. Create directories
 2. Create files with section headers and TODO markers
-3. Create empty feed-files (`job-flow.mmd`, `dataset-io.json`) at the Part-A root
+3. Create empty feed-files (`job-flow.mmd`, `dataset-io.json`) at the Part-B root (the KB `source-docs/<slug>/` directory)
 4. Initialize `extraction-status.md` and `CHANGE-TRACKER.md`
 
 ### 4. Confirm Readiness
@@ -62,7 +62,7 @@ Summarize files created, recommended extraction order, first job to extract.
 
 - Directory tree for Part A (in repo) and Part B (in KB)
 - Empty files with section headers and TODO markers
-- Empty feed-files at the Part-A root
+- Empty feed-files at the Part-B root (the KB `source-docs/<slug>/` directory)
 - `extraction-status.md` and `CHANGE-TRACKER.md` initialized
 
 ## Halt conditions
@@ -76,5 +76,5 @@ Summarize files created, recommended extraction order, first job to extract.
 
 - Generating content during scaffolding
 - Skipping the user-approval gate on scheduler-of-record — Part B's predecessor/successor edges depend on this
-- Forgetting the two mandatory feed-files at the Part-A root
+- Forgetting the two mandatory feed-files at the Part-B root (the KB `source-docs/<slug>/` directory)
 - Treating PROC expansion as optional during scaffolding (it is — but the file structure must still leave room for the resolved view)

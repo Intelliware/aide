@@ -49,7 +49,7 @@ After user approval:
 
 1. Create directories
 2. Create files with section headers and TODO markers
-3. Create empty feed-files (`program-call-graph.mmd`, `program-data-bindings.json`, `program-exec-inventory.md`) at the Part-A root
+3. Create empty feed-files (`program-call-graph.mmd`, `program-data-bindings.json`, `program-exec-inventory.md`) at the Part-B root (the KB `source-docs/<slug>/` directory)
 4. Initialize `extraction-status.md` and `CHANGE-TRACKER.md`
 
 ### 4. Confirm Readiness
@@ -60,7 +60,7 @@ Summarize files created, recommended extraction order, first program to extract.
 
 - Directory tree for Part A (in repo) and Part B (in KB)
 - Empty files with section headers and TODO markers
-- Empty feed-files at the Part-A root
+- Empty feed-files at the Part-B root (the KB `source-docs/<slug>/` directory)
 - `extraction-status.md` and `CHANGE-TRACKER.md` initialized
 
 ## Halt conditions
@@ -74,6 +74,6 @@ Summarize files created, recommended extraction order, first program to extract.
 
 - Generating content during scaffolding
 - Skipping the user-approval gate
-- Forgetting the three mandatory feed-files at the Part-A root
+- Forgetting the three mandatory feed-files at the Part-B root (the KB `source-docs/<slug>/` directory)
 - Not verifying execution-context per program — Part B differs sharply between batch and CICS
 - Treating dynamic CALLs as resolved during scaffolding (resolve only when extracting Stage 3)
