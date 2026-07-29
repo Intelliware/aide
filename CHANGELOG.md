@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `1.6.2` |
+| Current artifact version | `2.0.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,39 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.0.0` — 2026-07-29
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-07-28 | Addition | config | `config/SCHEMAS.md`, `config/project.toml.example` | Added the `[tools.*]` add-on resolution convention and the `{workspace}` path token, letting projects declare pluggable tool add-ons that resolve against the workspace root. Backwards-compatible: projects without `[tools.*]` are unaffected. | branch `mm/AIDE-core-changes` | ☐ Pending |
+| 2 | 2026-07-28 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | New framework-layer `[tools.*]` guardrail (**Check K**): validates add-on tool declarations against the resolution convention and warns on malformed or unresolvable entries. | branch `mm/AIDE-core-changes` | ☐ Pending |
+| 3 | 2026-07-28 | Addition | skills | `.agents/skills/_registry/**`, `aide-addon.toml` | Registry now supports add-on **extra-roots** via an `aide-addon.toml` manifest, so installed add-ons can contribute stage folders and skills to the canonical tree without polluting core. | branch `mm/AIDE-core-changes` | ☐ Pending |
+| 4 | 2026-07-28 | Addition | references | flows / source-adapter convention | Added an optional **source-adapter** convention to the greenfield/brownfield flows for pluggable discovery inputs. Opt-in; existing flows unchanged when unused. | branch `mm/AIDE-core-changes` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-07-28 | Restructure | skills | integration tooling → `aide-addons` add-on | Extracted the integration tooling (Jira / Confluence / document-conversion) out of the core catalogue into a separately-installable `aide-addons` add-on, consumed through the new add-on extra-roots mechanism. Projects that relied on these skills being present in core must now install the `aide-addons` add-on. | branch `mm/AIDE-core-changes` | ☐ Pending |
+| 2 | 2026-07-28 | Correction | compositions | `templates/compositions/{brownfield,greenfield}-quality-package.yaml` | Fixed `affects-repos` handling in quality packages, gated mobile-framework subsystems, and resolved the quality-gate flags. | branch `mm/AIDE-core-changes` | ☐ Pending |
+| 3 | 2026-07-28 | Correction | blocks | mainframe lineage / reverse-engineering blocks | Feed-files now sit at the Part-B root; lineage db2/cics/ims gates are feed-derived; sparse block numbering is pinned and the test-suite Part-B path is aligned to the source-docs convention. | branch `mm/AIDE-core-changes` | ☐ Pending |
+
+#### Branch Dependency
+
+Major release on top of `1.6.5`. Versioned as MAJOR because integration tooling
+(Jira / Confluence / document-conversion) has been **removed from the core skill
+catalogue** and extracted into a separately-installable `aide-addons` add-on
+(commit `3f40c0f`, marked breaking upstream). **Migration required:** projects that
+relied on those skills shipping in core must now install the `aide-addons` add-on
+to restore them. The rest of the release is additive and backwards-compatible —
+pluggable `[tools.*]` add-on resolution, add-on extra-roots, the source-adapter
+convention, and validator Check K — but the catalogue-shape change alone crosses
+the MAJOR threshold under this project's semver convention.
+
+---
 
 ### `1.6.5` — 2026-06-18
 
