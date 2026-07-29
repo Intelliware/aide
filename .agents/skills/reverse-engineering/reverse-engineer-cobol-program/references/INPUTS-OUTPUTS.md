@@ -72,7 +72,7 @@ Location: `{paths.knowledge_base_path}/source-docs/<repo-slug>/cobol-program-con
 
 ### Mandatory extracted artefacts (this skill only)
 
-Written at the Part-A directory root, not driven by the block list. Used as input to `build-mainframe-data-lineage`:
+Written at the canonical Part-B directory root (the KB `source-docs/<slug>/` directory, alongside the `*-consumer/` tree), not driven by the block list — a KB-stage skill (`build-mainframe-data-lineage`) reads them, so they must live on the KB side, not in the source repo. Used as input to `build-mainframe-data-lineage`:
 
 - `program-call-graph.mmd` — Mermaid graph of `CALL`/`PERFORM`/`XCTL` per program
 - `program-data-bindings.json` — copybook → DIVISION/SECTION-where-used → key fields, per program. Schema:

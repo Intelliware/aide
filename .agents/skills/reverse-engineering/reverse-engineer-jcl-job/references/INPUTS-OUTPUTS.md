@@ -64,7 +64,7 @@ Location: `{paths.knowledge_base_path}/source-docs/<repo-slug>/jcl-job-consumer/
 
 ### Mandatory extracted artefacts (this skill only)
 
-Written at the Part-A directory root, not driven by the block list. Used as input to `build-mainframe-data-lineage`:
+Written at the canonical Part-B directory root (the KB `source-docs/<slug>/` directory, alongside the `*-consumer/` tree), not driven by the block list — a KB-stage skill (`build-mainframe-data-lineage`) reads them, so they must live on the KB side, not in the source repo. Used as input to `build-mainframe-data-lineage`:
 
 - `job-flow.mmd` — Mermaid step→step graph with DD I/O annotated
 - `dataset-io.json` — job → step → DD → DSN → DISP → program invoked. Schema:

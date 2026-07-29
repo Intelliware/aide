@@ -66,7 +66,14 @@ decision-gates:
 notes: |
   Block order follows order-hint values 110..200 (continuous, no gap).
   DB2/IMS/CICS-binding blocks are conditional because not every project
-  uses all three middleware systems. The two side-artefact files
+  uses all three middleware systems. **The `has_db2` / `has_ims` / `has_cics`
+  flags in these gates are DERIVED BY THIS SKILL from the contributing
+  `program-exec-inventory` feeds (see step 01) — they are NOT required to be
+  pre-set in `project.toml`.** A KB-stage aggregator has no elicitation phase,
+  so the gate is feed-driven: `has_db2` is true iff some feed reports `EXEC SQL`,
+  `has_cics` iff some feed reports `EXEC CICS`, `has_ims` iff some feed reports
+  `EXEC DLI`. This keeps the gate syntax uniform with the RE compositions while
+  matching the skill's actual feed-driven behaviour. The two side-artefact files
   (move-chain.json, job-program-dataset-chain.mmd) are written by the
   parent skill alongside their corresponding markdown blocks but are NOT
   driven by this composition's block list — they are the canonical

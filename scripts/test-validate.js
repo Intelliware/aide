@@ -31,6 +31,7 @@ const { tmpdir } = require('os');
 const REPO_ROOT = path.resolve(__dirname, '..');
 const VALIDATE = path.join(REPO_ROOT, 'scripts', 'validate.js');
 const FIXTURES = path.join(REPO_ROOT, 'scripts', 'test_fixtures', 'sod-negatives');
+const FRAMEWORK_LAYER_FIXTURES = path.join(REPO_ROOT, 'scripts', 'test_fixtures', 'framework-layer-negatives');
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -332,6 +333,24 @@ test('Default mode exits zero', () => {
     'Check I', out,
     'default-mode output should not run Check I (SoD fixture mode)'
   );
+});
+
+// --- Check K — framework-layer [tools.*] guardrail ---
+
+test('Check K — reject [tools.*] in a framework layer', () => {
+  const proc = runValidate('--framework-toml', path.join(FRAMEWORK_LAYER_FIXTURES, 'tools-in-framework.toml'));
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(
+    proc.returncode, 0,
+    `validator should reject [tools.*] in a framework layer but exited 0.\noutput:\n${out}`
+  );
+  for (const needle of ['tools', 'project-layer']) {
+    assertIn(needle, out, `output missing '${needle}'.\noutput:\n${out}`);
+  }
+});
+
+test('Check K — accept a clean framework layer', () => {
+  expectAccept(['--framework-toml', path.join(REPO_ROOT, 'config', 'framework.toml.example')]);
 });
 
 // --- Summary ---

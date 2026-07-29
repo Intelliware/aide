@@ -36,6 +36,10 @@ The full sequencing rationale, sub-step instructions, and elicitation rules live
 
 When a knowledge base exists at `project.paths.knowledge_base_path`, prefer querying it via `knowledge-base/navigate-knowledge-base` before reading source repos directly. The KB encodes synthesized truth; raw repos are the fallback when the KB is silent.
 
+## Source adapter (optional — Step 0 seed)
+
+Before eliciting the change description in Step 0, check `discovery_source` in this skill's customization (`customizations/create-requirements-package.toml`). If set, follow `references/orientation/source-adapters.md`: hand off by name to the named adapter (e.g. `confluence-extract-package`) to pull the specification/page into a structured package on disk, then seed `change-description.md` from it and confirm with the user. If unset (the default), or if the adapter is set but not installed, capture the change description by direct elicitation as usual. The adapter only **seeds** intake — the Step 0 hard gate below still applies, and the user must still confirm who/what/why.
+
 ## Hard gates
 
 - Step 0 must produce a confirmed change description (who/what/why all stated) before any other sub-step runs.

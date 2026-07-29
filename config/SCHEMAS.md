@@ -138,6 +138,7 @@ Path values may use these tokens, expanded at config-load time:
 | `{framework-root}` | The directory containing `framework.toml`. |
 | `{home}` | The current user's home directory. |
 | `{cwd}` | The shell's current working directory at the time the framework was invoked. |
+| `{workspace}` | The common parent of the workspace's root folders in a multi-root workspace (i.e. the directory that holds the framework repo, the project repo, and any sibling add-on repos). When it cannot be determined, it falls back to the parent of `{framework-root}`. Used mainly by `[tools.*].install_root` to locate a sibling add-on repo. |
 
 Relative paths (no leading `/` or `~`) are resolved relative to `{project-root}`
 when they appear in `project.toml` / `project.user.toml` / `customizations/`,
@@ -230,6 +231,7 @@ suppression, custom blocks).
 | `regenerate_on_install` | bool | `true` | Skill-manifest regeneration on installer runs. |
 | `regenerate_on_skill_change` | bool | `true` | Watch SKILL.md frontmatter and regenerate when descriptions change. |
 | `manifest_path` | path | `"{framework-root}/_config/skill-manifest.csv"` | Where the registry generator writes its output. |
+| `extra_skill_roots` | array of path | `[]` | Additional add-on repos (or `.agents/skills` dirs) whose skills the registry generator should include alongside core. Each is scanned for `SKILL.md` files and tagged with an `origin` (from the add-on's `aide-addon.toml` `[addon].name`, else the dir name) in the generated `skills.csv`/`skills.json`. Also settable per-run via `build-registry.py --extra-skill-root PATH`. Core skills carry `origin = "core"`. |
 
 ### 2.2 Layer 2 — `framework.user.toml`
 
@@ -401,6 +403,72 @@ without having to know which layer they came from.
 
 This is the layer where `_suppress: true` is most useful — see
 `customizations/example-skill.toml.example` for the canonical demonstration.
+
+### 2.6 The `[tools.<name>]` table — add-on tool resolution
+
+Integration tooling (JIRA, Confluence, document conversion, …) ships as
+**separate add-on repos**, not in core (see
+`_docs/pluggable-tool-addons-proposal.md`). A `[tools.<name>]` table tells a
+skill how to locate the CLI that backs it. The table is **project-scoped**: it
+lives in `project.toml` (team declares intent) and may be overridden in
+`project.user.toml` (personal, local-path only). It is **not** valid in the
+`framework.*` layers — an add-on used on one project must not leak
+machine-wide to others.
+
+`<name>` is a free identifier chosen by the add-on (e.g. `atlassian`,
+`sharepoint`). Multiple add-ons coexist as multiple tables; two Atlassian
+add-ons targeting different sites are just `[tools.atlassian-prod]` and
+`[tools.atlassian-sandbox]`.
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `cli` | string | yes | The command probed on `PATH` first (e.g. `"atl"`, `"spt"`). If it resolves, it is used directly. |
+| `install_root` | path | yes | Fallback location of the add-on's `tools/` dir, used when `cli` is not on `PATH`: the skill runs `cd <install_root> && npm run <run_script> --`. Path tokens allowed — typically `"{workspace}/aide-addons/tools"`. This is the field a user overrides in `project.user.toml` when their clone lives elsewhere. |
+| `run_script` | string | no | npm script name for the fallback invocation. Defaults to `cli`. |
+| `setup_doc` | path | no | Path to the add-on's setup guide, surfaced in the "add-on not installed" message. |
+
+Because `[tools.<name>]` is a table, the deep-merge semantics (§1.3) let
+`project.toml` declare the full block while `project.user.toml` overrides only
+`install_root`; unmentioned keys inherit. Per-skill customizations (Layer 5)
+**cannot** override `[tools.*]` — it is a project-layer concern only.
+
+Resolution order a skill MUST follow: (1) probe `cli` on `PATH` → use directly;
+(2) else expand `install_root` and run via `npm run <run_script> --`; (3) else
+halt with a clear "add-on not installed" message pointing at `setup_doc`. If no
+`[tools.<name>]` block matches at all, a skill packaged with an in-repo `tools/`
+dir MAY fall back to the literal `cd tools && npm run <cli> --` form for
+backward compatibility.
+
+### 2.7 The add-on manifest — `aide-addon.toml`
+
+Each add-on repo carries an `aide-addon.toml` at its root so the framework can
+**enumerate** what an installed add-on provides (rather than infer it). It is
+read by `build-registry.py`/`.js` to label the add-on's skills and by humans as
+the add-on's contents contract.
+
+**Location:** `<addon-root>/aide-addon.toml`.
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `[addon].name` | string | yes | Short identifier used as the `origin` tag on this add-on's skills in the registry (e.g. `atlassian`). |
+| `[addon].description` | string | no | One-line summary of the add-on. |
+| `[addon].provides_skills` | array of string | no | Skill names the add-on contributes (documentation / sanity-check aid). |
+| `[addon].registers_tools` | array of string | no | The `[tools.<name>]` identifiers a consuming project is expected to declare (see § 2.6). |
+
+Example:
+
+```toml
+[addon]
+name = "atlassian"
+description = "JIRA + Confluence extraction via the Atlassian CLI"
+provides_skills = ["jira-get", "jira-search", "jira-extract-requirements",
+                   "confluence-fetch", "confluence-extract-package"]
+registers_tools = ["atlassian"]
+```
+
+An add-on is **discovered** by the host's multi-root `.agents/skills/` scan when
+opened as a workspace folder — the manifest does not drive discovery; it drives
+enumeration and registry labelling.
 
 ---
 

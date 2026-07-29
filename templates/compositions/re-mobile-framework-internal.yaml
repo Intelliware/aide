@@ -38,8 +38,9 @@ blocks:
     optional: false
     order: 150
   - slug: reverse-eng/mobile-framework/internal/gesture-and-event-system
-    optional: false
+    optional: true
     order: 160
+    include-if: "project.elicitation.framework_provides_gesture_system == true"
   - slug: reverse-eng/mobile-framework/internal/layout-engine-internals
     optional: true
     order: 170
@@ -54,17 +55,21 @@ blocks:
     optional: false
     order: 200
   - slug: reverse-eng/mobile-framework/internal/network-stack
-    optional: false
+    optional: true
     order: 210
+    include-if: "project.elicitation.framework_provides_networking == true"
   - slug: reverse-eng/mobile-framework/internal/storage-internals
-    optional: false
+    optional: true
     order: 220
+    include-if: "project.elicitation.framework_provides_storage == true"
   - slug: reverse-eng/mobile-framework/internal/notification-internals
-    optional: false
+    optional: true
     order: 230
+    include-if: "project.elicitation.framework_provides_notifications == true"
   - slug: reverse-eng/mobile-framework/internal/permissions-system
-    optional: false
+    optional: true
     order: 240
+    include-if: "project.elicitation.framework_provides_permissions == true"
   - slug: reverse-eng/mobile-framework/internal/performance-pipeline
     optional: false
     order: 250
@@ -96,13 +101,35 @@ elicitation:
     required: true
 
 decision-gates:
+  - block: reverse-eng/mobile-framework/internal/gesture-and-event-system
+    include-if: "project.elicitation.framework_provides_gesture_system == true"
   - block: reverse-eng/mobile-framework/internal/layout-engine-internals
     include-if: "project.elicitation.framework_owns_layout == true"
+  - block: reverse-eng/mobile-framework/internal/network-stack
+    include-if: "project.elicitation.framework_provides_networking == true"
+  - block: reverse-eng/mobile-framework/internal/storage-internals
+    include-if: "project.elicitation.framework_provides_storage == true"
+  - block: reverse-eng/mobile-framework/internal/notification-internals
+    include-if: "project.elicitation.framework_provides_notifications == true"
+  - block: reverse-eng/mobile-framework/internal/permissions-system
+    include-if: "project.elicitation.framework_provides_permissions == true"
   - block: reverse-eng/mobile-framework/internal/release-channel-and-codepush-or-ota
     include-if: "project.elicitation.has_ota_updates == true"
 
 notes: |
-  Block order follows order-hint values 110..320. Two conditional gates:
-  layout-engine-internals (only relevant when the framework owns layout
-  rather than deferring to the host platform) and release-channel-and-
-  codepush-or-ota (only if the framework supports OTA bundle updates).
+  Block order follows order-hint values 110..320. Seven conditional gates,
+  all agent-judged from the framework's own source during RE (no project.toml
+  seeding required — the analysing agent sets each flag true only when the
+  framework itself owns that subsystem):
+    - gesture-and-event-system  (framework_provides_gesture_system)
+    - layout-engine-internals   (framework_owns_layout)
+    - network-stack             (framework_provides_networking)
+    - storage-internals         (framework_provides_storage)
+    - notification-internals    (framework_provides_notifications)
+    - permissions-system        (framework_provides_permissions)
+    - release-channel-and-codepush-or-ota (has_ota_updates)
+  Rationale: a full framework (React Native / Flutter scale) owns these
+  subsystems and renders all seven; a thin plugin-style framework that
+  delegates a subsystem to a peer/host (e.g. NativeWind, a styling layer
+  over react-native-css) sets the corresponding flag false and omits that
+  block rather than emitting an "N/A / owned elsewhere" stub.

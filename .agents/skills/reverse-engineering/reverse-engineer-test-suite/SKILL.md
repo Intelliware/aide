@@ -103,7 +103,7 @@ under `templates/compositions/`:
 | Part | Composition file | Default output path | Shape |
 |---|---|---|---|
 | Part A — internal docs | `re-test-suite-internal.yaml` | `docs/test-suite-internal/` (under the test-suite repo root) | `tree` — one `.md` per block (named `NN-<bare-slug>.md`) |
-| Part B — consumer / KB components | `re-test-suite-consumer.yaml` | `{paths.knowledge_base_path}/components/<test-suite-id>/` | `tree` — one `.md` per KB component, every file declares `kind: test-suite` in frontmatter |
+| Part B — consumer / KB | `re-test-suite-consumer.yaml` | `{paths.knowledge_base_path}/source-docs/<repo-slug>/test-suite-consumer/` | `tree` — one `.md` per block (named `<NN>-<bare-slug>.md`), sibling to the other RE `*-consumer/` trees; every file declares `kind: test-suite` in frontmatter |
 
 ### Part A — internal (16 blocks, order 110..260)
 
@@ -150,7 +150,7 @@ authoring.
 | Artifact | Path | Format |
 |---|---|---|
 | Part A — internal docs | Test-suite repo (`docs/INTERNAL.md` or per-team convention) | Markdown |
-| Part B — consumer / KB components | `{paths.knowledge_base_path}/components/<test-suite-id>/<component>.md` | Markdown with `kind: test-suite` frontmatter (one file per logical component: runner, shared-utilities, fixtures, marker-vocabulary, environment-matrix, feature-inventory, ci-surface, ownership) |
+| Part B — consumer / KB | `{paths.knowledge_base_path}/source-docs/<repo-slug>/test-suite-consumer/<NN>-<bare-slug>.md` | Markdown with `kind: test-suite` frontmatter (one file per block: suite-purpose-and-scope, runner-and-invocation, shared-utilities-catalogue, …, ownership), sibling to the other RE `*-consumer/` trees |
 | Change-tracker entries | Per the `track-change` skill | Markdown |
 ## Next skill
 - After completion, hand off by name to `build-knowledge-base` if the KB

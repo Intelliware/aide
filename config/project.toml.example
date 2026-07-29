@@ -221,3 +221,24 @@ name = "QE Automation Suite"
 path = "{project-root}/../qe-automation"
 role = "test-automation"
 type = "cucumber-junit5"
+
+
+# ─── [tools.<name>] — add-on tool resolution, OPTIONAL ───────────────────────
+# Integration tooling (JIRA/Confluence, SharePoint/doc-convert) ships as a
+# separate ADD-ON REPO, not in core. A [tools.<name>] block tells a skill from
+# that add-on how to locate its CLI. The team declares intent here; each person
+# may override only `install_root` in project.user.toml if their add-on clone
+# lives elsewhere. See config/SCHEMAS.md § 2.6.
+#
+# Uncomment once you have cloned the add-on repo (e.g. as a sibling folder).
+
+# [tools.atlassian]
+# cli          = "atl"                                    # probed on PATH first
+# install_root = "{workspace}/aide-addons/tools"          # fallback: cd here && npm run atl --
+# run_script   = "atl"
+# setup_doc    = "{workspace}/aide-addons/tools/packages/atlassian-cli/SETUP-ATL-CLI.md"
+
+# [tools.sharepoint]
+# cli          = "spt"
+# install_root = "{workspace}/aide-addons/tools"
+# run_script   = "spt"

@@ -1,7 +1,7 @@
 ---
 slug: affects-repos
 title: "Affects Repos"
-applies-to: [greenfield-requirements-package, greenfield-design-package]
+applies-to: [greenfield-requirements-package, greenfield-design-package, greenfield-quality-package, brownfield-quality-package]
 requires-decision-from: [architect]
 optional: true
 order-hint: 2

@@ -25,8 +25,7 @@ When included, this block lets the team:
    never sees `Element / selector not found`).
 4. **Override** the default routing target per category (e.g. a team
    that doesn't use `manage-bugs` and routes all application defects
-   to an external tracker via `jira-extract-requirements` or a custom
-   skill).
+   to an external tracker via a tool add-on skill or a custom skill).
 `review-test-failures` reads this block first; falls back to the
 framework default for any category not redefined here.
 ### 6a.1 Disposition mapping

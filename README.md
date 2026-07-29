@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 1.6.5
+**Version:** 2.0.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -87,7 +87,7 @@ The word **update** in the prompt tells the agent to skip the "overwrite or abor
 
 The same `AIDE_SOURCE_URL`, `AIDE_REF`, and `AIDE_TARGET_DIR` overrides apply. Use `AIDE_REF` to pin a specific release rather than tracking `main`:
 
-> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=v1.6.2` by re-running its `INSTRUCTIONS.md`."*
+> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=v2.0.0` by re-running its `INSTRUCTIONS.md`."*
 
 ### Step 2 — Open it in your IDE
 
