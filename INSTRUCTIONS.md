@@ -12,10 +12,6 @@
 
 ## 1. Inputs
 
-**Ask the user to choose the AIDE source provider:**
-- Azure DevOps (**default**).
-- GitHub.
-
 **Ask the user whether the AIDE framework is already available on the local machine, using the following options:**
 A. The AIDE repo is already cloned.
 B. The AIDE framework has to be downloaded using git.
@@ -24,15 +20,19 @@ B. The AIDE framework has to be downloaded using git.
 
 If the user chooses option A, ask for the path to the AIDE framework.
 
-If the user chooses option B, ask whether to use the selected provider's default Git repository URL. If not, ask for a custom fork or mirror URL.
+If the user chooses option B, ask which AIDE source provider to use:
+A. Azure DevOps (**default**).
+B. GitHub.
+
+Then ask whether to use the selected provider's default Git repository URL. If not, ask for a custom fork or mirror URL.
 
 Resolve these before starting.
 
 | Variable          | Default                                     | Purpose                                                                           |
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------|
-| `AIDE_SOURCE_PROVIDER` | `azure-devops` | Source provider. Supported values are `azure-devops` and `github`. |
+| `AIDE_SOURCE_PROVIDER` | `azure-devops` for option B; not applicable to option A | Source provider used when downloading. Supported values are `azure-devops` and `github`. |
 | `AIDE_SOURCE_DIR` | `../AIDE` | Points to the location of the AIDE framework. Populated when the user chooses option A. |
-| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE`; GitHub: `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. |
+| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE`; GitHub: `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. If the Azure DevOps HTTPS clone fails and the user accepts the SSH fallback, replace this value with the verified SSH clone URL used successfully. |
 | `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to check out. Populated when the user chooses option B. |
 | `AIDE_REF_TYPE`   | `branch`                                    | Type of `AIDE_REF`: `branch`, `tag`, or `commit`.                                 |
 | `AIDE_TARGET_DIR` | `./AIDE`                                    | Destination directory inside the user's current workspace.                        |
@@ -61,7 +61,7 @@ Resolve these before starting.
 ## 3. Steps
 
 ### Step 1 — Resolve inputs
-After the user chooses the source provider and availability option A or B, and provides the required source path or URL, use the defaults for all remaining values. Only confirm a remaining value if the user explicitly asks to change it.
+After the user chooses availability option A or B, collect only the inputs required by that option: the source path for option A, or the source provider and required URL choice for option B. Use the defaults for all remaining values. Only confirm a remaining value if the user explicitly asks to change it.
 
 For download option B, the default pair is `AIDE_REF=main` and `AIDE_REF_TYPE=branch`. If the user changes `AIDE_REF`, ask for `AIDE_REF_TYPE`; never infer it from the ref text.
 
@@ -172,12 +172,25 @@ Extract only after all validation succeeds. Strip that single provider-added top
 
 **On `git clone` or checkout failure:**
 
-Do **not** immediately conclude that the repo "cannot be found." For private Azure DevOps and GitHub repositories, authentication and SSO failures can appear as authorization or not-found errors. Do **not** switch to `Invoke-WebRequest`, `curl`, or a provider REST endpoint to "verify" the repository. Instead, surface the real error and ask the user for one of the following, in this order of preference:
+Do **not** immediately conclude that the repo "cannot be found." For private Azure DevOps and GitHub repositories, authentication and SSO failures can appear as authorization or not-found errors. Do **not** switch to `Invoke-WebRequest`, `curl`, or a provider REST endpoint to "verify" the repository. Instead, surface the real error and use the following recovery paths in order:
 
-1. **Authenticate Git outside the URL.** Ask the user to authenticate with the selected provider through their normal Git credential helper, SSH agent, provider-supported sign-in flow, or corporate SSO. Never ask the user to paste a PAT into chat or embed a token in `AIDE_SOURCE_URL`. After the user confirms authentication, perform guarded cleanup of the failed `<temp-dir>`, allocate a fresh unique `<temp-dir>`, and retry the original `git clone` command once.
-2. **Use a local clone.** If authentication cannot be completed through Git, ask the user to clone the repository manually, restart with availability option A, and provide `AIDE_SOURCE_DIR`.
-3. **Confirm the ref and type.** Ask the user to confirm both `AIDE_REF` and `AIDE_REF_TYPE` (the default pair is `main` and `branch`).
-4. **Confirm the URL.** If the user passed a fork or mirror, confirm the provider, organization or owner, project where applicable, repository name, and host.
+1. **Offer the Azure DevOps HTTPS-to-SSH fallback when applicable.** Use this path only when `AIDE_SOURCE_PROVIDER=azure-devops`, the failed clone URL is HTTPS, and the failure is consistent with HTTPS credential acquisition or authentication (for example, `could not read Username`, a disabled terminal prompt, or an unavailable credential helper). Ask:
+   - **A — Retry with Azure DevOps SSH** (recommended when the user's SSH key is already registered).
+   - **B — Continue with the standard authentication recovery below.**
+
+   For the default Azure DevOps HTTPS URL, use this exact SSH fallback:
+
+   ```
+   git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
+   ```
+
+   For a custom Azure DevOps Services HTTPS URL, derive an SSH URL only when the URL unambiguously has the form `https://dev.azure.com/<organization>/<project>/_git/<repository>`: map it to `git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>`, preserving existing percent-encoding in path components. For Azure DevOps Server, enterprise mirrors, legacy `visualstudio.com` URLs, or any URL that cannot be mapped unambiguously, do not guess; ask the user for the repository's SSH clone URL and validate locally that it belongs to the selected Azure DevOps provider family.
+
+   If the user chooses A, perform guarded cleanup of the failed `<temp-dir>`, allocate a fresh unique `<temp-dir>`, and retry the same branch/tag/commit operation once with the SSH URL. Apply the same ref-to-`HEAD` verification as the HTTPS attempt. If the SSH clone succeeds, set `AIDE_SOURCE_URL` to the SSH URL actually used so provenance records the successful transport. If it fails, report the SSH error and continue with the recovery paths below; do not alternate repeatedly between HTTPS and SSH. Never place credentials in either URL.
+2. **Authenticate Git outside the URL.** Ask the user to authenticate with the selected provider through their normal Git credential helper, SSH agent, provider-supported sign-in flow, or corporate SSO. Never ask the user to paste a PAT into chat or embed a token in `AIDE_SOURCE_URL`. After the user confirms authentication, perform guarded cleanup of the failed `<temp-dir>`, allocate a fresh unique `<temp-dir>`, and retry the currently selected `git clone` command once.
+3. **Use a local clone.** If authentication cannot be completed through Git, ask the user to clone the repository manually, restart with availability option A, and provide `AIDE_SOURCE_DIR`.
+4. **Confirm the ref and type.** Ask the user to confirm both `AIDE_REF` and `AIDE_REF_TYPE` (the default pair is `main` and `branch`).
+5. **Confirm the URL.** If the user passed a fork or mirror, confirm the provider, organization or owner, project where applicable, repository name, and host.
 
 **On ZIP download or extraction failure:**
 
@@ -285,7 +298,7 @@ A single mechanism solves both: the runbook generates one tiny shim per skill **
 1. Enumerate every `<stage>/<skill>/SKILL.md` exactly two levels deep under `${AIDE_TARGET_DIR}/.agents/skills/`. Ignore any stage folder whose name begins with `_` (e.g. `_registry`). These canonical SOURCE files remain read-only throughout Step 8.
 2. Require at least one canonical SOURCE file and require one whose `<skill>` folder name is exactly `start-project`. If either requirement fails, report it and stop Step 8 without deleting or writing any workspace-root shim.
 3. Check for duplicate `<skill>` folder names across stages. Compare names case-insensitively so the result is safe on case-insensitive filesystems. If two or more SOURCE files would map to the same `./.agents/skills/<skill>/SKILL.md` destination, report every conflicting source path and stop Step 8 without deleting or writing any shim. Do not choose a winner based on traversal order.
-4. Validate every SOURCE file's frontmatter. After an optional UTF-8 BOM, the first line must be exactly `---`, a later line must be exactly `---` to close the block, and the content between them must parse using a safe YAML parser with arbitrary object construction disabled. The top level must be a mapping, and all mapping keys at every level must be strings. Reject duplicate keys, custom tags, anchors, and aliases. If any SOURCE file has missing, malformed, or unsafe frontmatter, report every invalid source path and stop Step 8 without deleting or writing any shim.
+4. Validate every SOURCE file's frontmatter. After an optional UTF-8 BOM, the first line must be exactly `---`, a later line must be exactly `---` to close the block, and the content between them must parse using a safe YAML parser with arbitrary object construction disabled. The top level must be a mapping, and all mapping keys at every level must be strings. Reject duplicate keys, custom tags, anchors, and aliases. If validation traverses a parser AST, treat a missing or `null` child collection as an empty collection: scalar/leaf nodes commonly expose `children = null`, which is not a validation error. When the agent generates validator code dynamically, syntax-check or compile the complete validator before executing it or allowing it to modify installation paths. Prefer readable multi-line code over compressed one-line expressions. For Ruby, put whitespace around ternary operators (`condition ? true_value : false_value`), especially when the condition is a predicate method ending in `?`; forms such as `predicate?value:other` are parser-ambiguous. A validator syntax error is an installer implementation error, not invalid AIDE source: correct the validator and retry the same phase without presenting it as a source or installation compatibility failure. If any SOURCE file has missing, malformed, or unsafe frontmatter, report every invalid source path and stop Step 8 without deleting or writing any shim.
 5. Validate the frontmatter that each shim will emit, applying the planned `name:` normalization before validation:
    - The authoritative `<skill>` folder name, and therefore emitted `name`, must be 1–64 characters, contain only lowercase ASCII letters, digits, and single hyphens, and must not start or end with a hyphen or contain consecutive hyphens.
    - `description` must exist, must be a string, must be non-empty after trimming whitespace, and must contain at most 1024 characters.
@@ -461,7 +474,7 @@ Confirm all the following exist:
 - `./AGENTS.md` — contains the `aide:managed:begin` and `aide:managed:end` sentinel lines (one each, begin before end; a *sentinel line* starts with the marker after optional leading whitespace — prose that merely mentions the substring does not count).
 - `./AGENTS.md` — contains the heading `## Coding standards (auto-enforced per repo)` **inside** the managed block (Step 9 addendum splice landed), and the SOT comment that opens the addendum source is **not** present (Step 9.2 strip succeeded). Skip both assertions only if `${AIDE_TARGET_DIR}/references/orientation/workspace-agents-coding-standards.md` is missing (older AIDE install).
 
-**Assert the canonical tree was not polluted.** List the immediate children of `${AIDE_TARGET_DIR}/.agents/skills/`. Every entry must be either `_registry` or a stage directory. A stage directory may be empty and may represent a future or add-on stage, but it must not contain a direct child `SKILL.md`; canonical skills have the shape `<stage>/<skill>/SKILL.md`. Known stage examples include `meta`, `requirements`, `design`, `planning`, `execution`, `reverse-engineering`, `knowledge-base`, `quick-dev`, `jira`, `confluence`, and `files-conversion`. If you see a flat skill folder with a direct `SKILL.md` there (e.g. `${AIDE_TARGET_DIR}/.agents/skills/start-project/`), report the pollution and stop without deleting anything from the canonical tree. Rerun the installation so Step 5 restores `.agents/`, then let Step 8 regenerate shims at the workspace root.
+**Assert the canonical tree was not polluted.** List the immediate children of `${AIDE_TARGET_DIR}/.agents/skills/`. Every entry must be `_registry`, a stage directory, or the regular non-link metadata file `README.md`. Ignore the allowed root `README.md` when checking the nested skill layout; it documents the skills tree and is not a stage or a generated shim. A stage directory may be empty and may represent a future or add-on stage, but it must not contain a direct child `SKILL.md`; canonical skills have the shape `<stage>/<skill>/SKILL.md`. Known stage examples include `meta`, `requirements`, `design`, `planning`, `execution`, `reverse-engineering`, `knowledge-base`, `quick-dev`, `jira`, `confluence`, and `files-conversion`. If you see a flat skill folder with a direct `SKILL.md` there (e.g. `${AIDE_TARGET_DIR}/.agents/skills/start-project/`), report the pollution and stop without deleting anything from the canonical tree. Rerun the installation so Step 5 restores `.agents/`, then let Step 8 regenerate shims at the workspace root.
 
 If any of the required files are missing or the assertion fails, report which and stop — do not silently continue.
 
@@ -498,7 +511,7 @@ Compose `${AIDE_TARGET_DIR}/.aide-install.json` in memory. The example below sho
 
 Populate source fields as follows:
 
-- **Availability option A:** set `source_method` to `local-directory` and `source_dir` to the resolved local path. If the directory is a Git clone and its current ref/commit can be resolved and verified, record the Git metadata and set `ref_verified=true`; if metadata is unavailable, set unavailable fields and `ref_verified` to `null`.
+- **Availability option A:** set `source_method` to `local-directory`, `source_dir` to the resolved local path, and `source_provider` to `null`; do not ask the user to select a provider. If the directory is a Git clone and its current ref/commit can be resolved and verified, record the Git metadata and set `ref_verified=true`; if metadata is unavailable, set unavailable fields and `ref_verified` to `null`.
 - **Option B using Git:** set `source_method` to `git-clone`, `source_dir` to `null`, record the resolved provider URL, ref, ref type, and verified checked-out commit SHA, and set `ref_verified=true`.
 - **Option B using ZIP:** set `source_method` to `zip`, `source_dir` to `null`, and record the provider URL, requested ref, and ref type. Record `commit_sha` only when `AIDE_REF_TYPE=commit`; otherwise use `null`. Set `ref_verified=false` unless the archive-to-ref relationship was independently proven; do not treat the filename or user-supplied URL alone as proof.
 
@@ -613,14 +626,9 @@ aide_install:
       - never_follow
       - never_unlink
   inputs:
-    source_provider:
-      ask_user: true
-      options:
-        - azure-devops
-        - github
-      default: azure-devops
     source_availability:
       ask_user: true
+      ask_first: true
       options:
         local-directory:
           set: AIDE_SOURCE_DIR
@@ -645,6 +653,16 @@ aide_install:
               - https
               - ssh
             zip_url_derivation_requires_https_web_or_clone_url: true
+    source_provider:
+      ask_user: true
+      ask_only_when_source_availability: download
+      display_choices:
+        A: azure-devops
+        B: github
+      options:
+        - azure-devops
+        - github
+      default: azure-devops
     remaining_values:
       use_defaults_silently: true
       confirm_only_when_user_requests_change: true
@@ -661,6 +679,7 @@ aide_install:
   source_providers:
     azure-devops:
       source_url: https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE
+      ssh_fallback_url: git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
     github:
       source_url: https://github.com/TD-Universe/TD-EM-AIDE
   preconditions:
@@ -897,6 +916,51 @@ aide_install:
       - "api.github.com"
       - "raw.githubusercontent.com"
     interpret_not_found_as: "verify_auth_before_repo_missing"
+    azure_devops_https_to_ssh_fallback:
+      applies_when:
+        source_provider: azure-devops
+        failed_url_scheme: https
+        failure_category:
+          - https_credential_acquisition
+          - authentication
+        example_errors:
+          - "could not read Username"
+          - terminal_prompts_disabled
+          - credential_helper_unavailable
+      prompt_user:
+        display_choices:
+          A: retry_with_azure_devops_ssh
+          B: continue_standard_authentication_recovery
+        recommended: A
+      default_repository:
+        https_url: https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE
+        ssh_url: git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
+      custom_azure_devops_services_url:
+        derive_only_when_https_shape_is_unambiguous: "https://dev.azure.com/<organization>/<project>/_git/<repository>"
+        ssh_shape: "git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>"
+        preserve_existing_path_percent_encoding: true
+      never_infer_for:
+        - azure_devops_server
+        - enterprise_mirror
+        - legacy_visualstudio_com_url
+        - ambiguous_url
+      when_not_derivable:
+        ask_user_for_exact_ssh_clone_url: true
+        validate_selected_provider_family_locally: true
+      retry:
+        guarded_cleanup_failed_temp_dir_first: true
+        allocate_fresh_unique_temp_dir: true
+        preserve_ref_and_ref_type: true
+        attempts: 1
+        verify_ref_matches_head: true
+      on_success:
+        set_AIDE_SOURCE_URL_to_successful_ssh_url: true
+        provenance_records_successful_transport_url: true
+      on_failure:
+        report_ssh_error: true
+        continue_standard_authentication_recovery: true
+        do_not_loop_between_https_and_ssh: true
+      credentials_in_url: forbidden
     archive_fallback_allowed_only_when: "git --version exits non-zero"
     archive_fallback_formats:
       - zip
@@ -961,10 +1025,11 @@ aide_install:
     on_git_failure:              # in order — never report "repo not found",
                                  # never switch to HTTP to "double-check"
       - report_failed_command_and_underlying_error
+      - offer_azure_devops_https_to_ssh_fallback_when_applicable
       - ask_user_to_authenticate_git_outside_url
       - guarded_cleanup_failed_temp_dir
       - allocate_fresh_unique_temp_dir
-      - retry_original_git_clone_once
+      - retry_currently_selected_git_clone_once
       - ask_user_for_local_clone_and_use_source_dir
       - ask_user_to_confirm_ref_and_type
       - ask_user_to_confirm_url
@@ -1052,6 +1117,18 @@ aide_install:
         arbitrary_object_construction: disabled
         require_top_level_mapping: true
         require_string_mapping_keys_at_every_level: true
+        generated_validator:
+          syntax_check_or_compile_before_execution: true
+          syntax_check_before_modifying_installation_paths: true
+          prefer_readable_multiline_code: true
+          ruby_ternary_operators_require_surrounding_whitespace: true
+          syntax_error_classification: installer_implementation_error
+          on_syntax_error:
+            - correct_validator
+            - retry_same_phase
+            - do_not_classify_as_invalid_source
+        ast_traversal:
+          null_or_absent_child_collection: treat_as_leaf
         reject:
           - duplicate_keys
           - custom_tags
@@ -1330,9 +1407,14 @@ aide_install:
       never_continue_silently: true
   canonical_tree_verification:
     root: "${AIDE_TARGET_DIR}/.agents/skills"
-    inspect: immediate_child_directories
+    inspect: immediate_children
     allowed:
       registry_directory: "_registry"
+      metadata_files:
+        README.md:
+          type: regular_file
+          symlink_or_junction: forbidden
+          ignore_when_checking_nested_skill_layout: true
       stage_directory:
         must_not_contain_direct_child_SKILL_md: true
         may_be_empty: true
@@ -1394,7 +1476,7 @@ aide_install:
           - git-clone
           - zip
       source_provider:
-        type: enum
+        type: enum_or_null
         values:
           - azure-devops
           - github
@@ -1451,6 +1533,7 @@ aide_install:
     source_methods:
       local-directory:
         source_dir: resolved_local_path
+        source_provider: null
         git_metadata: read_if_available_else_null
         ref_verified: true_when_git_metadata_resolved_and_verified_else_null
       git-clone:
