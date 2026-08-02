@@ -140,10 +140,76 @@ Generate from commit history and diff. Required sections:
 ## Step 4 — PR Creation (GATE)
 
 **GATE:** Confirm PR target (base branch, repo). Wait for explicit user
-approval. Then run `gh pr create` with the description from Step 3.
-Capture the PR URL and report it.
+approval before running any PR creation command.
 
-If `gh` is not authenticated, halt and ask the user.
+### Detect the git host and pick the right tool
+
+Before running anything, probe the remote URL and available CLIs:
+
+```
+git remote get-url origin
+```
+
+Then follow this decision table:
+
+| Remote URL pattern | Preferred tool | Fallback |
+|---|---|---|
+| `github.com` | `gh pr create` | browser URL |
+| `dev.azure.com` or `visualstudio.com` | `az repos pr create` | browser URL |
+| `gitlab.com` or self-hosted GitLab | browser URL | — |
+| `bitbucket.org` | browser URL | — |
+| Other / unknown | browser URL | — |
+
+### GitHub (`gh pr create`)
+
+Probe first: `gh auth status`. If authenticated, run:
+
+```
+gh pr create \
+  --base <target-branch> \
+  --title "<title>" \
+  --body "<description>"
+```
+
+If `gh` is absent or not authenticated, fall through to the browser URL fallback.
+
+### Azure DevOps (`az repos pr create`)
+
+Probe first: `az --version`. If present, ensure the DevOps extension is
+installed (`az extension add --name azure-devops` — idempotent) and the
+user is logged in (`az account show`). If not logged in, instruct the
+user to run `az login` then retry. Once authenticated, run:
+
+```
+az repos pr create \
+  --project "<ADO project name>" \
+  --repository "<repo name>" \
+  --source-branch <source-branch> \
+  --target-branch <target-branch> \
+  --title "<title>" \
+  --description "<description>"
+```
+
+The `--project` and `--repository` values can be derived from the remote
+URL. For `https://dev.azure.com/ORG/PROJECT/_git/REPO` or
+`git@ssh.dev.azure.com:v3/ORG/PROJECT/REPO`, extract `PROJECT` and `REPO`
+directly from the URL segments.
+
+If `az` is absent, fall through to the browser URL fallback.
+
+### Browser URL fallback
+
+When no CLI is available or authenticated, construct the platform's
+PR-creation URL and present it to the user:
+
+- **GitHub:** `https://github.com/<owner>/<repo>/compare/<target>...<source>?expand=1`
+- **Azure DevOps:** `https://dev.azure.com/<org>/<project>/_git/<repo>/pullrequestcreate?sourceRef=<source>&targetRef=<target>`
+- **GitLab:** `https://gitlab.com/<owner>/<repo>/-/merge_requests/new?merge_request[source_branch]=<source>&merge_request[target_branch]=<target>`
+
+Provide the full URL and the PR description text so the user can paste it
+into the browser form.
+
+Capture the PR URL from CLI output (if a CLI was used) and report it.
 
 ## Step 5 — Changelog Entry (conditional)
 
