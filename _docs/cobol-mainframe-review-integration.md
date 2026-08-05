@@ -1,69 +1,51 @@
 # COBOL/Mainframe RE Layer — Review-Package Integration
 
-**Stage 4 (partial) deliverable.** Documents the patches that the
-`mm/add-cobol` branch applies to the review-package skills introduced
-by the adversarial-review layer (`mm/add-adverserial`, 1.2.0). These
-patches are intentionally NOT applied on this branch because the
-target review-package skills do not yet exist on `main`.
+**Partially applied.** This document recorded patches that the
+`mm/add-cobol` branch needed against review-package skills that did
+not yet exist on `main`.
+
+## Status
+
+| Target skill | Status |
+|---|---|
+| `reverse-engineering/review-reverse-engineering-package/` | **Applied.** The skill landed on `main` with the RE close-out gate work; Patches 1–3 below were folded in at port time. |
+| `knowledge-base/review-knowledge-base-package/` | **Pending.** The skill still does not exist on `main`. Its patches remain below, unapplied. |
 
 ## Why this is a separate document
 
 The design doc (`_docs/cobol-mainframe-re-design.md`) declares the
 merge order: `mm/add-context` (1.1.0) → `mm/add-adverserial` (1.2.0)
-→ `mm/add-cobol` (1.3.0). Until `mm/add-adverserial` lands on `main`,
-the two skills this stage extends —
-`reverse-engineering/review-reverse-engineering-package/` and
-`knowledge-base/review-knowledge-base-package/` — do not exist on
-this branch.
+→ `mm/add-cobol` (1.3.0). `mm/add-adverserial` never merged as a
+whole; its RE-review half was ported onto `main` selectively, and the
+KB-review half was left out of scope.
 
-Rather than blocking 1.3.0 on a merge, this document records the
-exact patches in human-readable form. They become a small, mechanical
-follow-up commit applied either:
-- During `mm/add-cobol`'s own merge to `main` (squash + apply),
-- Or in a small follow-up PR immediately after `mm/add-cobol` lands.
+Rather than blocking on a merge, this document records the exact
+patches in human-readable form. The remaining ones become a small,
+mechanical follow-up commit whenever `review-knowledge-base-package`
+lands.
 
-## Patches to `review-reverse-engineering-package/SKILL.md`
+## Patches to `review-reverse-engineering-package` — APPLIED
 
-The skill's coverage / completeness tables expand to cover the three
-new domains. The existing nine sub-reviews (review-section-completeness,
-review-grounding, review-consistency, review-coverage,
-review-freshness, review-traceability, review-adversarial-pass,
-review-edge-cases, review-readiness) all apply unchanged — the
-patches add per-domain expectations to `review-coverage` and update
-the description / overview tables.
+The three patches below are already reflected in the skill on `main`;
+they are retained for provenance only. Do not re-apply.
 
-### Patch 1: description
+- **Patch 1 (description)** — the `description` field enumerates the
+  domains. Applied with **eleven** domains, not the ten listed in the
+  original patch: `test-suite` was added to the RE layer after this
+  document was written and belongs in the same list.
+- **Patch 2 (review-coverage expectations)** — the per-domain
+  coverage table lives in
+  `review-reverse-engineering-package/references/review-workflow.md`
+  § per-domain coverage expectations, with the cobol-program,
+  copybook-library, and jcl-job rows as specified, plus rows for api,
+  database, and test-suite.
+- **Patch 3 (domain detection)** — the skill's `## Step 0 — Resolve
+  domain and paths` resolves domain from `[[project.repos]]` and the
+  Part-A directory name, deferring to `analyze-repository`'s
+  extension and source-line-marker signals, and **halts** rather than
+  guessing when the two disagree.
 
-The skill's `description` field expands to mention the three new
-domains, so the skill correctly routes when invoked on a mainframe RE
-package:
-
-```diff
--description: "Use when the user asks to review reverse-engineered package(s) — Part A + Part B docs ..."
-+description: "Use when the user asks to review reverse-engineered package(s) — Part A + Part B docs for any of the ten domains (api, api-framework, web-app, ui-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job) ..."
-```
-
-### Patch 2: review-coverage expectations
-
-The `review-coverage` sub-review's per-domain expectations table gains
-three new rows:
-
-| Domain | Coverage Expectations Added |
-|---|---|
-| cobol-program | `program-call-graph.mmd`, `program-data-bindings.json`, `program-exec-inventory.md` exist and are well-formed (per the schemas in `reverse-engineer-cobol-program/references/INPUTS-OUTPUTS.md`) |
-| copybook-library | `copybook-record-graph.json`, `data-dictionary.md`, `copybook-conflicts.md` exist and are well-formed |
-| jcl-job | `job-flow.mmd`, `dataset-io.json` exist and are well-formed |
-
-Phrased as additions to the existing coverage matrix in the SKILL.md.
-
-### Patch 3: domain detection
-
-If the skill auto-detects domain from the source package, the
-detection rules expand to include the three new domains using the
-same signals as `analyze-repository` (file extensions and source-line
-markers).
-
-## Patches to `review-knowledge-base-package/SKILL.md`
+## Patches to `review-knowledge-base-package/SKILL.md` — PENDING
 
 The KB review skill gains one new sub-review covering lineage
 integrity, plus minor updates to the coverage tables.
@@ -129,17 +111,18 @@ this sub-review confirms:
 
 ## Apply-Time Checklist
 
-When applying these patches (post-merge of `mm/add-adverserial`):
+Steps 1–2 and 4 (RE half) are done. Remaining work, to be run whenever
+`review-knowledge-base-package` lands on `main`:
 
 1. Read this document end to end
-2. Apply Patch 1, Patch 2, Patch 3 to
-   `.agents/skills/reverse-engineering/review-reverse-engineering-package/SKILL.md`
+2. ~~Apply Patches 1–3 to `review-reverse-engineering-package`~~ — **done**
 3. Apply Patch 1, Patch 2, Patch 3 to
    `.agents/skills/knowledge-base/review-knowledge-base-package/SKILL.md`
-4. Apply the OVERVIEW.md patches
+4. Apply the `review-knowledge-base-package/references/OVERVIEW.md` patch
+   (the RE OVERVIEW.md patch is already applied)
 5. Run `scripts/build-registry.py` and `scripts/validate.py`; expect zero errors
 6. Update `CHANGELOG.md` with a "Modified review-package skills for mainframe" entry
-7. Delete this document (its content is now reflected in the skills)
+7. Delete this document once the KB half is also reflected in the skills
 
 ## Why these patches are minimal
 

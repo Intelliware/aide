@@ -111,6 +111,25 @@ flows:
       # The placeholder below is a dispatcher slot — validation skips it.
       - skill: reverse-engineer-<dynamic>
         dispatcher: analyze-repository
+      # RE close-out gate. Every reverse-engineer-* skill ends by ASKING the user how
+      # to attest the extraction (see references/elicitation-patterns/
+      # re-verification-gate-selection.md). Two legal exits:
+      #   automated — steps/verify.md in `automated` mode issues a mechanical GO/NO-GO
+      #               scoped to machine-checkable (Tier M) checks only; model-judgment
+      #               (Tier J) checks are reported UNVERIFIED and never counted.
+      #   review    — steps/verify.md in `review-evidence` mode (no verdict), then
+      #               review-reverse-engineering-package runs nine sub-reviews with
+      #               per-verdict human acceptance and owns the readiness verdict.
+      # This is a user-elected fork like the quality-stage fork below — NOT an
+      # unconditional gate. Either exit legally precedes build-knowledge-base; what is
+      # not legal is ingesting an extraction that received neither.
+      # [project.elicitation].re_verification_gate may pre-answer the question
+      # ("ask" default / "review" / "automated"); unattended runs left on "ask" fail
+      # fast rather than the AI picking a mode.
+      - skill: review-reverse-engineering-package
+        optional: true
+        role: user-elected
+        condition: "user chose the review path at the RE close-out gate"
       - skill: build-knowledge-base
       # For mainframe stacks (cobol-program + copybook-library + jcl-job all
       # contributed Part A), build-mainframe-data-lineage runs after
@@ -175,6 +194,14 @@ anytime:
   - manage-bugs
   - navigate-knowledge-base
   - detect-knowledge-base-drift
+  # Adversarial-review layer. Both are runnable against any A.I.D.E. artifact and are
+  # also invoked as sub-reviews 7-8 by review-reverse-engineering-package.
+  - review-adversarial
+  - review-edge-case-hunter
+  # Per-repo RE readiness gate. Listed here as well as in the brownfield sequence
+  # because it is independently invocable against an existing extraction without
+  # re-running the RE skill that produced it.
+  - review-reverse-engineering-package
   # Quality stage skills that are independently invocable at any time:
   #   - audit-quality-coverage: read-only coverage audit against the implementation package
   #   - review-test-failures: triage walk-through of a failed test run

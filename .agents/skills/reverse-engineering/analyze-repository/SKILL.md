@@ -115,7 +115,18 @@ Tell the user the exact phrase to use to invoke the first recommended skill. Rec
 - `reverse-engineer-jcl-job`
 - `reverse-engineer-test-suite`
 
-After the recommended RE skill(s) complete, the user proceeds to `build-knowledge-base` to aggregate Part B docs into the knowledge base. For mainframe stacks, additionally recommend `build-mainframe-data-lineage` to produce the cross-program data-traceability artifact.
+Each recommended RE skill ends at its own **close-out gate**, where it asks the user
+whether to attest the extraction via automated verification or via
+`review-reverse-engineering-package` (see
+`references/elicitation-patterns/re-verification-gate-selection.md`). Say so when
+handing off, so the user is not surprised by a question at the end of a long
+extraction — and so a multi-repo run is understood to have one gate per repo, not one
+for the batch.
+
+Only after a repo's extraction carries an attestation does the user proceed to
+`build-knowledge-base` to aggregate Part B docs into the knowledge base; it halts on an
+extraction carrying neither. For mainframe stacks, additionally recommend
+`build-mainframe-data-lineage` to produce the cross-program data-traceability artifact.
 
 ## Output
 
@@ -132,7 +143,9 @@ Dynamic — depends on classification:
 - Monorepos → first the framework/library RE skill, then app RE skills, then `build-knowledge-base`
 - Hybrid repos → primary RE skill first, then secondary RE skill(s)
 
-After all RE work completes: `build-knowledge-base` (aggregates Part B docs into the central KB).
+After each repo's RE work completes: that skill's close-out gate (automated verification
+or `review-reverse-engineering-package`), then `build-knowledge-base` (aggregates Part B
+docs into the central KB).
 
 ## Common mistakes
 

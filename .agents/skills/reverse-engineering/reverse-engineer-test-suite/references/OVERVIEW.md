@@ -68,3 +68,43 @@ After this skill ships, all four quality skills get cleaner, more
 accurate grounding with no per-skill code changes — the
 `navigate-knowledge-base --profile=test-suite` call they already
 make starts returning useful results.
+
+## Block rosters
+
+Moved here from `SKILL.md` to keep that file inside the 200-line budget, and
+because it is reference material: `templates/compositions/re-test-suite-internal.yaml`
+and `re-test-suite-consumer.yaml` are the authority on the block list. If this
+roster and a composition disagree, the composition wins and the roster needs
+fixing.
+
+### Part A — internal (16 blocks, order 110..260)
+
+1. `suite-overview` — identity, scope, application(s) under test, what's deliberately out of scope
+2. `runner-and-entry-points` — stack pins, canonical invocations, reports / artefacts
+3. `project-structure-and-conventions` — directory layout, naming rules, canonical examples
+4. `configuration-and-profiles` — config files, profiles, env-var overrides, secret handling, timeouts
+5. `shared-utilities-catalogue` — actions / waits / assertions / data / navigation / network / fixtures (full inventory)
+6. `fixtures-and-test-data` — static fixtures, builders, seed-data lifecycle, per-scenario state contract
+7. `page-objects-and-step-defs` — POs + step-defs with duplicate-phrasing remediation queue
+8. `spec-feature-inventory` — every spec mapped to INC / FR / AC, orphan + near-duplicate roster
+9. `marker-tag-vocabulary` — controlled + free-form tags, mandatory tag policy, vocabulary change procedure
+10. `auth-and-environment-entry` — auth paths, forbidden patterns, environment-entry contract
+11. `environment-matrix` — per-env URL / auth / seed / mutating-policy / safe tag-subsets
+12. `parallelism-and-isolation` — worker model, per-worker resources, isolation contract, race-condition history
+13. `reporting-and-analytics` — reports, dashboards, integrations, trace policy
+14. `ci-integration` — pipelines, gating semantics, artefact upload, quarantine workflow
+15. `known-gaps-and-anti-patterns` — coverage gaps, anti-patterns, flake roster, architectural debt
+16. `glossary` — suite-specific terms (distinct from project-level glossary)
+
+### Part B — consumer / KB (10 blocks, order 110..200)
+
+1. `suite-purpose-and-scope` — application-oriented purpose; what the suite proves; what it doesn't
+2. `runner-and-invocation` — consumer-grade stack + canonical commands + report locations
+3. `shared-utilities-catalogue` — public reusable helpers grouped by interaction type (the reuse-analysis target)
+4. `fixtures-catalogue` — static fixtures + runtime builders + seed-data contract
+5. `page-objects-and-step-defs-catalogue` — canonical PO methods and step-def phrasings (the duplicate-prevention surface)
+6. `marker-tag-vocabulary` — controlled + free-form tags; mandatory tag policy binding on consuming skills
+7. `environment-and-data-contract` — per-env capability contract + seed-data guarantees + binding forbiddances
+8. `feature-inventory` — what's covered, mapped to INC / FR / AC; coverage roll-ups; gap list
+9. `ci-surface` — gating pipelines, artefact paths, dashboards, notification channels
+10. `ownership` — per-area + per-role ownership, review routing, issue-filing surface

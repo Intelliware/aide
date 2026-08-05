@@ -590,6 +590,145 @@ def check_j() -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+RE_GATE_PATTERN = "references/elicitation-patterns/re-verification-gate-selection.md"
+RE_GATE_MODES = ("automated", "review-evidence")
+RE_GATE_ENUM = ("ask", "review", "automated")
+RE_REVIEW_SKILL = "review-reverse-engineering-package"
+
+
+def check_l() -> tuple[list[str], list[str]]:
+    """L — RE close-out gate binding.
+
+    Every `reverse-engineer-*` skill closes by ASKING the user how the extraction
+    should be attested, then routing to one of two paths. Both halves of that
+    contract are load-bearing and both decay silently, so both are asserted here.
+
+    For each `reverse-engineer-*/SKILL.md` (excluding the `analyze-repository`
+    dispatcher, which extracts nothing and so attests nothing):
+
+      1. The SKILL.md cites the routing elicitation pattern by path.
+      2. The SKILL.md names `review-reverse-engineering-package` — the review
+         path's destination. A gate that offers a route it cannot name is a gate
+         with one real option.
+      3. Its `steps/verify.md` exists and declares BOTH modes (`automated` and
+         `review-evidence`). A verify step that knows only one mode has quietly
+         become unconditional again.
+      4. That `steps/verify.md` declares BOTH check tiers. Without the tiering,
+         `automated` mode reverts to grading model judgment as PASS — the exact
+         defect the gate was built to remove.
+
+    Also verifies the elicitation pattern itself is on disk (Check G would catch a
+    dangling citation, but this check's error message is the actionable one) and
+    that the review skill it routes to actually exists.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    re_dir = SKILLS_ROOT / "reverse-engineering"
+    if not re_dir.is_dir():
+        return errors, warnings
+
+    if not (REPO_ROOT / RE_GATE_PATTERN).is_file():
+        errors.append(
+            f"{RE_GATE_PATTERN}: target file missing — every reverse-engineer-* "
+            f"skill cites this routing pattern; restore it or fix the path."
+        )
+
+    if not (re_dir / RE_REVIEW_SKILL / "SKILL.md").is_file():
+        errors.append(
+            f".agents/skills/reverse-engineering/{RE_REVIEW_SKILL}/SKILL.md: missing — "
+            f"the close-out gate's review path has no destination skill."
+        )
+
+    found = 0
+    for skill_md in sorted(re_dir.rglob("SKILL.md")):
+        parent = skill_md.parent.name
+        if not parent.startswith("reverse-engineer-"):
+            continue
+        found += 1
+        rel = skill_md.relative_to(REPO_ROOT)
+        text = skill_md.read_text(encoding="utf-8")
+
+        if RE_GATE_PATTERN not in text:
+            errors.append(
+                f"{rel}: does not cite `{RE_GATE_PATTERN}` — the close-out gate MUST "
+                f"route through the shared routing pattern, not an ad-hoc prompt."
+            )
+        if RE_REVIEW_SKILL not in text:
+            errors.append(
+                f"{rel}: does not name `{RE_REVIEW_SKILL}` — the review path of the "
+                f"close-out gate has no stated destination."
+            )
+
+        verify = skill_md.parent / "steps" / "verify.md"
+        vrel = verify.relative_to(REPO_ROOT)
+        if not verify.is_file():
+            errors.append(
+                f"{vrel}: missing — the automated path of the close-out gate has "
+                f"nothing to run."
+            )
+            continue
+
+        vtext = verify.read_text(encoding="utf-8")
+        missing_modes = [m for m in RE_GATE_MODES if f"`{m}`" not in vtext]
+        if missing_modes:
+            errors.append(
+                f"{vrel}: does not declare mode(s) {', '.join(missing_modes)} — a "
+                f"verify step that knows only one mode has become unconditional again."
+            )
+        for tier, label in (("Tier M", "machine-checkable"), ("Tier J", "model judgment")):
+            if tier not in vtext:
+                errors.append(
+                    f"{vrel}: does not declare `{tier}` ({label}) — without the "
+                    f"two-tier split, automated mode reports model judgment as PASS."
+                )
+        if "UNVERIFIED" not in vtext:
+            errors.append(
+                f"{vrel}: never mentions UNVERIFIED — Tier J checks must be reported "
+                f"as unattested rather than passed."
+            )
+
+    if found == 0:
+        warnings.append(
+            ".agents/skills/reverse-engineering/: no reverse-engineer-* skills found "
+            "(renamed or moved?) — Check L had nothing to verify."
+        )
+
+    # The shipped example is the value users copy. It must be in-enum itself.
+    example = REPO_ROOT / "config" / "project.toml.example"
+    if example.is_file():
+        errors.extend(
+            _re_gate_enum_errors(
+                example.read_text(encoding="utf-8"), "config/project.toml.example"
+            )
+        )
+
+    return errors, warnings
+
+
+def _re_gate_enum_errors(text: str, label: str) -> list[str]:
+    """Rule 6b — `[project.elicitation].re_verification_gate` must be in-enum.
+
+    Shared by Check L's fixture mode and Check I's project.toml sweep. An
+    unrecognised value is an error, not a silent fallback to "ask": a typo'd mode
+    must not quietly downgrade the close-out to the AI's own choice.
+    """
+    errors: list[str] = []
+    m = re.search(
+        r"^\s*re_verification_gate\s*=\s*[\"']([^\"']*)[\"']",
+        text,
+        re.MULTILINE,
+    )
+    if not m:
+        return errors
+    value = m.group(1)
+    if value not in RE_GATE_ENUM:
+        errors.append(
+            f"{label}: [project.elicitation].re_verification_gate = \"{value}\" is not "
+            f"one of {', '.join(RE_GATE_ENUM)} (config/SCHEMAS.md rule 6b)."
+        )
+    return errors
+
+
 def check_sod(
     project_toml_path: Path,
     artifact_path: Path | None = None,
@@ -632,6 +771,18 @@ def check_sod(
     except tomllib.TOMLDecodeError as exc:
         errors.append(f"{project_toml_path}: TOML parse error — {exc}")
         return errors, warnings
+
+    # Rule 6b — re_verification_gate enum. Read from the parsed table rather than
+    # the raw text so a value set via project.user.toml-style overrides is caught
+    # the same way.
+    gate = data.get("project", {}).get("elicitation", {}).get("re_verification_gate")
+    if gate is not None:
+        if not isinstance(gate, str) or gate not in RE_GATE_ENUM:
+            errors.append(
+                f"{project_toml_path}: [project.elicitation].re_verification_gate = "
+                f"{gate!r} is not one of {', '.join(RE_GATE_ENUM)} "
+                f"(config/SCHEMAS.md rule 6b)."
+            )
 
     declared_repos: set[str] = set()
     repo_roles: dict[str, str] = {}
@@ -939,6 +1090,7 @@ def main() -> int:
     g_err, g_warn = check_g()
     h_err, h_warn = check_h()
     j_err, j_warn = check_j()
+    l_err, l_warn = check_l()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -950,12 +1102,13 @@ def main() -> int:
         "Check G — elicitation-pattern resolution",
         "Check H — RE skill output-structure binding",
         "Check J — write-discipline binding (create-* skills)",
+        "Check L — RE close-out gate binding",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
-        (f_err, f_warn),
+        (l_err, l_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -984,6 +1137,7 @@ def main() -> int:
                  "G — elicitation-pattern resolution",
                  "H — RE skill output-structure binding",
                  "J — write-discipline binding (create-* skills)",
+                 "L — RE close-out gate binding",
                  "F — build-registry sanity"],
                 bundles,
             )
@@ -1011,6 +1165,7 @@ def main() -> int:
             _md(titles[5], g_err, g_warn),
             _md(titles[6], h_err, h_warn),
             _md(titles[7], j_err, j_warn),
+            _md(titles[8], l_err, l_warn),
             "## Check F — build-registry.py output",
             "",
         ]

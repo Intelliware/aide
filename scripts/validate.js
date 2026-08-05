@@ -757,6 +757,97 @@ function checkJ() {
   return [errors, warnings];
 }
 
+const RE_GATE_PATTERN = 'references/elicitation-patterns/re-verification-gate-selection.md';
+const RE_GATE_MODES = ['automated', 'review-evidence'];
+const RE_GATE_ENUM = ['ask', 'review', 'automated'];
+const RE_REVIEW_SKILL = 'review-reverse-engineering-package';
+
+// L — RE close-out gate binding. See validate.py:check_l for the full rationale.
+// Every reverse-engineer-* skill must ask the user how the extraction is attested and
+// name both routes; its steps/verify.md must declare both modes and both check tiers.
+function checkL() {
+  const errors = [];
+  const warnings = [];
+
+  const reDir = path.join(SKILLS_ROOT, 'reverse-engineering');
+  if (!fs.existsSync(reDir) || !fs.statSync(reDir).isDirectory()) {
+    return [errors, warnings];
+  }
+
+  const patternAbs = path.join(REPO_ROOT, RE_GATE_PATTERN);
+  if (!fs.existsSync(patternAbs) || !fs.statSync(patternAbs).isFile()) {
+    errors.push(`${RE_GATE_PATTERN}: target file missing — every reverse-engineer-* skill cites this routing pattern; restore it or fix the path.`);
+  }
+
+  const reviewSkillAbs = path.join(reDir, RE_REVIEW_SKILL, 'SKILL.md');
+  if (!fs.existsSync(reviewSkillAbs) || !fs.statSync(reviewSkillAbs).isFile()) {
+    errors.push(`.agents/skills/reverse-engineering/${RE_REVIEW_SKILL}/SKILL.md: missing — the close-out gate's review path has no destination skill.`);
+  }
+
+  let found = 0;
+  const skillFiles = discoverFiles(reDir, (name) => name === 'SKILL.md').sort();
+  for (const skillMd of skillFiles) {
+    const parent = path.basename(path.dirname(skillMd));
+    if (!parent.startsWith('reverse-engineer-')) continue;
+    found += 1;
+    const rel = path.relative(REPO_ROOT, skillMd);
+    const text = fs.readFileSync(skillMd, 'utf-8');
+
+    if (!text.includes(RE_GATE_PATTERN)) {
+      errors.push(`${rel}: does not cite \`${RE_GATE_PATTERN}\` — the close-out gate MUST route through the shared routing pattern, not an ad-hoc prompt.`);
+    }
+    if (!text.includes(RE_REVIEW_SKILL)) {
+      errors.push(`${rel}: does not name \`${RE_REVIEW_SKILL}\` — the review path of the close-out gate has no stated destination.`);
+    }
+
+    const verify = path.join(path.dirname(skillMd), 'steps', 'verify.md');
+    const vrel = path.relative(REPO_ROOT, verify);
+    if (!fs.existsSync(verify) || !fs.statSync(verify).isFile()) {
+      errors.push(`${vrel}: missing — the automated path of the close-out gate has nothing to run.`);
+      continue;
+    }
+
+    const vtext = fs.readFileSync(verify, 'utf-8');
+    const missingModes = RE_GATE_MODES.filter(m => !vtext.includes(`\`${m}\``));
+    if (missingModes.length > 0) {
+      errors.push(`${vrel}: does not declare mode(s) ${missingModes.join(', ')} — a verify step that knows only one mode has become unconditional again.`);
+    }
+    for (const [tier, label] of [['Tier M', 'machine-checkable'], ['Tier J', 'model judgment']]) {
+      if (!vtext.includes(tier)) {
+        errors.push(`${vrel}: does not declare \`${tier}\` (${label}) — without the two-tier split, automated mode reports model judgment as PASS.`);
+      }
+    }
+    if (!vtext.includes('UNVERIFIED')) {
+      errors.push(`${vrel}: never mentions UNVERIFIED — Tier J checks must be reported as unattested rather than passed.`);
+    }
+  }
+
+  if (found === 0) {
+    warnings.push('.agents/skills/reverse-engineering/: no reverse-engineer-* skills found (renamed or moved?) — Check L had nothing to verify.');
+  }
+
+  // The shipped example is the value users copy. It must be in-enum itself.
+  const example = path.join(REPO_ROOT, 'config', 'project.toml.example');
+  if (fs.existsSync(example) && fs.statSync(example).isFile()) {
+    errors.push(...reGateEnumErrors(fs.readFileSync(example, 'utf-8'), 'config/project.toml.example'));
+  }
+
+  return [errors, warnings];
+}
+
+// Rule 6b — re_verification_gate must be in-enum. An unrecognised value is an error,
+// not a silent fallback to "ask": a typo'd mode must not quietly downgrade the
+// close-out to the AI's own choice.
+function reGateEnumErrors(text, label) {
+  const errors = [];
+  const m = text.match(/^\s*re_verification_gate\s*=\s*["']([^"']*)["']/m);
+  if (!m) return errors;
+  if (!RE_GATE_ENUM.includes(m[1])) {
+    errors.push(`${label}: [project.elicitation].re_verification_gate = "${m[1]}" is not one of ${RE_GATE_ENUM.join(', ')} (config/SCHEMAS.md rule 6b).`);
+  }
+  return errors;
+}
+
 function checkSod(projectTomlPath, artifactPath = null) {
   const errors = [];
   const warnings = [];
@@ -774,6 +865,14 @@ function checkSod(projectTomlPath, artifactPath = null) {
   } catch (err) {
     errors.push(`${projectTomlPath}: TOML parse error — ${err.message}`);
     return [errors, warnings];
+  }
+
+  // Rule 6b — re_verification_gate enum.
+  const gate = data?.project?.elicitation?.re_verification_gate;
+  if (gate !== undefined && gate !== null) {
+    if (typeof gate !== 'string' || !RE_GATE_ENUM.includes(gate)) {
+      errors.push(`${projectTomlPath}: [project.elicitation].re_verification_gate = ${JSON.stringify(gate)} is not one of ${RE_GATE_ENUM.join(', ')} (config/SCHEMAS.md rule 6b).`);
+    }
   }
 
   const declaredRepos = new Set();
@@ -1169,6 +1268,7 @@ function main() {
   const [gErr, gWarn] = checkG();
   const [hErr, hWarn] = checkH();
   const [jErr, jWarn] = checkJ();
+  const [lErr, lWarn] = checkL();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1180,13 +1280,14 @@ function main() {
     'Check G — elicitation-pattern resolution',
     'Check H — RE skill output-structure binding',
     'Check J — write-discipline binding (create-* skills)',
+    'Check L — RE close-out gate binding',
     'Check F — build-registry.js output',
   ];
 
   const bundles = [
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
     [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
-    [fErr, fWarn],
+    [lErr, lWarn], [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {
@@ -1241,6 +1342,7 @@ function main() {
       toMarkdown(titles[5], gErr, gWarn),
       toMarkdown(titles[6], hErr, hWarn),
       toMarkdown(titles[7], jErr, jWarn),
+      toMarkdown(titles[8], lErr, lWarn),
       '## Check F — build-registry.js output',
       '',
     ];

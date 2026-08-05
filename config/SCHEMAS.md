@@ -356,6 +356,36 @@ deployment_model = "saas-multi-tenant"
 Unknown codes are tolerated (skills ignore answers they don't ask for) so
 adding new questions to the framework doesn't break old `project.toml` files.
 
+**Enumerated codes.** Most codes are free-form, but a few are validated because a
+skill branches on them:
+
+| Code | Type | Default | Purpose |
+|---|---|---|---|
+| `uses_test_case_increments` | bool | `false` | Opt into the TC-XXX per-test-case execution flow; gates the `test-case-increment` block and `review-quality-package` sub-review 6. |
+| `records_testability_classification` | bool | `false` | Render the testability table as a visible block. The gate itself always runs. |
+| `re_verification_gate` | enum | `"ask"` | How a reverse-engineering run is closed out. Values: `ask` \| `review` \| `automated`. See below. |
+
+`re_verification_gate` controls the RE close-out gate that every
+`reverse-engineer-*` skill reaches after extraction, per
+`references/elicitation-patterns/re-verification-gate-selection.md`:
+
+- `ask` (default) — put the choice to the user at close-out. The intended normal
+  case: only the user knows whether this extraction is load-bearing enough to
+  warrant human sign-off.
+- `review` — pre-answer as the review path. `steps/verify.md` runs in
+  `review-evidence` mode (mechanical checks, no verdict), then
+  `review-reverse-engineering-package` runs nine sub-reviews with per-verdict human
+  acceptance and writes the readiness verdict.
+- `automated` — pre-answer as the automated path. `steps/verify.md` runs in
+  `automated` mode and issues a `MECHANICAL: GO / NO-GO` scoped to machine-checkable
+  (Tier M) checks; model-judgment (Tier J) checks are reported UNVERIFIED and never
+  counted toward GO.
+
+An **unattended** invocation (CI, scheduled KB refresh) left on `ask` fails fast with
+an error naming this key. The AI does not pick a mode when nobody is present to
+answer — the same convention `review-requirements-package` § Step 0 uses for a
+missing `feature-id`.
+
 #### `[[project.repos]]`
 
 Array-of-table; one entry per repository participating in the project. This is
@@ -615,6 +645,7 @@ skill's contract assumes these have already passed.
 5. Every path token used (`{project-root}` etc.) is one of the four defined in § 1.5.
 6. `_suppress = true` only appears in array-of-table entries with a `code` or `id`.
 6a. `[project.testing].qe_repo`, when set, must be a non-empty string matching one declared `[[project.repos]].code`. Warn when the referenced repo's `role` is not `test-automation` or `qe`.
+6b. `[project.elicitation].re_verification_gate`, when set, must be one of `ask`, `review`, `automated`. An unrecognised value is an error, not a silent fallback to `ask` — a typo'd gate mode must not quietly downgrade the close-out to the AI's choice.
 
 **Config — separation-of-duties (SoD):**
 

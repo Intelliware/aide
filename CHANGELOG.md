@@ -52,6 +52,42 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
+### `2.1.0` — 2026-08-04
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-04 | Addition | references | `references/elicitation-patterns/re-verification-gate-selection.md` | New **RE close-out gate**. Every `reverse-engineer-*` skill now asks the user how the extraction should be attested — `automated` (mechanical gate) or `review` (human sign-off) — and routes accordingly. Replaces the unconditional kick-off of `steps/verify.md`, which self-issued its own GO/NO-GO with no human in the loop. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 2 | 2026-08-04 | Addition | skills | `.agents/skills/reverse-engineering/review-reverse-engineering-package/` | Per-repo RE readiness gate: nine ordered sub-reviews (completeness, grounding, consistency, coverage, freshness, traceability, adversarial pass, edge cases, readiness) with per-verdict human acceptance and a written APPROVED / CONDITIONAL / BLOCKED verdict. Ported from the unmerged `mm/add-adverserial` branch and corrected for current output geometry. Independently invocable. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 3 | 2026-08-04 | Addition | skills | `.agents/skills/meta/review-adversarial/`, `.agents/skills/meta/review-edge-case-hunter/` | Adversarial-review layer: attitude-driven critique and method-driven edge-case walk, both producing `aide-adversarial-findings@1` files. Anytime-runnable; invoked as sub-reviews 7–8 by `review-reverse-engineering-package`. Also ported from `mm/add-adverserial`. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 4 | 2026-08-04 | Addition | references | `references/review-patterns/` (3 files) | Shared wrapper-dispatcher contract, Format 4 findings schema, and severity→verdict mapping for the adversarial sub-reviews. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 5 | 2026-08-04 | Addition | config | `config/project.toml.example`, `config/SCHEMAS.md` | New `[project.elicitation].re_verification_gate` (`ask` default / `review` / `automated`) pre-answers the close-out gate for unattended runs. Validation rule 6b rejects unrecognised values rather than falling back to `ask`. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 6 | 2026-08-04 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | New **Check L** — RE close-out gate binding. Asserts every `reverse-engineer-*` skill cites the routing pattern, its `steps/verify.md` declares both modes and both check tiers, and `re_verification_gate` values are in-enum. | branch `mm/re-close-out-gate` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-04 | Correction | skills | 11 × `reverse-engineer-*/steps/verify.md` | Verification checks are now split into **Tier M** (machine-checkable — a command, parse, or exact comparison whose two sides the report quotes) and **Tier J** (model judgment). Only Tier M may produce PASS or feed the verdict; Tier J is reported UNVERIFIED and never counted toward GO. Closes a real gap: the previous gate let the model grade its own extraction on judgment checklists and call the result verified. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 2 | 2026-08-04 | Correction | skills | 11 × `reverse-engineer-*/steps/verify.md` | The step is now mode-aware. `automated` issues `MECHANICAL: GO/NO-GO` scoped to Tier M; `review-evidence` issues **no** verdict and hands its report to `review-reverse-engineering-package` as evidence for sub-reviews 1, 5, 6. A Tier M failure halts in `automated` mode but is handed up as a finding in `review-evidence` mode. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 3 | 2026-08-04 | Correction | skills | `.agents/skills/knowledge-base/build-knowledge-base/SKILL.md` | Ingestion now requires a close-out attestation per repo — either a `MECHANICAL: GO` verification report or an APPROVED/CONDITIONAL readiness verdict. An extraction carrying neither is a halt, not a warning. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 4 | 2026-08-04 | Addition | skills | `.agents/skills/_registry/workflow-graph.yaml` | Brownfield flow gains the close-out fork after the RE dispatcher slot, modelled as `role: user-elected` (like the quality-stage fork), not as an unconditional gate. `review-adversarial`, `review-edge-case-hunter`, and `review-reverse-engineering-package` added to `anytime`. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 5 | 2026-08-04 | Correction | docs | `_docs/cobol-mainframe-review-integration.md` | Marked the `review-reverse-engineering-package` half of the pending patch-list **applied** (folded in at port time, expanded from ten domains to eleven to include `test-suite`). The `review-knowledge-base-package` half remains pending — that skill is still not on `main`. | branch `mm/re-close-out-gate` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.0.0`. Additive: projects that do not set
+`re_verification_gate` get `ask`, which surfaces one question at the end of each RE
+run. No migration required, but note the behavioural change — a reverse-engineering
+run no longer closes itself, and `build-knowledge-base` now refuses an extraction that
+received neither attestation.
+
+Scoped out deliberately: `review-knowledge-base-package` (the global-KB audit sibling
+on `mm/add-adverserial`) and that branch's Stage-4 cross-wiring of adversarial
+sub-reviews into the requirements / design / planning review skills. Both remain
+available on `mm/add-adverserial` for a later pass.
+
 ### `2.0.0` — 2026-07-29
 
 #### Added

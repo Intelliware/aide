@@ -178,6 +178,16 @@ test('Rule 12 — cross-cutting unknown repo', () => {
   );
 });
 
+// Rejection matters more than it looks: a silent fallback to "ask" would make an
+// unattended run fail fast while the operator believed it was self-closing, and a
+// fallback the other way would imply human sign-off that never happened.
+test('Rule 6b — re_verification_gate out of enum', () => {
+  expectReject(
+    ['--project-toml', path.join(FIXTURES, 'bad-re-verification-gate.toml')],
+    ['re_verification_gate', 'auto', 'ask', 'review', 'automated']
+  );
+});
+
 // --- Test SoD Positive ---
 
 function createTempToml(body) {
@@ -324,7 +334,7 @@ test('Default mode exits zero', () => {
   );
 
   // Sanity: the output should mention each labelled check at least once
-  for (const label of ['Check A', 'Check B', 'Check D', 'Check E', 'Check F']) {
+  for (const label of ['Check A', 'Check B', 'Check D', 'Check E', 'Check F', 'Check L']) {
     assertIn(label, out, `missing '${label}' in default-mode output`);
   }
 
@@ -351,6 +361,50 @@ test('Check K — reject [tools.*] in a framework layer', () => {
 
 test('Check K — accept a clean framework layer', () => {
   expectAccept(['--framework-toml', path.join(REPO_ROOT, 'config', 'framework.toml.example')]);
+});
+
+// --- Check L — RE close-out gate binding ---
+// Asserted against the live tree, not a fixture: the invariant is about the shipped
+// skills, and a fixture copy would drift from them silently.
+
+const RE_DIR = path.join(REPO_ROOT, '.agents', 'skills', 'reverse-engineering');
+const RE_GATE_PATTERN_PATH = 'references/elicitation-patterns/re-verification-gate-selection.md';
+
+function reSkillFiles() {
+  if (!fs.existsSync(RE_DIR)) return [];
+  return fs.readdirSync(RE_DIR)
+    .filter(d => d.startsWith('reverse-engineer-'))
+    .map(d => path.join(RE_DIR, d, 'SKILL.md'))
+    .filter(p => fs.existsSync(p))
+    .sort();
+}
+
+test('Check L — routing pattern exists on disk', () => {
+  const abs = path.join(REPO_ROOT, RE_GATE_PATTERN_PATH);
+  assert(fs.existsSync(abs), `missing ${RE_GATE_PATTERN_PATH}`);
+});
+
+test('Check L — every RE skill cites the pattern and names the review skill', () => {
+  const skills = reSkillFiles();
+  assertEqual(skills.length, 11, `expected 11 RE skills, found ${skills.length}`);
+  for (const skill of skills) {
+    const name = path.basename(path.dirname(skill));
+    const text = fs.readFileSync(skill, 'utf-8');
+    assertIn(RE_GATE_PATTERN_PATH, text, `${name} does not cite the routing pattern`);
+    assertIn('review-reverse-engineering-package', text, `${name} does not name the review skill`);
+  }
+});
+
+test('Check L — every verify step declares both modes and both tiers', () => {
+  for (const skill of reSkillFiles()) {
+    const name = path.basename(path.dirname(skill));
+    const verify = path.join(path.dirname(skill), 'steps', 'verify.md');
+    assert(fs.existsSync(verify), `${name}: missing steps/verify.md`);
+    const text = fs.readFileSync(verify, 'utf-8');
+    for (const needle of ['`automated`', '`review-evidence`', 'Tier M', 'Tier J', 'UNVERIFIED']) {
+      assertIn(needle, text, `${name}/steps/verify.md missing '${needle}'`);
+    }
+  }
 });
 
 // --- Summary ---

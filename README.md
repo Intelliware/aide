@@ -282,7 +282,7 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 | `planning` | Implementation packages broken into INC-XXX increments (`create-`, `review-`) |
 | `quality` | Quality packages: strategy + test design (traced to ACs) + QE plan (automation / CI gates / test data / release gates). Plus three anytime-invocable skills: `audit-quality-coverage`, `review-test-failures`, `execute-quality-increments` (optional TC-XXX flow) |
 | `execution` | Implemented code, increment-status, bug log, PR (`execute-increments`, `manage-bugs`, `create-pr`) |
-| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 11 domain skills) |
+| `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 11 domain skills), plus `review-reverse-engineering-package` — the per-repo readiness gate for the review close-out path |
 | `knowledge-base` | The global multi-repo KB (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) |
 | `quick-dev` | Lightweight scoped-change path (`document-`, `plan-`, `execute-quick-change`) |
 
@@ -316,7 +316,28 @@ Entry point is `analyze-repository`: a thin dispatcher that classifies the repo 
 
 Each domain ships paired compositions in `templates/compositions/`: `re-<domain>-internal.yaml` (Part A) and `re-<domain>-consumer.yaml` (Part B).
 
-See `.agents/skills/reverse-engineering/README.md` for the full domain catalog and `templates/blocks/reverse-eng/` for the per-domain block libraries.
+### The close-out gate
+
+An extraction does not close itself. Every domain skill ends by **asking** the user how
+the output should be attested before the KB ingests it, then routing:
+
+- **`automated`** — `steps/verify.md` runs the machine-checkable (**Tier M**) checks and
+  issues a `MECHANICAL: GO / NO-GO`. Checks that only the model can judge (**Tier J**) are
+  reported UNVERIFIED and never counted toward GO. A GO with a non-empty UNVERIFIED list
+  is the normal outcome: it says *well-formed*, not *correct*.
+- **`review`** — the same Tier M checks run first as evidence, then
+  `review-reverse-engineering-package` runs nine ordered sub-reviews with per-verdict human
+  acceptance and writes an APPROVED / CONDITIONAL / BLOCKED readiness verdict to disk.
+  Additive: choosing review keeps every mechanical check and adds judgment on top.
+
+`build-knowledge-base` requires one of the two attestations per repo and halts on an
+extraction that carries neither. `[project.elicitation].re_verification_gate`
+(`ask` default / `review` / `automated`) pre-answers the question for unattended runs; an
+unattended run left on `ask` fails fast rather than the AI picking a mode.
+
+See `references/elicitation-patterns/re-verification-gate-selection.md` for the routing
+contract, `.agents/skills/reverse-engineering/README.md` for the full domain catalog, and
+`templates/blocks/reverse-eng/` for the per-domain block libraries.
 
 ## Vocabulary
 

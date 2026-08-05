@@ -119,6 +119,24 @@
       "origin": "core"
     },
     {
+      "canonical_id": "review-adversarial",
+      "name": "review-adversarial",
+      "description": "Use when the user asks to adversarially review, critique, stress-test, or challenge an A.I.D.E. artifact (requirements package, design package, implementation package, RE doc, KB component, KB instance, quick-change brief). Says 'adversarial review of X', 'critique X', 'find what's wrong with X', 'cynical review', 'stress-test these requirements', 'what would a skeptic say about this design', 'challenge my plan'. Attitude-driven — looks for hidden assumptions, weasel words, unsupported claims, missing risks, and scope inflation. Orthogonal to review-edge-case-hunter (method-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-adversarial/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-edge-case-hunter",
+      "name": "review-edge-case-hunter",
+      "description": "Use when the user asks to walk every branching path and boundary condition in an A.I.D.E. artifact and report only what's not handled. Says 'edge-case review of X', 'find unhandled edge cases in X', 'walk the paths in this design', 'what edges does this requirement miss', 'boundary analysis of X'. Method-driven — enumerates branches, error paths, boundaries, concurrency edges, time/clock edges, data-shape edges, authorization edges. Orthogonal to review-adversarial (attitude-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-edge-case-hunter/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "scaffold-documentation",
       "name": "scaffold-documentation",
       "description": "Use when the user says \"scaffold the docs\", \"set up the doc structure\", \"propose the file structure\", \"create the documentation skeleton\", or after completing an inventory/discovery phase and needing to organize findings into a file structure before extraction or authoring begins. Cross-stage utility — works for RE, requirements, design, and KB packages. Enforces the \"structure before content\" principle.",
@@ -377,6 +395,15 @@
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-reverse-engineering-package",
+      "name": "review-reverse-engineering-package",
+      "description": "Use when the user asks to review, validate, or check readiness of the reverse-engineered Part A + Part B doc set for a single repo before it is ingested into the knowledge base — for any of the eleven domains (api, api-framework, web-app, ui-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job, test-suite). Says 'review the RE output for <repo>', 'validate reverse-engineering for <repo>', 'check RE readiness', 'is the RE pass ready for the KB', 'review reverse-engineering package'. Independently invocable; assumes Part A and Part B already exist for the repo.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/review-reverse-engineering-package/SKILL.md",
       "origin": "core"
     }
   ]

@@ -91,7 +91,20 @@ Part B is the single source of truth that downstream skills query via
 - Reporting and analytics integrations
 - Known gaps, anti-patterns (hardcoded waits, static state, missing teardown), and accepted technical debt
 ### Stage 5: Verification and Finalization
-- Run `steps/verify.md` to execute the full extraction-verification gate
+- **Close-out gate — ask, then route.** Do NOT run `steps/verify.md`
+  unconditionally. Ask the user how this extraction should be closed out, per
+  `references/elicitation-patterns/re-verification-gate-selection.md`:
+  - **automated** — run `steps/verify.md` in `automated` mode. It issues the
+    mechanical GO/NO-GO; checks only the model can judge are reported
+    UNVERIFIED and never counted toward GO.
+  - **review** — run `steps/verify.md` in `review-evidence` mode (mechanical
+    checks only, no verdict), then hand off by name to
+    `review-reverse-engineering-package`, which owns the readiness verdict.
+
+  Halt until the user answers; do not infer a mode.
+  `[project.elicitation].re_verification_gate` may pre-answer it (`ask` is the
+  default, or `review` / `automated`); an unattended run left on `ask` fails
+  fast rather than picking for the user.
 - Confirm every Part B file frontmatter carries `kind: test-suite`
 - Confirm the marker / tag vocabulary documented in Part B matches what the consuming quality package's `automation-and-cicd` block expects
 - Log all changes via the `track-change` skill
@@ -105,37 +118,10 @@ under `templates/compositions/`:
 | Part A — internal docs | `re-test-suite-internal.yaml` | `docs/test-suite-internal/` (under the test-suite repo root) | `tree` — one `.md` per block (named `NN-<bare-slug>.md`) |
 | Part B — consumer / KB | `re-test-suite-consumer.yaml` | `{paths.knowledge_base_path}/source-docs/<repo-slug>/test-suite-consumer/` | `tree` — one `.md` per block (named `<NN>-<bare-slug>.md`), sibling to the other RE `*-consumer/` trees; every file declares `kind: test-suite` in frontmatter |
 
-### Part A — internal (16 blocks, order 110..260)
-
-1. `suite-overview` — identity, scope, application(s) under test, what's deliberately out of scope
-2. `runner-and-entry-points` — stack pins, canonical invocations, reports / artefacts
-3. `project-structure-and-conventions` — directory layout, naming rules, canonical examples
-4. `configuration-and-profiles` — config files, profiles, env-var overrides, secret handling, timeouts
-5. `shared-utilities-catalogue` — actions / waits / assertions / data / navigation / network / fixtures (full inventory)
-6. `fixtures-and-test-data` — static fixtures, builders, seed-data lifecycle, per-scenario state contract
-7. `page-objects-and-step-defs` — POs + step-defs with duplicate-phrasing remediation queue
-8. `spec-feature-inventory` — every spec mapped to INC / FR / AC, orphan + near-duplicate roster
-9. `marker-tag-vocabulary` — controlled + free-form tags, mandatory tag policy, vocabulary change procedure
-10. `auth-and-environment-entry` — auth paths, forbidden patterns, environment-entry contract
-11. `environment-matrix` — per-env URL / auth / seed / mutating-policy / safe tag-subsets
-12. `parallelism-and-isolation` — worker model, per-worker resources, isolation contract, race-condition history
-13. `reporting-and-analytics` — reports, dashboards, integrations, trace policy
-14. `ci-integration` — pipelines, gating semantics, artefact upload, quarantine workflow
-15. `known-gaps-and-anti-patterns` — coverage gaps, anti-patterns, flake roster, architectural debt
-16. `glossary` — suite-specific terms (distinct from project-level glossary)
-
-### Part B — consumer / KB (10 blocks, order 110..200)
-
-1. `suite-purpose-and-scope` — application-oriented purpose; what the suite proves; what it doesn't
-2. `runner-and-invocation` — consumer-grade stack + canonical commands + report locations
-3. `shared-utilities-catalogue` — public reusable helpers grouped by interaction type (the reuse-analysis target)
-4. `fixtures-catalogue` — static fixtures + runtime builders + seed-data contract
-5. `page-objects-and-step-defs-catalogue` — canonical PO methods and step-def phrasings (the duplicate-prevention surface)
-6. `marker-tag-vocabulary` — controlled + free-form tags; mandatory tag policy binding on consuming skills
-7. `environment-and-data-contract` — per-env capability contract + seed-data guarantees + binding forbiddances
-8. `feature-inventory` — what's covered, mapped to INC / FR / AC; coverage roll-ups; gap list
-9. `ci-surface` — gating pipelines, artefact paths, dashboards, notification channels
-10. `ownership` — per-area + per-role ownership, review routing, issue-filing surface
+The per-block rosters for both parts live in `references/OVERVIEW.md`
+§ Block rosters. The compositions above are the authority — the roster is a
+reading aid, and a disagreement between the two is a composition bug, not a
+roster bug.
 
 ### Block source
 
@@ -153,6 +139,16 @@ authoring.
 | Part B — consumer / KB | `{paths.knowledge_base_path}/source-docs/<repo-slug>/test-suite-consumer/<NN>-<bare-slug>.md` | Markdown with `kind: test-suite` frontmatter (one file per block: suite-purpose-and-scope, runner-and-invocation, shared-utilities-catalogue, …, ownership), sibling to the other RE `*-consumer/` trees |
 | Change-tracker entries | Per the `track-change` skill | Markdown |
 ## Next skill
+
+Depends on the close-out mode elected at the gate:
+
+- **review** → `review-reverse-engineering-package` — the per-repo readiness gate.
+  KB ingestion follows its APPROVED / CONDITIONAL verdict, not this skill's completion.
+- **automated** → straight to KB ingestion once the mechanical gate returns GO. The
+  UNVERIFIED list travels with the extraction; it is not cleared by ingestion.
+
+Then, in either case:
+
 - After completion, hand off by name to `build-knowledge-base` if the KB
   has not yet been initialised; otherwise hand off to
   `update-knowledge-base` to fold the new components into the live KB.
@@ -160,6 +156,14 @@ authoring.
   `navigate-knowledge-base --profile=test-suite` — no further action
   required from this skill.
 ## Common mistakes
+- **Running `steps/verify.md` without asking.** The close-out gate is a user
+  decision; picking the mode yourself reinstates the self-attested gate the
+  routing pattern replaced.
+- **Reporting a model-judgment check as PASS in `automated` mode.** Those items
+  are UNVERIFIED. A GO with a non-empty UNVERIFIED list is the honest and
+  expected outcome — it means well-formed, not attested as correct.
+- **Issuing a GO/NO-GO in `review-evidence` mode.** The review skill owns the
+  verdict there; two verdicts for one extraction is worse than one.
 - **Treating the test suite as an application.** Test suites have no
   end-users; their "API" is the marker vocabulary, the fixture catalogue,
   and the CI surface. Document those, not "what does this product do".
