@@ -23,6 +23,34 @@ combines `architecture-index` and `capability-index` blocks).
 
 ## Procedure
 
+0. **Solution Overview pointer (§ 0).** Emit a `## 0. Solution Overview`
+   section at the very top of `ARCHITECTURE.md`, linking to the human-grounded
+   half of the KB. Render it **even when those subtrees are still empty**, so a
+   first-time reader finds the doors rather than concluding they do not exist:
+
+   ```markdown
+   ## 0. Solution Overview
+
+   The KB has two halves: the code-grounded half (this file + `components/` +
+   `graph.json`) and the human-grounded half under `shared/`. Read these first
+   when grounding a discussion in the solution rather than in the code:
+
+   - [`shared/solution-context/00-overview.md`](shared/solution-context/00-overview.md) — mission, value proposition, classification
+   - [`shared/solution-context/10-personas-and-use-cases.md`](shared/solution-context/10-personas-and-use-cases.md) — personas and jobs-to-be-done
+   - [`shared/solution-context/20-goals-and-kpis.md`](shared/solution-context/20-goals-and-kpis.md) — goals and KPIs
+   - [`shared/solution-context/30-constraints-and-compliance.md`](shared/solution-context/30-constraints-and-compliance.md) — constraints and compliance
+   - [`shared/solution-context/40-external-integrations.md`](shared/solution-context/40-external-integrations.md) — vendor catalog
+   - [`shared/solution-context/50-ownership-and-raci.md`](shared/solution-context/50-ownership-and-raci.md) — ownership, RACI, on-call
+   - [`shared/ai-rules/project-context.md`](shared/ai-rules/project-context.md) — AI coding rules and architectural must-nots
+   - [`shared/operations/`](shared/operations/) — deployment topology, environments, SLOs, runbooks
+   ```
+
+   For a target that does not exist yet, annotate the link
+   `(pending — run <skill-name>)` rather than `(empty)`. Pending links are valid
+   output: they name the skill that fills the gap, which an `(empty)` marker does
+   not. `verify-knowledge-base-coverage` warns when pending links persist past
+   the bootstrap sequence.
+
 1. **Solution Summary (3 paragraphs).** Distill from RE Part B "system
    purpose" sections, supplemented by `project.toml` `[project]` `domain`
    and `description`:

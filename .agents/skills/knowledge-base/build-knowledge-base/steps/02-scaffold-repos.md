@@ -33,11 +33,23 @@ without yet emitting any component leaves.
    <knowledge_base_path>/
    ├── repos/
    ├── components/
-   ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/}/
+   ├── shared/{entities/, cross-cutting/, adrs/, integration-patterns/,
+   │           solution-context/, ai-rules/, operations/}/
    └── synthesized/{01-architecture-overview/ … 10-repository-maintenance/}/
    ```
 
    Use the exact 10-folder names listed in `references/SYNTHESIZED-FOLDERS.md`.
+
+   The three human-grounded subtrees (`solution-context/`, `ai-rules/`,
+   `operations/`) are scaffolded **empty** here — this skill never populates
+   them. `capture-solution-context`, `generate-ai-rules`, and
+   `document-operations` fill them respectively, and
+   `verify-knowledge-base-coverage` warns when they are still empty after the
+   bootstrap sequence completes.
+
+   Scaffolding them empty is deliberate: an absent directory reads as "this KB
+   does not do solution context", while an empty one reads as "nobody has
+   captured it yet". The second is true and actionable; the first is neither.
 
 2. **Seed `glossary.md`.** Read `[project.glossary]` from `project.toml`:
    - Inline `[[project.glossary.entries]]` rows become rendered glossary
