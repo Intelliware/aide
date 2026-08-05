@@ -65,12 +65,39 @@
       "origin": "core"
     },
     {
+      "canonical_id": "capture-solution-context",
+      "name": "capture-solution-context",
+      "description": "Use when the user wants to capture project-level solution context that the code cannot tell you — mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI; says 'capture solution context', 'document the solution', 'set up project context', 'document who uses this and why', 'capture business context for the KB'; or when bootstrapping a new project's knowledge base after RE → build-knowledge-base. Produces six markdown files under <KB>/shared/solution-context/ plus a glossary delta. Interactive by default; supports --non-interactive for CI runs that stub from RE outputs.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/capture-solution-context/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "detect-knowledge-base-drift",
       "name": "detect-knowledge-base-drift",
       "description": "Use when source repos may have changed without the KB being updated, when running a PR-gate freshness check, or for the scheduled (cron / weekly) drift sweep. Performs cheap-to-expensive layered detection (commit-stamp / structural diff / LLM contradiction / coverage sweep) and reports drift with per-component severity and recommended actions.",
       "stage": "knowledge-base",
       "package": "",
       "path": ".agents/skills/knowledge-base/detect-knowledge-base-drift/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "document-operations",
+      "name": "document-operations",
+      "description": "Use when the user wants to capture solution-level operational documentation that the code can only partially reveal — deployment topology, environment matrix, secrets layout, SLOs, dashboards, runbooks, on-call rotations; says 'document operations', 'capture deployment', 'document SLOs', 'set up runbooks for the KB'. Reads CI/CD configs and RE Part B deployment sections to auto-fill, then interactively elicits the gaps. Produces four leaves under <KB>/shared/operations/.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/document-operations/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "generate-ai-rules",
+      "name": "generate-ai-rules",
+      "description": "Use when the user wants to author the project-context.md that AI agents must follow when implementing code in this project — exact tech-stack versions, language-specific rules, framework rules, testing rules, workflow rules; says 'generate AI rules', 'create project-context', 'set up agent guardrails', 'document coding rules for the AI'. Hybrid: auto-derives rules from RE Part A (versions, build/test commands, lint configs), then interactively elicits the unobvious rules. Output is one canonical project-context.md plus optional per-repo overrides only when stacks diverge enough to warrant them.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/generate-ai-rules/SKILL.md",
       "origin": "core"
     },
     {

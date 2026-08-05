@@ -1,0 +1,43 @@
+# Composition: Knowledge Base — AI Rules
+#
+# Composes <KB>/shared/ai-rules/project-context.md — the canonical
+# AI guardrails document for the project. Authored by the
+# generate-ai-rules skill. Sibling to kb-solution-context and
+# kb-operations.
+#
+# Source: templates/blocks/knowledge-base/
+
+name: kb-ai-rules
+description: Knowledge-base AI rules — canonical project-context.md plus optional per-repo overrides.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-shared
+
+default-output-path: "{paths.knowledge_base_path}/shared/ai-rules/"
+
+blocks:
+  - slug: knowledge-base/ai-rules-project-context
+    optional: false
+    order: 1
+    output-filename: project-context.md
+
+elicitation:
+  - prompt: references/elicitation-patterns/coding-rules.md
+    required: true
+
+decision-gates:
+  - id: divergence-check
+    description: >
+      Decide whether to emit per-repo overrides under
+      shared/ai-rules/per-repo/<repo-slug>.md. Fires when the
+      generate-ai-rules skill detects stack divergence (different
+      languages, test framework families, package managers, or
+      validators) across [[project.repos]].
+    invoked-by: generate-ai-rules/steps/03-emit.md
+
+notes: |
+  Default output is exactly one document — project-context.md.
+  Per-repo overrides are produced only when Step 03 of the
+  generate-ai-rules skill detects divergence reaching the configured
+  threshold (or --force-overrides is passed). Override files have
+  no separate block template; they reuse ai-rules-project-context.md
+  with a "Why this override exists" header injected at render time.
