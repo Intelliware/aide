@@ -42,7 +42,7 @@ stages:
     description: "Analyze and document existing code repositories (API, UI, DB, mobile, framework) into Part A/B docs that feed the knowledge base."
     order: 6
   - id: knowledge-base
-    description: "Build, navigate, update, and verify the cross-repository knowledge base."
+    description: "Build, navigate, update, verify and audit the cross-repository knowledge base — both halves: the code-grounded half derived from RE, and the human-grounded solution-context / ai-rules / operations layer under shared/."
     order: 7
   - id: quick-dev
     description: "Lightweight scoped-change path: document-quick-change, plan-quick-change, execute-quick-change."
@@ -60,6 +60,11 @@ flows:
     description: "Full SDLC from requirements through execution. Best for new projects with elaborate workflow."
     sequence:
       - skill: start-project
+      # capture-solution-context runs before the first requirements package so
+      # that package has project mission, personas, KPIs and constraints to
+      # ground in. Project-scoped (<KB>/shared/), unlike the FEATURE-scoped
+      # requirements package — the two layers do not overlap.
+      - skill: capture-solution-context
       # Optional discovery input from Jira/Confluence is provided by an installed
       # tool ADD-ON (not core). When configured, create-requirements-package seeds
       # Step 1 discovery from the add-on via the source-adapter convention
@@ -73,6 +78,10 @@ flows:
         gates:
           - skill: review-design-package
             required: true
+      # generate-ai-rules sits AFTER design in greenfield: there is no stack to
+      # derive rules from until design has fixed the framework choices. In
+      # brownfield it runs earlier, because RE Part A already carries the stack.
+      - skill: generate-ai-rules
       - skill: create-implementation-package
         gates:
           - skill: review-implementation-package
@@ -94,6 +103,12 @@ flows:
             required: true
       - skill: execute-increments
         per-increment-closing-skill: update-knowledge-base
+      # document-operations runs once implementation has produced a deployment
+      # shape to document. Optional because a pre-launch project has no infra
+      # yet; the skill stops cleanly rather than inventing a topology.
+      - skill: document-operations
+        optional: true
+        condition: "infra files exist (CI/CD config, IaC, deployment manifests)"
       - skill: create-pr
 
   brownfield:
@@ -139,6 +154,20 @@ flows:
         optional: true
         condition: "mainframe stack present (any of cobol-program, copybook-library, jcl-job in [[project.repos]])"
       - skill: verify-knowledge-base-coverage
+      # The three solution-context skills run AFTER the code-grounded KB is in
+      # place, so components/, graph.json and ARCHITECTURE.md exist to link from.
+      # They also feed the first requirements package below: solution-context is
+      # PROJECT-scoped (<KB>/shared/), create-requirements-package is
+      # FEATURE-scoped (docs/<feature>/). The two layers do not overlap.
+      #
+      # In brownfield, generate-ai-rules can run this early because RE Part A
+      # already carries the exact stack and build/test commands it derives from —
+      # in greenfield it has to wait for design.
+      - skill: capture-solution-context
+      - skill: generate-ai-rules
+      - skill: document-operations
+        optional: true
+        condition: "infra files exist (CI/CD config, IaC, deployment manifests)"
       # Optional discovery input from Jira/Confluence is provided by an installed
       # tool ADD-ON (not core), consumed via the source-adapter convention
       # (discovery_source; see references/orientation/source-adapters.md). The
@@ -202,6 +231,15 @@ anytime:
   # because it is independently invocable against an existing extraction without
   # re-running the RE skill that produced it.
   - review-reverse-engineering-package
+  # Periodic global-KB audit. Distinct from the per-repo gate above and from
+  # detect-knowledge-base-drift, which stays the cheap per-PR signal.
+  - review-knowledge-base-package
+  # Solution-context layer. Also placed in both flow sequences, but listed here
+  # because a team refreshes personas, KPIs, AI rules or runbooks on its own
+  # cadence — those go stale on a calendar, not on a commit.
+  - capture-solution-context
+  - generate-ai-rules
+  - document-operations
   # Quality stage skills that are independently invocable at any time:
   #   - audit-quality-coverage: read-only coverage audit against the implementation package
   #   - review-test-failures: triage walk-through of a failed test run

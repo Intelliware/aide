@@ -283,7 +283,7 @@ Skills are grouped by stage of work, not by flow. The flow choice (greenfield/br
 | `quality` | Quality packages: strategy + test design (traced to ACs) + QE plan (automation / CI gates / test data / release gates). Plus three anytime-invocable skills: `audit-quality-coverage`, `review-test-failures`, `execute-quality-increments` (optional TC-XXX flow) |
 | `execution` | Implemented code, increment-status, bug log, PR (`execute-increments`, `manage-bugs`, `create-pr`) |
 | `reverse-engineering` | Per-repo Part A internal + Part B consumer docs (`analyze-repository` dispatcher + 11 domain skills), plus `review-reverse-engineering-package` — the per-repo readiness gate for the review close-out path |
-| `knowledge-base` | The global multi-repo KB (`build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`) |
+| `knowledge-base` | The global multi-repo KB, both halves. Code-grounded: `build-`, `navigate-`, `update-`, `detect-knowledge-base-drift`, `verify-knowledge-base-coverage`, `build-mainframe-data-lineage`. Human-grounded: `capture-solution-context`, `generate-ai-rules`, `document-operations`. Plus `review-knowledge-base-package` for the periodic audit |
 | `quick-dev` | Lightweight scoped-change path (`document-`, `plan-`, `execute-quick-change`) |
 
 ## Knowledge base
@@ -292,7 +292,9 @@ The KB **lives in its own repo**, separate from A.I.D.E. `project.toml`'s `[proj
 
 The KB is markdown-first. Agents traverse it via `read + grep + glob` over per-component frontmatter (`description`, `triggers`, `paths`, `depends_on`, `consumed_by`, …) — **no vector DB**, no embeddings. The root `ARCHITECTURE.md` (5–15 KB) loads first; `navigate-knowledge-base` selects the minimal component set for a given feature.
 
-See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 5 KB skills.
+The KB has **two halves**. The code-grounded half (`ARCHITECTURE.md`, `components/`, `graph.json`, `source-docs/`) is derived from reverse-engineering and git. The human-grounded half (`shared/{solution-context, ai-rules, operations}/`) covers what code cannot reveal — mission, personas, goals and KPIs, constraints, vendor relationships, ownership and on-call, plus the AI coding guardrails in `shared/ai-rules/project-context.md`. RE is rigorous about structure and behaviour, and blind to intent; the second half exists for that. Both are project-scoped and persist across features.
+
+See `config/SCHEMAS.md` § 3 for KB schemas, `templates/blocks/knowledge-base/` for KB block templates, and `.agents/skills/knowledge-base/README.md` for the 10 KB skills.
 
 ## Reverse engineering
 

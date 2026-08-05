@@ -52,6 +52,54 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
+### `2.2.0` — 2026-08-04
+
+Reconciles the three unlanded `mm/*` branches onto one branch. `mm/add-all` already
+contained every commit of `mm/add-context` and `mm/add-adverserial` via its own merge
+commits, so this is one body of work, not three.
+
+**Reconciled by content, not by merge.** `mm/add-cobol` and `mm/add-ack` are already
+ancestors of `main`, but `add-ack`'s tip is **not** an ancestor of `add-all` — the same
+work exists on both sides under different SHAs, and `add-all`'s copies are the older
+ones. A `git merge` would have reverted SoD path resolution and the write-discipline
+Preconditions across the requirements / design / planning / execution skills, and failed
+Check J. So: additions taken wholesale, shared files left at `main`'s version with only
+the *intent* of the branch's change re-applied by hand.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-04 | Addition | skills | `.agents/skills/knowledge-base/{capture-solution-context,generate-ai-rules,document-operations}/` | **Solution-context layer** — the human-grounded half of the KB. Three skills emitting `<KB>/shared/{solution-context, ai-rules, operations}/`: mission, personas, goals/KPIs, constraints, integrations, ownership; AI coding guardrails; deployment topology, environments, SLOs, runbooks. RE reads code rigorously but anything absent from code is invisible to it. Two of the three are hybrid — `generate-ai-rules` derives versions and commands from RE Part A, `document-operations` reads CI/CD configs — and only ask about what code cannot reveal. | branch `mm/add-context` | ☐ Pending |
+| 2 | 2026-08-04 | Addition | skills | `.agents/skills/knowledge-base/review-knowledge-base-package/` | Periodic global-KB audit: ten ordered sub-reviews plus one conditional, writing to `<KB>/_review/<ISO8601>/` so audit history accumulates. Orchestrates `verify-knowledge-base-coverage` and `detect-knowledge-base-drift` L1 rather than reimplementing them; the cheap per-PR signal stays with `detect-knowledge-base-drift`. | branch `mm/add-adverserial` | ☐ Pending |
+| 3 | 2026-08-04 | Addition | templates | `templates/blocks/knowledge-base/` (12 blocks), `templates/compositions/kb-{solution-context,ai-rules,operations}.yaml` | Block library and compositions backing the solution-context layer. | branch `mm/add-context` | ☐ Pending |
+| 4 | 2026-08-04 | Addition | references | `references/elicitation-patterns/{personas,coding-rules,operations-discovery,ownership-and-raci}.md` | Question scripts for the four interactive halves of the layer. | branch `mm/add-context` | ☐ Pending |
+| 5 | 2026-08-04 | Addition | config | `config/framework.toml.example`, `config/SCHEMAS.md` | `[knowledge_base] solution_context_max_age_days = 90` (advisory; never `high` severity) and `lineage_max_drift_commits = 25`. Deliberately different units: human-grounded leaves go stale on a calendar, lineage goes stale on a source-structure change. | branch `mm/add-context` + this reconcile | ☐ Pending |
+| 6 | 2026-08-04 | Addition | docs | `_docs/{solution-context-gap-audit,solution-context-layer,adversarial-review-design,plan-yolo-mode}.md`, `TODO.md` | Design provenance for both layers, including the BMad gap audit that decided what to take and what RE already covers. Both `TODO.md` explorations are now resolved and marked done. | branches `mm/add-context`, `mm/add-adverserial`, `mm/add-all` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-04 | Addition | skills | `review-requirements-package`, `review-design-package`, `review-implementation-package` | **Adversarial wrappers wired into the remaining three review gates**: requirements 10 → 12 sub-reviews, design 3 → 5, planning 8 → 10. Wrappers sit immediately before each readiness gate — running them first would waste them on an artifact still failing basic consistency, running them after would mean the gate never saw their findings. Planning translates severity into Critical / Important / Minor rather than PASS / FAIL. Applied by hand onto `main`'s current `review-workflow.md` files, not taken from the branch. | branch `mm/add-adverserial` (re-applied) | ☐ Pending |
+| 2 | 2026-08-04 | Addition | skills | `build-knowledge-base/steps/{02,06,07}`, `navigate-knowledge-base`, `detect-knowledge-base-drift/steps/04`, `verify-knowledge-base-coverage/steps/03` | Solution-context wired into the KB pipeline: subtrees scaffolded **empty** at build, `ARCHITECTURE.md` § 0 pointer, documented read order, new `navigate` tiers exempt from `--max-components`, advisory staleness and repo-coverage sweeps. Four of the six files had diverged on `main` — including a rename (`07-emit-claude-md.md` → `07-emit-navigate-md.md`) that a wholesale checkout would have resurrected. | branch `mm/add-context` (re-applied) | ☐ Pending |
+| 3 | 2026-08-04 | Addition | skills | `.agents/skills/_registry/workflow-graph.yaml` | Solution-context skills placed in both flows — `capture-solution-context` before the first requirements package, `generate-ai-rules` after design in greenfield but early in brownfield (RE Part A already carries the stack), `document-operations` optional on infra presence. All three plus `review-knowledge-base-package` added to `anytime`. Registry 45 → **49** skills. | branches `mm/add-context`, `mm/add-adverserial` | ☐ Pending |
+| 4 | 2026-08-04 | Correction | references | `references/review-patterns/adversarial-wrapper-pattern.md` | Dropped the wired/reserved split — all five review-package skills now wrap, which is what the shared reference was factored out for. | this reconcile | ☐ Pending |
+| 5 | 2026-08-04 | Correction | docs | `_docs/cobol-mainframe-review-integration.md` (**deleted**), `review-knowledge-base-package` | Applied the last pending patches — sub-review 7.5 `review-mainframe-lineage-integrity`, condition-gated on `<KB>/lineage/mainframe/` with a recorded `N/A` verdict when absent — then deleted the document per its own Apply-Time Checklist step 7. A silently-omitted sub-review and a legitimately-inapplicable one must not look identical in a verdict file. | branch `mm/add-cobol` (deferred patches) | ☐ Pending |
+| 6 | 2026-08-04 | Correction | docs | `_docs/skills-test-plan.md` | Grafted the 11 test-plan sections covering the newly-landed skills into `main`'s newer plan (which had dropped them because the skills never landed), added wrapper pass-criteria to D.3/D.5/D.7, and added 7 coverage-matrix rows. `main`'s version won everywhere else — it is 500+ lines further along. `C.8.4` collided (`main` reuses it for `reverse-engineer-test-suite`), so the RE-review sections renumbered to C.8.5/C.8.6. `skills-test-results.md` left untouched: `main`'s is a superset. | branch `mm/add-all` (grafted) | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.1.0`. Additive — no migration required. `mm/add-context`,
+`mm/add-adverserial` and `mm/add-all` are recorded as merged ancestors via
+`git merge -s ours`, so their authoring history stays reachable while this branch's tree
+remains authoritative. All three are then safely deletable with `git branch -d`.
+
+Deliberately **not** taken from `mm/add-all`: its older copies of the requirements /
+design / planning / execution skills (already superseded on `main` by the SoD and
+write-discipline work), and its `_docs/skills-test-results.md` (superseded by `main`'s
+2026-07-24 and 2026-07-26 records).
+
 ### `2.1.0` — 2026-08-04
 
 #### Added
@@ -73,7 +121,7 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 | 2 | 2026-08-04 | Correction | skills | 11 × `reverse-engineer-*/steps/verify.md` | The step is now mode-aware. `automated` issues `MECHANICAL: GO/NO-GO` scoped to Tier M; `review-evidence` issues **no** verdict and hands its report to `review-reverse-engineering-package` as evidence for sub-reviews 1, 5, 6. A Tier M failure halts in `automated` mode but is handed up as a finding in `review-evidence` mode. | branch `mm/re-close-out-gate` | ☐ Pending |
 | 3 | 2026-08-04 | Correction | skills | `.agents/skills/knowledge-base/build-knowledge-base/SKILL.md` | Ingestion now requires a close-out attestation per repo — either a `MECHANICAL: GO` verification report or an APPROVED/CONDITIONAL readiness verdict. An extraction carrying neither is a halt, not a warning. | branch `mm/re-close-out-gate` | ☐ Pending |
 | 4 | 2026-08-04 | Addition | skills | `.agents/skills/_registry/workflow-graph.yaml` | Brownfield flow gains the close-out fork after the RE dispatcher slot, modelled as `role: user-elected` (like the quality-stage fork), not as an unconditional gate. `review-adversarial`, `review-edge-case-hunter`, and `review-reverse-engineering-package` added to `anytime`. | branch `mm/re-close-out-gate` | ☐ Pending |
-| 5 | 2026-08-04 | Correction | docs | `_docs/cobol-mainframe-review-integration.md` | Marked the `review-reverse-engineering-package` half of the pending patch-list **applied** (folded in at port time, expanded from ten domains to eleven to include `test-suite`). The `review-knowledge-base-package` half remains pending — that skill is still not on `main`. | branch `mm/re-close-out-gate` | ☐ Pending |
+| 5 | 2026-08-04 | Correction | docs | `_docs/cobol-mainframe-review-integration.md` | Marked the `review-reverse-engineering-package` half of the pending patch-list **applied** (folded in at port time, expanded from ten domains to eleven to include `test-suite`). The `review-knowledge-base-package` half was still pending at this point; both halves land in `2.2.0` below, at which point the document is deleted. | branch `mm/reconcile` | ☐ Pending |
 
 #### Branch Dependency
 
