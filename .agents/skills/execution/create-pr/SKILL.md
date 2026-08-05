@@ -72,7 +72,7 @@ committing or creating the PR.
    (`templates/compositions/pr-description.yaml`); blocks cover summary,
    change-list, test plan, traceability, and optionally breaking-changes
    and rollout-notes when the diff warrants them
-5. **PR creation** — only with explicit user approval; reports the PR URL
+5. **PR creation** — only with explicit user approval; detects the git host (GitHub → `gh`, Azure DevOps → `az repos`, other → browser URL) and reports the PR URL
 6. **Changelog entry** — read `[project.change_log]` from `project.toml`.
    - If the table is absent or `enabled = false`: silently skip (no changelog declared).
    - If `enabled = true`: render an entry against
@@ -92,7 +92,7 @@ For step-by-step procedure, see `references/implementation-pr-workflow.md`.
 - Fixed working tree (no Critical findings remain)
 - Atomic commits with conventional commit messages
 - PR description (chat or PR body)
-- PR URL (if `gh pr create` was authorized)
+- PR URL (if `gh pr create` or `az repos pr create` was authorized, otherwise a browser URL)
 - Optional changelog entry
 
 ## Next skill
@@ -113,8 +113,8 @@ return to `execute-increments` after the PR is filed.
   logical changes, split them.
 - **Skipping the adversarial framing.** Zero findings is suspicious, not
   good news. Re-analyze.
-- **Auto-creating the PR without approval.** Never run `gh pr create`
-  without explicit user authorization.
+- **Auto-creating the PR without approval.** Never run `gh pr create` or
+  `az repos pr create` without explicit user authorization.
 - **Vague PR descriptions.** "Implements the feature" is not a
   description. Cite the increments / FRs / files affected and the test
   evidence.
