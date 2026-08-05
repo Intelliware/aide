@@ -1,4 +1,23 @@
-# Things to explore  
+# Exploration queue
+
+Open questions and requests about **A.I.D.E.'s own development** — things to
+investigate, compare, or design next. Working material, in the same category as the
+rest of `_docs/`.
+
+**This is not a framework artifact.** No skill emits it, no composition renders it, no
+block template or `config/SCHEMAS.md` entry describes it, and no validator checks it.
+Nothing in a user's project should ever produce a file like this. It lives here because
+A.I.D.E. is itself a repo someone develops, and this is where that repo's open threads
+are parked so they do not get lost between sessions.
+
+Distinct from the other `_docs/` files: those record decisions already taken
+(`solution-context-gap-audit.md`, `adversarial-review-design.md`), while this records the
+asks that led to them. Resolved items stay, marked ✅ with a pointer to where the answer
+landed — the request is often the clearest statement of why a feature exists.
+
+Was `TODO.md` at repo root until 2026-08-05.
+
+---
 
 ### ✅ DONE — Alignment with BMAD project-cotext / document-project skills/workflows
 **Resolved in 1.1.0 (commits 5c7f251 → d4151a8) — solution-context layer.**
