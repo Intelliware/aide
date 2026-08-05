@@ -110,6 +110,15 @@
       "origin": "core"
     },
     {
+      "canonical_id": "review-knowledge-base-package",
+      "name": "review-knowledge-base-package",
+      "description": "Use when the user asks to review, audit, validate, or check readiness of the global knowledge base — periodic audit covering architecture index, component coverage, graph integrity, frontmatter integrity, staleness, link integrity, solution-context coverage, mainframe lineage integrity when present, adversarial pass, edge cases, and readiness. Says 'review the KB', 'audit the knowledge base', 'check KB readiness', 'is the KB current', 'periodic KB review', 'review knowledge-base package'. Periodic skill, not gate-blocking on every change. Orchestrates verify-knowledge-base-coverage and detect-knowledge-base-drift; adds adversarial and edge-case sub-reviews; emits a final readiness verdict.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/review-knowledge-base-package/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "update-knowledge-base",
       "name": "update-knowledge-base",
       "description": "Use when a feature has just shipped and the KB must be brought back into sync — invoked as the closing step of execute-increments or execute-quick-change. Updates only the components matched by the diff, appends to change-tracker, emits an ADR if a threshold is crossed, and incrementally regenerates graph.json and the capability index. Never re-runs a full build.",

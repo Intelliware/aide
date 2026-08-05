@@ -9,7 +9,7 @@ description: "Use when the user asks to review, validate, or check readiness of 
 
 Runs the formal review sequence and final readiness gate against an already-assembled design package. Produces findings and a verdict per review (PASS / PASS WITH OBSERVATIONS / FAIL or, for readiness, GO / CONDITIONAL GO / NO-GO), ending with `review-solution-readiness` as the gate before planning handoff. Independently invocable: the user can run this skill against any existing design package without re-running creation.
 
-The review sequence is strict — three reviews in fixed order (architecture, security-posture, readiness), no parallel execution. A NO-GO or blocking finding halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. Folder name is `review-design-package` (renamed from the legacy `solution-review` to drop the "solution-" prefix and align with the new stage name "design").
+The review sequence is strict — five reviews in fixed order (architecture, security-posture, adversarial-pass, edge-cases, readiness), no parallel execution. A NO-GO or blocking finding halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. Folder name is `review-design-package` (renamed from the legacy `solution-review` to drop the "solution-" prefix and align with the new stage name "design").
 
 ## When to use
 
@@ -75,7 +75,9 @@ Run reviews strictly in order. Do not parallelize. Present findings and verdict 
 |---|---|---|
 | 1 | review-architecture | Structural soundness, scalability, resilience, maintainability |
 | 2 | review-security-posture | Security vulnerabilities, authn/authz, data protection, compliance posture |
-| 3 | review-solution-readiness | Final GO / CONDITIONAL GO / NO-GO gate for planning handoff |
+| 3 | review-adversarial-pass | Wraps `meta/review-adversarial` with `--stage=design` |
+| 4 | review-edge-cases | Wraps `meta/review-edge-case-hunter` with `--stage=design` |
+| 5 | review-solution-readiness | Final GO / CONDITIONAL GO / NO-GO gate for planning handoff |
 
 The detailed instructions, halt conditions, and verdict templates live in `references/review-workflow.md`.
 
@@ -84,6 +86,8 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 | Artifact | Path | Format |
 |---|---|---|
 | Per-review findings | `docs/<feature>/solutions-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature>/solutions-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature>/solutions-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
 | Final readiness verdict | `docs/<feature>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
 | Updated `change-tracker.md` rows | `docs/<feature>/solutions-package/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 

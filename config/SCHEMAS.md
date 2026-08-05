@@ -223,6 +223,8 @@ suppression, custom blocks).
 | `components_dirname` | string | `"components"` | Name of the components subdirectory. |
 | `default_verification_signal` | enum | `"openapi-diff"` | Default `verification_signal` value for new components. Values: `openapi-diff`, `exported-symbols-diff`, `route-inventory-diff`, `schema-diff`, `manual`. |
 | `staleness_warning_days` | int | `30` | Components whose `last_verified_against_commit` corresponds to a commit older than this many days raise a warning during KB read. |
+| `solution_context_max_age_days` | int | `90` | Solution-context leaves under `shared/{solution-context, ai-rules, operations}/` whose `last_captured` / `last_generated` / `last_reviewed` is older than this raise an **advisory** staleness flag in `detect-knowledge-base-drift` L4. Never fires `high` severity. Separate from `staleness_warning_days` because human-grounded leaves go stale on a calendar, not on a commit. |
+| `lineage_max_drift_commits` | int | `25` | How many commits `<KB>/lineage/mainframe/` may drift behind its contributing repos' HEADs before `review-knowledge-base-package` sub-review 7.5 flags it. Counted in commits, not days — lineage is derived from source structure (COPY members, CALL targets, DD statements), so it goes stale on a change, not on a date. |
 
 `[registry]`
 

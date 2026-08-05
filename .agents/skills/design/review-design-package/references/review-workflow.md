@@ -12,7 +12,50 @@ Run reviews strictly in the order below. Do not skip ahead and do not run review
 |---|---|---|---|
 | 1 | review-architecture | `review-architecture.md` | Structural soundness, scalability, resilience, maintainability |
 | 2 | review-security-posture | `review-security-posture.md` | Security vulnerabilities, authn/authz, data protection, compliance posture |
-| 3 | review-solution-readiness | `review-solution-readiness.md` | Final GO / CONDITIONAL GO / NO-GO gate for planning handoff |
+| 3 | review-adversarial-pass | `references/review-patterns/adversarial-wrapper-pattern.md` | Invokes `meta/review-adversarial --stage=design` |
+| 4 | review-edge-cases | `references/review-patterns/adversarial-wrapper-pattern.md` | Invokes `meta/review-edge-case-hunter --stage=design` |
+| 5 | review-solution-readiness | `review-solution-readiness.md` | Final GO / CONDITIONAL GO / NO-GO gate for planning handoff |
+
+## Adversarial wrapper sub-reviews (3 and 4)
+
+Reviews 3 and 4 follow the shared dispatcher pattern in
+`references/review-patterns/adversarial-wrapper-pattern.md`, run against the assembled
+design package, and write into the same `review/` directory as the other sub-reviews:
+
+```
+meta/review-adversarial \
+  --target=docs/<feature>/solutions-package/design-package.md \
+  --stage=design \
+  --output-path=docs/<feature>/solutions-package/review/adversarial-findings.md
+```
+
+```
+meta/review-edge-case-hunter \
+  --target=docs/<feature>/solutions-package/design-package.md \
+  --stage=design \
+  --output-path=docs/<feature>/solutions-package/review/edge-case-findings.md
+```
+
+They carry more weight here than in most stages, because a design package is where
+unsupported claims are cheapest to make and most expensive to discover later — "the queue
+handles backpressure", "this scales horizontally", "the cache is invalidated on write" are
+all assertions a checklist review passes and a skeptic does not.
+
+Sub-review verdicts use `PASS / PASS WITH OBSERVATIONS / FAIL` per
+`references/review-patterns/review-verdict-mapping.md` — the `GO / CONDITIONAL GO / NO-GO`
+vocabulary belongs to review 5 only, which aggregates:
+
+| `worst_severity` | Verdict |
+|---|---|
+| `critical` | FAIL |
+| `high` | PASS WITH OBSERVATIONS |
+| `medium` | PASS WITH OBSERVATIONS |
+| `low` | PASS |
+| `none` | PASS |
+
+If `triage_counts.must-fix > 0` AND `worst_severity == high`, MAY upgrade to FAIL. Each
+wrapper writes its own verdict file (`review-adversarial-pass.md`, `review-edge-cases.md`)
+citing the findings path.
 
 The deeper per-review checklists live in `model-2-sdlc-skills/solution-package/solution-review/references/<review>.md` for now and will be lifted to `templates/blocks/design/review-*.md` in a later migration task. Until then, this skill points authors to those legacy files for the detailed checklists.
 

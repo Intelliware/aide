@@ -2,11 +2,17 @@
 
 Shared dispatcher pattern for invoking `meta/review-adversarial` and `meta/review-edge-case-hunter` as sub-reviews inside a `review-*-package` skill.
 
-**Wired today:**
+**Wired in all five review-package skills.** Each inserts the two wrappers immediately before its readiness gate — after the checklist-driven sub-reviews have settled, and before the gate that aggregates them:
 
-- `reverse-engineering/review-reverse-engineering-package/references/review-workflow.md` (sub-reviews 7–8)
+| Skill | Sub-reviews | Wrapper positions | Readiness gate |
+|---|---|---|---|
+| `review-requirements-package` | 12 | 10, 11 | 12 |
+| `review-design-package` | 5 | 3, 4 | 5 |
+| `review-implementation-package` | 10 | 8, 9 | 10 |
+| `review-reverse-engineering-package` | 9 | 7, 8 | 9 |
+| `review-knowledge-base-package` | 10 (+1 conditional) | 8, 9 | 10 |
 
-**Reserved.** The pattern is deliberately generic so the other `review-*-package` skills can adopt it without redesign. They have not, and this document does not imply they have: `review-requirements-package` (10 sub-reviews), `review-design-package` (3), and `review-implementation-package` (8) run their own sequences with no adversarial wrapper. Their rows below describe what adoption *would* look like — treat them as a contract for a future edit, not a description of current behavior. Adopting the pattern in one of them is a deliberate change to that skill's `review-workflow.md`, not something this reference activates on its own.
+The ordering is the point. Running the wrappers first would waste them on an artifact still failing basic consistency; running them after the gate would mean the gate never saw their findings.
 
 ## Wrapper structure
 
@@ -19,12 +25,13 @@ Each wrapper is a single sub-review step that:
 
 ## Per-skill parameters
 
-| Wrapping skill | Status | Stage | Adversarial output filename | Edge-case output filename |
-|---|---|---|---|---|
-| `review-reverse-engineering-package` | wired | `reverse-engineering` | `adversarial-findings.md` | `edge-case-findings.md` |
-| `review-requirements-package` | reserved | `requirements` | `adversarial-findings.md` | `edge-case-findings.md` |
-| `review-design-package` | reserved | `design` | `adversarial-findings.md` | `edge-case-findings.md` |
-| `review-implementation-package` | reserved | `planning` | `adversarial-findings.md` | `edge-case-findings.md` |
+| Wrapping skill | Stage | Adversarial output filename | Edge-case output filename |
+|---|---|---|---|
+| `review-requirements-package` | `requirements` | `adversarial-findings.md` | `edge-case-findings.md` |
+| `review-design-package` | `design` | `adversarial-findings.md` | `edge-case-findings.md` |
+| `review-implementation-package` | `planning` | `adversarial-findings.md` | `edge-case-findings.md` |
+| `review-reverse-engineering-package` | `reverse-engineering` | `adversarial-findings.md` | `edge-case-findings.md` |
+| `review-knowledge-base-package` | `knowledge-base` | `adversarial-findings.md` | `edge-case-findings.md` |
 
 The output filenames are uniform; only the directory differs (each skill writes findings into its own review directory).
 
@@ -34,7 +41,7 @@ The two anytime skills produce findings with severity `critical | high | medium 
 
 ### Skills using PASS / PASS WITH OBSERVATIONS / FAIL semantics
 
-`review-reverse-engineering-package` (wired); `review-requirements-package` and `review-design-package` on adoption.
+`review-requirements-package`, `review-design-package`, `review-reverse-engineering-package`, `review-knowledge-base-package`.
 
 The standard mapping from `review-verdict-mapping.md`:
 
@@ -50,7 +57,7 @@ Note: `review-design-package` uses `NO-GO / CONDITIONAL GO / GO` only at the rea
 
 ### Skills using Critical / Important / Minor semantics
 
-`review-implementation-package` only (reserved — not wired today).
+`review-implementation-package` only.
 
 This skill collects findings across all sub-reviews and renders a single GO / NO-GO verdict at the end. Adversarial wrapper severity maps to its severity vocabulary as:
 
@@ -98,4 +105,4 @@ Same as the anytime skills' side effects: the wrapper writes its own verdict fil
 
 ## Why factor this out
 
-Without this shared reference, each wrapping skill would either copy-paste the dispatcher logic or quietly diverge over time. With it, wrappers are uniformly shaped and any change to the dispatcher pattern (e.g., a new `--target-commit` argument, a new severity tier) ripples through every wrapping skill via a single edit here. It is factored out ahead of full adoption on purpose: the second skill to wrap should inherit the shape rather than reinvent it.
+Without this shared reference, each wrapping skill would either copy-paste the dispatcher logic or quietly diverge over time. With it, wrappers are uniformly shaped and any change to the dispatcher pattern (e.g., a new `--target-commit` argument, a new severity tier) ripples through every wrapping skill via a single edit here. With five skills wrapping, that leverage is the whole point: the alternative was five copies of the same dispatcher drifting apart one edit at a time.

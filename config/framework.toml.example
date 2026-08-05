@@ -216,6 +216,15 @@ staleness_warning_days = 30
 # prompt to talk to someone, not a build break.
 solution_context_max_age_days = 90
 
+# How many commits the mainframe lineage artefact tree (<KB>/lineage/mainframe/)
+# may drift behind its contributing repos' HEADs before
+# review-knowledge-base-package sub-review 7.5 flags it.
+#
+# Counted in commits rather than days because lineage is derived from source
+# structure — COPY members, CALL targets, DD statements. It goes stale when
+# someone changes a record layout, not when a month passes.
+lineage_max_drift_commits = 25
+
 
 # ─── [registry] ──────────────────────────────────────────────────────────────
 # Skill-registry regeneration triggers. The registry is the CSV the
