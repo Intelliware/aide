@@ -24,7 +24,7 @@ findings.
 After all 8 reviews complete, render the consolidated issue list and the
 final GO / NO-GO verdict, and write the verdict into `change-tracker.md`.
 
-## The 8 reviews
+## The 10 reviews
 
 ### 1. Shape conformance
 
@@ -110,9 +110,55 @@ foundational dependency = Important.
 unknown upstream); missing `bugs-and-issues-log.md` = Important; missing
 `change-tracker.md` = Important.
 
-### 8. Implementation readiness verdict
+### 8. Adversarial pass (wrapper)
 
-Run last. Consolidate findings from reviews 1-7 into a single issue list.
+Follows the shared dispatcher pattern in
+`references/review-patterns/adversarial-wrapper-pattern.md`:
+
+```
+meta/review-adversarial \
+  --target={project.paths.implementation_package}/implementation-package.md \
+  --stage=planning \
+  --output-path={project.paths.implementation_package}/review/adversarial-findings.md
+```
+
+For a plan, the attitude lens earns its keep on increments that read as complete but
+assume their own feasibility — "wire up the integration", "migrate the data", a Plan item
+whose real cost is hidden behind a verb. Reviews 1–7 confirm an increment is well-formed;
+this one asks whether it is honest about what it will take.
+
+### 9. Edge-case pass (wrapper)
+
+```
+meta/review-edge-case-hunter \
+  --target={project.paths.implementation_package}/implementation-package.md \
+  --stage=planning \
+  --output-path={project.paths.implementation_package}/review/edge-case-findings.md
+```
+
+Method-driven, so it targets what the dependency graph and gate reviews cannot see:
+partial-failure states between increments, rollback paths that were never planned, the
+increment that leaves the system working only if the one after it also ships.
+
+**Severity mapping for both wrappers.** This skill uses Critical / Important / Minor rather
+than PASS / FAIL, so findings translate per
+`references/review-patterns/review-verdict-mapping.md`:
+
+| `worst_severity` | Severity in the consolidated issue list |
+|---|---|
+| `critical` | Critical (forces NO-GO) |
+| `high` | Important (forces NO-GO unless explicitly accepted as documented risk) |
+| `medium` | Important (same treatment) |
+| `low` | Minor |
+| `none` | (no entry added) |
+
+Each individual finding becomes one row in the consolidated list with its severity
+translated by the same mapping — the findings files are evidence, not a substitute for the
+issue list.
+
+### 10. Implementation readiness verdict
+
+Run last. Consolidate findings from reviews 1-9 into a single issue list.
 Determine the final verdict:
 
 - **GO** — no Critical findings, no unresolved `[NEEDS CLARIFICATION]`,

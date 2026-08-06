@@ -49,6 +49,12 @@ schema. This skill emits artifacts that conform to it.
   `detect-knowledge-base-drift`.
 - RE Part A/B docs do not yet exist → run the reverse-engineering stage
   first.
+- A repo's extraction carries **neither** close-out attestation — no
+  `MECHANICAL: GO` verification report and no APPROVED/CONDITIONAL readiness
+  verdict → halt and name the repo. The RE close-out gate has two legal exits
+  and this is neither; ingesting an unattested extraction is how a defect
+  becomes every downstream stage's ground truth. Send the user back to the
+  gate rather than ingesting and noting it.
 - `project.toml` does not declare `knowledge_base_path` → set it before
   invoking this skill.
 
@@ -58,6 +64,7 @@ schema. This skill emits artifacts that conform to it.
 |---|---|---|
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | RE Part A + Part B docs | `<knowledge_base_path>/source-docs/<repo-slug>/` | Yes |
+| **Close-out attestation, per repo** | either a verification report from the RE skill's `steps/verify.md` in `automated` mode carrying `MECHANICAL: GO`, **or** a `review/readiness-verdict.md` from `review-reverse-engineering-package` reading APPROVED or CONDITIONAL | Yes — one of the two |
 | `[[project.repos]]` array | `project.toml` | Yes |
 | KB block templates | `templates/blocks/knowledge-base/` | Yes |
 | `kb-instance-root` composition | `templates/compositions/kb-instance-root.yaml` | Yes |

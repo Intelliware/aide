@@ -55,7 +55,20 @@ Web applications are technology-agnostic in this skill — the workflow is ident
 - i18n, a11y, performance, security, testing, anti-patterns, dev workflows
 
 ### Stage 5: Verification and Finalization
-- Run `steps/verify.md` to execute the full extraction-verification gate
+- **Close-out gate — ask, then route.** Do NOT run `steps/verify.md`
+  unconditionally. Ask the user how this extraction should be closed out, per
+  `references/elicitation-patterns/re-verification-gate-selection.md`:
+  - **automated** — run `steps/verify.md` in `automated` mode. It issues the
+    mechanical GO/NO-GO; checks only the model can judge are reported
+    UNVERIFIED and never counted toward GO.
+  - **review** — run `steps/verify.md` in `review-evidence` mode (mechanical
+    checks only, no verdict), then hand off by name to
+    `review-reverse-engineering-package`, which owns the readiness verdict.
+
+  Halt until the user answers; do not infer a mode.
+  `[project.elicitation].re_verification_gate` may pre-answer it (`ask` is the
+  default, or `review` / `automated`); an unattended run left on `ask` fails
+  fast rather than picking for the user.
 - Log all changes using the `track-change` skill
 
 ## Key Rules
@@ -90,10 +103,27 @@ Side artifacts at the Part-A directory root:
 
 ## Next skill
 
+Depends on the close-out mode elected at the gate:
+
+- **review** → `review-reverse-engineering-package` — the per-repo readiness gate.
+  KB ingestion follows its APPROVED / CONDITIONAL verdict, not this skill's completion.
+- **automated** → straight to KB ingestion once the mechanical gate returns GO. The
+  UNVERIFIED list travels with the extraction; it is not cleared by ingestion.
+
+Then, in either case:
+
 `build-knowledge-base` — aggregates Part B into the central KB index.
 
 ## Common mistakes
 
+- **Running `steps/verify.md` without asking.** The close-out gate is a user
+  decision; picking the mode yourself reinstates the self-attested gate the
+  routing pattern replaced.
+- **Reporting a model-judgment check as PASS in `automated` mode.** Those items
+  are UNVERIFIED. A GO with a non-empty UNVERIFIED list is the honest and
+  expected outcome — it means well-formed, not attested as correct.
+- **Issuing a GO/NO-GO in `review-evidence` mode.** The review skill owns the
+  verdict there; two verdicts for one extraction is worse than one.
 - Documenting components in isolation without capturing the routing→state→API→render data flow
 - Leaking internal component-implementation details into Part B
 - Skipping cross-cutting concerns (i18n, a11y, perf) — they affect every feature

@@ -129,6 +129,18 @@ class TestSoDNegativeFixtures(unittest.TestCase):
             must_contain=["project.testing", "qe_repo", "unknown repo", "not declared"],
         )
 
+    def test_rule6b_bad_re_verification_gate(self) -> None:
+        """Rule 6b — `re_verification_gate` must be ask | review | automated.
+
+        Rejection matters more than it looks: a silent fallback to "ask" would make an
+        unattended run fail fast while the operator believed it was self-closing, and a
+        fallback the other way would imply human sign-off that never happened.
+        """
+        self._expect_reject(
+            ["--project-toml", str(FIXTURES / "bad-re-verification-gate.toml")],
+            must_contain=["re_verification_gate", "auto", "ask", "review", "automated"],
+        )
+
 
 class TestSoDPositive(unittest.TestCase):
     """Clean SoD configs and legacy-mode configs must pass."""
@@ -245,6 +257,71 @@ class TestSoDPositive(unittest.TestCase):
             role = "test-automation"
         """)
         self._expect_accept(["--project-toml", str(p)])
+
+    def test_re_verification_gate_each_enum_value_passes(self) -> None:
+        """Rule 6b accepts every documented value, and an absent key stays legal."""
+        for value in ("ask", "review", "automated"):
+            with self.subTest(value=value):
+                p = self._write_toml(f"""
+                    [project]
+                    code = "re-gate-ok"
+                    [project.elicitation]
+                    re_verification_gate = "{value}"
+                """)
+                self._expect_accept(["--project-toml", str(p)])
+
+        p = self._write_toml("""
+            [project]
+            code = "re-gate-absent"
+            [project.elicitation]
+            team_size = "10-25"
+        """)
+        self._expect_accept(["--project-toml", str(p)])
+
+
+class TestRECloseOutGate(unittest.TestCase):
+    """Check L — every reverse-engineer-* skill binds the close-out gate.
+
+    These assert against the live tree rather than a fixture: the invariant is about
+    the shipped skills, and a fixture copy would drift from them silently.
+    """
+
+    RE_DIR = REPO_ROOT / ".agents" / "skills" / "reverse-engineering"
+    PATTERN = "references/elicitation-patterns/re-verification-gate-selection.md"
+
+    def _re_skills(self) -> list[Path]:
+        return sorted(
+            p for p in self.RE_DIR.glob("reverse-engineer-*/SKILL.md") if p.is_file()
+        )
+
+    def test_default_run_reports_check_l(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check L — RE close-out gate binding", proc.stdout)
+
+    def test_routing_pattern_exists(self) -> None:
+        self.assertTrue((REPO_ROOT / self.PATTERN).is_file(), f"missing {self.PATTERN}")
+
+    def test_every_re_skill_cites_pattern_and_review_skill(self) -> None:
+        skills = self._re_skills()
+        self.assertEqual(len(skills), 11, msg=f"expected 11 RE skills, found {len(skills)}")
+        for skill in skills:
+            text = skill.read_text(encoding="utf-8")
+            with self.subTest(skill=skill.parent.name):
+                self.assertIn(self.PATTERN, text)
+                self.assertIn("review-reverse-engineering-package", text)
+
+    def test_every_verify_step_declares_both_modes_and_tiers(self) -> None:
+        for skill in self._re_skills():
+            verify = skill.parent / "steps" / "verify.md"
+            with self.subTest(skill=skill.parent.name):
+                self.assertTrue(verify.is_file(), f"missing {verify}")
+                text = verify.read_text(encoding="utf-8")
+                self.assertIn("`automated`", text)
+                self.assertIn("`review-evidence`", text)
+                self.assertIn("Tier M", text)
+                self.assertIn("Tier J", text)
+                self.assertIn("UNVERIFIED", text)
 
 
 class TestSoDEdgeCases(unittest.TestCase):

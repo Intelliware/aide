@@ -1,0 +1,18 @@
+# Negative fixture for rule 6b — re_verification_gate is not in the enum.
+# Expected: validator REJECTS with a message containing "re_verification_gate".
+#
+# "auto" is the realistic typo: it looks like a shortening of "automated" and a
+# silent fallback to "ask" would leave the operator believing unattended runs are
+# closing themselves out automatically when in fact they fail fast — or worse, if
+# the fallback went the other way, that a human was signing off when nobody was.
+
+[project]
+code = "bad-re-gate"
+
+[project.elicitation]
+re_verification_gate = "auto"
+
+[[project.repos]]
+code = "app"
+path = "."
+role = "api"

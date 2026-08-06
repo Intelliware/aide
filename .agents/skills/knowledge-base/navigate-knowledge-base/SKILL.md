@@ -62,6 +62,7 @@ read top-N, read frontmatter only, etc.).
 | `knowledge_base_path` | `project.toml` `[project.paths]` | Yes |
 | `--max-components` (default 7) | Caller | No |
 | `--include-cross-cutting` (bool, default true) | Caller | No |
+| `--include-solution-context` (bool, default true) | Caller | No — when true, surfaces matching `shared/{solution-context,ai-rules,operations}/` leaves as their own tiers, ranked below component matches and exempt from `--max-components` |
 | `--depth` (one-hop / two-hop, default one-hop) | Caller | No |
 | `--profile` (`default` / `test-suite`, default `default`) | Caller | No — when `test-suite`, biases ranking toward `kind: test-suite` components produced by `reverse-engineer-test-suite`; consumed by the merged quality stage's skills (`create-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) |
 | `--profile-subkind` (one of `runner` / `shared-utilities` / `fixtures` / `marker-vocabulary` / `feature-inventory` / `environment-matrix` / `ci-surface` / `ownership`, repeatable) | Caller | No — restricts a `--profile=test-suite` query to the named subkind(s); used by e.g. `review-test-failures` to fetch `shared-utilities` only for locator lookup |
@@ -92,12 +93,31 @@ This skill is single-shot — no `steps/` folder. The flow is:
    the feature description matches any cross-cutting concern keyword
    (auth, log, error, security, performance, version), append the
    `shared/cross-cutting/<concern>.md` pointer.
-5. **Cap and rank.** Apply `--max-components` cap. Ranking:
-   primary-match > one-hop neighbour > two-hop neighbour. Within a tier,
-   rank by trigger-overlap score.
-6. **Return.** Output is a JSON-or-markdown list of:
+5. **Solution-context injection.** If `--include-solution-context` (default
+   true), grep frontmatter `triggers:` lists in:
+   - `<knowledge_base_path>/shared/solution-context/*.md`
+   - `<knowledge_base_path>/shared/ai-rules/*.md`
+   - `<knowledge_base_path>/shared/operations/*.md` (and
+     `shared/operations/runbooks/*.md` when present)
+
+   Append each match as a `solution-context` / `ai-rules` / `operations` tier
+   entry. These tiers rank **below** primary component matches on purpose: the
+   calling skill should load components first and reach for the human-grounded
+   leaves when the feature is project-scoped — an architecture, compliance, or
+   ownership question — rather than a single-component change.
+6. **Cap and rank.** Apply `--max-components` cap. Ranking:
+   primary-match > one-hop neighbour > two-hop neighbour > cross-cutting >
+   solution-context > ai-rules > operations. Within a tier, rank by
+   trigger-overlap score.
+
+   **The cap applies to components only.** Solution-context, ai-rules, and
+   operations entries are returned alongside the capped component list without
+   competing for slots — those leaves are small and cheap, and letting them
+   displace a component would trade the answer for its context.
+7. **Return.** Output is a JSON-or-markdown list of:
    - `path` (relative to KB root, ready for read).
-   - `tier` (`primary` / `one-hop` / `two-hop` / `cross-cutting`).
+   - `tier` (`primary` / `one-hop` / `two-hop` / `cross-cutting` /
+     `solution-context` / `ai-rules` / `operations`).
    - `why` (one sentence — which trigger / capability / edge selected it).
 
 ## Output
@@ -120,79 +140,12 @@ none — returns context to caller.
 
 ## Profiles
 
-A **profile** is a named query bias the caller selects with `--profile`.
-It does not change the workflow steps; it changes how step 2 (capability
-lookup) and step 5 (cap and rank) weight components.
+A **profile** is a named query bias the caller selects with `--profile`. It does not
+change the workflow steps; it changes how step 2 (capability lookup) and step 6 (cap and
+rank) weight components. `default` applies the behaviour described above with no
+frontmatter filtering.
 
-### `default` profile
-
-The behaviour described above. No frontmatter filtering; all components
-in the capability index are eligible.
-
-### `test-suite` profile
-
-Used by the merged quality stage to ground in test-suite documentation
-rather than application code.
-
-- **Step 2 (capability lookup):** filter the capability index to
-  components whose frontmatter declares `kind: test-suite` (produced
-  by `reverse-engineer-test-suite`). Score and shortlist as usual,
-  but draw the candidate pool from that filtered set.
-- **Step 3 (graph expansion):** walk one hop on `depends_on` /
-  `consumed_by` as usual; do **not** filter the expansion — the
-  expansion correctly pulls in the application components the test
-  suite tests (recorded in `tests:` frontmatter), which the caller
-  typically wants to see alongside the suite components.
-- **Step 5 (cap and rank):** within tiers, prefer `kind: test-suite`
-  components over application components. The fan-out of one suite
-  query to application components is expected and useful — but
-  applications should never out-rank the suite components for a
-  test-suite-profile query.
-- **`--profile-subkind` filter (optional):** restrict the primary
-  selection to the named subkind(s). Example:
-  `--profile=test-suite --profile-subkind=shared-utilities` returns
-  only `shared-utilities.md` components plus their one-hop
-  expansion. Useful for `review-test-failures`'s locator lookup.
-
-If no components carry `kind: test-suite` (the KB has not yet ingested
-a `reverse-engineer-test-suite` output), the profile returns an empty
-primary set and the caller is told:
-
-> No test-suite components found in the KB. Run
-> `/reverse-engineer-test-suite` against the suite repo, then
-> `/build-knowledge-base` or `/update-knowledge-base` to fold the
-> components in. Falling back to the `default` profile would return
-> application components, which is not what a test-grounded query
-> needs.
-
-The caller (typically a quality-stage skill) then decides whether to
-abort or proceed with a clearly-flagged "no KB grounding available"
-note.
-
-
-
-- **Returning more than `--max-components`.** The default cap exists for
-  good reason; raise it consciously, not by default.
-- **Reading component bodies during selection.** Bodies are expensive;
-  selection reads frontmatter only (via grep against the YAML block).
-- **Forgetting `consumed_by` (incoming edges).** A feature touching A
-  often impacts everyone who calls A; one-hop must include both
-  directions.
-- **Greedy two-hop expansion.** Two-hop can balloon to 20+ components;
-  use `--depth=two-hop` only on explicit caller request.
-- **Skipping the capability index in favour of pure trigger grep.**
-  Capability is the curated routing layer; it disambiguates trigger
-  collisions (e.g. `pay` matches both checkout and refund flows).
-- **Stale-component blindness.** This skill does NOT verify freshness.
-  It returns components with their stated `last_verified_against_commit`
-  and lets the caller decide. If freshness matters, the caller should
-  run `detect-knowledge-base-drift --mode=gate` first.
-- **Falling back to the `default` profile when `test-suite` returns
-  empty.** A quality-stage caller that needs test-suite grounding
-  should never silently substitute application components — that
-  produces correct-looking but wrong results. Always surface the
-  empty-profile case to the caller and let it decide.
-- **Using `--profile=test-suite` for application-feature queries.**
-  Profiles are not free filters — `test-suite` is for quality-stage
-  callers grounding in test artefacts. A requirements or design skill
-  should always use the `default` profile.
+The `test-suite` profile and the `--profile-subkind` filter are documented in
+`references/OVERVIEW.md` § Profiles — including the per-step weighting and the
+empty-primary-set case when the KB has not yet ingested a `reverse-engineer-test-suite`
+output.

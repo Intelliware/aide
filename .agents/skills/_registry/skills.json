@@ -65,6 +65,15 @@
       "origin": "core"
     },
     {
+      "canonical_id": "capture-solution-context",
+      "name": "capture-solution-context",
+      "description": "Use when the user wants to capture project-level solution context that the code cannot tell you — mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI; says 'capture solution context', 'document the solution', 'set up project context', 'document who uses this and why', 'capture business context for the KB'; or when bootstrapping a new project's knowledge base after RE → build-knowledge-base. Produces six markdown files under <KB>/shared/solution-context/ plus a glossary delta. Interactive by default; supports --non-interactive for CI runs that stub from RE outputs.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/capture-solution-context/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "detect-knowledge-base-drift",
       "name": "detect-knowledge-base-drift",
       "description": "Use when source repos may have changed without the KB being updated, when running a PR-gate freshness check, or for the scheduled (cron / weekly) drift sweep. Performs cheap-to-expensive layered detection (commit-stamp / structural diff / LLM contradiction / coverage sweep) and reports drift with per-component severity and recommended actions.",
@@ -74,12 +83,39 @@
       "origin": "core"
     },
     {
+      "canonical_id": "document-operations",
+      "name": "document-operations",
+      "description": "Use when the user wants to capture solution-level operational documentation that the code can only partially reveal — deployment topology, environment matrix, secrets layout, SLOs, dashboards, runbooks, on-call rotations; says 'document operations', 'capture deployment', 'document SLOs', 'set up runbooks for the KB'. Reads CI/CD configs and RE Part B deployment sections to auto-fill, then interactively elicits the gaps. Produces four leaves under <KB>/shared/operations/.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/document-operations/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "generate-ai-rules",
+      "name": "generate-ai-rules",
+      "description": "Use when the user wants to author the project-context.md that AI agents must follow when implementing code in this project — exact tech-stack versions, language-specific rules, framework rules, testing rules, workflow rules; says 'generate AI rules', 'create project-context', 'set up agent guardrails', 'document coding rules for the AI'. Hybrid: auto-derives rules from RE Part A (versions, build/test commands, lint configs), then interactively elicits the unobvious rules. Output is one canonical project-context.md plus optional per-repo overrides only when stacks diverge enough to warrant them.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/generate-ai-rules/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "navigate-knowledge-base",
       "name": "navigate-knowledge-base",
       "description": "Use when any stage skill (requirements, design, planning, execution, quick-dev) needs to load grounding context from the KB before starting work, or when a feature description / change scope arrives and only a minimal component subset must be selected to read. Returns the ranked component file list for the agent to load — the agent must NOT read the whole KB.",
       "stage": "knowledge-base",
       "package": "",
       "path": ".agents/skills/knowledge-base/navigate-knowledge-base/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-knowledge-base-package",
+      "name": "review-knowledge-base-package",
+      "description": "Use when the user asks to review, audit, validate, or check readiness of the global knowledge base — periodic audit covering architecture index, component coverage, graph integrity, frontmatter integrity, staleness, link integrity, solution-context coverage, mainframe lineage integrity when present, adversarial pass, edge cases, and readiness. Says 'review the KB', 'audit the knowledge base', 'check KB readiness', 'is the KB current', 'periodic KB review', 'review knowledge-base package'. Periodic skill, not gate-blocking on every change. Orchestrates verify-knowledge-base-coverage and detect-knowledge-base-drift; adds adversarial and edge-case sub-reviews; emits a final readiness verdict.",
+      "stage": "knowledge-base",
+      "package": "",
+      "path": ".agents/skills/knowledge-base/review-knowledge-base-package/SKILL.md",
       "origin": "core"
     },
     {
@@ -116,6 +152,24 @@
       "stage": "meta",
       "package": "",
       "path": ".agents/skills/meta/framework-navigator/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-adversarial",
+      "name": "review-adversarial",
+      "description": "Use when the user asks to adversarially review, critique, stress-test, or challenge an A.I.D.E. artifact (requirements package, design package, implementation package, RE doc, KB component, KB instance, quick-change brief). Says 'adversarial review of X', 'critique X', 'find what's wrong with X', 'cynical review', 'stress-test these requirements', 'what would a skeptic say about this design', 'challenge my plan'. Attitude-driven — looks for hidden assumptions, weasel words, unsupported claims, missing risks, and scope inflation. Orthogonal to review-edge-case-hunter (method-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-adversarial/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-edge-case-hunter",
+      "name": "review-edge-case-hunter",
+      "description": "Use when the user asks to walk every branching path and boundary condition in an A.I.D.E. artifact and report only what's not handled. Says 'edge-case review of X', 'find unhandled edge cases in X', 'walk the paths in this design', 'what edges does this requirement miss', 'boundary analysis of X'. Method-driven — enumerates branches, error paths, boundaries, concurrency edges, time/clock edges, data-shape edges, authorization edges. Orthogonal to review-adversarial (attitude-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/review-edge-case-hunter/SKILL.md",
       "origin": "core"
     },
     {
@@ -377,6 +431,15 @@
       "stage": "reverse-engineering",
       "package": "",
       "path": ".agents/skills/reverse-engineering/reverse-engineer-web-app/SKILL.md",
+      "origin": "core"
+    },
+    {
+      "canonical_id": "review-reverse-engineering-package",
+      "name": "review-reverse-engineering-package",
+      "description": "Use when the user asks to review, validate, or check readiness of the reverse-engineered Part A + Part B doc set for a single repo before it is ingested into the knowledge base — for any of the eleven domains (api, api-framework, web-app, ui-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job, test-suite). Says 'review the RE output for <repo>', 'validate reverse-engineering for <repo>', 'check RE readiness', 'is the RE pass ready for the KB', 'review reverse-engineering package'. Independently invocable; assumes Part A and Part B already exist for the repo.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/review-reverse-engineering-package/SKILL.md",
       "origin": "core"
     }
   ]

@@ -142,6 +142,19 @@ uses_test_case_increments  = true                 # opt into the TC-XXX per-test
 test_framework             = "cucumber-junit5"    # primary test framework — values are free-form but should match a registered category
 test_runner                = "maven-surefire"     # how the framework is invoked in CI
 records_testability_classification = true         # render the Step 0b testability table as a visible block (false = change-tracker summary only; the gate itself always runs)
+# Reverse-engineering close-out gate. Every reverse-engineer-* skill ends by asking
+# the user how to attest the extraction before the KB ingests it:
+#   "automated" — steps/verify.md runs the machine-checkable (Tier M) checks and
+#                 issues a mechanical GO/NO-GO. Model-judgment (Tier J) checks are
+#                 reported UNVERIFIED and never counted toward GO. No human sign-off.
+#   "review"    — the mechanical checks run first as evidence, then
+#                 review-reverse-engineering-package runs nine sub-reviews with
+#                 per-verdict human acceptance and writes a readiness verdict.
+# "ask" (the default) puts the choice to the user at close-out, which is the intended
+# normal case — the user is the one who knows whether this extraction is load-bearing.
+# Setting "review" or "automated" pre-answers it for unattended runs (CI, scheduled KB
+# refresh); an unattended run left on "ask" fails fast rather than picking a mode.
+re_verification_gate       = "ask"                # ask | review | automated
 observability_stack        = "datadog"
 identity_provider          = "auth0"
 primary_database           = "postgres"

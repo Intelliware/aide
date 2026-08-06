@@ -41,6 +41,40 @@ For each component:
      consider extending `staleness_warning_days` in
      `framework.toml`."
 
+## Solution-context coverage warnings
+
+In addition to component staleness, this step emits **coverage warnings**
+for the human-grounded shared subtrees. These are project-scoped, not
+per-component, so they are listed once per leaf rather than per repo.
+
+For each of these directories, count populated leaves:
+
+| Directory | Expected leaves | Warning when |
+|---|---|---|
+| `<KB>/shared/solution-context/` | 6 (00, 10, 20, 30, 40, 50) | < 6 leaves present |
+| `<KB>/shared/ai-rules/` | 1 (`project-context.md`) | not present |
+| `<KB>/shared/operations/` | 4 (00, 10, 20, 30) | < 4 leaves present |
+
+For each missing leaf, emit a warning:
+
+- `kind`: `solution-context-missing-leaf`.
+- `expected_path`: which leaf is missing.
+- `recommended_action`: "Run `capture-solution-context` /
+  `generate-ai-rules` / `document-operations` to create this leaf."
+
+Additionally, for each `[[project.repos]]` entry, grep across all six
+solution-context leaves for the repo's `code`. If no reference exists
+anywhere, emit:
+
+- `kind`: `solution-context-repo-orphan`.
+- `repo_code`: the repo missing references.
+- `recommended_action`: "Run `capture-solution-context --refresh-only`
+  and ensure `50-ownership-and-raci.md` § 1 lists this repo."
+
+Solution-context warnings are **informational** (severity = low) — they
+do not block other flows, but they appear in the coverage report so a
+team can see the human-grounded layer is incomplete.
+
 ## Note on relationship to drift detection
 
 Coverage's staleness warning is purely time-based. Drift detection's L1
@@ -59,6 +93,8 @@ The two are complementary; neither replaces the other.
 - Every component has a wall-clock age computed (or `commit_unknown`
   recorded).
 - Warnings list contains every component over the threshold.
+- Solution-context coverage check emitted (count of expected vs
+  actual leaves per shared subtree; per-repo orphan list).
 
 ## Hand-off
 

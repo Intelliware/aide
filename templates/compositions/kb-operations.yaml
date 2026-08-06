@@ -1,0 +1,57 @@
+# Composition: Knowledge Base — Operations
+#
+# Composes the four leaves under <KB>/shared/operations/ — the
+# operational layer of solution context. Authored by the
+# document-operations skill. Sibling to kb-solution-context and
+# kb-ai-rules.
+#
+# Source: templates/blocks/knowledge-base/
+
+name: kb-operations
+description: Knowledge-base operations — deployment topology, environments & secrets, SLOs, runbooks & on-call.
+applies-to-flow: knowledge-base
+package-type: knowledge-base-shared
+
+default-output-path: "{paths.knowledge_base_path}/shared/operations/"
+
+blocks:
+  - slug: knowledge-base/ops-deployment-topology
+    optional: false
+    order: 1
+    output-filename: 00-deployment-topology.md
+  - slug: knowledge-base/ops-environments-and-secrets
+    optional: false
+    order: 2
+    output-filename: 10-environments-and-secrets.md
+  - slug: knowledge-base/ops-slos-and-monitoring
+    optional: false
+    order: 3
+    output-filename: 20-slos-and-monitoring.md
+  - slug: knowledge-base/ops-runbooks-and-oncall
+    optional: false
+    order: 4
+    output-filename: 30-runbooks-and-oncall.md
+
+elicitation:
+  - prompt: references/elicitation-patterns/operations-discovery.md
+    required: true
+
+decision-gates:
+  - id: runbook-split
+    description: >
+      When 30-runbooks-and-oncall.md § 4 lists more than 6 runbooks
+      OR any single runbook exceeds 80 lines, split runbooks into
+      individual files under shared/operations/runbooks/<slug>.md
+      using the ops-runbook block template, and replace § 4 with an
+      index pointing to those files.
+    invoked-by: document-operations/steps/03-emit.md
+
+notes: |
+  All four leaves are required. Split runbook files (when emitted) use
+  the ops-runbook block template; the runbook-split decision-gate above
+  governs when that split fires.
+
+  Cross-references between operations leaves and solution-context /
+  ai-rules leaves are inserted by document-operations/steps/03-emit.md
+  § 3.3, not by the composition (the composition only governs file
+  emission, not link injection).

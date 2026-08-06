@@ -3,7 +3,7 @@
 **Owner:** mike.moerman@electricmind.com
 **Authored:** 2026-04-26
 **Last revised:** 2026-07-23 — retargeted to `mm/AIDE-core-changes`. This branch carries everything from `mm/add-ack-cobol-repo` (ack-restoration 1.4.0 + COBOL/mainframe RE 1.3.0 + separation-of-duties scaffold) **plus** the post-1.4.5 core changes: a new **`quality/` stage** (5 skills), a new **`reverse-engineer-test-suite`** RE skill, the **pluggable add-on layer** (`aide-addon.toml` manifest, `extra_skill_roots`, `[tools.*]` resolution, `{workspace}` token), and the **source-adapter convention**. Skill count reflows from 36→**42** and stages from 8→**9**. Static counts that were hard-pinned for the old tree are re-pinned here (A.5 Grep1 4→8, Grep2 9→10); new static coverage for the add-on/source-adapter layer lives in A.8–A.10; the new RE skill is C.8.4; the quality stage is a new **Phase Q** slotted at the D.7 user-elected GO. Tests for layers still not on this branch (1.1.0 solution-context, 1.2.0 adversarial review) remain intentionally absent.
-**Scope:** End-to-end manual exercise of every skill shipped under `.agents/skills/`. The plan establishes the canonical skill count dynamically in **A.0** (`<SKILL_COUNT>`) so subsequent steps stop hard-coding the total; on `mm/AIDE-core-changes` this resolves to **42 skills across 9 stages** but additions / removals on the branch will reflow without further plan edits. Anchored on Next.js as the framework being reverse-engineered into the central knowledge base; one mainframe sample (plus a small CICS+DB2 supplementary repo) added in Phase C to exercise the 1.3.0 mainframe RE layer. The SoD scaffold is covered statically in A.6 and observed at runtime through D-stage / Q-stage Step-0 no-op assertions (legacy mode) plus an optional D.2-SoD variant that exercises the active SoD path. The add-on and source-adapter layers are covered statically in A.8–A.10.
+**Scope:** End-to-end manual exercise of every skill shipped under `.agents/skills/`. The plan establishes the canonical skill count dynamically in **A.0** (`<SKILL_COUNT>`) so subsequent steps stop hard-coding the total; on `mm/reconcile` this resolves to **49 skills across 9 stages** but additions / removals on the branch will reflow without further plan edits. Anchored on Next.js as the framework being reverse-engineered into the central knowledge base; one mainframe sample (plus a small CICS+DB2 supplementary repo) added in Phase C to exercise the 1.3.0 mainframe RE layer. The SoD scaffold is covered statically in A.6 and observed at runtime through D-stage / Q-stage Step-0 no-op assertions (legacy mode) plus an optional D.2-SoD variant that exercises the active SoD path. The add-on and source-adapter layers are covered statically in A.8–A.10.
 
 > **Skill home for `analyze-repository`.** It lives under `.agents/skills/reverse-engineering/` (it's the dispatcher for the RE stage), not under `meta/`. Phase B's "Meta skills" preamble correctly excludes it; Phase C is its home (C.1 / C.1m).
 
@@ -95,7 +95,7 @@ The narrative is the part the operator reads first; the table and ledger are the
 
 ## 1. Goals
 
-1. Verify each of the **`<SKILL_COUNT>`** framework skills (resolved in A.0; 42 on `mm/AIDE-core-changes`) behaves per its `SKILL.md` description on a realistic input.
+1. Verify each of the **`<SKILL_COUNT>`** framework skills (resolved in A.0; 49 on `mm/reconcile`) behaves per its `SKILL.md` description on a realistic input.
 2. Validate the agentskills.io frontmatter, `references/` progressive-disclosure pattern, and `steps/` decomposition.
 3. Exercise all three flows (greenfield, brownfield, quick-dev) end-to-end.
 4. Build a usable Next.js-anchored knowledge base from open-source repos that span all 10 reverse-engineering domains (the original 7 plus 3 mainframe domains added in 1.3.0).
@@ -660,6 +660,32 @@ git init -q
 
 ---
 
+### B.10  review-edge-case-hunter  —  method-driven anytime review (1.2.0)
+**Setup:** Reuse the same weak draft as B.9 but extend it with a one-paragraph "system behaviour" section describing a function with implicit edges: pagination over a list (no mention of empty-list, max-page, or concurrent-write), an integer counter (no overflow/underflow handling), a date filter (no timezone or DST handling).
+**Trigger phrase:** "Hunt edge cases in `~/Dev/framework-tests/scratch/weak-requirements.md`."
+**Expected outputs:** Findings file at `_review/weak-requirements/<timestamp>/review-edge-case-hunter.md` using the same Format-4 schema with `produced_by: review-edge-case-hunter`.
+**Pass criteria:**
+- [ ] [auto] `worst_severity` reflects the worst category found, per `references/review-patterns/review-verdict-mapping.md`
+- [ ] [user] At least one finding under each of three of the seven edge-case categories: boundaries (empty/max), data shapes (overflow), time/clock (timezone)
+- [ ] [user] Findings report **only unhandled** edges — present / handled cases are not enumerated
+- [ ] [user] No overlap with B.9's findings (the two skills are intentionally orthogonal: attitude-driven vs method-driven)
+**Rollback:** `rm -rf _review/weak-requirements/`.
+
+---
+
+### B.9  review-adversarial  —  attitude-driven anytime review (1.2.0)
+**Setup:** Author a deliberately-weak draft requirements section at `~/Dev/framework-tests/scratch/weak-requirements.md` containing weasel words ("performant", "scalable"), an unsupported claim, and a hidden assumption (e.g., "all users have stable internet").
+**Trigger phrase:** "Run an adversarial review on `~/Dev/framework-tests/scratch/weak-requirements.md` (--stage=requirements)."
+**Inputs:** The weak draft + an explicit `--stage=requirements` hint.
+**Expected outputs:** Findings file at `_review/weak-requirements/<timestamp>/review-adversarial.md` carrying the Format-4 schema (`schema: aide-adversarial-findings@1`, `target_artifact`, `target_path`, `target_commit`, `produced_by`, `stage`, `severity_counts`, `triage_counts`, `worst_severity`).
+**Pass criteria:**
+- [ ] [auto] Frontmatter parses; `severity_counts` and `triage_counts` agree with the body
+- [ ] [auto] Findings file path uses the standalone-mode pattern (`_review/<artifact-slug>/<timestamp>/<skill>.md`), not the wrapper-mode pattern
+- [ ] [user] At least one **critical** finding for each weasel word (Measurability lens)
+- [ ] [user] At least one **high** finding for the hidden assumption (Hidden assumptions lens)
+- [ ] [user] Each finding follows the design-doc structure: original claim → adversarial counter → recommended fix
+**Rollback:** `rm -rf _review/weak-requirements/`.
+
 ## Phase C — Brownfield: RE + Knowledge Base
 
 Sandbox prep (one-time before C.1):
@@ -986,6 +1012,32 @@ git -C ~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample  gc --aggressive
 
 > **Note:** the earlier `hono` output at `recipes-kb/source-docs/hono/api-framework-consumer/` (from C.3) is a **sibling** of this step's `test-suite-consumer/` tree under the same `hono/` dir. Both coexist — one clone, two RE domains. C.9 will map both.
 
+### C.8.5  review-reverse-engineering-package  —  per-repo gate against the RealWorld API output (1.2.0)
+**Setup:** Re-use C.2's RealWorld API Part A + Part B output. (The skill is per-repo; we exercise it once on a meaty modern-stack repo and again on the mainframe sample in C.8.5.)
+**Trigger phrase:** "Review the reverse-engineering package for `realworld-api` before KB ingestion."
+**Inputs:** Part A under `<oss-clones>/realworld-api/docs/api-internal/`, Part B under `recipes-kb/source-docs/realworld-api/api-consumer/`, supplementary `openapi.yaml`.
+**Expected outputs:** A package-review directory at `<recipes-kb>/source-docs/realworld-api/_review/<timestamp>/` containing 9 sub-review files (`review-section-completeness.md`, `review-grounding.md`, `review-consistency.md`, `review-coverage.md`, `review-freshness.md`, `review-traceability.md`, `review-adversarial.md`, `review-edge-case-hunter.md`, `review-readiness.md`) and a top-level verdict.
+
+**Pass criteria:**
+- [ ] [auto] All 9 sub-reviews ran in order; FAIL on any one halts the sequence per the existing `review-*-package` pattern.
+- [ ] [auto] Sub-reviews 7 and 8 are the **wrapper-mode** invocations of the new anytime skills — their output paths are inside the package-review directory (not under `_review/<artifact-slug>/`).
+- [ ] [auto] Frontmatter on the wrapper-mode files carries `produced_by: review-adversarial` (resp. `review-edge-case-hunter`) and `target_artifact: reverse-engineering-package`.
+- [ ] [auto] The readiness verdict consumes severities per `references/review-patterns/review-verdict-mapping.md`: critical→FAIL halts; high→PASS WITH OBSERVATIONS; medium/low→advisory.
+- [ ] [auto] Coverage tables in the sub-review match what `re-api-internal.yaml` + `re-api-consumer.yaml` declare (post-1.3.0 the same skill carries extended coverage tables for cobol/copybook/jcl, but those are exercised in C.8.5).
+
+**Rollback:** `rm -rf recipes-kb/source-docs/realworld-api/_review/`.
+
+### C.8.6  review-reverse-engineering-package  —  per-repo gate on the mainframe sample (1.2.0 + 1.3.0 coverage tables)
+**Trigger phrase:** "Review the reverse-engineering package for the zopeneditor-sample repo."
+**Inputs:** The three Part A trees produced by C.8.1–C.8.3 + their three Part B trees + the lineage feed-files at the Part-B directory root.
+**Expected outputs:** Same 9-sub-review structure as C.8.4 but reading the 1.3.0 coverage-table extensions (cobol-program, copybook-library, jcl-job rows in the `review-section-completeness` block).
+**Pass criteria:**
+- [ ] [auto] The completeness sub-review references the three mainframe domains' block lists (post-1.3.0 extension).
+- [ ] [auto] The grounding sub-review checks that every claim in Part A traces to a file under `COBOL/`, `COPYBOOK/` (or COPYLIB / COPYLIB-MVS), or `JCL/` (or JCLLIB / JCLPROC) (paths in component frontmatter resolve).
+- [ ] [auto] The traceability sub-review confirms all required lineage feed-files (`copybook-record-graph.json`, `program-data-bindings.json`, `program-call-graph.mmd`, `dataset-io.json`, `job-flow.mmd`) are present at the Part-B directory root.
+- [ ] [auto] Wrapper sub-reviews 7/8 fire with `--stage=reverse-engineering` and produce Format-4 findings.
+**Rollback:** `rm -rf recipes-kb/source-docs/zopeneditor-sample/_review/`.
+
 ### C.9  build-knowledge-base  —  scaffold the KB
 **Trigger:** "From `~/Dev/framework-tests/recipes-app/` (where `project.toml` lives), build the knowledge base into `../recipes-kb/` from the source-docs already deposited under that path."
 
@@ -1010,6 +1062,41 @@ git -C ~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample  gc --aggressive
 - [ ] [auto] Each component has the mandatory frontmatter (description, triggers, paths, depends_on, consumed_by, last_verified_against_commit with full 40-char SHA)
 - [ ] [user] No source-doc content duplicated into component bodies
 **Rollback:** `rm -rf recipes-kb/{ARCHITECTURE.md,CLAUDE.md,graph.json,glossary.md,change-tracker.md,repos,components,shared,synthesized}`.
+
+### C.9.3  document-operations  —  hybrid auto + interactive (1.1.0)
+**Trigger phrase:** "Document the operations for this project."
+**Inputs:** Per-repo CI/CD configs from the cloned repos (e.g., `.github/workflows/`, `vercel.json`, `Dockerfile`s where present) + RE Part B deployment sections + interactive answers for SLOs / on-call / runbooks.
+**Expected outputs:** Four leaves under `<KB>/shared/operations/` (`00-deployment-topology.md`, `10-environments-and-secrets.md`, `20-slos-and-monitoring.md`, `30-runbooks-and-oncall.md`). If the runbooks index exceeds 6 rows, additional files appear under `<KB>/shared/operations/runbooks/<runbook-slug>.md`.
+**Pass criteria:**
+- [ ] [auto] All 4 leaves present
+- [ ] [auto] `00-deployment-topology.md` lists each repo's deploy target (auto-derived from CI configs where possible)
+- [ ] [auto] `30-runbooks-and-oncall.md` is either ≤6 rows OR splits cleanly into `runbooks/` files
+- [ ] [auto] `--non-interactive` mode (if exercised on a small subset) leaves `TODO(human):` markers
+- [ ] [auto] `ARCHITECTURE.md` § 0 link annotations now show all three subtrees as active (post C.9.1–C.9.3)
+**Rollback:** `rm -rf recipes-kb/shared/operations`.
+
+### C.9.2  generate-ai-rules  —  hybrid auto + interactive (1.1.0)
+**Trigger phrase:** "Generate the AI rules for this project."
+**Inputs:** RE Part A docs from C.2–C.8 (auto-derivation source: tech-stack versions, build/test commands, lint configs) + interactive answers for the unobvious rules (commit conventions, review etiquette, testing philosophy).
+**Expected outputs:** `<KB>/shared/ai-rules/project-context.md` (the canonical rules file) plus `<KB>/shared/ai-rules/per-repo/<repo-slug>.md` only when stack divergence between repos warrants it (the modern-stack group is mostly Next.js; `zopeneditor-sample` (and the supplementary `hlasm-cics-cobol-sample`) are clear divergences — at minimum one per-repo override is expected here).
+**Pass criteria:**
+- [ ] [auto] `project-context.md` exists and contains both the auto-derived sections (tech-stack pin lines per repo) and the elicited sections (testing, commits, etc.)
+- [ ] [auto] At least one `per-repo/<slug>.md` exists, almost certainly for `zopeneditor-sample` (the divergence between Next.js and COBOL/JCL is the canonical worked example in `references/EXAMPLE.md`)
+- [ ] [auto] Auto-derived sections cite their source (the RE Part A frontmatter `last_verified_against_commit` SHA)
+- [ ] [auto] No `TODO(human):` markers if this run was interactive
+**Rollback:** `rm -rf recipes-kb/shared/ai-rules`.
+
+### C.9.1  capture-solution-context  —  fill the human-grounded leaves (1.1.0)
+**Trigger phrase:** "Capture solution context for this project."
+**Inputs:** The KB scaffold from C.9 + the operator's answers to the 7-step interactive elicitation (mission, personas, goals/KPIs, constraints, external integrations, ownership/RACI; the Recipes-KB has only 7 source repos, so we treat the project as a synthetic Next.js-anchored multi-repo platform for the purpose of these answers).
+**Expected outputs:** Six markdown leaves under `<KB>/shared/solution-context/` (`00-overview.md`, `10-personas-and-use-cases.md`, `20-goals-and-kpis.md`, `30-constraints-and-compliance.md`, `40-external-integrations.md`, `50-ownership-and-raci.md`) plus a glossary delta merged into `recipes-kb/glossary.md`.
+**Pass criteria:**
+- [ ] [auto] All 6 leaves present and non-empty
+- [ ] [auto] Each leaf carries trigger-style frontmatter (`description: Use when …`, `triggers: [...]`) so `navigate-knowledge-base` can surface them later (post-1.1.0)
+- [ ] [auto] Glossary delta applied — at least 3 new project terms recorded
+- [ ] [auto] `--non-interactive` mode (if exercised) leaves `TODO(human):` markers rather than fabricating content
+- [ ] [auto] `ARCHITECTURE.md` § 0 link annotations flip from `pending` to active (the skill is supposed to update them on emission)
+**Rollback:** `rm -rf recipes-kb/shared/solution-context && git -C recipes-kb checkout -- glossary.md ARCHITECTURE.md`.
 
 ### C.9.4  build-mainframe-data-lineage  —  KB aggregator across the mainframe Part B feeds (1.3.0)
 **Trigger phrase:** "Build the mainframe data lineage for the recipes-kb knowledge base. Include both the primary `zopeneditor-sample` and the supplementary `hlasm-cics-cobol-sample` repos as feeds."
@@ -1093,6 +1180,27 @@ git -C ~/Dev/framework-tests/oss-clones/hlasm-cics-cobol-sample  gc --aggressive
 
 **Rollback:** `git -C ~/Dev/framework-tests/recipes-kb checkout -- .`.
 
+### C.14  review-knowledge-base-package  —  periodic global KB audit (1.2.0 + 1.3.0)
+**Trigger phrase:** "Review the knowledge base — full periodic audit."
+**Inputs:** The fully-built KB from C.9 + C.9.1–C.9.4 + drift-fix from C.13.
+**Expected outputs:** A package-review directory at `recipes-kb/_review/<timestamp>/` with 10 sub-review files (`review-architecture-index.md`, `review-component-coverage.md`, `review-graph-integrity.md`, `review-frontmatter-integrity.md`, `review-staleness.md`, `review-link-integrity.md`, `review-solution-context-coverage.md`, `review-adversarial.md`, `review-edge-case-hunter.md`, `review-readiness.md`) plus a top-level verdict.
+
+Sub-review 2 internally calls `verify-knowledge-base-coverage`; sub-review 5 calls `detect-knowledge-base-drift` L1 — verify these are orchestrated, not re-implemented.
+
+The 1.3.0 deferred patch (`_docs/cobol-mainframe-review-integration.md`) calls for an additional `review-mainframe-lineage-integrity` sub-review when `lineage/mainframe/` exists; if your `mm/add-all` carries that patch landed, the count is 11. If the patch is documented-only at this point, the count is 10 and the lineage-integrity check is reported as "not yet integrated" — record that as a finding rather than a Fail.
+
+**Pass criteria:**
+- [ ] [auto] All sub-reviews ran in order; FAIL on any halts the sequence per the existing pattern.
+- [ ] [auto] Sub-review 7 (solution-context coverage) confirms the three subtrees from C.9.1–C.9.3 are present and non-empty.
+- [ ] [auto] Sub-reviews 8 and 9 are wrapper-mode invocations of `review-adversarial` / `review-edge-case-hunter` with `--stage=knowledge-base`; their findings files live inside the package-review directory, not under `_review/<artifact-slug>/`.
+- [ ] [auto] Final readiness verdict is one of PASS / PASS WITH OBSERVATIONS / FAIL, per `references/review-patterns/review-verdict-mapping.md`.
+- [ ] [auto] The skill is **not** wired as a per-PR gate (it's intentionally periodic) — confirm by checking `workflow-graph.yaml` does not list it under any flow's `gates:`; it lives under `anytime:`.
+- [ ] [auto] If the 1.3.0 deferred-patch lineage check is wired, every artifact under `recipes-kb/lineage/mainframe/` is integrity-checked against the source feed-files.
+
+**Rollback:** `rm -rf recipes-kb/_review/`.
+
+---
+
 ### C.13b  update-knowledge-base  —  ADR-threshold variant (OPTIONAL)
 > Run only if you want to confirm the ADR emission path fires when a threshold is crossed. Skip on a YOLO pass if you don't have time — record as `Skip`.
 
@@ -1153,6 +1261,16 @@ Several steps below (D.8, D.10, E.3) use `git reset` for rollback. To make rollb
 - [ ] [auto] Handoff phrase names `create-requirements-package` (the next greenfield skill on this branch — `capture-solution-context` does NOT exist here yet; that is 1.1.0 / `mm/add-context`).
 **Rollback:** `rm -rf ~/Dev/framework-tests/recipes-app-gf`.
 
+### D.1.5  capture-solution-context  —  greenfield position (1.1.0)
+**Trigger phrase:** "Capture solution context for the Recipes project."
+**Inputs:** `project.toml` from D.1; the Recipes scenario from §5; no RE Part A docs yet (this is greenfield so the skill is purely interactive).
+**Expected outputs:** Six leaves under `<knowledge_base_path>/shared/solution-context/` (the path resolves via `project.toml`; for the greenfield sandbox we point `knowledge_base_path` at `~/Dev/framework-tests/recipes-kb-gf/`).
+**Pass criteria:**
+- [ ] [auto] All 6 leaves emitted with non-empty content (or `TODO(human):` markers if `--non-interactive` was used; the default mode for this test is interactive).
+- [ ] [auto] Glossary delta merged into the project glossary, not the KB glossary (the project doesn't have a built KB yet — this is the greenfield branch of the skill's logic).
+- [ ] [auto] Handoff phrase names `create-requirements-package` (the next step in the greenfield sequence).
+**Rollback:** `rm -rf ~/Dev/framework-tests/recipes-kb-gf/shared/solution-context && git checkout -- ~/Dev/framework-tests/recipes-app-gf/glossary*.md` (or the equivalent if glossary is project-resident).
+
 ### D.2  create-requirements-package  —  full requirements stage
 **Trigger:** "Create the requirements package for Recipes."
 **Inputs:** Scenario from §5 of this plan.
@@ -1209,6 +1327,11 @@ And create `project.user.toml` with `[user] role = "BA"`.
 - [ ] [auto] One overall verdict
 - [ ] [user] Findings cite specific sections / FR IDs
 - [ ] [auto] **(SoD scaffold, legacy-mode)** Review-skill Step 0 (the `## Step 0 — Locate the upstream artifact (SoD only)` section in the SKILL.md) ran, observed legacy mode, and resolved the artifact path via `[project.paths]` exactly as today.
+- [ ] [auto] The sequence ran **12** sub-reviews, not 10 — `review-adversarial-pass` at 10 and `review-edge-cases` at 11, with `review-requirements-readiness` last at 12.
+- [ ] [auto] Sub-review 10 wrote a Format-4 findings file to `docs/<feature>/requirements-package/review/adversarial-findings.md` — inside the package review directory, **not** under the anytime default `_review/<artifact-slug>/<ISO8601>/`.
+- [ ] [auto] Sub-review 11 wrote `.../review/edge-case-findings.md` the same way, with `stage: requirements` in frontmatter.
+- [ ] [auto] Each wrapper also wrote its own verdict file (`review-adversarial-pass.md`, `review-edge-cases.md`) citing the findings path.
+- [ ] [user] The two wrapper findings are substantively different from each other — attitude-driven vs method-driven. Identical findings mean one lens was not actually applied.
 **Rollback:** none.
 
 ### D.4  create-design-package  —  full design stage
@@ -1233,7 +1356,21 @@ And create `project.user.toml` with `[user] role = "BA"`.
 - [ ] [user] At least one finding (no rubber-stamp)
 - [ ] [user] Overall verdict is unambiguous
 - [ ] [auto] **(SoD scaffold, legacy-mode)** Review-skill Step 0 (`## Step 0 — Locate the upstream artifact (SoD only)`) ran, observed legacy mode, and resolved the artifact path via `[project.paths]`.
+- [ ] [auto] The sequence ran **5** sub-reviews, not 3 — wrappers at 3 and 4, `review-solution-readiness` last at 5.
+- [ ] [auto] Both wrappers wrote Format-4 findings into the package review directory with `stage: design`.
+- [ ] [auto] A FAIL on either wrapper halts the sequence **before** `review-solution-readiness` runs — the gate must never issue GO over an unresolved wrapper FAIL.
+- [ ] [auto] Wrapper sub-review verdicts use PASS / PASS WITH OBSERVATIONS / FAIL; the GO / CONDITIONAL GO / NO-GO vocabulary appears only at sub-review 5.
 **Rollback:** none.
+
+### D.5.5  generate-ai-rules  —  greenfield position (1.1.0)
+**Trigger phrase:** "Generate the AI rules now that the design is fixed."
+**Inputs:** The design package from D.4 (tech-stack is now pinned — that's the auto-derivation source the skill needs) + the solution-context leaves from D.1.5.
+**Expected outputs:** `<KB>/shared/ai-rules/project-context.md` (one file, no per-repo overrides expected since greenfield has a single repo).
+**Pass criteria:**
+- [ ] [auto] `project-context.md` cites the design package as its tech-stack source (with the pinned versions, not "latest").
+- [ ] [auto] No `per-repo/` directory created (single-repo project — divergence threshold not met).
+- [ ] [auto] Handoff phrase names `create-implementation-package` (next greenfield skill).
+**Rollback:** `rm -rf <knowledge_base_path>/shared/ai-rules`.
 
 ### D.6  create-implementation-package  —  decompose into INC-XXX
 **Trigger:** "Create the implementation package."
@@ -1255,6 +1392,10 @@ And create `project.user.toml` with `[user] role = "BA"`.
 - [ ] [auto] Per-increment verdict
 - [ ] [auto] Increment-shape compliance confirmed
 - [ ] [user] The GO verdict names the quality fork the operator must elect (quality-first vs execute-first). In this test bed we take execute-first through Phase D, then exercise the quality stage as **Phase Q** after D.10 (see the Phase Q preamble).
+- [ ] [auto] The sequence ran **10** sub-reviews, not 8 — wrappers at 8 and 9, readiness verdict last at 10.
+- [ ] [auto] Both wrappers wrote Format-4 findings into the package review directory with `stage: planning`.
+- [ ] [auto] Wrapper findings appear in the **consolidated issue list** with severities translated to Critical / Important / Minor per `review-verdict-mapping.md` — this skill's planning-stage deviation from PASS / FAIL.
+- [ ] [auto] The readiness verdict (sub-review 10) still ran when a wrapper surfaced Critical findings — planning consolidates rather than halting mid-sequence. A Critical finding forces NO-GO at the verdict, not a halt at sub-review 8.
 **Rollback:** none.
 
 ### D.8  execute-increments  —  ship INC-001
@@ -1335,6 +1476,18 @@ The skill walks 6 steps: (1) diff review, (2) fix cycle, (3) atomic commits, (4)
 ```
 git -C ~/Dev/framework-tests/recipes-app-gf stash push -u -m "d10-pre-rollback" || true
 git -C ~/Dev/framework-tests/recipes-app-gf reset --soft "$(cat _docs/.sha-pre-d10)"
+### D.10.5  document-operations  —  greenfield position (1.1.0)
+**Trigger phrase:** "Document the operations for Recipes."
+**Inputs:** The implemented code from D.8 + any CI config that exists (likely a `.github/workflows/ci.yml` if Mike adds one; otherwise the skill enters its `optional-when: "no infra files yet"` branch declared in `workflow-graph.yaml`).
+**Expected outputs:** If CI exists: four leaves under `<KB>/shared/operations/` (with the four canonical names from §C.9.3). If no CI exists: the skill stops cleanly with a "no infra files yet" handoff and emits zero leaves — this is the optional-when branch.
+**Pass criteria:**
+- [ ] [auto] If CI exists: all 4 leaves present, deployment topology auto-derived from the workflow file, runbooks index ≤6 rows or split into `runbooks/` files.
+- [ ] [auto] If no CI: zero leaves emitted; handoff message is exactly the "no infra files yet" wording from the skill's SKILL.md (not a fabricated `TODO(human):` placeholder).
+- [ ] [auto] Handoff phrase names `update-knowledge-base` (the closing-skill handoff at end of execution) — confirms greenfield-tail position.
+**Rollback:** `rm -rf <knowledge_base_path>/shared/operations`.
+
+---
+
 # Do NOT push. The soft reset un-commits but keeps the working-tree changes.
 ```
 
@@ -1500,6 +1653,13 @@ When converting a step-by-step run to a YOLO run mid-pass, carry the verdict led
 | navigate-knowledge-base | C.11 | |
 | detect-knowledge-base-drift | C.12 | |
 | update-knowledge-base | C.13 (+ optional C.13b) | C.13 = no-ADR branch; C.13b = ADR-emitted branch |
+| capture-solution-context | C.9.1, D.1.5 | 2 invocations — brownfield (post-KB) and greenfield (pre-requirements) placement |
+| generate-ai-rules | C.9.2, D.5.5 | 2 invocations — brownfield derives from RE Part A, greenfield waits for design to fix the stack |
+| document-operations | C.9.3, D.10.5 | 2 invocations; optional in both flows when no infra exists |
+| review-reverse-engineering-package | C.8.5, C.8.6 | per-repo RE close-out gate; API output + mainframe sample |
+| review-knowledge-base-package | C.14 | periodic global KB audit; sub-review 7.5 is N/A unless the mainframe lineage tree exists |
+| review-adversarial | B.9 + wrapped in D.3, D.5, D.7, C.8.5/C.8.6, C.14 | anytime standalone plus 5 wrapper call sites |
+| review-edge-case-hunter | B.10 + wrapped in D.3, D.5, D.7, C.8.5/C.8.6, C.14 | same |
 | create-requirements-package | D.2 (+ optional D.2-SoD) | post-ack ack-restoration assertions; SoD legacy-mode no-op observed |
 | review-requirements-package | D.3 | SoD legacy-mode no-op observed |
 | create-design-package | D.4 | ack-restoration assertions; SoD legacy-mode no-op |

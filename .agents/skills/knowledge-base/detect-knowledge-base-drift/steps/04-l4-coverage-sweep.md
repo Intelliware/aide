@@ -65,16 +65,60 @@ For each component, walk its `paths:`:
    - `recommended_action`: "Either delete the component or update its
      `paths:` to reflect the current source layout."
 
-### 4d — Severity
+### 4d — Solution-context staleness
 
-Both orphans and stales → severity `medium`. They are advisory, not
-breaking.
+Walk every leaf under `<KB>/shared/{solution-context,ai-rules,operations}/`.
+For each leaf:
+
+1. Read frontmatter `last_captured` (or `last_generated` for ai-rules
+   and `last_reviewed` for individual runbooks).
+2. Compute age in days from today's date.
+3. Threshold: `[knowledge_base.solution_context_max_age_days]` from
+   `project.toml` (or `framework.toml` if not set), default `90`.
+4. If age > threshold → solution-context stale. Record:
+   - `kind`: `solution-context-stale`
+   - `leaf_path`: relative to KB root.
+   - `last_captured`: the date.
+   - `age_days`: integer.
+   - `recommended_action`:
+     - solution-context leaf → "Re-run `capture-solution-context
+       --refresh-only`."
+     - ai-rules leaf → "Re-run `generate-ai-rules`."
+     - operations leaf or runbook → "Re-run `document-operations`
+       (or refresh just the affected runbook)."
+
+Severity for solution-context stales: `low` if age is within 1.5×
+threshold, `medium` if greater. Solution-context staleness never
+fires `high` because it does not block code correctness — but
+exceeding 1.5× threshold often indicates the team has stopped
+maintaining the human-grounded layer and should be flagged.
+
+### 4e — Solution-context repo-coverage check
+
+For each `[[project.repos]]` entry, grep across
+`<KB>/shared/solution-context/**/*.md` for the repo's `code`
+appearing in any `paths:`, `related_components`, or table cell. If
+no leaf references the repo at all, record:
+
+- `kind`: `solution-context-repo-orphan`
+- `repo_code`: the unreferenced repo.
+- `recommended_action`: "Re-run `capture-solution-context` and
+  ensure ownership/RACI § 1 covers this repo."
+- Severity: `low`.
+
+### 4f — Severity (for component-side checks)
+
+Both orphans and stales (component-side, from 4b/4c) → severity
+`medium`. They are advisory, not breaking.
 
 ## Acceptance
 
 - Every repo with a defined artifact source was enumerated.
 - Every artifact has a coverage verdict.
 - Every component has a path-resolution verdict.
+- Every solution-context / ai-rules / operations leaf has a staleness
+  verdict.
+- Every repo has a solution-context coverage verdict.
 
 ## Output
 
@@ -84,6 +128,10 @@ L4 rows ready to merge into the report:
   recommended_action)`.
 - For each stale: `(layer=L4-stale, severity=medium, evidence,
   recommended_action)`.
+- For each solution-context stale: `(layer=L4-sc-stale,
+  severity=low|medium, evidence, recommended_action)`.
+- For each solution-context repo orphan: `(layer=L4-sc-repo-orphan,
+  severity=low, evidence, recommended_action)`.
 
 ## Hand-off
 

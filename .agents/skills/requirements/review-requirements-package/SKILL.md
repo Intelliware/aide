@@ -9,7 +9,7 @@ description: "Use when the user asks to review, validate, or check readiness of 
 
 Runs the formal review sequence and final readiness gate against an already-assembled requirements package. Produces findings and a verdict (PASS / PASS WITH OBSERVATIONS / FAIL) per review, ending with `review-requirements-readiness` as the GO/NO-GO gate before design handoff. Independently invocable: the user can run this skill against any existing requirements package without re-running creation.
 
-The review sequence is strict — ten reviews in fixed order, no parallel execution. A FAIL verdict halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. If a fix changes content checked by an earlier passed review, that earlier verdict is explicitly re-evaluated.
+The review sequence is strict — twelve reviews in fixed order, no parallel execution. A FAIL verdict halts the sequence; the user fixes (with this skill's help if asked) and the failed review re-runs from the beginning. If a fix changes content checked by an earlier passed review, that earlier verdict is explicitly re-evaluated.
 
 ## When to use
 
@@ -72,7 +72,7 @@ the full SoD layout geometry.
 Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any FAIL until resolved.
 
 **CRITICAL — Write artifacts to disk immediately:**
-After each review verdict is accepted by the user, **immediately create** the file `review/<review-name>.md` on disk (under the output path declared in the Output table below). Do NOT wait until all ten reviews are complete. After Review 10, **immediately create** `review/readiness-verdict.md`. These files are mandatory deliverables — presenting findings only in chat without writing the files is a skill failure. If the `review/` directory does not exist, create it.
+After each review verdict is accepted by the user, **immediately create** the file `review/<review-name>.md` on disk (under the output path declared in the Output table below). Do NOT wait until all twelve reviews are complete. After Review 12, **immediately create** `review/readiness-verdict.md`. These files are mandatory deliverables — presenting findings only in chat without writing the files is a skill failure. If the `review/` directory does not exist, create it.
 
 | Order | Review | What it checks |
 |---|---|---|
@@ -85,7 +85,9 @@ After each review verdict is accepted by the user, **immediately create** the fi
 | 7 | review-data-completeness | Data dictionary and impacts fully specified |
 | 8 | review-traceability | Forward to acceptance criteria, backward to needs |
 | 9 | review-feasibility | No structurally infeasible or constraint-violating requirements |
-| 10 | review-requirements-readiness | Final go/no-go gate (last) |
+| 10 | review-adversarial-pass | Wraps `meta/review-adversarial` with `--stage=requirements` |
+| 11 | review-edge-cases | Wraps `meta/review-edge-case-hunter` with `--stage=requirements` |
+| 12 | review-requirements-readiness | Final go/no-go gate (last) |
 
 The detailed instructions, halt conditions, and verdict templates live in `references/review-workflow.md`.
 
@@ -94,6 +96,8 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 | Artifact | Path | Format |
 |---|---|---|
 | Per-review findings | `docs/<feature>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
 | Final readiness verdict | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
 | Updated `change-tracker.md` rows | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
 
@@ -111,4 +115,5 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 - Forgetting to re-run an earlier review when a fix materially changes its checked content.
 - Authoring requirements during review. This skill validates only — fixes are deferred to `create-requirements-package` (or done with this skill's help in a clearly bracketed fix-then-re-validate cycle).
 - Skipping the readiness gate. `review-requirements-readiness` is the last review; without an APPROVED verdict, design handoff is blocked.
+- Treating the adversarial wrappers as optional. Reviews 10–11 run like any other sub-review and their verdicts feed the readiness gate. They are the layer that catches what the nine mechanical reviews miss.
 - Not appending `Review finding` rows to the change tracker for every fix the review triggers.
