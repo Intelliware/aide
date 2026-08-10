@@ -1,6 +1,6 @@
 # A.I.D.E. (AI Integrated Delivery Enablement)
 
-**Version:** 2.0.0
+**Version:** 2.2.0
 
 A unified, skills-based SDLC methodology framework, conformant with the [agentskills.io](https://agentskills.io) standard.
 
@@ -69,7 +69,7 @@ The agent will fetch the repo, copy the mandatory subset (`AGENTS.md`, `.agents/
 
 **Examples with overrides** (rules block above still applies — paste it first):
 
-> *"Install AIDE from `https://github.com/my-org/aide-fork` using `AIDE_REF=v1.5.2` per its `INSTRUCTIONS.md`."*
+> *"Install AIDE from `https://github.com/my-org/aide-fork` using `AIDE_REF=R1.5.2` per its `INSTRUCTIONS.md`."*
 
 > *"Install AIDE from `file:///c:/Users/me/repos/TD-EM-AIDE` into `AIDE_TARGET_DIR=./vendor/aide` per its `INSTRUCTIONS.md`."*
 
@@ -85,9 +85,9 @@ The install runbook is fully idempotent — re-running it *is* the update path. 
 
 The word **update** in the prompt tells the agent to skip the "overwrite or abort?" confirmation (see `INSTRUCTIONS.md` Step 2 — "update-intent exception") and just refresh in place.
 
-The same `AIDE_SOURCE_URL`, `AIDE_REF`, and `AIDE_TARGET_DIR` overrides apply. Use `AIDE_REF` to pin a specific release rather than tracking `main`:
+The same `AIDE_SOURCE_URL`, `AIDE_REF`, and `AIDE_TARGET_DIR` overrides apply. Use `AIDE_REF` to pin a specific release rather than tracking `main`. Release tags are named `R<semver>` — for example `R2.2.0`, not `v2.2.0`:
 
-> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=v2.0.0` by re-running its `INSTRUCTIONS.md`."*
+> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=R2.2.0` by re-running its `INSTRUCTIONS.md`."*
 
 ### Step 2 — Open it in your IDE
 

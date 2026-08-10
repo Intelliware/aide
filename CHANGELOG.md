@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.0.0` |
+| Current artifact version | `2.2.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -88,6 +88,8 @@ the *intent* of the branch's change re-applied by hand.
 | 4 | 2026-08-04 | Correction | references | `references/review-patterns/adversarial-wrapper-pattern.md` | Dropped the wired/reserved split — all five review-package skills now wrap, which is what the shared reference was factored out for. | this reconcile | ☐ Pending |
 | 5 | 2026-08-04 | Correction | docs | `_docs/cobol-mainframe-review-integration.md` (**deleted**), `review-knowledge-base-package` | Applied the last pending patches — sub-review 7.5 `review-mainframe-lineage-integrity`, condition-gated on `<KB>/lineage/mainframe/` with a recorded `N/A` verdict when absent — then deleted the document per its own Apply-Time Checklist step 7. A silently-omitted sub-review and a legitimately-inapplicable one must not look identical in a verdict file. | branch `mm/add-cobol` (deferred patches) | ☐ Pending |
 | 6 | 2026-08-04 | Correction | docs | `_docs/skills-test-plan.md` | Grafted the 11 test-plan sections covering the newly-landed skills into `main`'s newer plan (which had dropped them because the skills never landed), added wrapper pass-criteria to D.3/D.5/D.7, and added 7 coverage-matrix rows. `main`'s version won everywhere else — it is 500+ lines further along. `C.8.4` collided (`main` reuses it for `reverse-engineer-test-suite`), so the RE-review sections renumbered to C.8.5/C.8.6. `skills-test-results.md` left untouched: `main`'s is a superset. | branch `mm/add-all` (grafted) | ☐ Pending |
+| 7 | 2026-07-14 | Addition | skills | `.agents/skills/execution/create-pr/{SKILL.md, references/implementation-pr-workflow.md}` | **Host-aware PR creation.** Step 4 previously hardcoded `gh pr create`, which left Azure DevOps repos with no automated path. It now probes the git remote URL and the available CLIs before attempting creation: `github.com` → `gh pr create` (with auth check); `dev.azure.com` / `visualstudio.com` → `az repos pr create` (with extension install, `az login` guidance, and URL-segment extraction for `--project` and `--repository`); everything else → a browser-URL fallback with per-platform templates for GitHub, Azure DevOps and GitLab. `SKILL.md` workflow summary, output list, and common-mistakes section updated to match. | PR 1917 | ☐ Pending |
+| 8 | 2026-07-21 | Restructure | compositions | `templates/compositions/brownfield-enhancement-spec.yaml`, `references/elicitation-patterns/impact-assessment.md`, `README.md` | **Requirements-parity for the brownfield enhancement spec.** The requirements portion now mirrors the greenfield requirements shape block-for-block, on the principle that brownfield differs from greenfield only in that the pre-existing foundation is *discovered* rather than authored. Foundation-level detail is therefore not restated, and change-only sections are delta-gated behind `include-if` conditions (e.g. `project.elicitation.changes_personas`) rather than dropped, so a requirement authored here ends up equivalent in scope to its greenfield counterpart. Design and planning stay deliberately lean (single increment). | PR 1917 | ☐ Pending |
 
 #### Branch Dependency
 
@@ -100,6 +102,18 @@ Deliberately **not** taken from `mm/add-all`: its older copies of the requiremen
 design / planning / execution skills (already superseded on `main` by the SoD and
 write-discipline work), and its `_docs/skills-test-results.md` (superseded by `main`'s
 2026-07-24 and 2026-07-26 records).
+
+#### Release packaging
+
+`2.2.0` is tagged `R2.2.0`; **there is no `R2.1.0` tag.** Both the `2.1.0` and `2.2.0`
+bodies of work reached `main` in the same merge (PR 2011), so `main` was never at
+`2.1.0` as a released state — `2.1.0` is a real version boundary in this log, but it
+shipped inside `R2.2.0`. Retro-tagging it would assert a release that never existed.
+
+Rows 7-8 under Changed (PR 1917) also ship here. They merged to `main` on 2026-08-02,
+after the `R2.0.0` tag but before this release, and were recorded retroactively at
+release time rather than when they landed — which is why their dates precede the rest
+of the section.
 
 ### `2.1.0` — 2026-08-04
 
