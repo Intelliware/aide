@@ -27,6 +27,8 @@ The navigator does **not** perform documentation, planning, design, or coding wo
 
 - The user has already named a specific skill — invoke that skill directly.
 - The user wants the framework configured (overrides, suppression, customization) — route to **`customize-framework`**.
+- The user wants to add hooks (before/after skill chaining) — route to **`customize-framework`** with operation `add-hook`.
+- The user wants to install, enable, or inspect presets — route to **`manage-presets`**.
 - The user wants to bootstrap a brand-new project — route to **`start-project`** (the navigator can recommend it but should not perform initialization).
 - The user is asking a non-framework question (general coding help, language reference) — answer normally, do not invoke this skill.
 
@@ -79,6 +81,8 @@ Common targets and the trigger phrase the navigator emits to the user:
 - `create-requirements-package` — "Create the requirements package for `<feature>`."
 - `document-quick-change` — "Document a quick change for `<scope>`."
 - `customize-framework` — "Customize the framework for this project."
+- `customize-framework` (hooks) — "Add a before-hook to run `<skill>` before `<target-skill>`."
+- `manage-presets` — "Show me available presets." / "Install the `<preset-name>` preset." / "Disable the `<preset-name>` preset."
 
 ## Common mistakes
 

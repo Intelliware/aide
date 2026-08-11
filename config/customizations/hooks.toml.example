@@ -1,0 +1,124 @@
+# Per-skill hooks — Layer 5 hook examples
+#
+# This file demonstrates all hook operations available in customizations/<skill>.toml.
+# See config/SCHEMAS.md § 2.5.1 for the full hook schema.
+#
+# Hooks enable automatic skill chaining at skill boundaries — running one skill
+# before or after another without manual invocation.
+
+# -----------------------------------------------------------------------------
+# Example 1: Before-hook — Check the knowledge base before creating requirements
+# -----------------------------------------------------------------------------
+# In: customizations/create-requirements-package.toml
+
+[[hooks]]
+code = "kb-context-load"                       # Stable merge key (required)
+event = "before"                               # Fires before Step 0
+skill = "navigate-knowledge-base"              # Skill to invoke
+priority = 100                                 # Lower = runs first (default 500)
+condition = "project.paths.knowledge_base_path != ''"  # Skip if no KB configured
+
+# The skill announces: "Running before-hook: navigate-knowledge-base (code: kb-context-load)"
+# If condition is falsy, announces: "Skipped before-hook: navigate-knowledge-base (code: kb-context-load) — condition not met"
+
+# -----------------------------------------------------------------------------
+# Example 2: After-hook — Update KB after executing increments
+# -----------------------------------------------------------------------------
+# In: customizations/execute-increments.toml
+
+[[hooks]]
+code = "kb-update-post-increment"
+event = "after"                                # Fires after final step, before ## Next skill
+skill = "update-knowledge-base"
+priority = 200
+
+# -----------------------------------------------------------------------------
+# Example 3: Optional hook — Prompt user before running
+# -----------------------------------------------------------------------------
+# In: customizations/create-design-package.toml
+
+[[hooks]]
+code = "adversarial-review-optional"
+event = "after"
+skill = "review-adversarial"
+optional = true                                # User is prompted before running
+prompt = "Run adversarial review before handoff?"  # Required when optional=true
+
+# When optional=true, the skill prompts:
+#   "Run adversarial review before handoff? [Y/n]"
+# If user declines, announces: "Skipped after-hook: review-adversarial (code: adversarial-review-optional) — user declined"
+
+# -----------------------------------------------------------------------------
+# Example 4: Multiple hooks with priority ordering
+# -----------------------------------------------------------------------------
+# In: customizations/create-implementation-package.toml
+
+[[hooks]]
+code = "validate-design-approved"
+event = "before"
+skill = "verify-source"
+priority = 50                                  # Runs first (lower number)
+
+[[hooks]]
+code = "load-kb-components"
+event = "before"
+skill = "navigate-knowledge-base"
+priority = 100                                 # Runs second
+condition = "project.paths.knowledge_base_path != ''"
+
+[[hooks]]
+code = "edge-case-scan"
+event = "after"
+skill = "review-edge-case-hunter"
+priority = 100                                 # After-hooks also sorted by priority
+
+[[hooks]]
+code = "track-package-creation"
+event = "after"
+skill = "track-change"
+priority = 500                                 # Runs last among after-hooks
+
+# Execution order:
+#   1. verify-source (priority 50)
+#   2. navigate-knowledge-base (priority 100) — if condition met
+#   3. [Steps 0..N of create-implementation-package]
+#   4. review-edge-case-hunter (priority 100)
+#   5. track-change (priority 500)
+#   6. ## Next skill handoff
+
+# -----------------------------------------------------------------------------
+# Example 5: Suppress a hook defined in a preset or lower layer
+# -----------------------------------------------------------------------------
+# In: customizations/create-requirements-package.toml
+#
+# Scenario: A preset adds a before-hook for KB context loading, but this
+# project has no KB and wants to suppress it entirely.
+
+[[hooks]]
+code = "kb-context-load"                       # Must match the code being suppressed
+_suppress = true                               # Removes the hook from merged config
+
+# Only the code and _suppress fields are allowed. Any other fields are stripped with a warning.
+
+# -----------------------------------------------------------------------------
+# Example 6: Conditional hook based on project configuration
+# -----------------------------------------------------------------------------
+# In: customizations/execute-increments.toml
+
+[[hooks]]
+code = "quality-audit-check"
+event = "after"
+skill = "audit-quality-coverage"
+priority = 300
+condition = "project.elicitation.uses_test_case_increments == true"
+
+# The condition expression supports:
+#   - Dot-path access: project.paths.knowledge_base_path
+#   - Equality: project.default_flow == 'brownfield'
+#   - Inequality: project.elicitation.team_size != 'solo'
+#   - Boolean check: project.elicitation.uses_test_case_increments == true
+#   - Existence (truthy): project.paths.qe_repo (non-empty = truthy)
+#
+# A condition evaluates falsy when:
+#   - The path does not exist in merged config
+#   - The value is empty string, false, 0, or null

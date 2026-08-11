@@ -25,6 +25,27 @@ been collecting state; now we render and write.
    - `replace-array` — the entire new list, comma-separated or one
      per line
    - `suppress` — only the key field; no other values
+   - `add-hook` — structured hook entry (see below)
+   - `suppress-hook` — only the `code` field plus `_suppress = true`
+
+   **For `add-hook`**, collect:
+   ```toml
+   [[hooks]]
+   code = "<user-provided>"           # Required, unique
+   event = "<before|after>"           # Required
+   skill = "<skill-name>"             # Required, validated against catalog
+   priority = <1-999>                 # Optional, default 500
+   optional = <true|false>            # Optional, default false
+   prompt = "<prompt text>"           # Required when optional = true
+   condition = "<expression>"         # Optional
+   ```
+
+   **For `suppress-hook`**, render:
+   ```toml
+   [[hooks]]
+   code = "<code-to-suppress>"
+   _suppress = true
+   ```
 
 2. **Optional `note`** — short rationale (one line). The skill
    inserts this as an inline comment alongside the override. Example:

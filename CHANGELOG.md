@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.2.0` |
+| Current artifact version | `2.3.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,40 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.3.0` — 2026-08-11
+
+Adds two new customization capabilities: Hook System and Preset Bundles.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-11 | Addition | config | `config/SCHEMAS.md` | Hook system schema (§ 2.5.1) with `[[hooks]]` array-of-tables, validation rules 13-19, and preset schemas (§ 2.8 for preset.toml, § 2.9 for presets.toml) with validation rules 20-24. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 2 | 2026-08-11 | Addition | skills | `.agents/skills/meta/manage-presets/` | New skill for preset installation, enable/disable, discovery, and inspection. Four-step workflow: discover, install, enable-disable, show. Added to `anytime` in workflow-graph.yaml. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 3 | 2026-08-11 | Addition | config | `config/customizations/hooks.toml.example` | Comprehensive hook authoring examples demonstrating before/after hooks, priority ordering, optional prompts, conditions, and suppression. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 4 | 2026-08-11 | Addition | config | `config/presets.toml.example`, `config/preset.toml.example` | Example files for preset registry (presets.toml) and preset manifest (preset.toml). | branch `feature/hooks-and-presets` | ☐ Pending |
+| 5 | 2026-08-11 | Addition | references | `references/orientation/hook-runtime.md` | Hook execution procedure for skills: lifecycle, condition evaluation, optional handling, announcements, error handling, and implementation checklist. | branch `feature/hooks-and-presets` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/03-pick-operation.md` | Added `add-hook` and `suppress-hook` operations to the operation menu with hook-specific elicitation flow. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 2 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/04-author-override.md` | Added hook authoring templates for `add-hook` and `suppress-hook` operations. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 3 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/05-verify-merge.md` | Updated merge table to include preset layers and show preset origins in the layer column. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 4 | 2026-08-11 | Source Update | config | `config/customizations/README.md` | Added documentation for hooks and presets, updated precedence diagram to show presets between Layers 4 and 5. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 5 | 2026-08-11 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Added `manage-presets` to the `anytime` skills list. | branch `feature/hooks-and-presets` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.2.0`. Additive — no migration required. Both hooks and presets are
+fully opt-in. Projects without `[[hooks]]` declarations or `presets.toml` see no change in
+behavior. The merge order is extended to insert presets between Layer 4 (`project.user.toml`)
+and Layer 5 (`customizations/<skill>.toml`), but this only affects projects that register
+presets.
+
+---
 
 ### `2.2.0` — 2026-08-04
 

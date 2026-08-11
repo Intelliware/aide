@@ -24,8 +24,9 @@ and showing the user the result.
    2. `framework.user.toml` (if present)
    3. `project.toml`
    4. `project.user.toml` (if present)
-   5. `customizations/<skill>.toml` (per skill, if present)
-   6. `customizations/<skill>.user.toml` (per skill, if present)
+   5. **Presets** (from `presets.toml`, enabled only, in array order)
+   6. `customizations/<skill>.toml` (per skill, if present)
+   7. `customizations/<skill>.user.toml` (per skill, if present)
 
    Use the merge rules in `config/SCHEMAS.md` § 1.3 (scalar override,
    table recursive merge, array-of-tables merge by `code`/`id`,
@@ -47,12 +48,19 @@ and showing the user the result.
    framework.user                       <v or —>
    project                              <v or —>
    project.user                         <v or —>
+   preset: enterprise-compliance        <v or —>
+   preset: team-conventions             <v or —>
    customizations/<skill>.toml          <v or —>
    customizations/<skill>.user.toml     <v or —>
    EFFECTIVE                            <v>
    ```
 
    For arrays, print the effective list (one entry per line).
+
+   **Preset origins:** When a value comes from a preset, show the
+   preset name in the layer column. List presets in their merge order
+   (earlier = lower precedence). This helps users understand why a
+   value may differ from what they expect.
 
 4. **Validate** the override actually wins. If the EFFECTIVE value
    differs from what the user authored, surface the higher-precedence

@@ -1,0 +1,97 @@
+# Preset registry — presets.toml example
+#
+# This file tracks which presets are installed in the project and their enable state.
+# Lives at {project-root}/presets.toml (committed) with an optional personal override
+# at {project-root}/presets.user.toml (gitignored).
+#
+# See config/SCHEMAS.md § 2.9 for the full schema.
+#
+# Merge order with presets:
+#   framework.toml → framework.user.toml → project.toml → project.user.toml
+#     → [PRESETS: in order below, enabled only]
+#       → customizations/<skill>.toml → customizations/<skill>.user.toml
+#
+# Within the [[presets]] array, earlier entries have lower precedence than later entries.
+# Project-local Layer 5 customizations always override preset values.
+
+# -----------------------------------------------------------------------------
+# Example 1: Add-on preset from a sibling add-on repo
+# -----------------------------------------------------------------------------
+
+[[presets]]
+name = "enterprise-compliance"                 # Must match [preset].name in preset.toml
+source = "{workspace}/aide-enterprise-addon/presets/enterprise-compliance"
+enabled = true
+
+# The source path points to the directory containing preset.toml.
+# Path tokens: {workspace}, {project-root}, {framework-root}, {home}
+
+# -----------------------------------------------------------------------------
+# Example 2: Local project preset (team conventions)
+# -----------------------------------------------------------------------------
+
+[[presets]]
+name = "team-conventions"
+source = "{project-root}/presets/team-conventions"
+enabled = true
+
+# Local presets live under {project-root}/presets/<preset-name>/ and are
+# committed alongside project.toml. Use for team-specific customizations
+# that don't warrant a separate add-on repo.
+
+# -----------------------------------------------------------------------------
+# Example 3: Disabled preset (remembered but not applied)
+# -----------------------------------------------------------------------------
+
+[[presets]]
+name = "strict-review-gates"
+source = "{workspace}/aide-strict-review/presets/strict-gates"
+enabled = false                                # Disabled but tracked
+
+# A disabled preset is remembered in the registry so `manage-presets enable`
+# can re-enable it without re-discovering the source path. Disabled presets
+# are skipped during config merge.
+
+# -----------------------------------------------------------------------------
+# Example 4: Multiple presets with precedence
+# -----------------------------------------------------------------------------
+
+# When multiple presets customize the same skill, later presets win.
+# In this example, "strict-review-gates" would override "enterprise-compliance"
+# for any overlapping fields — but only when both are enabled.
+
+# [[presets]]
+# name = "enterprise-compliance"
+# source = "{workspace}/aide-enterprise-addon/presets/enterprise-compliance"
+# enabled = true
+#
+# [[presets]]
+# name = "strict-review-gates"
+# source = "{workspace}/aide-strict-review/presets/strict-gates"
+# enabled = true    # This preset's values win on conflict
+
+# -----------------------------------------------------------------------------
+# Personal override: presets.user.toml
+# -----------------------------------------------------------------------------
+#
+# A personal registry at {project-root}/presets.user.toml (gitignored) can
+# enable or disable presets for the local user without editing the team file.
+#
+# Example presets.user.toml:
+#
+#   [[presets]]
+#   name = "enterprise-compliance"
+#   enabled = false    # Disable for me only
+#
+# Entries merge by `name` with the personal file winning.
+
+# -----------------------------------------------------------------------------
+# Discovering presets
+# -----------------------------------------------------------------------------
+#
+# Use `manage-presets discover` to scan workspace folders for preset.toml
+# manifests that are not yet registered. The skill will list available presets
+# and offer to add them to this file.
+#
+# Use `manage-presets show <preset-name>` to see what files a preset contains
+# and what each file changes before installing.

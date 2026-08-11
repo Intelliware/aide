@@ -155,6 +155,15 @@
       "origin": "core"
     },
     {
+      "canonical_id": "manage-presets",
+      "name": "manage-presets",
+      "description": "Use when the user says \"install a preset\", \"enable preset\", \"disable preset\", \"show preset\", \"list presets\", \"discover presets\", or wants to manage reusable customization bundles. Handles preset discovery, installation, enable/disable toggling, and inspection without manual TOML editing.",
+      "stage": "meta",
+      "package": "",
+      "path": ".agents/skills/meta/manage-presets/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "review-adversarial",
       "name": "review-adversarial",
       "description": "Use when the user asks to adversarially review, critique, stress-test, or challenge an A.I.D.E. artifact (requirements package, design package, implementation package, RE doc, KB component, KB instance, quick-change brief). Says 'adversarial review of X', 'critique X', 'find what's wrong with X', 'cynical review', 'stress-test these requirements', 'what would a skeptic say about this design', 'challenge my plan'. Attitude-driven — looks for hidden assumptions, weasel words, unsupported claims, missing risks, and scope inflation. Orthogonal to review-edge-case-hunter (method-driven). Anytime-runnable; also called as a sub-review by every review-*-package skill.",

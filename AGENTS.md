@@ -49,6 +49,44 @@ Multi-repo solutions may also include a knowledge-base repo as a separate siblin
 
 The KB lives in its own repo, separate from A.I.D.E. and from any application repo.
 
+## Customization
+
+A.I.D.E. supports three levels of customization, all opt-in:
+
+### Layer overrides (customize-framework)
+
+Override any config value without editing framework files. Use `/customize-framework` to:
+- Change skill defaults (elicitation depth, artifact counts, etc.)
+- Suppress optional artifacts team-wide or personally
+- Pin elicitation answers so skills don't re-ask
+- Add custom blocks to compositions
+
+The five-layer config model (`framework.toml` → `framework.user.toml` → `project.toml` → `project.user.toml` → `customizations/<skill>.toml`) ensures overrides are explicit and auditable.
+
+### Hooks (skill chaining)
+
+Run one skill automatically before or after another. Hooks are declared in `customizations/<skill>.toml` as `[[hooks]]` entries:
+
+```toml
+[[hooks]]
+code = "kb-check"
+event = "before"
+skill = "navigate-knowledge-base"
+condition = "project.paths.knowledge_base_path != ''"
+```
+
+Use `/customize-framework` with operation `add-hook` to author hooks interactively. See `config/SCHEMAS.md` § 2.5.1 for the full schema.
+
+### Presets (reusable bundles)
+
+Presets are shareable bundles of customization files. They ship in add-on repos or local `presets/` directories. Use `/manage-presets` to:
+- `discover` — find available presets in the workspace
+- `install` — add a preset to `presets.toml`
+- `enable` / `disable` — toggle presets without removing them
+- `show` — inspect what a preset contains before installing
+
+Presets merge between Layer 4 and Layer 5, so project-local customizations always win. See `config/SCHEMAS.md` § 2.8–2.9.
+
 ## What this folder is NOT
 
 This folder is **A.I.D.E.**, not the user's project. Do **not** write user code, project artifacts, or implementation deliverables into `.agents/skills/`, `templates/`, `config/`, `scripts/`, or `references/` here. Those locations are framework-internal. The user's work product lives in their own project's workspace folder.
