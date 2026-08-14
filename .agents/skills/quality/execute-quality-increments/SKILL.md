@@ -54,7 +54,7 @@ logs it and routes to `execute-increments` or `manage-bugs`.
 
 | Input | Source | Required |
 |---|---|---|
-| Assembled quality package | `{paths.quality_path}/{feature-id}-quality.md` (with GO from review) | Yes |
+| Assembled quality package | `{paths.quality_package}/{feature-id}-quality.md` (with GO from review) | Yes |
 | Test-case plan overview | `docs/<feature>/quality-package/quality/plan/qe-plan-overview.md` | Yes |
 | Per-increment files | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
 | Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Yes |

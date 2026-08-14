@@ -16,16 +16,15 @@
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| Assembled `quality-package.md` (resolved per stage mode; legacy `{paths.quality_path}/{feature-id}-quality.md`) | Markdown (composed per `greenfield-quality-package.yaml`) | `review-quality-package` (gate); `execute-increments` (test design + gates) |
+| Assembled `quality-package.md` (resolved per stage mode; legacy `{paths.quality_package}/{feature-id}-quality.md`) | Markdown (composed per `greenfield-quality-package.yaml`) | `review-quality-package` (gate); `execute-increments` (test design + gates) |
 | Per-section block files `docs/<feature>/quality-package/quality/*.md` | Markdown (one block per file) | The review skill; the author on re-runs |
 | Test-traceability matrix `docs/<feature>/quality-package/quality/traceability.md` | Markdown table — test ↔ AC ↔ FR/NFR ↔ INC | `review-quality-package` (coverage review) |
 | Change tracker `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table | Downstream skills; subsequent review passes |
 
 ## Notes
 
-- Path keys mirror the framework's existing inconsistency: `[project.paths]`
-  uses `*_package` keys, while compositions resolve `{paths.quality_path}`.
-  Both name the same quality-stage output directory.
+- `[project.paths].quality_package` and the composition token
+  `{paths.quality_package}` name the same quality-stage output directory.
 - When an increment has no mapped test coverage, the skill records an explicit
   exception row in the traceability matrix rather than silently omitting it; the
   coverage review in `review-quality-package` checks for unaccounted increments.

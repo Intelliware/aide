@@ -66,7 +66,7 @@ Use elicitation prompts referenced from the active composition (`references/elic
 
 | Artifact | Path | Format |
 |---|---|---|
-| Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>-requirements.md`; legacy: `{paths.requirements_path}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
+| Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>-requirements.md`; legacy: `{paths.requirements_package}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
 | Per-section files (when sharded) | `docs/<feature>/requirements-package/requirements/*.md` | Markdown (one block per file) |
 | Discovery artifacts (brownfield) | `docs/<feature>/requirements-package/discovery/*.md` | Markdown |
 | Analysis artifacts | `docs/<feature>/requirements-package/analysis/*.md` | Markdown |

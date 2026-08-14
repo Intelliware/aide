@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| Assembled quality package | yes | `{paths.quality_path}/{feature-id}-quality.md` (or `docs/<feature>/quality-package/quality-package.md`) | The artifact produced by `create-quality-package` |
+| Assembled quality package | yes | `{paths.quality_package}/{feature-id}-quality.md` (or `docs/<feature>/quality-package/quality-package.md`) | The artifact produced by `create-quality-package` |
 | Quality change tracker | yes | `docs/<feature>/quality-package/quality/change-tracker.md` | Scopes reviews to what changed since last review |
 | Test-traceability matrix | yes | `docs/<feature>/quality-package/quality/traceability.md` | Coverage and traceability reviews consume it |
 | Approved requirements package + readiness verdict | yes | `{paths.requirements_package}/` + `review/readiness-verdict.md` | Coverage review confirms every AC is tested |

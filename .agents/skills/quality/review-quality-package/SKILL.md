@@ -43,7 +43,7 @@ is explicitly re-evaluated.
 
 | Name | Required? |
 |---|---|
-| Assembled quality package (`{paths.quality_path}/{feature-id}-quality.md`) | yes |
+| Assembled quality package (`{paths.quality_package}/{feature-id}-quality.md`) | yes |
 | Quality `change-tracker.md` | yes |
 | Test-traceability matrix | yes |
 | Approved requirements package + readiness verdict | yes |
@@ -60,7 +60,7 @@ artifact under the project's current stage configuration.
 
 - **Legacy mode.** If `[stages.quality]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
-  `{paths.quality_path}/{feature-id}-quality.md`. No scoping needed.
+  `{paths.quality_package}/{feature-id}-quality.md`. No scoping needed.
 - **SoD directory mode** (`[stages.quality].dir = "..."`). The artifact lives
   under `<host-repo>/<artifact_subdir>/quality/`:
   - **Single-repo:** `<repo-code>/<feature-id>-quality.md`. The user identifies

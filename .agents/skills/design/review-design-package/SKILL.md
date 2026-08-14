@@ -28,7 +28,7 @@ The review sequence is strict — five reviews in fixed order (architecture, sec
 
 | Name | Required? |
 |---|---|
-| Assembled design package (`solution-package.md` alias or `{paths.design_path}/{feature-id}-design.md`) | yes |
+| Assembled design package (`solution-package.md` alias or `{paths.design_package}/{feature-id}-design.md`) | yes |
 | Design `change-tracker.md` | yes |
 | Architecture baseline (when present) | conditional |
 | Approved requirements package + readiness verdict | yes |

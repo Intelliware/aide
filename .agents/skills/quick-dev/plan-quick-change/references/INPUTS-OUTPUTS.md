@@ -7,7 +7,7 @@
 | quick-dev spec | yes | `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md` | populated four-block spec from `document-quick-change` |
 | codebase | yes | local filesystem — repos referenced in the spec's FR/Where | `../api`, `../web` |
 | canonical reduced increment shape | yes | `references/canonical-increment-shape.md` | reduced 7-section shape |
-| project paths | yes | `project.toml` `[project.paths]` | `requirements_path`, `implementation_package` |
+| project paths | yes | `project.toml` `[project.paths]` | `requirements_package`, `implementation_package` |
 | coding standards | no — when present | framework standards or `customizations/` | language/framework standards relevant to the change |
 
 ## Outputs

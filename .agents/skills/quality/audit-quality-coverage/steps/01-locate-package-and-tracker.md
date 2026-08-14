@@ -58,7 +58,7 @@ Read the file list under `{paths.implementation_package}/`:
 Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 `review-quality-package` for the full SoD geometry). Required artifacts:
 
-- `{paths.quality_path}/{feature-id}-quality.md` — the assembled package
+- `{paths.quality_package}/{feature-id}-quality.md` — the assembled package
 - `docs/<feature>/quality-package/quality/traceability.md` — the matrix
 - `docs/<feature>/quality-package/quality/test-design.md` — the test-design block
 - `docs/<feature>/quality-package/quality/automation-and-cicd.md` — the
@@ -66,7 +66,7 @@ Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 
 If the quality package is missing, halt with:
 
-> No quality package found at `{paths.quality_path}/`. The coverage
+> No quality package found at `{paths.quality_package}/`. The coverage
 > audit requires an assembled quality package. Route the user to
 > `create-quality-package`.
 

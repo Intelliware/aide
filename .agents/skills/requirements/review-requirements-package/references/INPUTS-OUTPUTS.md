@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| Assembled requirements package | yes | `{paths.requirements_path}/{feature-id}-requirements.md` (or `docs/<feature>/requirements-package/requirements-package.md`) | The artifact produced by `create-requirements-package` |
+| Assembled requirements package | yes | `{paths.requirements_package}/{feature-id}-requirements.md` (or `docs/<feature>/requirements-package/requirements-package.md`) | The artifact produced by `create-requirements-package` |
 | Change tracker | yes | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Used by reviews to scope checks to what changed since last review |
 | Completeness tracker | yes | `docs/<feature>/requirements-package/requirements/completeness-tracker.md` | Confirms every block is `Complete` or explicitly `N/A` with gate |
 | Analysis artifacts | yes (when analysis ran) | `docs/<feature>/requirements-package/analysis/*.md` | Traceability review consumes constraint/risk/decision logs |

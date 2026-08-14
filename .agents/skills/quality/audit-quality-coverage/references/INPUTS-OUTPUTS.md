@@ -8,7 +8,7 @@
 | Implementation package | yes | `{paths.implementation_package}/` | Source of truth for which increments exist |
 | `increment-status.md` | yes | `{paths.implementation_package}/increment-status.md` | Per-INC dev status (`not-started` / `in-progress` / `completed` / `blocked`) |
 | Per-INC files | yes | `{paths.implementation_package}/INC-XXX.md` (or shard layout) | Per-INC scope, level, NFR mapping; reveals which increments are NFR-only / dev-owned |
-| Quality package | yes | `{paths.quality_path}/{feature-id}-quality.md` (or SoD-resolved path) | The latest assembled package |
+| Quality package | yes | `{paths.quality_package}/{feature-id}-quality.md` (or SoD-resolved path) | The latest assembled package |
 | Test-traceability matrix | yes | `docs/<feature>/quality-package/quality/traceability.md` | Primary source of "which test covers which INC / AC / FR / NFR" |
 | Test-design block | yes | `docs/<feature>/quality-package/quality/test-design.md` | Test levels per scope (the team's pyramid) — distinguishes which INCs require automated coverage vs. dev-owned-only |
 | Test-case status tracker | optional (bootstrapped if absent) | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | TC-XXX implementation status when the team uses the optional TC-XXX flow |

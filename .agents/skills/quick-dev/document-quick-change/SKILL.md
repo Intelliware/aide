@@ -39,13 +39,13 @@ See `references/INPUTS-OUTPUTS.md`.
 4. **Classify rigor** — trivial (one sentence + 1 AC, inline) / small (short spec on disk) / medium (full template). Confirm with the user.
 5. **Structure against the composition** — populate the five blocks from `templates/compositions/quick-dev-spec.yaml`: overview, executive-summary-business-context (the "Why"), functional requirements (the "What" + delta), acceptance criteria, and assumptions-constraints-out-of-scope (which carries §12.2 environmental/regulatory/organisational constraints **and** §12.2a Solution Constraints — the implementation guardrails the executor must honor across every iteration and any Solution Pivot, captured by the change-scope-discovery elicitation pattern). §12.2a Solution Constraints must explicitly cover, at minimum: implementation guardrails (no regex, no hardcoded maps, no new dependencies, etc.), **quality constraints** (test framework / runner to use, coverage floor, lint/format rules, mandated NFR thresholds, security/compliance rules, prohibited test patterns), environmental constraints, and organisational constraints. For each acceptance criterion authored in step 5, add a one-line **"How will this be proven?"** note alongside it — name the verification method (unit test, integration test, manual check, log/metric inspection, existing automated gate). The note may be terse ("unit test on `parseFoo()`", "manual smoke in the staging UI") but it must exist for every AC. This is the quick-dev substitute for a full quality package. Add glossary entries if any new term appears. If the user reports no solution constraints, render §12.2a with a single "None known at spec time" row rather than omitting it. For trivial inline specs, the same fields are still captured (inline, not on disk) — including the per-AC proof note — and the executor's fallback prompt is a substitute for the on-disk section, not a licence to skip the question.
 6. **Mark uncertainty** — insert `[NEEDS CLARIFICATION: …]` for any ambiguity that affects implementation. Resolve markers one at a time with the user.
-7. **Finalize and confirm** — write to `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (or stay inline for trivial). Get explicit user confirmation before handoff.
+7. **Finalize and confirm** — write to `{paths.requirements_package}/<feature-id>-quick-dev-spec.md` (or stay inline for trivial). Get explicit user confirmation before handoff.
 
 Detailed marker-resolution rules and rigor decision logic are not separately stepped — the workflow is short enough to keep inline.
 
 ## Output
 
-See `references/INPUTS-OUTPUTS.md`. A single combined spec at `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (small/medium) or inline (trivial), plus an initialized `CHANGE-TRACKER.md` if it didn't exist.
+See `references/INPUTS-OUTPUTS.md`. A single combined spec at `{paths.requirements_package}/<feature-id>-quick-dev-spec.md` (small/medium) or inline (trivial), plus an initialized `CHANGE-TRACKER.md` if it didn't exist.
 
 ## Next skill
 

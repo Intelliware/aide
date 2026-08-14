@@ -18,13 +18,13 @@
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| `{paths.requirements_path}/{feature-id}-requirements.md` (assembled) | Markdown, composed per `greenfield-requirements-package.yaml` block ordering | `review-requirements-package`, `create-design-package`, `create-implementation-package`, knowledge-base sync skills |
+| `{paths.requirements_package}/{feature-id}-requirements.md` (assembled) | Markdown, composed per `greenfield-requirements-package.yaml` block ordering | `review-requirements-package`, `create-design-package`, `create-implementation-package`, knowledge-base sync skills |
 | `docs/<feature>/requirements-package/discovery/change-description.md` | Markdown | All subsequent steps (anchor file) |
 | `docs/<feature>/requirements-package/discovery/*.md` (brownfield: codebase-discovery, existing-artifact-review, process-map, user-journey-map, requirements-elicitation, current-capability-baseline) | Markdown | Analysis step (Step 3), writing step (Step 4) |
 | `docs/<feature>/requirements-package/analysis/*.md` (stakeholder-map, change-scope, dependency-map, impact-analysis, constraint-register, gap-analysis, assumption-log, decision-log, risk-register) | Markdown | Writing step (Step 4), `review-requirements-package`, `create-design-package` |
 | `docs/<feature>/requirements-package/requirements/*.md` (per-section block files: 01-executive-summary through 14-acceptance-criteria) | Markdown — one block per file, FR numbering FR[Area].[Feature].[Detail] | `review-requirements-package`, `create-design-package` |
 | `docs/<feature>/requirements-package/requirements/completeness-tracker.md` | Markdown table — Not Started / In Progress / Skipped / N/A / Complete per block | `review-requirements-package`, the user (visibility) |
 | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table — Added/Modified/Removed entries per item ID with Trigger and Authorized By | All downstream skills (delta detection); becomes Section 12 of the assembled package |
-| `docs/<feature>/requirements-package/requirements-package.md` (alias for the assembled package, for backwards-compat with model-2 paths) | Markdown — pass-through to `{paths.requirements_path}/{feature-id}-requirements.md` | Review skill, design skill |
+| `docs/<feature>/requirements-package/requirements-package.md` (alias for the assembled package, for backwards-compat with model-2 paths) | Markdown — pass-through to `{paths.requirements_package}/{feature-id}-requirements.md` | Review skill, design skill |
 
 When the composition declares a block as gated (`include-if`), the corresponding output file is omitted and the completeness tracker records the section as N/A with the gate condition that excluded it.

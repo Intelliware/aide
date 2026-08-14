@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Purpose |
 |---|---|---|---|
-| Assembled quality package | yes | `{paths.quality_path}/{feature-id}-quality.md` | Topology, test stack, harness design, execution conventions |
+| Assembled quality package | yes | `{paths.quality_package}/{feature-id}-quality.md` | Topology, test stack, harness design, execution conventions |
 | Quality automation & CI/CD block | yes | `docs/<feature>/quality-package/quality/automation-and-cicd.md` | Framework, runner, tag vocabulary, environment profiles |
 | Test-case plan overview | yes | `docs/<feature>/quality-package/quality/plan/qe-plan-overview.md` | Increment list, dependency graph, execution order |
 | Scaffolding increment files | yes | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding type) | Implementation plans for prep work |
@@ -25,7 +25,7 @@
 | Shared test utilities, fixtures, builders | Test-artifact target repo (path per language) | Per language | Scaffolding only |
 | Feature / scenario / spec files | Test-artifact target repo (path per framework) | Per framework | Test-case increments |
 | Step definitions / test classes | Test-artifact target repo (path per language) | Per language | Test-case increments |
-| Test-case data files / exports (CSV, JSON, fixtures) | `{paths.quality_path}/` or test-artifact target repo | Per format | Test-case increments |
+| Test-case data files / exports (CSV, JSON, fixtures) | `{paths.quality_package}/` or test-artifact target repo | Per format | Test-case increments |
 | Updated test-case-status.md | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Markdown table | Every increment |
 | Updated change-tracker.md | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table | Every increment; with `Trigger = Execution deviation` when relevant |
 

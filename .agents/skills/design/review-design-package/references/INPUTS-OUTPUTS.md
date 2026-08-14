@@ -4,10 +4,10 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| Assembled design package | yes | `{paths.design_path}/{feature-id}-design.md` (or alias `docs/<feature>/solutions-package/solution-package.md`) | The artifact produced by `create-design-package` |
+| Assembled design package | yes | `{paths.design_package}/{feature-id}-design.md` (or alias `docs/<feature>/solutions-package/solution-package.md`) | The artifact produced by `create-design-package` |
 | Design change tracker | yes | `docs/<feature>/solutions-package/design/change-tracker.md` | Used by reviews to scope checks to what changed since last review |
 | Architecture baseline | conditional (brownfield only) | `docs/<feature>/solutions-package/discovery/architecture-baseline.md` | Architecture review consumes it |
-| Approved requirements package | yes | `{paths.requirements_path}/{feature-id}-requirements.md` | Architecture and traceability checks need it |
+| Approved requirements package | yes | `{paths.requirements_package}/{feature-id}-requirements.md` | Architecture and traceability checks need it |
 | Requirements readiness verdict | yes | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Must be APPROVED or accepted CONDITIONAL |
 | Requirements change tracker | yes | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Used to confirm the design's recorded requirements version is current |
 | `project.toml` | yes | `{project-root}/project.toml` | Flow detection, policy gates |
