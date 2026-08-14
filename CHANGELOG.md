@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.5.0` |
+| Current artifact version | `2.4.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -52,41 +52,23 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
-### `2.5.0` — 2026-08-14
-
-Phase 2 (Preconditions) of `_docs/feature-id-minimal-plan.md`: every feature-aware
-skill now knows the active feature and refuses to guess when it doesn't, rather than
-inventing an ID or a slug from the request. Still ships no path changes — resolving
-`{feature-id}` is phase 3. A project with no `features.toml` is byte-for-byte
-unaffected: the precondition's first line is the opt-in check, and it is a pure
-no-op when the file is absent.
-
-#### Added
-
-| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
-|---|---|---|---|---|---|---|---|
-| 1 | 2026-08-14 | Addition | references | `references/ai-principles/feature-precondition.md` | New shared precondition contract (mirrors the `write-discipline.md` pattern) defining Mode A (write-side: select-and-create, halt-and-delegate to `select-feature`), Mode B (read-side: select-only, create suppressed), and Mode C (probe-only: `framework-navigator`, never halts). Single source so a future change to the resolution logic ripples through every consuming skill via one edit. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
-| 2 | 2026-08-14 | Addition | skills | 11 write-side skills (`create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `execute-increments`, `execute-quality-increments`, `document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`, `create-pr`) | Each gains a `## Precondition — active feature` section citing Mode A: halt and redirect to `select-feature` (passing its own name as `caller`) when `features.toml` exists but no active feature resolves; echo the feature ID and resolved output directory before the first write otherwise. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
-| 3 | 2026-08-14 | Addition | skills | 5 read-side skills (`review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`) | Each gains a `## Precondition — active feature` section citing Mode B: identical resolution, but `select-feature` is invoked with `caller_mode: select-only` — reviewing/auditing is never a reason to mint a feature that has nothing to review yet. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
-| 4 | 2026-08-14 | Addition | skills | `framework-navigator` (`SKILL.md`, `references/state-probe.md`, `steps/03-match-or-render.md`, `steps/04-recommend.md`) | State probe gains `features_toml_present` / `active_feature` fields (opt-in, no-op when `features.toml` is absent). The recommendation gate filter now surfaces `select-feature` as a prerequisite — using the same mechanism as an unmet `workflow-graph.yaml` gate, no score penalty — when the probe shows no active feature ahead of a feature-aware recommendation. The navigator never halts on this itself: per its own "Side effects: none" contract, it recommends, it does not block. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
-
-#### Branch Dependency
-
-Continues the stack from `2.4.0`: `feat/feature-id-minimal-plan`, based on
-`path-token-reconciliation`, not yet merged to `main`. `python3 scripts/validate.py`
-(0 errors, 3 pre-existing unrelated warnings), `python3 scripts/test_validate.py`
-(29/29 passing), and `python3 scripts/build-registry.py` (50 skills, 0 warnings — no
-new skill added this phase, only existing skills wired) all green.
-
 ### `2.4.0` — 2026-08-14
 
-Phase 1 (Foundation) of `_docs/feature-id-minimal-plan.md`: gives the `{feature-id}`
-token — already load-bearing in every stage's output paths — a source of truth. Adds
-the opt-in feature registry (`features.toml`), the personal active-feature pointer
-(`[user].active_feature`), and the `select-feature` skill that mints and activates
-features. Ships no path changes: `{feature-id}` insertion into compositions and skill
-paths is phase 3, gated on this landing first. A project with no `features.toml` is
-byte-for-byte unaffected.
+Phases 1 (Foundation) and 2 (Preconditions) of `_docs/feature-id-minimal-plan.md`,
+shipped as one release. Phase 1 gives the `{feature-id}` token — already load-bearing
+in every stage's output paths — a source of truth: the opt-in feature registry
+(`features.toml`), the personal active-feature pointer (`[user].active_feature`), and
+the `select-feature` skill that mints and activates features. Phase 2 makes that
+source of truth binding: every feature-aware skill now resolves the active feature and
+refuses to guess when it cannot, instead of inventing an ID or a slug from the
+request.
+
+The two phases ship together because neither is much use alone — phase 1 registers a
+skill nothing routes to, and phase 2 is what makes it reachable. Ships no path
+changes: `{feature-id}` insertion into compositions and skill paths is phase 3, gated
+on this landing first. A project with no `features.toml` is byte-for-byte unaffected —
+the precondition's first line is the opt-in check, and it is a pure no-op when the
+file is absent.
 
 #### Added
 
@@ -95,18 +77,26 @@ byte-for-byte unaffected.
 | 1 | 2026-08-14 | Addition | config | `config/features.toml.example` | New annotated example for the committed, opt-in feature registry — one `[[features]]` entry per feature, `id` format `FEAT-NNNN-<kebab-slug>`, optional `ticket` / `repos`. Presence of `features.toml` is the opt-in; absence means the project behaves exactly as before this change. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 2 | 2026-08-14 | Addition | config | `config/SCHEMAS.md` | New § 2.8 (the feature registry — schema, opt-in semantics, ordinal-collision handling via git merge conflict) and § 2.9 (the active-feature pointer — Layer 4, resolution rule, echo requirement). `active_feature` added to the § 2.4 Layer 4 field table. New `features.toml.example` deliverables-table row. § 4 validation gains rules 13-16 (opt-in, fire only when `features.toml` exists): `id` format, `id` uniqueness (full string and bare ordinal), `active_feature` resolution, `repos` cross-reference. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 3 | 2026-08-14 | Addition | config | `config/project.user.toml.example` | New commented-out `[user].active_feature` example alongside the existing `[user].role` block, cross-referencing `config/SCHEMAS.md` § 2.8-2.9. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
-| 4 | 2026-08-14 | Addition | skills | `.agents/skills/meta/select-feature/` (`SKILL.md` + `references/{OVERVIEW,INPUTS-OUTPUTS,EXAMPLE}.md`) | New skill: selects or mints the active feature. Select leads, create follows — presenting the existing registry first is the deliberate mitigation against the same work acquiring two feature identities. Registered in `workflow-graph.yaml`'s `anytime` list as the redirect target for every write-side/read-side skill's (future, phase 2) feature-ID precondition. `python3 scripts/build-registry.py` re-run; 50 skills, 0 warnings. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 4 | 2026-08-14 | Addition | skills | `.agents/skills/meta/select-feature/` (`SKILL.md` + `references/{OVERVIEW,INPUTS-OUTPUTS,EXAMPLE}.md`) | New skill: selects or mints the active feature. Select leads, create follows — presenting the existing registry first is the deliberate mitigation against the same work acquiring two feature identities. Registered in `workflow-graph.yaml`'s `anytime` list as the redirect target for every write-side / read-side skill's feature-ID precondition (row 5 onward). `python3 scripts/build-registry.py` re-run; 50 skills, 0 warnings. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 5 | 2026-08-14 | Addition | references | `references/ai-principles/feature-precondition.md` | New shared precondition contract (mirrors the `write-discipline.md` pattern) defining Mode A (write-side: select-and-create, halt-and-delegate to `select-feature`), Mode B (read-side: select-only, create suppressed), and Mode C (probe-only: `framework-navigator`, never halts). Single source so a future change to the resolution logic ripples through every consuming skill via one edit. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 6 | 2026-08-14 | Addition | skills | 11 write-side skills (`create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `execute-increments`, `execute-quality-increments`, `document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`, `create-pr`) | Each gains a `## Precondition — active feature` section citing Mode A: halt and redirect to `select-feature` (passing its own name as `caller`) when `features.toml` exists but no active feature resolves; echo the feature ID and resolved output directory before the first write otherwise. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 7 | 2026-08-14 | Addition | skills | 5 read-side skills (`review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`) | Each gains a `## Precondition — active feature` section citing Mode B: identical resolution, but `select-feature` is invoked with `caller_mode: select-only` — reviewing/auditing is never a reason to mint a feature that has nothing to review yet. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 8 | 2026-08-14 | Addition | skills | `framework-navigator` (`SKILL.md`, `references/state-probe.md`, `steps/03-match-or-render.md`, `steps/04-recommend.md`) | State probe gains `features_toml_present` / `active_feature` fields (opt-in, no-op when `features.toml` is absent). The recommendation gate filter now surfaces `select-feature` as a prerequisite — using the same mechanism as an unmet `workflow-graph.yaml` gate, no score penalty — when the probe shows no active feature ahead of a feature-aware recommendation. The navigator never halts on this itself: per its own "Side effects: none" contract, it recommends, it does not block. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 
 #### Branch Dependency
 
 Minor release stacked on top of the (not-yet-merged) `2.3.0` / `path-token-reconciliation`
 branch — this branch is `feat/feature-id-minimal-plan`, based on `path-token-reconciliation`
-rather than `main`, because this phase's `{feature-id}` documentation assumes every
-`{paths.<key>}` token already resolves (the `2.3.0` prerequisite). Independently
-shippable per `_docs/feature-id-minimal-plan.md` § 9: adds capability without moving a
-single byte of any existing artifact. `python3 scripts/validate.py` (0 errors, 3
-pre-existing unrelated warnings) and `python3 scripts/test_validate.py` (29/29 passing)
-both green.
+rather than `main`, because the `{feature-id}` work assumes every `{paths.<key>}` token
+already resolves (the `2.3.0` prerequisite). Independently shippable per
+`_docs/feature-id-minimal-plan.md` § 9: adds capability without moving a single byte of
+any existing artifact. Because `2.3.0` is itself unmerged and untagged, this version
+number assumes the stack lands in order; renumber if it does not.
+
+`python3 scripts/validate.py` (0 errors, 3 pre-existing unrelated warnings), `python3
+scripts/test_validate.py` (29/29 passing), and `python3 scripts/build-registry.py`
+(50 skills, 0 warnings — phase 2 added no new skill, only wired existing ones) all
+green.
 
 ### `2.3.0` — 2026-08-14
 
