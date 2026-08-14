@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.2.0` |
+| Current artifact version | `2.3.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,40 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.3.0` — 2026-08-14
+
+Reconciles every `{paths.<name>}` composition/skill token against the `[project.paths]`
+keys actually declared in `config/SCHEMAS.md`, and adds the missing `quality_package`
+key those tokens should have resolved to all along. See
+`_docs/path-token-reconciliation-plan.md` for the full defect analysis — this is a
+clean, independently-mergeable predecessor to the (not-yet-landed) feature-ID-as-
+path-segment work in `_docs/feature-id-minimal-plan.md`, which itself would have
+inherited the same phantom-token confusion had it landed first.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-14 | Addition | config | `config/SCHEMAS.md`, `config/project.toml.example` | New `[project.paths].quality_package` key — restores a key the archived QE work depended on but that was dropped when those skills merged into the live tree, with a default (`"{project-root}/.framework-output/quality"`) that breaks no existing `project.toml`. § 1.5 gains a **`{paths.<key>}` / `{project.paths.<key>}` token-family** subsection: the two spellings are declared synonyms resolving into `[project.paths]`, and `{feature-id}` / `{increment-id}` / `{repo-slug}` / `{component-slug}` are documented as skill-supplied runtime substitutions — a distinct mechanism from both the config-load tokens above them and the `{paths.<key>}` family, not an informal fourth naming style. | branch `path-token-reconciliation` | ☐ Pending |
+| 2 | 2026-08-14 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | New **Check M** — every `{paths.<key>}` / `{project.paths.<key>}` reference under `.agents/skills/` and `templates/compositions/` must name a key actually declared in `[project.paths]`. Hard error, not a warning: a `<key>` that resolves to nothing is a broken pointer, not a style variant, and a warning would only invite the naming scheme to drift back. Ships with positive/negative fixture tests in `scripts/test_validate.py` / `scripts/test-validate.js` (phantom-key rejection, declared-key acceptance, `{project.paths.<key>}` synonym acceptance). | branch `path-token-reconciliation` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-14 | Correction | Multiple | 7 `templates/compositions/*.yaml`, 23 `.agents/skills/**` files, `config/customizations/review-implementation-package.toml.example` (31 files, 43 occurrences) | Renamed every `{paths.<name>_path}` phantom token — `requirements_path`, `design_path`, `planning_path`, `quality_path`, `implementation_path`; none was ever a declared `[project.paths]` key — to the real key it always meant (the `*_package` sibling). Each occurrence had silently diverged from where the corresponding `create-*` skill actually writes; a `review-*` / `audit-*` skill resolving one of these tokens literally would have looked in the wrong directory. `greenfield-implementation-package.yaml`'s `{paths.planning_path}` became `{project.paths.implementation_package}` (matching the key `create-implementation-package/SKILL.md` already used correctly) rather than a new `planning_package` key, since planning and implementation were never two separate stages in `[project.paths]`. | branch `path-token-reconciliation` | ☐ Pending |
+| 2 | 2026-08-14 | Correction | config | `config/SCHEMAS.md` | § 4 validation rule 5 said path tokens are "one of the four defined in § 1.5" — stale since the `{workspace}` token (2.0.0, Check K's PR) brought the count to five without updating the rule text. | branch `path-token-reconciliation` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.2.0` (new schema field, new validator check — both
+backwards-compatible per this file's own versioning convention). Purely a naming-
+consistency and validation-coverage fix: every renamed token already pointed at the
+directory its `*_package` sibling names, so no artifact moves and no `project.toml`
+requires migration. Projects that never overrode `quality_package` inherit the new
+default silently; projects that already set it (there should be none, since the key
+did not previously exist in the schema) are unaffected either way.
 
 ### `2.2.0` — 2026-08-04
 
