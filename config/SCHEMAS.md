@@ -145,6 +145,26 @@ when they appear in `project.toml` / `project.user.toml` / `customizations/`,
 and relative to `{framework-root}` when they appear in
 `framework.toml` / `framework.user.toml`.
 
+**The `{paths.<key>}` family.** Compositions and skill markdown reference
+`[project.paths]` fields (§2.3) using either `{paths.<key>}` or
+`{project.paths.<key>}` — the two are synonyms, both legal, and both resolve
+identically to that field's configured (or default) value. `<key>` must name
+a field actually declared in `[project.paths]` (`requirements_package`,
+`design_package`, `implementation_package`, `quality_package`,
+`knowledge_base_path`); a `<key>` that names no declared field is a broken
+reference, not an informal spelling. This is a distinct mechanism from the
+environment tokens above: `{project-root}` et al. expand to a filesystem
+location at config-load time, while `{paths.<key>}` is a lookup into
+already-resolved config.
+
+**Skill-supplied runtime substitutions.** `{feature-id}`, `{increment-id}`,
+`{repo-slug}`, `{component-slug}` and similar are **not** config-load
+tokens — no layer declares them and no loader expands them. They are
+placeholders that the invoking skill fills in from its own runtime context
+(the active feature, the increment being executed, the repo or component in
+scope) before a path is used. Documented here so the token table above is
+not read as the complete list of every `{...}` placeholder in the tree.
+
 ---
 
 ## 2. Layer Schemas
@@ -297,6 +317,7 @@ All paths may use the tokens in § 1.5. Relative paths resolve under
 | `requirements_package` | path | `"{project-root}/.framework-output/requirements"` | Where the requirements stage writes its package. |
 | `design_package` | path | `"{project-root}/.framework-output/design"` | Where the design stage writes. |
 | `implementation_package` | path | `"{project-root}/.framework-output/implementation"` | Where the implementation stage writes. |
+| `quality_package` | path | `"{project-root}/.framework-output/quality"` | Where the quality stage writes its package. Restores a key defined in the archived QE work but dropped when those skills merged into the live tree; adding it with a default breaks no existing `project.toml`. |
 | `knowledge_base_path` | path | _(no default)_ | Path to the KB repository. **Critical:** the KB lives in its own repo, so this path almost always points outside `{project-root}` (typically `"../knowledge-base"` for a sibling repo). Absolute paths are also valid. If unset, the KB-stage skills error early with a helpful message. |
 
 #### `[project.testing]`
@@ -644,7 +665,7 @@ skill's contract assumes these have already passed.
 2. Every `[[project.repos]]` entry has a unique `code`.
 3. At most one `[[project.repos]]` entry has `primary = true`.
 4. `project.default_flow`, when set, is one of the three flow values.
-5. Every path token used (`{project-root}` etc.) is one of the four defined in § 1.5.
+5. Every path token used (`{project-root}` etc.) is one of the five defined in § 1.5.
 6. `_suppress = true` only appears in array-of-table entries with a `code` or `id`.
 6a. `[project.testing].qe_repo`, when set, must be a non-empty string matching one declared `[[project.repos]].code`. Warn when the referenced repo's `role` is not `test-automation` or `qe`.
 6b. `[project.elicitation].re_verification_gate`, when set, must be one of `ask`, `review`, `automated`. An unrecognised value is an error, not a silent fallback to `ask` — a typo'd gate mode must not quietly downgrade the close-out to the AI's choice.
