@@ -23,6 +23,10 @@ task #8 -> task #9):
      `## Preconditions` section that cites
      `references/ai-principles/write-discipline.md`. Prevents silent
      decay of the write-on-acknowledge contract.
+  M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
+     reference under `.agents/skills/` and `templates/compositions/` must
+     name a key actually declared in `[project.paths]` (config/SCHEMAS.md
+     § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
 
 Hard errors fail the run (exit 1):
   - Composition references a non-existent block (A).
@@ -31,6 +35,8 @@ Hard errors fail the run (exit 1):
     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
   - Composition or skill cites an elicitation pattern that does not exist (G).
   - Any SoD rule violation when running in --project-toml mode (I).
+  - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
+    undeclared `[project.paths]` key (M).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 """
@@ -101,6 +107,17 @@ REQUIRED_BLOCK_FIELDS = ("slug", "title", "applies-to", "requires-decision-from"
 
 # SoD enum (config/SCHEMAS.md § 4 rules 9 / 10).
 SOD_ROLE_ENUM = ("BA", "Architect", "BSA", "Developer", "Tester", "KB-Steward")
+
+# Check M — [project.paths] keys a `{paths.<key>}` / `{project.paths.<key>}`
+# reference is allowed to name (config/SCHEMAS.md § 1.5 + § 2.3).
+PROJECT_PATHS_KEYS = {
+    "requirements_package",
+    "design_package",
+    "implementation_package",
+    "quality_package",
+    "knowledge_base_path",
+}
+PATHS_TOKEN_RE = re.compile(r"\{(?:project\.)?paths\.([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
 # --- frontmatter parser (same shape as build-registry.py) -------------------
@@ -729,6 +746,48 @@ def _re_gate_enum_errors(text: str, label: str) -> list[str]:
     return errors
 
 
+def check_m() -> tuple[list[str], list[str]]:
+    """M — `{paths.<key>}` / `{project.paths.<key>}` token resolution.
+
+    Every `{paths.<name>}` or `{project.paths.<name>}` reference under
+    `templates/compositions/` and `.agents/skills/` must name a field
+    actually declared in `[project.paths]` (config/SCHEMAS.md § 2.3). These
+    are dotted addresses into config, not informal nicknames — a `<name>`
+    that matches no declared key is a broken pointer that silently diverges
+    from wherever a co-operating skill or composition actually writes.
+    See config/SCHEMAS.md § 1.5 and `_docs/path-token-reconciliation-plan.md`.
+
+    Hard error, not a warning: this check lands green (every existing
+    violation fixed in the same change that adds it) and a warning would
+    only invite the naming scheme to drift back.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    targets: list[Path] = sorted(SKILLS_ROOT.rglob("*.md")) + sorted(
+        COMPOSITIONS_ROOT.glob("*.yaml")
+    )
+    for path in targets:
+        rel = path.relative_to(REPO_ROOT)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
+            for tok in PATHS_TOKEN_RE.finditer(line):
+                key = tok.group(1)
+                if key in PROJECT_PATHS_KEYS:
+                    continue
+                if _in_code_fence(lines, i):
+                    continue
+                errors.append(
+                    f"{rel}:{i+1}: `{tok.group(0)}` names no declared "
+                    f"[project.paths] key — declared keys are "
+                    f"{', '.join(sorted(PROJECT_PATHS_KEYS))}."
+                )
+    return errors, warnings
+
+
 def check_sod(
     project_toml_path: Path,
     artifact_path: Path | None = None,
@@ -1091,6 +1150,7 @@ def main() -> int:
     h_err, h_warn = check_h()
     j_err, j_warn = check_j()
     l_err, l_warn = check_l()
+    m_err, m_warn = check_m()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -1103,12 +1163,13 @@ def main() -> int:
         "Check H — RE skill output-structure binding",
         "Check J — write-discipline binding (create-* skills)",
         "Check L — RE close-out gate binding",
+        "Check M — {paths.<key>} token resolution",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
-        (l_err, l_warn), (f_err, f_warn),
+        (l_err, l_warn), (m_err, m_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -1138,6 +1199,7 @@ def main() -> int:
                  "H — RE skill output-structure binding",
                  "J — write-discipline binding (create-* skills)",
                  "L — RE close-out gate binding",
+                 "M — {paths.<key>} token resolution",
                  "F — build-registry sanity"],
                 bundles,
             )
@@ -1166,6 +1228,7 @@ def main() -> int:
             _md(titles[6], h_err, h_warn),
             _md(titles[7], j_err, j_warn),
             _md(titles[8], l_err, l_warn),
+            _md(titles[9], m_err, m_warn),
             "## Check F — build-registry.py output",
             "",
         ]

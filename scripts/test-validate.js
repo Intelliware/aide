@@ -334,7 +334,7 @@ test('Default mode exits zero', () => {
   );
 
   // Sanity: the output should mention each labelled check at least once
-  for (const label of ['Check A', 'Check B', 'Check D', 'Check E', 'Check F', 'Check L']) {
+  for (const label of ['Check A', 'Check B', 'Check D', 'Check E', 'Check F', 'Check L', 'Check M']) {
     assertIn(label, out, `missing '${label}' in default-mode output`);
   }
 
@@ -405,6 +405,75 @@ test('Check L — every verify step declares both modes and both tiers', () => {
       assertIn(needle, text, `${name}/steps/verify.md missing '${needle}'`);
     }
   }
+});
+
+// --- Check M — {paths.<key>} / {project.paths.<key>} token resolution ---
+// No fixture-mode flag exists for M (unlike I/K), so these write an ephemeral
+// composition directly into the live templates/compositions/ tree — the same
+// tree validate.js's hardcoded COMPOSITIONS_ROOT scans — and remove it
+// afterwards regardless of assertion outcome.
+
+const CHECK_M_FIXTURE = path.join(REPO_ROOT, 'templates', 'compositions', '_check-m-test-fixture.yaml');
+
+function writeCheckMFixture(token) {
+  fs.writeFileSync(
+    CHECK_M_FIXTURE,
+    [
+      'name: check-m-test-fixture',
+      'description: Ephemeral fixture for test-validate.js Check M test. Deleted immediately after the assertion.',
+      'applies-to-flow: any',
+      'package-type: test-fixture',
+      '',
+      `default-output-path: "${token}/{feature-id}-test.md"`,
+      '',
+    ].join('\n'),
+    'utf-8'
+  );
+}
+
+test('Check M — reject a phantom {paths.requirements_path} reference', () => {
+  writeCheckMFixture('{paths.requirements_path}');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_M_FIXTURE);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(
+    proc.returncode, 0,
+    `validator should reject a phantom {paths.requirements_path} reference.\noutput:\n${out}`
+  );
+  assertIn('Check M', out, `output missing 'Check M'.\noutput:\n${out}`);
+  assertIn('requirements_path', out, `output missing 'requirements_path'.\noutput:\n${out}`);
+});
+
+test('Check M — accept a declared {paths.requirements_package} key', () => {
+  writeCheckMFixture('{paths.requirements_package}');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_M_FIXTURE);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `validator should accept a declared [project.paths] key.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check M — accept the {project.paths.<key>} synonym form', () => {
+  writeCheckMFixture('{project.paths.quality_package}');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_M_FIXTURE);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `validator should accept the {project.paths.<key>} synonym form.\noutput:\n${proc.stdout + proc.stderr}`
+  );
 });
 
 // --- Summary ---

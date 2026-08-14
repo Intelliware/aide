@@ -19,6 +19,10 @@
  *   I. Separation-of-duties (SoD) rule enforcement against a fixture
  *      project.toml (and optional cross-cutting artifact). Run with
  *      `--project-toml PATH` to evaluate rules 7–12 from `config/SCHEMAS.md`.
+ *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
+ *      reference under `.agents/skills/` and `templates/compositions/` must
+ *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
+ *      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
  *
  * Hard errors fail the run (exit 1):
  *   - Composition references a non-existent block (A).
@@ -27,6 +31,8 @@
  *     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
  *   - Composition or skill cites an elicitation pattern that does not exist (G).
  *   - Any SoD rule violation when running in --project-toml mode (I).
+ *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
+ *     undeclared `[project.paths]` key (M).
  *
  * Everything else is a soft warning (does not fail). Stdlib-only.
  */
@@ -90,6 +96,17 @@ const PHASE_VOCAB_ALLOW_PRAGMA = 'validate: allow-phase-vocab';
 
 // SoD enum (config/SCHEMAS.md § 4 rules 9 / 10).
 const SOD_ROLE_ENUM = ['BA', 'Architect', 'BSA', 'Developer', 'Tester', 'KB-Steward'];
+
+// Check M — [project.paths] keys a `{paths.<key>}` / `{project.paths.<key>}`
+// reference is allowed to name (config/SCHEMAS.md § 1.5 + § 2.3).
+const PROJECT_PATHS_KEYS = new Set([
+  'requirements_package',
+  'design_package',
+  'implementation_package',
+  'quality_package',
+  'knowledge_base_path',
+]);
+const PATHS_TOKEN_RE = /\{(?:project\.)?paths\.([A-Za-z_][A-Za-z0-9_]*)\}/g;
 
 // --- frontmatter parser (same shape as build-registry.js) -------------------
 
@@ -848,6 +865,55 @@ function reGateEnumErrors(text, label) {
   return errors;
 }
 
+// M — `{paths.<key>}` / `{project.paths.<key>}` token resolution.
+//
+// Every `{paths.<name>}` or `{project.paths.<name>}` reference under
+// `templates/compositions/` and `.agents/skills/` must name a field
+// actually declared in `[project.paths]` (config/SCHEMAS.md § 2.3). These
+// are dotted addresses into config, not informal nicknames — a `<name>`
+// that matches no declared key is a broken pointer that silently diverges
+// from wherever a co-operating skill or composition actually writes. See
+// config/SCHEMAS.md § 1.5 and `_docs/path-token-reconciliation-plan.md`.
+//
+// Hard error, not a warning: this check lands green (every existing
+// violation fixed in the same change that adds it) and a warning would
+// only invite the naming scheme to drift back.
+function checkM() {
+  const errors = [];
+  const warnings = [];
+
+  const targets = [];
+  if (fs.existsSync(SKILLS_ROOT)) {
+    targets.push(...discoverFiles(SKILLS_ROOT, (name) => name.endsWith('.md')));
+  }
+  targets.push(...discoverCompositionFiles());
+
+  for (const filePath of targets.sort()) {
+    const rel = path.relative(REPO_ROOT, filePath);
+    let text;
+    try {
+      text = fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+      continue;
+    }
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      for (const tok of line.matchAll(PATHS_TOKEN_RE)) {
+        const key = tok[1];
+        if (PROJECT_PATHS_KEYS.has(key)) continue;
+        if (inCodeFence(lines, i)) continue;
+        errors.push(
+          `${rel}:${i + 1}: \`${tok[0]}\` names no declared [project.paths] ` +
+          `key — declared keys are ${[...PROJECT_PATHS_KEYS].sort().join(', ')}.`
+        );
+      }
+    }
+  }
+
+  return [errors, warnings];
+}
+
 function checkSod(projectTomlPath, artifactPath = null) {
   const errors = [];
   const warnings = [];
@@ -1269,6 +1335,7 @@ function main() {
   const [hErr, hWarn] = checkH();
   const [jErr, jWarn] = checkJ();
   const [lErr, lWarn] = checkL();
+  const [mErr, mWarn] = checkM();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1281,13 +1348,14 @@ function main() {
     'Check H — RE skill output-structure binding',
     'Check J — write-discipline binding (create-* skills)',
     'Check L — RE close-out gate binding',
+    'Check M — {paths.<key>} token resolution',
     'Check F — build-registry.js output',
   ];
 
   const bundles = [
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
     [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
-    [lErr, lWarn], [fErr, fWarn],
+    [lErr, lWarn], [mErr, mWarn], [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {
@@ -1343,6 +1411,7 @@ function main() {
       toMarkdown(titles[6], hErr, hWarn),
       toMarkdown(titles[7], jErr, jWarn),
       toMarkdown(titles[8], lErr, lWarn),
+      toMarkdown(titles[9], mErr, mWarn),
       '## Check F — build-registry.js output',
       '',
     ];

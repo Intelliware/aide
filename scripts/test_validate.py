@@ -364,12 +364,80 @@ class TestDefaultModeRegression(unittest.TestCase):
             f"default-mode validator regression failed.\noutput:\n{out}",
         )
         # Sanity: the output should mention each labelled check at least once.
-        for label in ("Check A", "Check B", "Check D", "Check E", "Check F"):
+        for label in ("Check A", "Check B", "Check D", "Check E", "Check F", "Check M"):
             self.assertIn(label, out, f"missing '{label}' in default-mode output")
         # And it should NOT mention Check I — that only fires in SoD-fixture mode.
         self.assertNotIn(
             "Check I", out,
             "default-mode output should not run Check I (SoD fixture mode)",
+        )
+
+
+class TestPathsTokenResolution(unittest.TestCase):
+    """Check M — `{paths.<key>}` / `{project.paths.<key>}` token resolution.
+
+    No fixture-mode flag exists for M (unlike I/K), so these write an
+    ephemeral composition directly into the live `templates/compositions/`
+    tree — the same tree `validate.py`'s hardcoded COMPOSITIONS_ROOT scans —
+    and remove it in a `finally` block regardless of assertion outcome.
+    """
+
+    FIXTURE_PATH = REPO_ROOT / "templates" / "compositions" / "_check-m-test-fixture.yaml"
+
+    def _write_fixture(self, token: str) -> None:
+        self.FIXTURE_PATH.write_text(
+            textwrap.dedent(
+                f"""\
+                name: check-m-test-fixture
+                description: Ephemeral fixture for test_validate.py Check M test. Deleted immediately after the assertion.
+                applies-to-flow: any
+                package-type: test-fixture
+
+                default-output-path: "{token}/{{feature-id}}-test.md"
+                """
+            ),
+            encoding="utf-8",
+        )
+
+    def test_reject_phantom_token(self) -> None:
+        """A `{paths.requirements_path}` reference (no such key declared) must be rejected."""
+        self._write_fixture("{paths.requirements_path}")
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_PATH.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"validator should reject a phantom {{paths.requirements_path}} reference.\noutput:\n{out}",
+        )
+        self.assertIn("Check M", out)
+        self.assertIn("requirements_path", out)
+
+    def test_accept_declared_key(self) -> None:
+        """A `{paths.requirements_package}` reference (a real, declared key) must pass."""
+        self._write_fixture("{paths.requirements_package}")
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_PATH.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"validator should accept a declared [project.paths] key.\noutput:\n{out}",
+        )
+
+    def test_accept_project_paths_prefix_form(self) -> None:
+        """The `{project.paths.<key>}` synonym form must resolve identically."""
+        self._write_fixture("{project.paths.quality_package}")
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_PATH.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"validator should accept the {{project.paths.<key>}} synonym form.\noutput:\n{out}",
         )
 
 
