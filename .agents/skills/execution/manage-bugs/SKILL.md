@@ -62,6 +62,10 @@ in-scope fixes) or a future bug-fix increment. This skill manages the log.
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables and
 the bug schema.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before determining the mode. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: manage-bugs`) rather than guessing which feature's log to operate on. If it resolves, echo the feature ID and the resolved log path before the first read or write. Applies to all four modes, including REVIEW.
+
 ## Workflow — four operating modes
 
 This skill is invoked in exactly **one** of four modes per call. Determine

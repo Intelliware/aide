@@ -29,6 +29,10 @@ Derived from the legacy `expedited-implementation-package`'s orient + plan steps
 
 See `references/INPUTS-OUTPUTS.md`.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: plan-quick-change`) rather than guessing which feature's spec to load. If it resolves, confirm the spec at `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
+
 ## Workflow
 
 1. **Read the quick-dev spec** — load `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md`. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.

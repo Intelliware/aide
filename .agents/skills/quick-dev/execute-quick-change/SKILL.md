@@ -50,6 +50,10 @@ If, mid-execution, the scope grows past quick-dev tolerances (new data model, ne
 
 See `references/INPUTS-OUTPUTS.md`.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: execute-quick-change`) rather than guessing which feature's plan to execute. If it resolves, echo the feature ID before opening the TDD loop.
+
 ## Workflow
 
 1. **Load solution constraints** — before any increment starts, read the spec's §12.2a Solution Constraints and treat them as facts the implementation must honor on every iteration, including any Solution Pivot. If the spec is inline (trivial) and a constraints section was not written, ask the user once before opening the TDD loop.

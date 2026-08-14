@@ -67,6 +67,10 @@ user what you understood and what you produced; wait for their explicit
 acknowledgement (or correction) before proceeding. This applies regardless of
 which step you are on. Halt the step if the user disagrees.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-quality-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
+
 ## Workflow
 
 Sequenced steps. Run one step at a time. Read each `steps/<n>.md` only when you

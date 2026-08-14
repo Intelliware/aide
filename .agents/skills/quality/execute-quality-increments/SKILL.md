@@ -72,6 +72,10 @@ the user what you understood and what you produced; wait for their explicit
 acknowledgement (or correction) before proceeding. This applies regardless
 of which step you are on. Halt the step if the user disagrees.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: execute-quality-increments`) rather than guessing which feature's TC-XXX increments to run. If it resolves, echo the feature ID before loading the first increment.
+
 ## Workflow
 
 Execute one step at a time. Read each step file only when starting that
