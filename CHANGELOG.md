@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.3.0` |
+| Current artifact version | `2.4.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,36 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.4.0` — 2026-08-14
+
+Phase 1 (Foundation) of `_docs/feature-id-minimal-plan.md`: gives the `{feature-id}`
+token — already load-bearing in every stage's output paths — a source of truth. Adds
+the opt-in feature registry (`features.toml`), the personal active-feature pointer
+(`[user].active_feature`), and the `select-feature` skill that mints and activates
+features. Ships no path changes: `{feature-id}` insertion into compositions and skill
+paths is phase 3, gated on this landing first. A project with no `features.toml` is
+byte-for-byte unaffected.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-14 | Addition | config | `config/features.toml.example` | New annotated example for the committed, opt-in feature registry — one `[[features]]` entry per feature, `id` format `FEAT-NNNN-<kebab-slug>`, optional `ticket` / `repos`. Presence of `features.toml` is the opt-in; absence means the project behaves exactly as before this change. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 2 | 2026-08-14 | Addition | config | `config/SCHEMAS.md` | New § 2.8 (the feature registry — schema, opt-in semantics, ordinal-collision handling via git merge conflict) and § 2.9 (the active-feature pointer — Layer 4, resolution rule, echo requirement). `active_feature` added to the § 2.4 Layer 4 field table. New `features.toml.example` deliverables-table row. § 4 validation gains rules 13-16 (opt-in, fire only when `features.toml` exists): `id` format, `id` uniqueness (full string and bare ordinal), `active_feature` resolution, `repos` cross-reference. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 3 | 2026-08-14 | Addition | config | `config/project.user.toml.example` | New commented-out `[user].active_feature` example alongside the existing `[user].role` block, cross-referencing `config/SCHEMAS.md` § 2.8-2.9. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 4 | 2026-08-14 | Addition | skills | `.agents/skills/meta/select-feature/` (`SKILL.md` + `references/{OVERVIEW,INPUTS-OUTPUTS,EXAMPLE}.md`) | New skill: selects or mints the active feature. Select leads, create follows — presenting the existing registry first is the deliberate mitigation against the same work acquiring two feature identities. Registered in `workflow-graph.yaml`'s `anytime` list as the redirect target for every write-side/read-side skill's (future, phase 2) feature-ID precondition. `python3 scripts/build-registry.py` re-run; 50 skills, 0 warnings. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release stacked on top of the (not-yet-merged) `2.3.0` / `path-token-reconciliation`
+branch — this branch is `feat/feature-id-minimal-plan`, based on `path-token-reconciliation`
+rather than `main`, because this phase's `{feature-id}` documentation assumes every
+`{paths.<key>}` token already resolves (the `2.3.0` prerequisite). Independently
+shippable per `_docs/feature-id-minimal-plan.md` § 9: adds capability without moving a
+single byte of any existing artifact. `python3 scripts/validate.py` (0 errors, 3
+pre-existing unrelated warnings) and `python3 scripts/test_validate.py` (29/29 passing)
+both green.
 
 ### `2.3.0` — 2026-08-14
 
