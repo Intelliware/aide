@@ -19,7 +19,7 @@ description: Combined req+design+plan spec in one artifact for enhancing an exis
 applies-to-flow: brownfield
 package-type: enhancement-spec
 
-default-output-path: "{paths.requirements_path}/{feature-id}-enhancement-spec.md"
+default-output-path: "{paths.requirements_package}/{feature-id}-enhancement-spec.md"
 
 blocks:
   # ---- Framing ----

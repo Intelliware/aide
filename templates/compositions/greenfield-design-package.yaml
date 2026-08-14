@@ -10,7 +10,7 @@ description: Full design package for a greenfield project (all elaborate design 
 applies-to-flow: greenfield
 package-type: design
 
-default-output-path: "{paths.design_path}/{feature-id}-design.md"
+default-output-path: "{paths.design_package}/{feature-id}-design.md"
 
 blocks:
   # ---- Front matter / framing ----

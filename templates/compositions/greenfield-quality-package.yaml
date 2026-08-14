@@ -12,7 +12,7 @@ description: Full quality package for a greenfield project (all elaborate qualit
 applies-to-flow: greenfield
 package-type: quality
 
-default-output-path: "{paths.quality_path}/{feature-id}-quality.md"
+default-output-path: "{paths.quality_package}/{feature-id}-quality.md"
 
 blocks:
   # ---- Front matter / framing ----

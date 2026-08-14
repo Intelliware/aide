@@ -10,7 +10,7 @@ description: Full quality package for a brownfield enhancement (greenfield quali
 applies-to-flow: brownfield
 package-type: quality
 
-default-output-path: "{paths.quality_path}/{feature-id}-quality.md"
+default-output-path: "{paths.quality_package}/{feature-id}-quality.md"
 
 blocks:
   # ---- Front matter / framing ----

@@ -11,7 +11,7 @@ description: Minimal spec — overview, FRs, acceptance criteria, solution const
 applies-to-flow: quick-dev
 package-type: quick-dev-spec
 
-default-output-path: "{paths.requirements_path}/{feature-id}-quick-dev-spec.md"
+default-output-path: "{paths.requirements_package}/{feature-id}-quick-dev-spec.md"
 
 blocks:
   - slug: shared/overview

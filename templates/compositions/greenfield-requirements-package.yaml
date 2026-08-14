@@ -10,7 +10,7 @@ description: Full requirements package for a greenfield project (all elaborate b
 applies-to-flow: greenfield
 package-type: requirements
 
-default-output-path: "{paths.requirements_path}/{feature-id}-requirements.md"
+default-output-path: "{paths.requirements_package}/{feature-id}-requirements.md"
 
 blocks:
   # ---- Front matter / framing ----
