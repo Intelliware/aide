@@ -14,6 +14,7 @@
 | `framework.user.toml.example` | Annotated example of the gitignored personal global preferences layer. |
 | `project.toml.example` | Annotated example of the committed project super-context for a 3-repo setup with a sibling KB repo. |
 | `project.user.toml.example` | Annotated example of the gitignored personal project preferences layer. |
+| `features.toml.example` | Annotated example of the committed, opt-in feature registry — a peer of `project.toml`, not a layer within it. See § 2.8. |
 | `customizations/README.md` | Layer-5 directory orientation: file-naming rules, precedence inside Layer 5, when-to-use-which-layer guide, and how `customize-framework` interacts with this folder. |
 | `customizations/example-skill.toml.example` | Comprehensive merge-behaviour reference for a hypothetical skill: scalar override, array-of-tables merge by `code`, `_suppress: true`, array-of-scalars replacement. |
 | `customizations/create-requirements-package.toml.example` | Worked example for a stage-driver skill (composition pin, deepened elicitation, suppressed optional artifact, custom block). |
@@ -439,6 +440,7 @@ preferences. The block deep-merges field-by-field with `framework.user.toml`'s
 | Field | Type | Purpose |
 |---|---|---|
 | `role` | enum | (SoD only) The role this user operates as on this project. Values: `BA`, `Architect`, `BSA`, `Developer`, `Tester`, `KB-Steward`. Compared against `[stages.<stage>].write_role` at every write boundary. Project-scoped because the same person may act as different roles on different projects. |
+| `active_feature` | string | (only meaningful when `features.toml` exists) Which registered feature this person is currently working on. Must resolve to a declared `id` in `features.toml` — see § 2.8/§ 2.9. Project-scoped and personal for the identical reason `role` is: the same person works different features on different projects, and both fields are consulted at the same write boundaries. |
 
 Typical contents are one or two sections — see `project.user.toml.example`.
 
@@ -522,6 +524,96 @@ registers_tools = ["atlassian"]
 An add-on is **discovered** by the host's multi-root `.agents/skills/` scan when
 opened as a workspace folder — the manifest does not drive discovery; it drives
 enumeration and registry labelling.
+
+### 2.8 The feature registry — `features.toml`
+
+**Location:** `{project-root}/features.toml`. **Not one of the five layers above** —
+it is project *data* (which features exist), not configuration (how the framework
+should behave), so it is filed as a committed peer of `project.toml` rather than a
+section within it. Filing it under `[project]` would have meant answering
+layer-precedence questions it does not deserve (can `project.user.toml` override a
+feature?) and would have made the registry conflict-prone in the same file that
+holds rarely-edited settings like SoD policy and repo definitions.
+
+**The presence of this file is the opt-in — no separate config flag.** Resolution in
+every feature-aware skill is exactly two lines:
+
+```
+If features.toml exists  → resolve the active feature; write feature-scoped paths.
+If it does not           → behave exactly as today.
+```
+
+Existing projects are untouched until someone runs `select-feature` for the first
+time. Artifacts already on disk in a flat (non-feature-scoped) layout stay where
+they are and keep working.
+
+**Shape** (see `features.toml.example` for the full annotated file):
+
+```toml
+[[features]]
+id      = "FEAT-0001-alert-customer"
+title   = "Alert customer when a refund is delayed"
+created = 2026-08-11
+ticket  = "ACME-1247"          # optional
+repos   = ["billing-api"]      # optional; codes from [[project.repos]]
+```
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `id` | string | yes | The directory segment and the feature's stable identity. Format `FEAT-NNNN-<kebab-slug>` — zero-padded 4-digit ordinal, allocated sequentially in creation order (max existing ordinal + 1), plus a descriptive kebab slug. Mirrors the framework's existing ADR convention (`ADR-NNNN-<kebab-title>`). The ordinal is the permanent identity; the slug is a label frozen at mint time and does not need to track later title edits. Gaps in the ordinal sequence are legal; reuse of an already-assigned ordinal is not. |
+| `title` | string | yes | Human-readable one-line description. Freely editable after minting — renaming the title does not rename the directory. |
+| `created` | date | yes | ISO date the entry was minted. |
+| `ticket` | string | no | External tracker reference (Jira key, ADO work item, etc.). |
+| `repos` | array<string> | no | `[[project.repos]].code` values this feature is expected to touch. **Advisory, not authoritative** — each `create-*` skill's own run-time scope prompt (single-repo vs. cross-cutting) always wins when it diverges, because scope genuinely changes during discovery. When the run-time answer diverges from `repos`, the skill should offer to update this field rather than let the two drift apart silently. |
+
+**Absence vs. emptiness.** No `features.toml` means the project has not opted in.
+An empty-but-present file (no `[[features]]` entries) is also legal and means
+"opted in, no features yet" — this is the normal state immediately after opt-in
+and needs no scaffolding trick to represent, unlike an empty array-of-tables
+declared inline in TOML.
+
+**Minting is concurrency-safe by construction, not by cleverness.** Ordinal
+allocation reads the highest existing entry and adds one, so two people minting a
+feature on separate branches at the same time can both compute the same next
+ordinal. Because this file is committed, that collision surfaces as an ordinary
+**git merge conflict in one small file** — loud and blocking — rather than as two
+directories quietly coexisting on disk. `select-feature` warns when the working
+tree is behind its remote for exactly this reason.
+
+**Deliberately not in the registry:** any `status` or `lifecycle` field. Feature
+status/lifecycle tracking is out of scope for this change (see
+`_docs/feature-id-minimal-plan.md` § 1) — the registry carries identity only.
+
+### 2.9 The active feature — `[user].active_feature`
+
+**Location:** `project.user.toml`, Layer 4 (gitignored, personal, machine-local) —
+see the `active_feature` row in § 2.4's field table.
+
+```toml
+[user]
+role           = "BA"
+active_feature = "FEAT-0001-alert-customer"
+```
+
+**The registry is shared truth; the pointer is personal state.** Two people on the
+same project routinely work different features at the same time; neither should be
+able to change the other's working context by committing a file. Putting the
+pointer in Layer 4 makes concurrent work the default rather than a special case.
+
+**Resolution rule.** `active_feature` must resolve to a declared `id` in
+`features.toml`. If it is set but unresolvable (typo, or the feature was never
+committed), that is an **error**, not a silent fallback — inventing a directory for
+an unregistered feature is exactly the drift this mechanism exists to prevent.
+
+**Selected, never inferred.** `active_feature` is written only by `select-feature`
+(directly, or as the closing step of minting a new feature). No other skill writes
+it as a side effect of running.
+
+**Every feature-scoped skill echoes the resolved feature before its first
+read/write.** A `review-*` or coverage run against the wrong feature returns a
+confident verdict about the wrong artifacts, which is as damaging as a misplaced
+write and harder to notice — so the echo applies to read-side skills too, before
+their first read rather than their first write.
 
 ---
 
@@ -678,6 +770,20 @@ skill's contract assumes these have already passed.
 10. `[user].role` (when set in `project.user.toml`) matches the same enum.
 11. `[project].artifact_subdir` (when set) is a bare relative path: no leading slash, no path tokens.
 12. **Artifact frontmatter (cross-cutting):** any artifact written under a `_cross-cutting/` directory MUST carry an `affects_repos` array in its YAML frontmatter, and every value MUST resolve to a known `[[project.repos]].code`. Single-repo artifacts MAY omit the field; if present, must have exactly one entry matching the artifact's `<repo-code>` directory.
+
+**Config — feature registry (opt-in, `features.toml`):** these rules apply only
+when `features.toml` exists; a project without one is not in feature-scoped mode
+and none of the following fires.
+
+13. Every `[[features]].id` matches `^FEAT-\d{4}-[a-z0-9]+(-[a-z0-9]+)*$`.
+14. Every `[[features]].id` is unique — both the full string and the bare 4-digit
+    ordinal (a duplicate ordinal with a differing slug is still a collision).
+    Gaps in the ordinal sequence are legal; only reuse is an error.
+15. `[user].active_feature` (when set in `project.user.toml`) resolves to a
+    declared `[[features]].id`. Unset is valid (see § 2.9); set-but-unresolvable
+    is an error, including when `features.toml` is present but empty.
+16. Every `[[features]].repos` entry (when present) resolves to a known
+    `[[project.repos]].code`.
 
 **KB:**
 
