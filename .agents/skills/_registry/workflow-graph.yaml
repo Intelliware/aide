@@ -219,6 +219,11 @@ anytime:
   - customize-framework
   - shard-document
   - track-change
+  # Feature registry / active-feature selection. Independently invocable, and
+  # also the redirect target every write-side and read-side feature-ID
+  # precondition names when no active feature resolves — see
+  # config/SCHEMAS.md § 2.8-2.9 and _docs/feature-id-minimal-plan.md § 7.
+  - select-feature
   - verify-source
   - manage-bugs
   - navigate-knowledge-base

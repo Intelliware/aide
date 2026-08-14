@@ -1,0 +1,94 @@
+# Overview — select-feature
+
+## Purpose
+
+`{feature-id}` already appears in 21+ skill files and 7+ compositions, in
+strings like `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`.
+Before this skill existed, nothing anywhere defined what its *value* was: no
+skill minted it, no config declared it, no elicitation pattern asked for it —
+it was resolved by whatever the agent decided in the moment. Two sessions
+describing the same work could produce two different IDs and two orphan
+directory trees, with no error raised anywhere.
+
+`select-feature` is the single place that mints and activates a feature ID,
+backed by two files:
+
+- `features.toml` (project root, committed) — the registry of every feature
+  that has ever been minted. Shared truth.
+- `[user].active_feature` in `project.user.toml` (gitignored) — which feature
+  *this person, on this machine* is currently working on. Personal state.
+
+See `config/SCHEMAS.md` § 2.8 and § 2.9 for the full schema and the reasoning
+behind splitting registry (Layer 3 territory) from pointer (Layer 4).
+
+## Why select leads and create follows
+
+The failure this skill exists to prevent is the same piece of work acquiring
+two identities. A skill that opens by offering to *add* a feature reproduces
+that hazard at exactly the moment it was meant to stop it: a user who does not
+recall that `FEAT-0007-refund-delays` exists will cheerfully mint
+`FEAT-0012-delayed-refund-alerts` for the same work. Presenting what already
+exists first — with enough context per entry to be recognised (ID, title,
+ticket, which stages already have artifacts) — makes reuse the path of least
+resistance and creation the deliberate choice.
+
+**Two cases skip selection entirely**, or select-first becomes friction for no
+benefit:
+
+1. **Empty registry.** Nothing to select from — go straight to create.
+2. **A supplied description with no plausible match.** When the caller passes
+   the text the user already typed (e.g. a halted skill forwarding the
+   original request), and ranking it against existing features surfaces
+   nothing plausible, offer create immediately rather than making the user
+   reject a list first.
+
+The inverse risk is worth naming too: if creating reads as the discouraged
+path, people attach unrelated work to a loosely-related existing feature, and
+a feature accumulating three unrelated changes is its own kind of mess. That
+is why create stays a visible, first-class option in the select list rather
+than something buried beneath it — the design leans toward reuse, it does not
+mandate it.
+
+## When to use
+
+- Choosing or switching the active feature before starting work in a
+  feature-scoped project
+- Listing registered features and their per-stage progress
+- Starting genuinely new work that needs a feature ID minted
+- Redirected here by another skill's halted precondition ("No active feature.
+  Run `select-feature`, then re-run this skill.")
+- Opting a project into feature-scoped paths for the first time — creating
+  the first registry entry *is* the opt-in
+
+## When NOT to use
+
+- The project has no `features.toml` and no intent to create one — every
+  skill already behaves correctly with no active feature; nothing to resolve
+- Renaming or relocating on-disk artifacts — this skill only touches the two
+  config files, never the artifact tree (a slug can drift from a later title
+  edit; the directory name does not follow it — see `config/SCHEMAS.md` § 2.8)
+- Recording that a feature shipped, was abandoned, or is on hold — status and
+  lifecycle are explicitly out of scope; do not let a `status` field creep in
+  here
+
+## Position in workflow
+
+Listed as `anytime` in `.agents/skills/_registry/workflow-graph.yaml`, not in
+any flow's linear `sequence` — every write-side and read-side skill in the
+feature-ID precondition (`create-requirements-package`, `create-design-package`,
+`create-implementation-package`, `create-quality-package`, `execute-increments`,
+`execute-quality-increments`, `document-quick-change`, `plan-quick-change`,
+`execute-quick-change`, `manage-bugs`, `create-pr`, and the `review-*` gates)
+halts and names this skill as the destination when no active feature resolves.
+This skill returns the user to that caller via the ordinary `## Next skill`
+forward-handoff convention, pointed backwards.
+
+## Concurrency note
+
+Ordinal allocation (`max + 1`) is the one hazard in this design: two people
+minting a feature on separate branches at the same moment can both compute the
+same next ordinal. Because `features.toml` is committed, the collision
+surfaces as a git merge conflict in one small file — loud and blocking —
+rather than as two directories quietly coexisting. This skill warns when the
+local working tree appears behind its remote before minting, but the merge
+conflict is the actual backstop.
