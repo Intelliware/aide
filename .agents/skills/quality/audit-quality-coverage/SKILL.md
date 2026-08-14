@@ -55,6 +55,8 @@ counts, and the recommended actions; wait for explicit user
 acknowledgement before declaring the audit closed. If any input is
 missing or ambiguous, surface that to the user before producing the
 report rather than silently substituting defaults.
+## Precondition — active feature
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: audit-quality-coverage`) rather than guessing which feature to audit — do not fall back to creating one. If it resolves, echo the feature ID before locating the packages.
 ## Workflow
 Execute one step at a time. Read each step file only when starting that
 step.

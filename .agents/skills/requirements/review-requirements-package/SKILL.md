@@ -67,6 +67,10 @@ prompt.
 See `_docs/sod-multi-repo-proposal.md` § 5 and `config/SCHEMAS.md` § 5 for
 the full SoD layout geometry.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-requirements-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved artifact path before Review 1.
+
 ## Workflow
 
 Run reviews strictly in order. Do not parallelize. Present findings and verdict after each review. Stop on any FAIL until resolved.

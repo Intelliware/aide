@@ -53,6 +53,10 @@ re-run for re-validation.
 
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Review 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-implementation-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved package path before Review 1.
+
 ## Workflow
 
 Run the review checks **strictly in order**. Do not run them in parallel.
