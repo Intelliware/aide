@@ -1,11 +1,13 @@
 # Path token reconciliation — prerequisite plan
 
-**Status:** draft
+**Status:** implemented — shipped in `2.3.0` (2026-08-14).
 **Date:** 2026-08-12
 **Framework version at authoring:** 2.2.0 (`R2.2.0`)
 **Relationship to other plans:** predecessor to `_docs/feature-id-minimal-plan.md`. Also
-extracts and completes the prerequisite that `_docs/feature-id-path-segment-plan.md` carries
-internally as its §2.6. Neither feature-ID plan should start until this lands.
+extracts and completes the prerequisite that
+`_docs/feature-id-path-segment-plan-superseded.md` carries internally as its §2.6 — that
+document is now superseded by this plan plus the minimal plan. Neither feature-ID plan
+should start until this lands, which it now has.
 
 ---
 
@@ -213,8 +215,10 @@ For `_docs/feature-id-minimal-plan.md`:
 - **Its validator check becomes N**, and gains a cleaner job: assert the `{feature-id}`
   segment, on paths already known to resolve.
 
-For `_docs/feature-id-path-segment-plan.md`: its §2.6 prerequisite is satisfied externally,
-so its Tier 2 unblocks without the plan having to carry a blocking tier at all.
+For `_docs/feature-id-path-segment-plan-superseded.md`: its §2.6 prerequisite is satisfied
+externally, so its Tier 2 unblocks without the plan having to carry a blocking tier at all.
+(In practice its Tier 2 scope now lives in `_docs/feature-id-minimal-plan.md` instead —
+the full plan is retained only for rationale and decision-log purposes; see its banner.)
 
 **Cost, honestly stated.** These 30 files are a subset of the ~97 the feature-ID work touches,
 so about a third of that work's files get edited twice, and there is one extra merge. Total

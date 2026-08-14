@@ -1,6 +1,20 @@
-# Plan — Feature ID as a directory segment for all stages
+# Plan — Feature ID as a directory segment for all stages (SUPERSEDED)
 
-Status: **proposal / not yet approved** — 6 open decisions block implementation; see §8 Decision log. The path shape (D1, D5) and the §2.6 prerequisite (D7, D10) are decided; the prerequisite is independently shippable.
+> **⚠ SUPERSEDED — do not implement from this document.**
+>
+> Split 2026-08-12 into two independently-mergeable documents:
+>
+> - `_docs/path-token-reconciliation-plan.md` — the §2.6 prerequisite below.
+>   **Implemented, shipped in `2.3.0`.**
+> - `_docs/feature-id-minimal-plan.md` — the remaining feature-ID-as-path-segment
+>   scope. **Not yet implemented.**
+>
+> This document is retained for its rationale (§1), blast-radius analysis, and
+> decision log (§8) — several decisions here (D1, D2, D5, D7, D10) are carried
+> forward by the minimal plan rather than re-argued. It is a historical record,
+> not the current plan of record: read the two documents above instead.
+
+Status: ~~proposal / not yet approved~~ — **superseded**, see banner above. (Original: 6 open decisions block implementation; see §8 Decision log. The path shape (D1, D5) and the §2.6 prerequisite (D7, D10) were decided; the prerequisite was independently shippable — and now shipped.)
 Scope: A.I.D.E. framework itself (`.agents/skills/`, `templates/`, `config/`, `references/`, `scripts/`, root docs)
 Citations verified against: **framework 2.0.0** (commit `0aae630`). Every `file:line` reference below was checked at that commit; re-verify after any upstream sync before acting on a line number.
 

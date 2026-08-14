@@ -3,11 +3,14 @@
 **Status:** draft for comparison
 **Date:** 2026-08-11
 **Framework version at authoring:** 2.2.0 (`R2.2.0`, commit `5f8684d`)
-**Parallel to:** `_docs/feature-id-path-segment-plan.md` (the full plan). This document
-does **not** supersede it. The two exist side by side so the scope trade-off is visible.
+**Parallel to:** `_docs/feature-id-path-segment-plan-superseded.md` (the original full
+plan, since split — see its banner). This document and
+`_docs/path-token-reconciliation-plan.md` together replace it; the full plan is retained
+only for its rationale (§1) and decision log (§8), which several sections below carry
+forward rather than re-argue.
 **Prerequisite:** `_docs/path-token-reconciliation-plan.md` — 30 files, extracted as a
-standalone predecessor. Several sections below were written before that extraction and now
-defer to it; each says so where it applies.
+standalone predecessor. **Implemented, shipped in `2.3.0`.** Several sections below were
+written before that extraction and defer to it; each says so where it applies.
 
 ---
 
