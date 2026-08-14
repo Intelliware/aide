@@ -89,6 +89,7 @@ Examples:
 | `execute-increments` | "Execute the next increment." |
 | `document-quick-change` | "Document a quick change for `<scope>`." |
 | `customize-framework` | "Customize the framework for this project." |
+| `select-feature` | "Select (or start) the feature I'm working on." |
 
 ## Hand-off contract
 
