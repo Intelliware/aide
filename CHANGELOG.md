@@ -52,23 +52,29 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ## Change Log
 
-### `2.4.0` — 2026-08-14
+### `2.4.0` — 2026-08-16
 
-Phases 1 (Foundation) and 2 (Preconditions) of `_docs/feature-id-minimal-plan.md`,
-shipped as one release. Phase 1 gives the `{feature-id}` token — already load-bearing
-in every stage's output paths — a source of truth: the opt-in feature registry
-(`features.toml`), the personal active-feature pointer (`[user].active_feature`), and
-the `select-feature` skill that mints and activates features. Phase 2 makes that
-source of truth binding: every feature-aware skill now resolves the active feature and
-refuses to guess when it cannot, instead of inventing an ID or a slug from the
-request.
+Phases 1 (Foundation), 2 (Preconditions), 3b (Working tree) and 3 (Path segments) of
+`_docs/feature-id-minimal-plan.md`, shipped as one release. Phase 1 gives the
+`{feature-id}` token — already load-bearing in every stage's output paths — a source
+of truth: the opt-in feature registry (`features.toml`), the personal active-feature
+pointer (`[user].active_feature`), and the `select-feature` skill that mints and
+activates features. Phase 2 makes that source of truth binding: every feature-aware
+skill now resolves the active feature and refuses to guess when it cannot, instead of
+inventing an ID or a slug from the request. Phase 3b binds the working-tree directory
+to the resolved ID, and phase 3 puts that ID into the assembled paths themselves.
 
-The two phases ship together because neither is much use alone — phase 1 registers a
-skill nothing routes to, and phase 2 is what makes it reachable. Ships no path
-changes: `{feature-id}` insertion into compositions and skill paths is phase 3, gated
-on this landing first. A project with no `features.toml` is byte-for-byte unaffected —
-the precondition's first line is the opt-in check, and it is a pure no-op when the
-file is absent.
+The phases ship together because none of them is much use alone. Phase 1 registers a
+skill nothing routes to; phase 2 makes it reachable but moves no artifact; 3b and 3
+are what actually stop one feature's work from landing in two places under two names.
+Shipping 1 and 2 by themselves would have released a registry that nothing consumed.
+
+A project with no `features.toml` remains byte-for-byte unaffected, which is the
+constraint the whole design is built around rather than a courtesy. Each
+precondition's first line is the opt-in check and returns immediately; the assembled
+path drops exactly one directory segment; and the filename keeps its `{feature-id}-`
+prefix either way, so only globs that assume directory *depth* are sensitive to
+opting in, not globs that match on filename.
 
 #### Added
 
@@ -82,21 +88,56 @@ file is absent.
 | 6 | 2026-08-14 | Addition | skills | 11 write-side skills (`create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `execute-increments`, `execute-quality-increments`, `document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`, `create-pr`) | Each gains a `## Precondition — active feature` section citing Mode A: halt and redirect to `select-feature` (passing its own name as `caller`) when `features.toml` exists but no active feature resolves; echo the feature ID and resolved output directory before the first write otherwise. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 7 | 2026-08-14 | Addition | skills | 5 read-side skills (`review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`) | Each gains a `## Precondition — active feature` section citing Mode B: identical resolution, but `select-feature` is invoked with `caller_mode: select-only` — reviewing/auditing is never a reason to mint a feature that has nothing to review yet. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 8 | 2026-08-14 | Addition | skills | `framework-navigator` (`SKILL.md`, `references/state-probe.md`, `steps/03-match-or-render.md`, `steps/04-recommend.md`) | State probe gains `features_toml_present` / `active_feature` fields (opt-in, no-op when `features.toml` is absent). The recommendation gate filter now surfaces `select-feature` as a prerequisite — using the same mechanism as an unmet `workflow-graph.yaml` gate, no score penalty — when the probe shows no active feature ahead of a feature-aware recommendation. The navigator never halts on this itself: per its own "Side effects: none" contract, it recommends, it does not block. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 9 | 2026-08-16 | Addition | skills | `start-project` (`SKILL.md`, `steps/06-handoff.md`) | Bootstrap now states once, at handoff, that feature-scoped paths exist and that `select-feature` enables them at any point. Closes a discoverability hole rather than changing a default: `start-project` never mentioned `features.toml`, and a feature-aware skill cannot route a user to `select-feature` on a project without a registry because the precondition returns before it could — so the only way in was to already know to ask. Deliberately a statement, not a question: it writes no `features.toml`, does not wait for a reply, and is not re-raised. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 10 | 2026-08-16 | Addition | references | `references/ai-principles/feature-precondition.md` | New *Worked example — one feature, both ways* section showing a single feature's full tree opted in and not, placed where the working-tree and assembled-path rules meet so the two can be read together. This is the only end-to-end illustration of the opted-in tree: every skill's own `references/EXAMPLE.md` depicts the not-opted-in shape, correctly, because that is what a project gets until someone runs `select-feature`. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-15 | Restructure | skills, templates | 51 files across `requirements`, `design`, `quality`, `quick-dev`, plus `workflow-graph.yaml`, `capture-solution-context`, `review-adversarial/references/OVERVIEW.md`, `templates/blocks/quality/test-case-increment.md` | Phase 3b — bound the per-section working-tree directory to the registry ID: every `docs/<feature>/` became `docs/<feature-id>/`, and the third spelling `<feature-folder>` (a defect inherited from the superseded plan) was retired. Three spellings for one concept were what allowed a single feature's work to be described in three mutually-consistent-looking ways. Non-mechanical part: `requirements-writing-workflow.md`, `solution-discovery-workflow.md` and `document-quick-change/SKILL.md` no longer infer a folder name from the user's description and negotiate it — on an opted-in project the registry answers that question, and the inference survives only as the not-opted-in fallback. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 2 | 2026-08-15 | Addition | references | `references/ai-principles/feature-precondition.md` | New *Resolving the working-tree directory* section, including the reconciliation rule for a project that opts in mid-flight. When `docs/<slug>/` exists but `docs/<feature-id>/` does not, the skill **halts** and offers either a `git mv` rename or keeping the existing directory — creating the ID-named directory alongside would split one feature across two trees, which is the precise failure this change exists to prevent, reintroduced by the fix for it. Option (b) is stable across sessions because the slug is derivable from the ID, so the rule re-finds the directory on every run without a new registry field. Honours `config/SCHEMAS.md` § 2.8's promise that artifacts already on disk stay where they are. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 3 | 2026-08-15 | Restructure | templates | 7 compositions (`greenfield-requirements-package`, `brownfield-enhancement-spec`, `greenfield-design-package`, `greenfield-quality-package`, `brownfield-quality-package`, `quick-dev-spec`, `greenfield-implementation-package`) | Phase 3 — each feature-scoped `default-output-path` now carries the `{feature-id}/` segment, written in the opted-in form with a comment pointing at the conditional rule. One string plus a comment rather than two keys: two path strings per composition would need to stay in sync forever, and a self-erasing token would put conditional logic in a format that has no way to express it. The new *Resolving the assembled artifact path* section in `feature-precondition.md` holds the rule — segment present when `features.toml` exists, dropped when absent, filename prefix unchanged either way. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 4 | 2026-08-15 | Restructure | skills | ~33 occurrences across `requirements`, `design`, `quality`, `quick-dev` | Phase 3 skill path strings for the four stages whose package is a single assembled artifact, e.g. `{paths.requirements_package}/{feature-id}-requirements.md` → `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`. Uniform and mechanical; the redundant-looking filename prefix is deliberate per § 2.1 of the plan. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 5 | 2026-08-16 | Restructure | skills, config | 23 files across `planning`, `execution`, `quality`, plus `config/customizations/review-implementation-package.toml.example` and `greenfield-implementation-package.yaml` | Phase 3 for the implementation stage, which differs from the other four: the package is a *directory* of per-feature files, so the segment goes on the directory reference rather than beside a filename. Increments, `increment-status.md`, `bugs-and-issues-log.md`, `change-tracker.md`, `implementation-package.md` and the `plan/` and `review/` subdirectories all now sit under `{project.paths.implementation_package}/{feature-id}/`. Each moved because it tracks state for one feature's increments — the same test that keeps this project-level CHANGELOG where it is, since that one is project-scoped, carries no `{feature-id}` in its path, and is written at PR time rather than during authoring. Largely propagates a shape the stage had already committed to: `execute-increments/steps/00-scope-target-repo.md` already documented legacy mode as `{project.paths.implementation_package}/<feature-id>/` alongside both SoD modes while the rest of the stage still described a flat layout. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 6 | 2026-08-16 | Correction | config, skills | `config/customizations/review-implementation-package.toml.example`, `templates/compositions/greenfield-implementation-package.yaml` | Converged the customization example's `{feature-id}-review/` directory on `{feature-id}/review/`, matching the bare `review/` that `review-implementation-package` already used — § 2.1's keep-the-prefix rule governs filenames, not directories, so there was no reason for the two to disagree. The composition's header comment now says a feature's increments live together under the segment; "the set of all increments for a project" stopped being a useful description once the stage root holds one directory per feature. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-16 | Correction | skills | `plan-quick-change` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`), `execute-quick-change/references/INPUTS-OUTPUTS.md` | The quick-dev spec handoff was broken and had been since before this work: `document-quick-change` writes the spec to `{paths.requirements_package}/<feature-id>/`, but both downstream skills loaded it from `docs/<feature-id>/quick-dev-package/`. It survived only because the agent carried the spec in conversation across the three skills and so never had to resolve the path it had been given. `quick-dev-spec.yaml`'s `default-output-path` settles which side was wrong — the spec is a deliverable, so the readers were fixed. Resulting split: the spec assembled, and the plan, change tracker, orientation notes and review findings in the working tree. Recorded as a known defect at line 69 of the superseded plan; retiring `<feature-folder>` did not cause it but did remove the last ambiguity that let it pass unnoticed, since both sides now name the same directory in the same spelling and simply disagree about the parent. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 
 #### Branch Dependency
 
 Minor release stacked on top of the (not-yet-merged) `2.3.0` / `path-token-reconciliation`
 branch — this branch is `feat/feature-id-minimal-plan`, based on `path-token-reconciliation`
 rather than `main`, because the `{feature-id}` work assumes every `{paths.<key>}` token
-already resolves (the `2.3.0` prerequisite). Independently shippable per
-`_docs/feature-id-minimal-plan.md` § 9: adds capability without moving a single byte of
-any existing artifact. Because `2.3.0` is itself unmerged and untagged, this version
-number assumes the stack lands in order; renumber if it does not.
+already resolves (the `2.3.0` prerequisite). Because `2.3.0` is itself unmerged and
+untagged, this version number assumes the stack lands in order; renumber if it does
+not.
+
+`_docs/feature-id-minimal-plan.md` § 9 describes phases 1 and 2 as adding capability
+without moving a byte of any existing artifact. That held for those two phases and no
+longer describes this release: 3b renames the working-tree directory on opted-in
+projects and 3 adds a directory level to every assembled path. What is preserved is
+narrower and worth stating exactly — a project with no `features.toml` is unchanged,
+and an opted-in project's *filenames* are unchanged. Directory depth is not.
 
 `python3 scripts/validate.py` (0 errors, 3 pre-existing unrelated warnings), `python3
 scripts/test_validate.py` (29/29 passing), and `python3 scripts/build-registry.py`
-(50 skills, 0 warnings — phase 2 added no new skill, only wired existing ones) all
-green.
+(50 skills, 0 warnings — phases 2 onward added no new skill, only wired existing ones)
+all green.
+
+Phase 4 (validator checks that would stop the retired spellings reappearing) is not in
+this release.
+
+`README.md`'s version line is set to `2.4.0`, per the synchronisation rule at the foot
+of this file. It had been left at `2.2.0` — the `2.3.0` bump on `path-token-reconciliation`
+did not carry it forward, and the phase 1 bump here did not either, so the line was two
+releases stale rather than one. Setting it to this release's number is the correct end
+state for the stack; expect a one-line conflict if `2.3.0` is later amended to fix its
+own half.
 
 ### `2.3.0` — 2026-08-14
 
