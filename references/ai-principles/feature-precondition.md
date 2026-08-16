@@ -108,6 +108,47 @@ Three details that are easy to get wrong:
   (`config/SCHEMAS.md` § 5) and a role check must keep corresponding to a subtree.
   Cross-cutting features nest identically as `_cross-cutting/<feature-id>/`.
 
+## Worked example — one feature, both ways
+
+The two rules above are easier to trust side by side than in isolation. Below is a
+single feature, `FEAT-0001-alert-customer`, laid out under both configurations.
+This is the only place the opted-in tree is shown end to end: the skills' own
+`references/EXAMPLE.md` files all depict the **not-opted-in** column, because that
+is what a project gets until someone runs `select-feature`.
+
+Opted in — `features.toml` exists, `[user].active_feature = "FEAT-0001-alert-customer"`:
+
+```
+docs/FEAT-0001-alert-customer/          ← working tree, per-section files
+  requirements-package/
+  design-package/
+  CHANGE-TRACKER.md
+.framework-output/requirements/FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md
+.framework-output/design/FEAT-0001-alert-customer/FEAT-0001-alert-customer-design.md
+.framework-output/implementation/FEAT-0001-alert-customer/INC-001.md
+```
+
+Not opted in — no `features.toml`, the folder name inferred from the request:
+
+```
+docs/alert-customer/                    ← working tree, per-section files
+  requirements-package/
+  design-package/
+  CHANGE-TRACKER.md
+.framework-output/requirements/alert-customer-requirements.md
+.framework-output/design/alert-customer-design.md
+.framework-output/implementation/INC-001.md
+```
+
+Three things the comparison makes concrete. The assembled files differ by exactly
+one directory level, never by filename — which is why filename globs survive opt-in
+and depth-sensitive ones do not. `INC-001.md` gains the segment but no prefix, so
+the not-opted-in column has nothing distinguishing it from a second feature's
+`INC-001.md`, which is the collision opting in exists to fix. And the working-tree
+directory is the one place the two columns disagree on a *name* rather than a
+depth, which is why a project opting in mid-flight hits case 3 above and gets asked
+before anything moves.
+
 ## Mode A — Write-side (select-and-create)
 
 Applies to skills that produce new artifacts:

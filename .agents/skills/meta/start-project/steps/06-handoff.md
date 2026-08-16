@@ -35,7 +35,20 @@ that `project.toml` is now in place and validated.
    - The trigger phrase the user can repeat to invoke the next skill
      manually if they want to come back to it later
 
-3. Emit the handoff. Do not invoke the next skill silently — the user
+3. Add the feature-scoping note, once, immediately before the handoff:
+
+   > Artifacts will be written per feature under `docs/<feature-name>/`. If you
+   > would rather have them keyed to a registered feature ID
+   > (`docs/FEAT-0001-<slug>/`), run `select-feature` at any point — including
+   > later, once work is already underway.
+
+   This is a statement, not a question. Do not wait for a reply, do not create
+   `features.toml`, and do not re-raise it if the user says nothing — the note
+   exists because opt-in is otherwise undiscoverable from bootstrap, not because
+   the project needs to decide now. `select-feature` handles a mid-flight opt-in,
+   including renaming an existing `docs/<slug>/`.
+
+4. Emit the handoff. Do not invoke the next skill silently — the user
    should see the transition.
 
 ## Hard gates
@@ -48,6 +61,7 @@ that `project.toml` is now in place and validated.
 ## Exit criteria
 
 - [ ] Handoff message emitted.
+- [ ] Feature-scoping note stated once, with no `features.toml` written.
 - [ ] User has the trigger phrase for the next skill.
 - [ ] Skill terminates cleanly (no further elicitation in this thread
       from `start-project`).

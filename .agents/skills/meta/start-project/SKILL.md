@@ -57,6 +57,12 @@ Use elicitation prompts referenced from `references/elicitation-patterns/project
 
 The skill does NOT create `framework.toml` or `framework.user.toml` — those belong to the framework installation, not the project.
 
+It also does not create `features.toml`. Feature-scoped paths are opt-in, and creating that file *is* the opt-in, so it stays the user's decision — see `references/ai-principles/feature-precondition.md`. Mention the option once, at handoff, without asking a question or waiting for an answer:
+
+> Artifacts will be written per feature under `docs/<feature-name>/`. If you would rather have them keyed to a registered feature ID (`docs/FEAT-0001-<slug>/`), run `select-feature` at any point — including later, once work is already underway.
+
+Say it once and move on. A project that ignores the note behaves exactly as it does today, which is the point of the default.
+
 ## Next skill
 
 Determined by the flow chosen in step 2:
