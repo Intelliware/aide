@@ -59,7 +59,7 @@ the single `Failure triage` row it appends to the quality package's
 | Input | Source | Required |
 |---|---|---|
 | Failure set | Hand-off from `execute-quality-increments` / `execute-increments` / a CI run, or user-provided | Yes |
-| Quality package automation-and-cicd block | `docs/<feature>/quality-package/quality/automation-and-cicd.md` | Yes — pins evidence locations (reports, logs, screenshots) |
+| Quality package automation-and-cicd block | `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` | Yes — pins evidence locations (reports, logs, screenshots) |
 | Failure categories taxonomy | `references/failure-categories.md` (generic) + `templates/blocks/quality/failure-categories.md` (team-overridable) | Yes |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Per-test reports, execution log, screenshots | paths declared in automation-and-cicd | Recommended — drives evidence-first triage |
@@ -107,7 +107,7 @@ that step.
 | Per-failure presentation + classification | Chat (interactive) | Markdown block per failure |
 | Running summary table | Chat | Markdown table, grown one row at a time |
 | Final summary block + action items | Chat | Markdown — summary + disposition counts + routed action items |
-| `change-tracker.md` row | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the triage (Trigger note: `Failure triage`) |
+| `change-tracker.md` row | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the triage (Trigger note: `Failure triage`) |
 
 ## Next skill
 

@@ -37,7 +37,7 @@ Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1.
 
 ## Workflow
 
-1. **Determine feature folder** — reuse an existing `docs/<feature>/` if one exists, otherwise infer a kebab-case name from the user's description and confirm. Create `docs/<feature>/quick-dev-package/` if needed.
+1. **Resolve feature folder** — the folder is the registry's feature ID, already resolved by the precondition above; read it rather than inferring one. Create `docs/<feature-id>/quick-dev-package/` if needed. **Not opted in** (no `features.toml`): reuse an existing feature folder under `docs/` if one exists, otherwise infer a kebab-case name from the user's description and confirm it.
 2. **Listen** — capture the user's description: what they want, why, where, what done looks like, what's explicitly out of scope.
 3. **Existing-artifact intake** — first, check the optional **source adapter**: read `requirements_source` from this skill's customization (`customizations/document-quick-change.toml`). If set, follow the resolution rules in `references/orientation/source-adapters.md` — hand off by name to the named adapter (e.g. `jira-extract-requirements`) to pull the story/ticket into a structured package on disk, then seed the spec from it. If unset (the default), or if the adapter is set but not installed, fall back to asking the user directly. Then, either way, ask whether the user has additional tickets, incident notes, screenshots, prior PRs, ADRs, or other artifacts to seed the spec. Read them if provided; reconcile conflicts before drafting.
 4. **Classify rigor** — trivial (one sentence + 1 AC, inline) / small (short spec on disk) / medium (full template). Confirm with the user.

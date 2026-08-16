@@ -4,12 +4,12 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| Assembled design package | yes | `{paths.design_package}/{feature-id}-design.md` (or alias `docs/<feature>/solutions-package/solution-package.md`) | The artifact produced by `create-design-package` |
-| Design change tracker | yes | `docs/<feature>/solutions-package/design/change-tracker.md` | Used by reviews to scope checks to what changed since last review |
-| Architecture baseline | conditional (brownfield only) | `docs/<feature>/solutions-package/discovery/architecture-baseline.md` | Architecture review consumes it |
+| Assembled design package | yes | `{paths.design_package}/{feature-id}-design.md` (or alias `docs/<feature-id>/solutions-package/solution-package.md`) | The artifact produced by `create-design-package` |
+| Design change tracker | yes | `docs/<feature-id>/solutions-package/design/change-tracker.md` | Used by reviews to scope checks to what changed since last review |
+| Architecture baseline | conditional (brownfield only) | `docs/<feature-id>/solutions-package/discovery/architecture-baseline.md` | Architecture review consumes it |
 | Approved requirements package | yes | `{paths.requirements_package}/{feature-id}-requirements.md` | Architecture and traceability checks need it |
-| Requirements readiness verdict | yes | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Must be APPROVED or accepted CONDITIONAL |
-| Requirements change tracker | yes | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Used to confirm the design's recorded requirements version is current |
+| Requirements readiness verdict | yes | `docs/<feature-id>/requirements-package/review/readiness-verdict.md` | Must be APPROVED or accepted CONDITIONAL |
+| Requirements change tracker | yes | `docs/<feature-id>/requirements-package/requirements/change-tracker.md` | Used to confirm the design's recorded requirements version is current |
 | `project.toml` | yes | `{project-root}/project.toml` | Flow detection, policy gates |
 | Active composition YAML | yes | `templates/compositions/<flow>-design-package.yaml` | Confirms which blocks are required vs gated |
 | ADR files referenced by the design | yes | `{paths.knowledge_base_path}/adr/<id>.md` (or fallback) | Each ADR ID referenced in the design must resolve to a file |
@@ -18,9 +18,11 @@
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| `docs/<feature>/solutions-package/review/review-architecture.md` | Markdown — findings + PASS / PASS WITH OBSERVATIONS / FAIL | User; subsequent reviews; `create-implementation-package` |
-| `docs/<feature>/solutions-package/review/review-security-posture.md` | Markdown — findings + verdict | User; subsequent reviews; `create-implementation-package` |
-| `docs/<feature>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO, summary of accepted risks, conditions, points of contact | `create-implementation-package` (gate); user; orchestrator |
+| `docs/<feature-id>/solutions-package/review/review-architecture.md` | Markdown — findings + PASS / PASS WITH OBSERVATIONS / FAIL | User; subsequent reviews; `create-implementation-package` |
+| `docs/<feature-id>/solutions-package/review/review-security-posture.md` | Markdown — findings + verdict | User; subsequent reviews; `create-implementation-package` |
+| `docs/<feature-id>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO, summary of accepted risks, conditions, points of contact | `create-implementation-package` (gate); user; orchestrator |
 | Updated `change-tracker.md` rows | Markdown table — appended rows with `Trigger = Review finding`, named `Authorized By` | All downstream skills (delta detection); the next review pass; the orchestrator |
+
+`<feature-id>` above is the **registry's feature ID**, resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`) in select-only mode. Reviewing the wrong feature's package returns a confident verdict about the wrong artifacts, so the resolved ID is echoed before the first read.
 
 When a review returns FAIL or NO-GO, the verdict file is still written (with the verdict) so the audit trail is preserved across re-runs. The next pass of that review overwrites it with the audit log retained in the change tracker.

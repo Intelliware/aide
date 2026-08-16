@@ -91,7 +91,7 @@ Until the gate has cleared, none of those happen.
 ## Audit trail
 
 Append a one-line entry to the increment's row in
-`<feature-folder>/quick-dev-package/CHANGE-TRACKER.md` capturing the
+`docs/<feature-id>/quick-dev-package/CHANGE-TRACKER.md` capturing the
 confirmation: who confirmed, when, in what environment, and (when the
 confirmation is partial) which ACs are confirmed vs still pending. The
 gate is only closed once an entry exists for every AC. If the gate had

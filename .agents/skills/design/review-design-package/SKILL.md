@@ -58,7 +58,7 @@ artifact under the project's current stage configuration.
 This step is **read-only** — no permission check required (the review skill
 does not write to the upstream artifact). When the review skill writes its
 own findings, it writes under the same host repo at
-`docs/<feature>/solutions-package/review/...`.
+`docs/<feature-id>/solutions-package/review/...`.
 
 If executed non-interactively without an explicit `feature-id` (and `scope`
 when ambiguous), **fail fast** with a clear error rather than blocking on a
@@ -89,11 +89,11 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature>/solutions-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Adversarial findings file | `docs/<feature>/solutions-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Edge-case findings file | `docs/<feature>/solutions-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Final readiness verdict | `docs/<feature>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
-| Updated `change-tracker.md` rows | `docs/<feature>/solutions-package/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+| Per-review findings | `docs/<feature-id>/solutions-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature-id>/solutions-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature-id>/solutions-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Final readiness verdict | `docs/<feature-id>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `docs/<feature-id>/solutions-package/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 
 ## Next skill
 

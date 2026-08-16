@@ -68,11 +68,11 @@ The deeper how-to lives in `references/process.md`, `references/solution-discove
 | Artifact | Path | Format |
 |---|---|---|
 | Assembled design package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/design/<repo-code-or-_cross-cutting>/<feature-id>-design.md`; legacy: `{paths.design_package}/{feature-id}-design.md`) | Markdown (composed per `templates/compositions/greenfield-design-package.yaml`) |
-| Per-section block files | `docs/<feature>/solutions-package/design/*.md` | Markdown (one block per file) |
-| Architecture-baseline (brownfield) | `docs/<feature>/solutions-package/discovery/architecture-baseline.md` | Markdown |
-| ADR files (one per significant decision) | `{paths.knowledge_base_path}/adr/<id>.md` (or `docs/<feature>/solutions-package/design/adr/<id>.md` if KB absent) | Markdown — ADR template from `templates/blocks/knowledge-base/adr-template.md` |
-| Change tracker continuation | `docs/<feature>/solutions-package/design/change-tracker.md` | Markdown table |
-| Design package alias | `docs/<feature>/solutions-package/solution-package.md` | Markdown — pass-through to `{paths.design_package}/{feature-id}-design.md` |
+| Per-section block files | `docs/<feature-id>/solutions-package/design/*.md` | Markdown (one block per file) |
+| Architecture-baseline (brownfield) | `docs/<feature-id>/solutions-package/discovery/architecture-baseline.md` | Markdown |
+| ADR files (one per significant decision) | `{paths.knowledge_base_path}/adr/<id>.md` (or `docs/<feature-id>/solutions-package/design/adr/<id>.md` if KB absent) | Markdown — ADR template from `templates/blocks/knowledge-base/adr-template.md` |
+| Change tracker continuation | `docs/<feature-id>/solutions-package/design/change-tracker.md` | Markdown table |
+| Design package alias | `docs/<feature-id>/solutions-package/solution-package.md` | Markdown — pass-through to `{paths.design_package}/{feature-id}-design.md` |
 
 ## Next skill
 review-design-package

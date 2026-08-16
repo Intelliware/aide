@@ -74,7 +74,7 @@ override.
 ### 4c. Append the change-tracker row
 
 Append one row to
-`docs/<feature>/quality-package/quality/change-tracker.md`:
+`docs/<feature-id>/quality-package/quality/change-tracker.md`:
 
 | Field | Value |
 |---|---|
@@ -118,7 +118,7 @@ Before closing the skill, summarise:
 > - Actions taken this turn: <list of invoked skills, or "none —
 >   user deferred">
 > - Audit record:
->   `docs/<feature>/quality-package/quality/change-tracker.md`
+>   `docs/<feature-id>/quality-package/quality/change-tracker.md`
 >   (latest row, Trigger: `Failure triage`)
 
 Wait for explicit user acknowledgement before terminating the skill.

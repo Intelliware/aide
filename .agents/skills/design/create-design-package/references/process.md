@@ -48,7 +48,7 @@ Always resolve which blocks apply by reading the active composition's `blocks:` 
 - **Scaffolding before content** — copy block templates, run scoping, then fill section by section.
 - **The Requirements Package is the north star** — constantly reference it; consume the requirements `change-tracker.md` for delta detection.
 - **C4 diagrams use the same pinned versions** as `design/technology-stack`. Drift = bug.
-- **ADRs live in the knowledge base** when present (`{paths.knowledge_base_path}/adr/`); fall back to `docs/<feature>/solutions-package/design/adr/` when KB is absent.
+- **ADRs live in the knowledge base** when present (`{paths.knowledge_base_path}/adr/`); fall back to `docs/<feature-id>/solutions-package/design/adr/` when KB is absent.
 
 ## Internal step naming
 

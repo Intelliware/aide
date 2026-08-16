@@ -38,4 +38,4 @@ is itself a signal — invoke the escape hatch (`steps/02-escape-hatch.md`).
 
 A short orientation summary, presented inline. For audit and session-resumption
 purposes, optionally persist to
-`<feature-folder>/quick-dev-package/codebase-orientation.md`.
+`docs/<feature-id>/quick-dev-package/codebase-orientation.md`.

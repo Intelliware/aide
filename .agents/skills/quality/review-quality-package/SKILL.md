@@ -73,7 +73,7 @@ artifact under the project's current stage configuration.
 
 This step is read-only — no permission check required. When the review skill
 writes its own findings, it writes under the same host repo at
-`docs/<feature>/quality-package/review/...`.
+`docs/<feature-id>/quality-package/review/...`.
 
 If executed non-interactively without an explicit `feature-id` (and `scope` when
 ambiguous), fail fast with a clear error rather than blocking on a prompt.
@@ -107,9 +107,9 @@ The detailed instructions, halt conditions, and verdict templates live in
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature>/quality-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Final readiness verdict | `docs/<feature>/quality-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
-| Updated `change-tracker.md` rows | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+| Per-review findings | `docs/<feature-id>/quality-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Final readiness verdict | `docs/<feature-id>/quality-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 
 ## Next skill
 

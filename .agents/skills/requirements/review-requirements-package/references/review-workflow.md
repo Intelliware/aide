@@ -41,16 +41,16 @@ waste them on a package still failing basic consistency.
 
 ```
 meta/review-adversarial \
-  --target=docs/<feature>/requirements-package/requirements-package.md \
+  --target=docs/<feature-id>/requirements-package/requirements-package.md \
   --stage=requirements \
-  --output-path=docs/<feature>/requirements-package/review/adversarial-findings.md
+  --output-path=docs/<feature-id>/requirements-package/review/adversarial-findings.md
 ```
 
 ```
 meta/review-edge-case-hunter \
-  --target=docs/<feature>/requirements-package/requirements-package.md \
+  --target=docs/<feature-id>/requirements-package/requirements-package.md \
   --stage=requirements \
-  --output-path=docs/<feature>/requirements-package/review/edge-case-findings.md
+  --output-path=docs/<feature-id>/requirements-package/review/edge-case-findings.md
 ```
 
 The two are orthogonal, not redundant: `review-adversarial` is attitude-driven (hidden

@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| quick-dev spec | yes | `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md` | populated four-block spec from `document-quick-change` |
+| quick-dev spec | yes | `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-spec.md` | populated four-block spec from `document-quick-change` |
 | codebase | yes | local filesystem — repos referenced in the spec's FR/Where | `../api`, `../web` |
 | canonical reduced increment shape | yes | `references/canonical-increment-shape.md` | reduced 7-section shape |
 | project paths | yes | `project.toml` `[project.paths]` | `requirements_package`, `implementation_package` |
@@ -14,9 +14,9 @@
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-plan.md` | markdown — 1–3 increments per reduced shape | `execute-quick-change` |
+| `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md` | markdown — 1–3 increments per reduced shape | `execute-quick-change` |
 | Inline orientation summary | conversation message | the user |
-| Optional: `<feature-folder>/quick-dev-package/codebase-orientation.md` | markdown — persisted orientation findings | session-resumption, audit |
+| Optional: `docs/<feature-id>/quick-dev-package/codebase-orientation.md` | markdown — persisted orientation findings | session-resumption, audit |
 
 ## Side effects
 

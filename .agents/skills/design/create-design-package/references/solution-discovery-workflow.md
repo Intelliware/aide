@@ -20,12 +20,11 @@ Do not:
 - Skip a sub-step because a previous sub-step seemed to cover it.
 - Run sub-steps in parallel.
 
-## Sub-step 0a — Determine feature folder
+## Sub-step 0a — Resolve feature folder
 
-1. Check for existing `docs/*/requirements-package/` — reuse if present.
-2. Else infer from change description / executive summary (kebab-case).
-3. Confirm with user: *"I'll organize all design outputs under `docs/<feature>/solutions-package/`. Does this folder name work?"*
-4. Create `docs/<feature>/solutions-package/discovery/` if absent.
+1. The feature folder is the **registry's feature ID**, already resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`). Read it; do not infer one, and do not put the folder name to the user as a question — the requirements package this design implements already sits under that folder, so re-negotiating the name here is how a design ends up filed away from its own requirements.
+2. **Not opted in** (no `features.toml`): fall back to the prior behaviour — check for an existing `docs/*/requirements-package/` and reuse that feature folder if present, else infer a kebab-case name from the change description / executive summary and confirm it with the user.
+3. Create `docs/<feature-id>/solutions-package/discovery/` if absent.
 
 ## The sequence
 

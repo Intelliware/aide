@@ -53,7 +53,7 @@ This step runs before any design sub-step. Determines which sections are needed 
 Read:
 - The requirements package — specifically functional requirements, data requirements, user journeys, business rules, permissions-access-control, and NFRs.
 - The requirements `change-tracker.md` — Package Version Log + Version Diff Summary.
-- The architecture baseline (`docs/<feature>/solutions-package/discovery/architecture-baseline.md`) when discovery ran — component architecture, tech stack, integration points, areas affected.
+- The architecture baseline (`docs/<feature-id>/solutions-package/discovery/architecture-baseline.md`) when discovery ran — component architecture, tech stack, integration points, areas affected.
 
 If solution discovery was skipped, do not fail. Before scoping:
 1. Tell the user that design is starting without an architecture baseline.

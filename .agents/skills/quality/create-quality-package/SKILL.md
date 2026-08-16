@@ -118,9 +118,9 @@ per-stage touchpoint map is in `references/quality-in-the-lifecycle.md`.
 | Artifact | Path | Format |
 |---|---|---|
 | Assembled quality package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/quality/<repo-code-or-_cross-cutting>/<feature-id>-quality.md`; legacy: `{paths.quality_package}/{feature-id}-quality.md`) | Markdown (composed per `templates/compositions/greenfield-quality-package.yaml`) |
-| Per-section block files | `docs/<feature>/quality-package/quality/*.md` | Markdown (one block per file) |
-| Test-traceability matrix | `docs/<feature>/quality-package/quality/traceability.md` | Markdown table — test ↔ AC ↔ FR/NFR ↔ INC |
-| Change tracker continuation | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table |
+| Per-section block files | `docs/<feature-id>/quality-package/quality/*.md` | Markdown (one block per file) |
+| Test-traceability matrix | `docs/<feature-id>/quality-package/quality/traceability.md` | Markdown table — test ↔ AC ↔ FR/NFR ↔ INC |
+| Change tracker continuation | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table |
 
 ## Next skill
 

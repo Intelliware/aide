@@ -59,9 +59,9 @@ Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 `review-quality-package` for the full SoD geometry). Required artifacts:
 
 - `{paths.quality_package}/{feature-id}-quality.md` — the assembled package
-- `docs/<feature>/quality-package/quality/traceability.md` — the matrix
-- `docs/<feature>/quality-package/quality/test-design.md` — the test-design block
-- `docs/<feature>/quality-package/quality/automation-and-cicd.md` — the
+- `docs/<feature-id>/quality-package/quality/traceability.md` — the matrix
+- `docs/<feature-id>/quality-package/quality/test-design.md` — the test-design block
+- `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` — the
   automation block (used in Step 3 for the marker scheme)
 
 If the quality package is missing, halt with:
@@ -72,7 +72,7 @@ If the quality package is missing, halt with:
 
 ### 1d. Locate or bootstrap the test-case status tracker
 
-Check whether `docs/<feature>/quality-package/quality/plan/test-case-status.md`
+Check whether `docs/<feature-id>/quality-package/quality/plan/test-case-status.md`
 exists.
 
 **If found:** record its current state (TC IDs, statuses) for use in

@@ -135,7 +135,7 @@ related_components:    # optional; populated when component catalog is present
 
 - **Treating this as a requirements skill.** Solution context is
   project-scoped and persistent. Feature requirements live under
-  `docs/<feature>/requirements-package/`. They are different layers.
+  `docs/<feature-id>/requirements-package/`. They are different layers.
 - **Skipping interactive mode silently in CI.** Always emit
   `TODO(human):` markers in non-interactive output so a human knows the
   leaf is incomplete; never produce a confidently-wrong leaf from auto-

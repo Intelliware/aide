@@ -58,7 +58,7 @@ requirements artifact under the project's current stage configuration.
 This step is **read-only** — no permission check required (the review skill
 does not write to the upstream artifact). When the review skill writes its
 own findings, it writes to the same host repo as the upstream artifact under
-`docs/<feature>/requirements-package/review/...` (relative to the host).
+`docs/<feature-id>/requirements-package/review/...` (relative to the host).
 
 If executed non-interactively without an explicit `feature-id` (and `scope`
 when ambiguous), **fail fast** with a clear error rather than blocking on a
@@ -99,11 +99,11 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Adversarial findings file | `docs/<feature>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Edge-case findings file | `docs/<feature>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Final readiness verdict | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
-| Updated `change-tracker.md` rows | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
+| Per-review findings | `docs/<feature-id>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature-id>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature-id>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Final readiness verdict | `docs/<feature-id>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
+| Updated `change-tracker.md` rows | `docs/<feature-id>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
 
 ## Next skill
 

@@ -33,15 +33,14 @@ Rules:
 6. **Do not** backfill from artifact-internal revision histories that predate the tracker.
 7. **Do not** duplicate artifact-internal revision history verbatim — both exist; neither replaces the other.
 
-File location: `docs/<feature>/requirements-package/requirements/change-tracker.md`. Template: `templates/blocks/shared/change-log.md`.
+File location: `docs/<feature-id>/requirements-package/requirements/change-tracker.md`. Template: `templates/blocks/shared/change-log.md`.
 
-## Sub-step 0a — Determine feature folder and initialize tracker
+## Sub-step 0a — Resolve feature folder and initialize tracker
 
-1. Check for existing `docs/*/requirements-package/`. Reuse if present.
-2. Else infer from change description (kebab-case).
-3. Confirm with user: *"I'll organize all requirements outputs under `docs/<feature>/requirements-package/`. Does this folder name work?"*
-4. Create folder structure if absent: `docs/<feature>/requirements-package/requirements/`.
-5. Initialize the change tracker (copy `templates/blocks/shared/change-log.md`, populate header at v0.1). If a tracker already exists from a prior iteration, do not overwrite — append a new Package Version Log entry and continue the CHG-NNN sequence.
+1. The feature folder is the **registry's feature ID**, already resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`). Read it; do not infer one, and do not put the folder name to the user as a question — negotiating it per-session is how the same work acquired two directories.
+2. **Not opted in** (no `features.toml`): fall back to the prior behaviour — check for an existing `docs/*/requirements-package/` and reuse it if present, else infer a kebab-case name from the change description and confirm it with the user.
+3. Create folder structure if absent: `docs/<feature-id>/requirements-package/requirements/`.
+4. Initialize the change tracker (copy `templates/blocks/shared/change-log.md`, populate header at v0.1). If a tracker already exists from a prior iteration, do not overwrite — append a new Package Version Log entry and continue the CHG-NNN sequence.
 
 ## Sub-step 0b — Existing-artifact gather (analysis-skipped path only)
 
@@ -49,7 +48,7 @@ When analysis was skipped, gather any existing user artifacts about the proposed
 
 ## Did analysis run?
 
-Check for `docs/<feature>/requirements-package/analysis/stakeholder-map.md` (always produced when analysis runs).
+Check for `docs/<feature-id>/requirements-package/analysis/stakeholder-map.md` (always produced when analysis runs).
 
 **Analysis ran:** each sub-step independently checks for the specific analysis artifacts it needs and uses them if found. Skills that find artifacts consume them; skills that do not, elicit directly.
 

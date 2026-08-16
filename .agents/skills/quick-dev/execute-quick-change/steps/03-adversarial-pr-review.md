@@ -62,7 +62,7 @@ the diff is genuinely trivial (single-line config rename, typo fix).
 ## Output
 
 A findings list, persisted to
-`<feature-folder>/quick-dev-package/review-YYYY-MM-DD.md`, summarized inline.
+`docs/<feature-id>/quick-dev-package/review-YYYY-MM-DD.md`, summarized inline.
 After Critical and Important findings are fixed, re-run the affected lens
 against the updated diff. Loop until clean.
 

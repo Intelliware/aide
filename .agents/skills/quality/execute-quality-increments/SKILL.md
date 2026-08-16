@@ -55,10 +55,10 @@ logs it and routes to `execute-increments` or `manage-bugs`.
 | Input | Source | Required |
 |---|---|---|
 | Assembled quality package | `{paths.quality_package}/{feature-id}-quality.md` (with GO from review) | Yes |
-| Test-case plan overview | `docs/<feature>/quality-package/quality/plan/qe-plan-overview.md` | Yes |
-| Per-increment files | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
-| Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Yes |
-| Review readiness verdict | `docs/<feature>/quality-package/review/readiness-verdict.md` | Yes (must be GO or accepted CONDITIONAL GO) |
+| Test-case plan overview | `docs/<feature-id>/quality-package/quality/plan/qe-plan-overview.md` | Yes |
+| Per-increment files | `docs/<feature-id>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature-id>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
+| Test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Yes |
+| Review readiness verdict | `docs/<feature-id>/quality-package/review/readiness-verdict.md` | Yes (must be GO or accepted CONDITIONAL GO) |
 | Test-artifact target repo | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to the in-scope code repo when unset | Yes |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base (when present) | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Recommended — grounds reuse cross-check on existing test utilities |
