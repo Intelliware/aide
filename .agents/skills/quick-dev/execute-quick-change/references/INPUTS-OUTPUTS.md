@@ -5,7 +5,7 @@
 | Name | Required? | Source | Example |
 |---|---|---|---|
 | quick-dev plan | yes | `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md` | approved plan with 1–3 increments |
-| quick-dev spec | yes | `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-spec.md` | for spec-compliance review and PR description |
+| quick-dev spec | yes | `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` | for spec-compliance review and PR description |
 | solution constraints | yes | spec §12.2a (or inline if the spec is trivial) | guardrails the implementation must honor on every iteration, including any Solution Pivot — e.g. "no regex", "no new dependencies", "must reuse `useRetry`" |
 | codebase | yes | local filesystem | repos referenced by the plan |
 | project paths | yes | `project.toml` `[project.paths]` | `implementation_package`, `knowledge_base_path` |

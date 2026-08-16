@@ -31,11 +31,11 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: plan-quick-change`) rather than guessing which feature's spec to load. If it resolves, confirm the spec at `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
+Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: plan-quick-change`) rather than guessing which feature's spec to load. If it resolves, confirm the spec at `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
 
 ## Workflow
 
-1. **Read the quick-dev spec** — load `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-spec.md`. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.
+1. **Read the quick-dev spec** — load `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md`, the path `quick-dev-spec.yaml` declares and `document-quick-change` writes. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.
 2. **Codebase orientation** — read the affected files (the spec's "Where" / FR file references). Identify patterns, conventions, test infrastructure. See `steps/01-orient.md`.
 3. **Escape-hatch check** — if orientation reveals the change is too large, halt and recommend the full elaborate pipeline. See `steps/02-escape-hatch.md`.
 4. **Decompose into increments** — group ACs into 1–3 increments. Each increment must produce a working system state, be independently verifiable, and trace to one or more ACs. Cross-check that the proposed approach for each increment honors every §12.2a Solution Constraint — an increment whose plan would have to violate a constraint to ship is not a legal increment.

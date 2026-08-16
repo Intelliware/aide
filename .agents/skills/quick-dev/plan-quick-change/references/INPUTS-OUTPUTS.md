@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| quick-dev spec | yes | `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-spec.md` | populated four-block spec from `document-quick-change` |
+| quick-dev spec | yes | `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` | populated four-block spec from `document-quick-change` |
 | codebase | yes | local filesystem — repos referenced in the spec's FR/Where | `../api`, `../web` |
 | canonical reduced increment shape | yes | `references/canonical-increment-shape.md` | reduced 7-section shape |
 | project paths | yes | `project.toml` `[project.paths]` | `requirements_package`, `implementation_package` |
