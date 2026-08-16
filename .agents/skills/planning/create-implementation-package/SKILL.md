@@ -99,7 +99,7 @@ An implementation package at the path resolved for the planning stage. Resolutio
 
 - **Colocate mode** (`colocate_with_source = true`): `<source-repo-path>/<artifact_subdir>/implementation/<feature-id>/`
 - **Directory mode** (`dir = "..."`): `<host-repo>/<artifact_subdir>/implementation/<repo-code>/<feature-id>/`
-- **Legacy mode** (no SoD fields): `{project.paths.implementation_package}/`
+- **Legacy mode** (no SoD fields): `{project.paths.implementation_package}/{feature-id}/`
 
 In each case the package contains:
 

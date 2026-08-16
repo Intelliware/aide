@@ -38,7 +38,7 @@ the `OrderService` pattern, name test files `*.spec.ts`".
 
 ## Output
 
-`{project.paths.implementation_package}/plan/codebase-analysis.md` — structured
+`{project.paths.implementation_package}/{feature-id}/plan/codebase-analysis.md` — structured
 map of the affected codebase areas covering:
 
 - **Affected modules / directories / layers** — the analysis boundary

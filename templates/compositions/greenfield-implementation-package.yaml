@@ -2,8 +2,9 @@
 #
 # Implementation plan composed of the 8 canonical planning blocks (the
 # "increment shape") wrapped with shared overview, glossary, and change-log.
-# This composition produces ONE increment per file. The set of all increments
-# for a project lives under {project.paths.implementation_package}/.
+# This composition produces ONE increment per file. A feature's increments live
+# together under {project.paths.implementation_package}/{feature-id}/, so the
+# stage root holds one directory per feature rather than a flat set.
 #
 # Canonical increment shape:
 #   1. increment-identity     (id, title, status, owners, version)

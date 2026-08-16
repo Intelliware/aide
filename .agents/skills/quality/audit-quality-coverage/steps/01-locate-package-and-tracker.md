@@ -40,15 +40,15 @@ the rest of the audit.
 
 ### 1b. Locate the implementation package
 
-Confirm that `{paths.implementation_package}/increment-status.md`
+Confirm that `{paths.implementation_package}/{feature-id}/increment-status.md`
 exists at the resolved location. If missing, halt with a clear error:
 
 > No implementation package found at
-> `{paths.implementation_package}/`. The coverage audit requires a
+> `{paths.implementation_package}/{feature-id}/`. The coverage audit requires a
 > GO implementation package. Route the user to
 > `create-implementation-package` or `review-implementation-package`.
 
-Read the file list under `{paths.implementation_package}/`:
+Read the file list under `{paths.implementation_package}/{feature-id}/`:
 - `increment-status.md` (required)
 - `INC-XXX.md` for each increment (required — shard-aware: read per-file
   paths from `increment-status.md` if the package is sharded)

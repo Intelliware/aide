@@ -29,7 +29,7 @@ Test planning runs before increment decomposition because:
 
 ## Output
 
-`{project.paths.implementation_package}/plan/test-plan.md` covering:
+`{project.paths.implementation_package}/{feature-id}/plan/test-plan.md` covering:
 
 - **Test strategy** — unit vs. integration vs. component vs. E2E split, with
   rationale for each layer

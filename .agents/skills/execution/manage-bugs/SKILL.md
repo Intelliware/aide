@@ -54,8 +54,8 @@ in-scope fixes) or a future bug-fix increment. This skill manages the log.
 
 | Input | Source | Required |
 |---|---|---|
-| Implementation package | `{project.paths.implementation_package}/` | Yes (for path to `bugs-and-issues-log.md`) |
-| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/bugs-and-issues-log.md` | Yes (created if missing) |
+| Implementation package | `{project.paths.implementation_package}/{feature-id}/` | Yes (for path to `bugs-and-issues-log.md`) |
+| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` | Yes (created if missing) |
 | Increment context | the calling increment ID, if invoked from `execute-increments` | Conditional |
 | project.toml | `{project-root}/project.toml` | Yes |
 

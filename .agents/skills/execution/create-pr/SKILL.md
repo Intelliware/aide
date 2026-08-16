@@ -48,7 +48,7 @@ must be fixed in the working tree, not in a follow-up commit.
 | Input | Source | Required |
 |---|---|---|
 | Working-tree diff | `git diff` (uncommitted changes) | Yes |
-| Implementation package (if available) | `{project.paths.implementation_package}/` | If present |
+| Implementation package (if available) | `{project.paths.implementation_package}/{feature-id}/` | If present |
 | Requirements / design references | upstream packages | If present (for traceability) |
 | Coding standards | `_assets/standards/` | If present |
 | project.toml | `{project-root}/project.toml` | Yes |

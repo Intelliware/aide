@@ -109,5 +109,5 @@ when you are about to execute that step. After each step:
 ## Handoff
 
 After plan-readiness review returns GO and all artifacts are in
-`{project.paths.implementation_package}/`, hand off to
+`{project.paths.implementation_package}/{feature-id}/`, hand off to
 `review-implementation-package` for the formal pre-execution gate.

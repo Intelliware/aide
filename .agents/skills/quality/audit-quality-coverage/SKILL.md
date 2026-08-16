@@ -41,7 +41,7 @@ appears under the workflow graph's `anytime:` block.
 | Input | Source | Required |
 |---|---|---|
 | Feature ID / scope | User-provided or auto-detected from INC ID or open quality package | Yes |
-| Implementation package | `{paths.implementation_package}/` (all `INC-XXX.md` + `increment-status.md`) | Yes |
+| Implementation package | `{paths.implementation_package}/{feature-id}/` (all `INC-XXX.md` + `increment-status.md`) | Yes |
 | Quality package | `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` (or SoD-resolved path) | Yes (use the latest assembled version) |
 | Test-traceability matrix | `docs/<feature-id>/quality-package/quality/traceability.md` | Yes — primary source of "what's claimed to be covered" |
 | Test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |

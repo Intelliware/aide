@@ -93,4 +93,4 @@ findings_header_template = "review-findings-header.md"
 # Persist findings to a per-feature folder rather than the framework
 # default of `.framework-output/reviews/`. Lets us co-locate findings
 # with the implementation package they review.
-findings_path_pattern = "{paths.implementation_package}/{feature-id}-review/findings.md"
+findings_path_pattern = "{paths.implementation_package}/{feature-id}/review/findings.md"

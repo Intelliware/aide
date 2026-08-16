@@ -9,7 +9,7 @@
 | Test-traceability matrix | yes | `docs/<feature-id>/quality-package/quality/traceability.md` | Coverage and traceability reviews consume it |
 | Approved requirements package + readiness verdict | yes | `{paths.requirements_package}/` + `review/readiness-verdict.md` | Coverage review confirms every AC is tested |
 | Approved design package + readiness verdict | yes | `{paths.design_package}/` + `review/readiness-verdict.md` | NFR / security validation traces here |
-| GO implementation package | yes | `{paths.implementation_package}/` (all `INC-XXX.md`) | Coverage review confirms every increment is covered or excepted |
+| GO implementation package | yes | `{paths.implementation_package}/{feature-id}/` (all `INC-XXX.md`) | Coverage review confirms every increment is covered or excepted |
 | `project.toml` | yes | `{project-root}/project.toml` | Flow detection, policy gates (`testing_strategy`, `compliance_regime`) |
 
 ## Outputs
