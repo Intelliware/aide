@@ -20,7 +20,10 @@ description: Implementation plan for a single increment using the canonical 8-bl
 applies-to-flow: greenfield
 package-type: implementation
 
-default-output-path: "{project.paths.implementation_package}/{increment-id}.md"
+# The `{feature-id}/` segment applies only when `features.toml` exists; drop it
+# otherwise. See references/ai-principles/feature-precondition.md. `{increment-id}`
+# takes no `{feature-id}-` prefix — the enclosing segment is what associates it.
+default-output-path: "{project.paths.implementation_package}/{feature-id}/{increment-id}.md"
 
 blocks:
   # ---- Wrapper: framing ----

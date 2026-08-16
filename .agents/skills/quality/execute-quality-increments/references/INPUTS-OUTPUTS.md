@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Purpose |
 |---|---|---|---|
-| Assembled quality package | yes | `{paths.quality_package}/{feature-id}-quality.md` | Topology, test stack, harness design, execution conventions |
+| Assembled quality package | yes | `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` | Topology, test stack, harness design, execution conventions |
 | Quality automation & CI/CD block | yes | `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` | Framework, runner, tag vocabulary, environment profiles |
 | Test-case plan overview | yes | `docs/<feature-id>/quality-package/quality/plan/qe-plan-overview.md` | Increment list, dependency graph, execution order |
 | Scaffolding increment files | yes | `docs/<feature-id>/quality-package/quality/plan/TC-XXX.md` (scaffolding type) | Implementation plans for prep work |

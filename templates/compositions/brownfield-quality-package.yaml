@@ -10,7 +10,9 @@ description: Full quality package for a brownfield enhancement (greenfield quali
 applies-to-flow: brownfield
 package-type: quality
 
-default-output-path: "{paths.quality_package}/{feature-id}-quality.md"
+# The `{feature-id}/` segment applies only when `features.toml` exists; drop it
+# otherwise. See references/ai-principles/feature-precondition.md.
+default-output-path: "{paths.quality_package}/{feature-id}/{feature-id}-quality.md"
 
 blocks:
   # ---- Front matter / framing ----

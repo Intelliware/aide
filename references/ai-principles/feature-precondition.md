@@ -7,11 +7,13 @@ drifting. See `config/SCHEMAS.md` § 2.8 (the registry) and § 2.9 (the active-f
 pointer) for the underlying schema, and `_docs/feature-id-minimal-plan.md` § 7 for
 the design rationale.
 
-**Phase note.** As of this writing, resolving the active feature does not yet change
-*where* any artifact is written — no skill's output paths carry a `<feature-id>/`
-segment yet (that is `_docs/feature-id-minimal-plan.md` phase 3). This precondition's
-job in phase 2 is narrower: make every feature-aware skill *know* the active feature
-and refuse to guess when it doesn't, so phase 3 has something correct to build on.
+**Phase note.** Resolving the active feature now determines the **per-section
+working-tree** directory: every stage writes its working artifacts under
+`docs/<feature-id>/` (phase 3b). It does **not** yet affect the **assembled**
+artifact path — no composition's `default-output-path` carries a `<feature-id>/`
+segment yet (that is `_docs/feature-id-minimal-plan.md` phase 3 proper). Keep the two
+straight when reading the mode steps below: the echo in step 4 names the working-tree
+directory, which is registry-bound today.
 
 ## The two-line resolution rule
 
@@ -24,6 +26,87 @@ If it is present            → resolve [user].active_feature and follow the mod
 
 A project that has never run `select-feature` is never affected by anything in this
 document — the check is the first line, and it is a pure no-op for that project.
+
+## Resolving the working-tree directory
+
+Both Mode A and Mode B need the per-section working-tree directory, and on an
+opted-in project that directory is `docs/<feature-id>/`. Resolve it in this order:
+
+1. `docs/<feature-id>/` exists → use it. This is the steady state and the common
+   case; stop here.
+2. Neither exists → create `docs/<feature-id>/`. Ordinary first run for a new
+   feature.
+3. `docs/<slug>/` exists but `docs/<feature-id>/` does not → this is the feature's
+   **pre-opt-in directory**, and the rule below applies. `<slug>` is the feature ID
+   with its `FEAT-NNNN-` prefix stripped: `FEAT-0007-notification-mark-as-read`
+   yields `notification-mark-as-read`.
+
+Case 3 exists because a project that opts in mid-flight already has a directory
+that was named by inference before the registry existed. Creating
+`docs/FEAT-0007-notification-mark-as-read/` alongside an existing
+`docs/notification-mark-as-read/` would split one feature's work across two trees —
+the precise failure this whole change exists to prevent, reintroduced by the fix
+for it. So on case 3, **halt** and offer exactly two options:
+
+> `docs/notification-mark-as-read/` already holds this feature's work from before
+> the registry existed. Either:
+> **(a) rename it** to `docs/FEAT-0007-notification-mark-as-read/` — one
+> `git mv`, history preserved, everything registry-bound afterwards; or
+> **(b) keep it** where it is, and I will keep using it for this feature.
+
+Both answers are legitimate and neither needs a new registry field. Option (b) is
+stable across sessions precisely because the slug is derivable from the ID, so this
+same rule re-finds the directory on every subsequent run — which is why the match is
+defined on the slug rather than recorded somewhere. This also honours
+`config/SCHEMAS.md` § 2.8's promise that artifacts already on disk in a flat layout
+"stay where they are and keep working": the framework offers the migration, it never
+performs it unasked.
+
+Never resolve case 3 silently in either direction. Renaming a directory the user
+did not ask you to rename and starting a second tree beside theirs are both worse
+than one question.
+
+## Resolving the assembled artifact path
+
+The assembled per-stage artifact gains a `<feature-id>/` directory immediately above
+it. Every feature-scoped composition's `default-output-path` is written in the
+**opted-in** form, carrying that segment:
+
+```
+{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md
+```
+
+**The segment is conditional; the string is not.** Resolve it by the same two-line
+rule at the top of this file:
+
+```
+features.toml exists       → resolve the segment normally. The path is as written.
+features.toml is absent    → drop the <feature-id>/ segment entirely, leaving the
+                             flat path the project uses today. The filename keeps
+                             its {feature-id}- prefix, exactly as before.
+```
+
+Dropping one segment is the whole of the not-opted-in behaviour. A project that never
+runs `select-feature` therefore writes byte-for-byte where it writes today, which is
+`_docs/feature-id-minimal-plan.md` § 6's central promise and is not negotiable for the
+sake of a tidier path string.
+
+Three details that are easy to get wrong:
+
+- **Filenames keep the `{feature-id}-` prefix.** The names are redundant
+  (`FEAT-0001-refund/FEAT-0001-refund-requirements.md`) and deliberately so — every
+  existing filename stays valid, so only globs that assume directory *depth* break,
+  not globs that match on filename. See § 2.1 of the plan.
+- **Per-item files never gain a prefix.** `INC-XXX.md`, `TC-XXX.md` and bug-log
+  entries are per-feature counters, and the enclosing feature directory is what
+  associates them, so `FEAT-0001-alert-customer/INC-001.md` is already unambiguous.
+  They gain the enclosing segment, not a prefix.
+- **SoD colocate mode is already correct** and changes nothing — it has always nested
+  under `<feature-id>/`. In SoD directory mode the segment goes *inside* the
+  `<repo-code>/` directory (`<repo-code>/<feature-id>/`), never outside it, because
+  `<repo-code>/` is the boundary `[stages.*].write_role` enforces
+  (`config/SCHEMAS.md` § 5) and a role check must keep corresponding to a subtree.
+  Cross-cutting features nest identically as `_cross-cutting/<feature-id>/`.
 
 ## Mode A — Write-side (select-and-create)
 
@@ -92,8 +175,12 @@ feature" is a legitimate answer, not a failure. See
 - **Minting logic.** All of it — ordinal allocation, slug proposal, registry
   writes — lives in `select-feature`. This precondition only decides *whether* to
   call it and in which mode.
-- **Path construction.** Building the actual `<feature-id>/`-scoped path is phase 3
-  work. This precondition resolves *which* feature-id string is active; it does not
-  yet change any `default-output-path` or step-file path string.
+- **Assembled-path construction.** This precondition resolves the working-tree
+  directory (see above) but not the assembled artifact path. Inserting
+  `<feature-id>/` into composition `default-output-path` values is phase 3 proper.
+- **Performing the migration.** The reconciliation rule *offers* to rename a
+  pre-opt-in directory and honours the answer. It never runs `git mv` unprompted,
+  and it does not sweep the project for other unmigrated directories — one feature,
+  one question, at the moment that feature is next worked.
 - **Feature status/lifecycle.** Out of scope per `_docs/feature-id-minimal-plan.md`
   § 1. This precondition asks "which feature," never "is this feature done."

@@ -2,7 +2,7 @@
 
 No-op when the quality stage is in legacy mode (`[stages.quality]` declares
 neither `dir` nor `colocate_with_source`). In legacy mode the package lives at
-`{paths.quality_package}/{feature-id}-quality.md` — skip to Step 1.
+`{paths.quality_package}/{feature-id}/{feature-id}-quality.md` — skip to Step 1.
 
 When the quality stage adopts SoD, inherit scope from the upstream packages
 rather than re-eliciting it:

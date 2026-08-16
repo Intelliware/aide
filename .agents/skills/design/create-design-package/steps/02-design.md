@@ -43,7 +43,7 @@ This step can be entered:
 | 15 | non-functional-requirements-technical | `design/non-functional-requirements-technical` | `15-nfrs-technical.md` |
 | 16 | risk-assessment (gated) | `design/risk-assessment` | `16-risk-assessment.md` |
 | 17 | adr-authoring | `knowledge-base/adr-template` | one ADR per significant decision under `{paths.knowledge_base_path}/adr/` (fallback `solutions-package/design/adr/`) |
-| 18 | package-synthesis | (assembly) | `solution-package.md` (alias) + `{paths.design_package}/{feature-id}-design.md` |
+| 18 | package-synthesis | (assembly) | `solution-package.md` (alias) + `{paths.design_package}/{feature-id}/{feature-id}-design.md` |
 
 Block ordering matches `templates/compositions/greenfield-design-package.yaml`. Skip blocks marked OUT in scoping; record N/A in the design change-tracker header with the gate condition.
 
@@ -80,7 +80,7 @@ Full instructions live in `references/solution-design-workflow.md` and `referenc
 ## Exit criteria
 
 - [ ] Every applicable block is `Complete`, `Skipped` (with revisit), or `N/A` (with gate)
-- [ ] `solution-package.md` (alias) and `{paths.design_package}/{feature-id}-design.md` assembled per composition block ordering
+- [ ] `solution-package.md` (alias) and `{paths.design_package}/{feature-id}/{feature-id}-design.md` assembled per composition block ordering
 - [ ] Design change tracker at v0.1 with one `Added` row per tracked decision
 - [ ] User has acknowledged the assembled package
 

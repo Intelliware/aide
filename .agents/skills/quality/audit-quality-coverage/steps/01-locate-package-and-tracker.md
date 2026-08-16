@@ -58,7 +58,7 @@ Read the file list under `{paths.implementation_package}/`:
 Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 `review-quality-package` for the full SoD geometry). Required artifacts:
 
-- `{paths.quality_package}/{feature-id}-quality.md` — the assembled package
+- `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` — the assembled package
 - `docs/<feature-id>/quality-package/quality/traceability.md` — the matrix
 - `docs/<feature-id>/quality-package/quality/test-design.md` — the test-design block
 - `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` — the

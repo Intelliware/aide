@@ -24,7 +24,7 @@ Do not:
 
 1. The feature folder is the **registry's feature ID**, already resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`). Read it; do not infer one, and do not put the folder name to the user as a question — the requirements package this design implements already sits under that folder, so re-negotiating the name here is how a design ends up filed away from its own requirements.
 2. **Not opted in** (no `features.toml`): fall back to the prior behaviour — check for an existing `docs/*/requirements-package/` and reuse that feature folder if present, else infer a kebab-case name from the change description / executive summary and confirm it with the user.
-3. Create `docs/<feature-id>/solutions-package/discovery/` if absent.
+3. Create `docs/<feature-id>/solutions-package/discovery/` if absent — resolving the feature directory itself through the precondition's *Resolving the working-tree directory* order, which halts to ask when a pre-opt-in directory exists under the feature's bare slug.
 
 ## The sequence
 

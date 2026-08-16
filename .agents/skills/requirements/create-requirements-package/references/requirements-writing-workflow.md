@@ -39,7 +39,7 @@ File location: `docs/<feature-id>/requirements-package/requirements/change-track
 
 1. The feature folder is the **registry's feature ID**, already resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`). Read it; do not infer one, and do not put the folder name to the user as a question — negotiating it per-session is how the same work acquired two directories.
 2. **Not opted in** (no `features.toml`): fall back to the prior behaviour — check for an existing `docs/*/requirements-package/` and reuse it if present, else infer a kebab-case name from the change description and confirm it with the user.
-3. Create folder structure if absent: `docs/<feature-id>/requirements-package/requirements/`.
+3. Create folder structure if absent: `docs/<feature-id>/requirements-package/requirements/` — but resolve the feature directory itself through the precondition's *Resolving the working-tree directory* order first. If a pre-opt-in directory exists under the feature's bare slug, that rule halts to ask rather than letting you create a second tree beside it.
 4. Initialize the change tracker (copy `templates/blocks/shared/change-log.md`, populate header at v0.1). If a tracker already exists from a prior iteration, do not overwrite — append a new Package Version Log entry and continue the CHG-NNN sequence.
 
 ## Sub-step 0b — Existing-artifact gather (analysis-skipped path only)
