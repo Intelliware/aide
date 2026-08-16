@@ -32,7 +32,7 @@ id      = "FEAT-0001-alert-customer"
 title   = "Alert customer when a refund is delayed"
 created = 2026-08-11
 ticket  = "ACME-1247"          # optional — Jira key / ticket reference
-repos   = ["billing-api"]      # optional — codes from [[project.repos]] in project.toml;
+repos   = ["api-billing"]      # optional — codes from [[project.repos]] in project.toml;
                                 # advisory only, the run-time scope prompt in each create-*
                                 # skill's step 00 always wins on divergence (config/SCHEMAS.md § 2.8)
 

@@ -27,6 +27,15 @@ task #8 -> task #9):
      reference under `.agents/skills/` and `templates/compositions/` must
      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
+  N1. Feature-segment / retired-placeholder guardrail — every feature-scoped
+     composition's `default-output-path` carries `{feature-id}` as a path
+     segment, and no retired placeholder (`<feature>`, `<feature-folder>`,
+     `<feature-name>`) names a per-feature directory under `docs/` or under a
+     `{paths.*}` token. See `references/ai-principles/feature-precondition.md`.
+  N2. Feature registry validation against a features.toml fixture or a real
+     project registry. Run with `--features-toml PATH` to evaluate rules
+     13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
+     and `--project-user-toml` for `active_feature`.
 
 Hard errors fail the run (exit 1):
   - Composition references a non-existent block (A).
@@ -37,6 +46,10 @@ Hard errors fail the run (exit 1):
   - Any SoD rule violation when running in --project-toml mode (I).
   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
     undeclared `[project.paths]` key (M).
+  - A feature-scoped composition missing its `{feature-id}` segment, or any
+    retired feature placeholder in an artifact path (N1).
+  - Any feature-registry rule violation when running in --features-toml
+    mode (N2).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 """
@@ -118,6 +131,37 @@ PROJECT_PATHS_KEYS = {
     "knowledge_base_path",
 }
 PATHS_TOKEN_RE = re.compile(r"\{(?:project\.)?paths\.([A-Za-z_][A-Za-z0-9_]*)\}")
+
+# Check N1 — the [project.paths] keys whose artifacts are per-feature. A
+# composition rooted at one of these is feature-scoped and must carry the
+# {feature-id}/ segment. `knowledge_base_path` is deliberately absent: the KB
+# and the RE doc trees are keyed by repo-slug or domain, not by feature, and
+# project-change-log.yaml is rooted at {project-root} for the same reason.
+FEATURE_SCOPED_PATH_KEYS = {
+    "requirements_package",
+    "design_package",
+    "implementation_package",
+    "quality_package",
+}
+DEFAULT_OUTPUT_PATH_RE = re.compile(r'^\s*default-output-path:\s*"([^"]*)"', re.M)
+FEATURE_SEGMENT = "{feature-id}"
+
+# Check N1 — spellings retired by the feature-ID rollout (phase 3b).
+# `<feature-id>` is the only placeholder permitted to name the per-feature
+# directory. These are matched only where the *parent* marks the path as an
+# A.I.D.E. artifact tree — under `docs/` or under a `{paths.*}` token — because
+# `<feature>` remains legitimate elsewhere: as a conversational placeholder in
+# elicitation prompts and trigger phrases, as the `<feature>:<sub-scope>` scope
+# ID, and as a source-tree convention in the RE blocks (`src/domain/<feature>/`),
+# which describe the *documented application's* layout, not ours.
+_RETIRED_FEATURE_ALT = r"(<feature>|<feature-folder>|<feature-name>)"
+RETIRED_IN_DOCS_RE = re.compile(r"(?<![\w-])docs/" + _RETIRED_FEATURE_ALT)
+RETIRED_IN_TOKEN_RE = re.compile(
+    r"\{(?:project\.)?paths\.[A-Za-z_][A-Za-z0-9_]*\}/" + _RETIRED_FEATURE_ALT
+)
+
+# Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): FEAT-NNNN-<kebab-slug>.
+FEATURE_ID_RE = re.compile(r"^FEAT-(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 # --- frontmatter parser (same shape as build-registry.py) -------------------
@@ -788,6 +832,220 @@ def check_m() -> tuple[list[str], list[str]]:
     return errors, warnings
 
 
+def check_n1() -> tuple[list[str], list[str]]:
+    """N1 — feature-segment presence and retired-placeholder guardrail.
+
+    Two assertions, both about the framework's own consistency:
+
+    N1a. Every feature-scoped composition's `default-output-path` carries
+         `{feature-id}` as a complete path segment. Feature-scoped is derived,
+         not listed: it means the path is rooted at one of the four per-feature
+         `[project.paths]` keys (FEATURE_SCOPED_PATH_KEYS). Deriving it means a
+         new stage composition is covered the day it is added.
+
+    N1b. No retired feature placeholder survives in an A.I.D.E. artifact path.
+         `docs/<feature>/`, `<feature-folder>` and `<feature-name>` were three
+         spellings of one concept, and having three is what let a single
+         feature's work be described in three mutually-consistent-looking ways.
+
+    Hard errors, not warnings: this lands green in the same change that fixes
+    every violation it would report, and a warning would only invite the
+    spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
+    `references/ai-principles/feature-precondition.md`.
+
+    Pairs with Check M: M asserts every path token names a real key, N1 asserts
+    every feature-scoped path carries a feature segment. Together they close
+    both halves of the routing contract.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    for path in sorted(COMPOSITIONS_ROOT.glob("*.yaml")):
+        rel = path.relative_to(REPO_ROOT)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        match = DEFAULT_OUTPUT_PATH_RE.search(text)
+        if not match:
+            continue
+        out_path = match.group(1)
+        token = PATHS_TOKEN_RE.search(out_path)
+        if not token or token.group(1) not in FEATURE_SCOPED_PATH_KEYS:
+            continue
+        if f"/{FEATURE_SEGMENT}/" not in out_path:
+            errors.append(
+                f"{rel}: default-output-path `{out_path}` is rooted at the "
+                f"per-feature key `{token.group(1)}` but carries no "
+                f"`{FEATURE_SEGMENT}/` segment — two features' artifacts would "
+                f"collide in one directory. See references/ai-principles/"
+                f"feature-precondition.md."
+            )
+
+    targets: list[Path] = sorted(SKILLS_ROOT.rglob("*.md")) + sorted(
+        TEMPLATES_ROOT.rglob("*.md")
+    ) + sorted(COMPOSITIONS_ROOT.glob("*.yaml"))
+    for path in targets:
+        rel = path.relative_to(REPO_ROOT)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        for i, line in enumerate(text.splitlines()):
+            for regex in (RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE):
+                for hit in regex.finditer(line):
+                    errors.append(
+                        f"{rel}:{i+1}: `{hit.group(0)}` uses the retired "
+                        f"placeholder `{hit.group(1)}` — the per-feature "
+                        f"directory is spelled `<feature-id>`."
+                    )
+    return errors, warnings
+
+
+def check_features_registry(
+    features_toml_path: Path,
+    project_toml_path: Path | None = None,
+    project_user_toml_path: Path | None = None,
+) -> tuple[list[str], list[str]]:
+    """N2 — feature registry validation (project data, opt-in).
+
+    Implements `config/SCHEMAS.md` § 4 rules 13-16 against a real or fixture
+    `features.toml`. Separate from N1 because it validates project *data*, not
+    framework self-consistency: this script is hard-anchored to the framework
+    repo and cannot see a project's registry, which lives in another repo
+    entirely. Follows the seam Check I already established for `--project-toml`.
+
+    Two sub-rules need a second file and are skipped when it is absent, rather
+    than assumed: `repos` cross-referencing needs `[[project.repos]]` from
+    `project.toml`, and `active_feature` resolution needs `[user]` from
+    `project.user.toml`. Skipping is reported so a partial run cannot be
+    mistaken for a clean one.
+    """
+    import tomllib
+
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if not features_toml_path.exists():
+        return [f"{features_toml_path}: file not found."], warnings
+    try:
+        with features_toml_path.open("rb") as fh:
+            data = tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        return [f"{features_toml_path}: malformed TOML — {exc}"], warnings
+
+    features = data.get("features", [])
+    if not isinstance(features, list):
+        return [f"{features_toml_path}: `features` must be an array of tables."], warnings
+    if not features:
+        warnings.append(
+            f"{features_toml_path}: no [[features]] entries — legal, and means "
+            f"'opted in, no features yet' (config/SCHEMAS.md § 2.8.3)."
+        )
+
+    ids_seen: dict[str, int] = {}
+    ordinals_seen: dict[str, str] = {}
+    declared_ids: set[str] = set()
+
+    for idx, entry in enumerate(features, start=1):
+        where = f"{features_toml_path}: [[features]] #{idx}"
+        if not isinstance(entry, dict):
+            errors.append(f"{where}: not a table.")
+            continue
+        fid = entry.get("id")
+        if not isinstance(fid, str) or not fid:
+            errors.append(f"{where}: missing required `id`.")
+            continue
+        match = FEATURE_ID_RE.match(fid)
+        if not match:
+            errors.append(
+                f"{where}: `id` = {fid!r} does not match FEAT-NNNN-<kebab-slug> "
+                f"(4-digit zero-padded ordinal, lowercase kebab slug)."
+            )
+            continue
+        declared_ids.add(fid)
+        if fid in ids_seen:
+            errors.append(
+                f"{where}: duplicate `id` {fid!r} — first declared at "
+                f"#{ids_seen[fid]}."
+            )
+        else:
+            ids_seen[fid] = idx
+        ordinal = match.group(1)
+        if ordinal in ordinals_seen and ordinals_seen[ordinal] != fid:
+            errors.append(
+                f"{where}: ordinal {ordinal} is already used by "
+                f"{ordinals_seen[ordinal]!r} — an assigned ordinal is a stable "
+                f"identity and is never reused, even under a different slug."
+            )
+        else:
+            ordinals_seen.setdefault(ordinal, fid)
+
+    if project_toml_path is None:
+        warnings.append(
+            "`repos` cross-reference skipped — supply --project-toml to check "
+            "each entry against [[project.repos]].code."
+        )
+    else:
+        repo_codes: set[str] = set()
+        try:
+            with project_toml_path.open("rb") as fh:
+                pdata = tomllib.load(fh)
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            errors.append(f"{project_toml_path}: unreadable — {exc}")
+            pdata = {}
+        for repo in pdata.get("project", {}).get("repos", []) or []:
+            if isinstance(repo, dict) and isinstance(repo.get("code"), str):
+                repo_codes.add(repo["code"])
+        for idx, entry in enumerate(features, start=1):
+            if not isinstance(entry, dict):
+                continue
+            repos = entry.get("repos")
+            if repos is None:
+                continue
+            if not isinstance(repos, list):
+                errors.append(
+                    f"{features_toml_path}: [[features]] #{idx}: `repos` must be "
+                    f"an array of [[project.repos]] codes."
+                )
+                continue
+            for code in repos:
+                if code not in repo_codes:
+                    errors.append(
+                        f"{features_toml_path}: [[features]] #{idx}: `repos` "
+                        f"entry {code!r} matches no [[project.repos]].code in "
+                        f"{project_toml_path.name} — declared codes are "
+                        f"{', '.join(sorted(repo_codes)) or '(none)'}."
+                    )
+
+    if project_user_toml_path is None:
+        warnings.append(
+            "`active_feature` resolution skipped — supply --project-user-toml "
+            "to check [user].active_feature against the registry."
+        )
+    else:
+        try:
+            with project_user_toml_path.open("rb") as fh:
+                udata = tomllib.load(fh)
+        except (OSError, tomllib.TOMLDecodeError) as exc:
+            errors.append(f"{project_user_toml_path}: unreadable — {exc}")
+            udata = {}
+        active = udata.get("user", {}).get("active_feature")
+        if active is None:
+            warnings.append(
+                f"{project_user_toml_path}: no [user].active_feature set — legal; "
+                f"feature-aware skills will halt and route to `select-feature`."
+            )
+        elif active not in declared_ids:
+            errors.append(
+                f"{project_user_toml_path}: [user].active_feature = {active!r} "
+                f"resolves to no `id` in {features_toml_path.name} — a stale "
+                f"pointer sends every write to a feature that does not exist."
+            )
+
+    return errors, warnings
+
+
 def check_sod(
     project_toml_path: Path,
     artifact_path: Path | None = None,
@@ -1115,7 +1373,39 @@ def main() -> int:
             "config/SCHEMAS.md § 2.6). Exits non-zero on violation. Skips A-H."
         ),
     )
+    parser.add_argument(
+        "--features-toml",
+        type=str,
+        help=(
+            "Path to a features.toml fixture or a real project registry. Switches "
+            "the validator into feature-registry mode (Check N2): evaluates rules "
+            "13-16 from config/SCHEMAS.md — id format, id and ordinal uniqueness, "
+            "active_feature resolution, repos cross-reference. Exits non-zero on "
+            "violation. Skips the regular A-H checks. Pair with --project-toml to "
+            "check `repos`, and --project-user-toml to check active_feature."
+        ),
+    )
+    parser.add_argument(
+        "--project-user-toml",
+        type=str,
+        help=(
+            "Path to a project.user.toml fixture — pairs with --features-toml to "
+            "resolve [user].active_feature against the registry (Check N2)."
+        ),
+    )
     args = parser.parse_args()
+
+    if args.features_toml:
+        ftoml = Path(args.features_toml)
+        ptoml = Path(args.project_toml) if args.project_toml else None
+        utoml = Path(args.project_user_toml) if args.project_user_toml else None
+        print(f"validate.py — feature-registry check against {ftoml}")
+        n2_err, n2_warn = check_features_registry(ftoml, ptoml, utoml)
+        _print("Check N2 — feature registry (features.toml)", n2_err, n2_warn)
+        print("\n=== Summary ===")
+        print(f"  errors:   {len(n2_err)}")
+        print(f"  warnings: {len(n2_warn)}")
+        return 0 if not n2_err else 1
 
     if args.framework_toml:
         ftoml = Path(args.framework_toml)
@@ -1151,6 +1441,7 @@ def main() -> int:
     j_err, j_warn = check_j()
     l_err, l_warn = check_l()
     m_err, m_warn = check_m()
+    n1_err, n1_warn = check_n1()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -1164,12 +1455,13 @@ def main() -> int:
         "Check J — write-discipline binding (create-* skills)",
         "Check L — RE close-out gate binding",
         "Check M — {paths.<key>} token resolution",
+        "Check N1 — feature-segment / retired-placeholder guardrail",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
-        (l_err, l_warn), (m_err, m_warn), (f_err, f_warn),
+        (l_err, l_warn), (m_err, m_warn), (n1_err, n1_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -1200,6 +1492,7 @@ def main() -> int:
                  "J — write-discipline binding (create-* skills)",
                  "L — RE close-out gate binding",
                  "M — {paths.<key>} token resolution",
+                 "N1 — feature-segment / retired-placeholder guardrail",
                  "F — build-registry sanity"],
                 bundles,
             )

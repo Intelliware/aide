@@ -380,6 +380,11 @@ class TestPathsTokenResolution(unittest.TestCase):
     ephemeral composition directly into the live `templates/compositions/`
     tree — the same tree `validate.py`'s hardcoded COMPOSITIONS_ROOT scans —
     and remove it in a `finally` block regardless of assertion outcome.
+
+    The fixture carries a `{feature-id}/` segment because Check N1 scans the
+    same tree: a fixture rooted at a feature-scoped key without one is a real
+    N1 violation, and the positive cases here must isolate M rather than trip
+    a second check.
     """
 
     FIXTURE_PATH = REPO_ROOT / "templates" / "compositions" / "_check-m-test-fixture.yaml"
@@ -393,7 +398,7 @@ class TestPathsTokenResolution(unittest.TestCase):
                 applies-to-flow: any
                 package-type: test-fixture
 
-                default-output-path: "{token}/{{feature-id}}-test.md"
+                default-output-path: "{token}/{{feature-id}}/{{feature-id}}-test.md"
                 """
             ),
             encoding="utf-8",
@@ -439,6 +444,256 @@ class TestPathsTokenResolution(unittest.TestCase):
             proc.returncode, 0,
             f"validator should accept the {{project.paths.<key>}} synonym form.\noutput:\n{out}",
         )
+
+
+class TestFeatureSegmentGuardrail(unittest.TestCase):
+    """Check N1 — feature-segment presence and retired-placeholder guardrail.
+
+    Like Check M, N1 has no fixture-mode flag: it asserts the framework's own
+    consistency, so the fixtures are written into the live trees it scans and
+    removed in `finally`.
+    """
+
+    COMPOSITION = REPO_ROOT / "templates" / "compositions" / "_check-n1-test-fixture.yaml"
+    # Inside TEMPLATES_ROOT (which N1 walks) but outside blocks/ — a .md under
+    # blocks/ is additionally subject to Check E's frontmatter rules and Check
+    # A's orphan scan, which would mask the N1 result these cases isolate.
+    SKILL_DOC = REPO_ROOT / "templates" / "_check-n1-test-fixture.md"
+
+    def _write_composition(self, out_path: str) -> None:
+        self.COMPOSITION.write_text(
+            textwrap.dedent(
+                f"""\
+                name: check-n1-test-fixture
+                description: Ephemeral fixture for test_validate.py Check N1 test. Deleted immediately after the assertion.
+                applies-to-flow: any
+                package-type: test-fixture
+
+                default-output-path: "{out_path}"
+                """
+            ),
+            encoding="utf-8",
+        )
+
+    def test_reject_feature_scoped_composition_without_segment(self) -> None:
+        """A per-feature stage path with no `{feature-id}/` segment must be rejected."""
+        self._write_composition("{paths.design_package}/{feature-id}-design.md")
+        try:
+            proc = run_validate()
+        finally:
+            self.COMPOSITION.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1 should reject a feature-scoped path with no segment.\noutput:\n{out}",
+        )
+        self.assertIn("Check N1", out)
+        self.assertIn("carries no", out)
+
+    def test_accept_feature_scoped_composition_with_segment(self) -> None:
+        """The same path with the segment present must pass."""
+        self._write_composition("{paths.design_package}/{feature-id}/{feature-id}-design.md")
+        try:
+            proc = run_validate()
+        finally:
+            self.COMPOSITION.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1 should accept a feature-scoped path carrying the segment.\noutput:\n{out}",
+        )
+
+    def test_accept_non_feature_scoped_composition_without_segment(self) -> None:
+        """A KB path is keyed by repo-slug, not feature — it must not be required to carry the segment."""
+        self._write_composition("{paths.knowledge_base_path}/source-docs/{repo-slug}/api-consumer/")
+        try:
+            proc = run_validate()
+        finally:
+            self.COMPOSITION.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1 must not require a feature segment on a non-feature-scoped path.\noutput:\n{out}",
+        )
+
+    def _write_skill_doc(self, body: str) -> None:
+        self.SKILL_DOC.write_text(
+            f"# Ephemeral fixture for test_validate.py Check N1\n\n{body}\n",
+            encoding="utf-8",
+        )
+
+    def test_reject_retired_placeholder_under_docs(self) -> None:
+        """`docs/<feature>/` was retired in favour of `docs/<feature-id>/`."""
+        self._write_skill_doc("Write the section to `docs/<feature>/requirements-package/`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1 should reject `docs/<feature>/`.\noutput:\n{out}",
+        )
+        self.assertIn("retired placeholder", out)
+
+    def test_reject_retired_placeholder_under_path_token(self) -> None:
+        """The same spelling is equally wrong in an assembled path."""
+        self._write_skill_doc("Assemble to `{paths.quality_package}/<feature-folder>/x.md`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1 should reject `<feature-folder>` under a path token.\noutput:\n{out}",
+        )
+        self.assertIn("retired placeholder", out)
+
+    def test_accept_feature_id_spelling(self) -> None:
+        """`docs/<feature-id>/` is the one permitted spelling."""
+        self._write_skill_doc("Write the section to `docs/<feature-id>/requirements-package/`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1 should accept `docs/<feature-id>/`.\noutput:\n{out}",
+        )
+
+    def test_accept_feature_placeholder_outside_artifact_paths(self) -> None:
+        """`<feature>` stays legal in prose, scope IDs, and documented source trees.
+
+        The five `src/domain/<feature>/` rows in the RE blocks describe the
+        *documented application's* layout, not ours; flagging those would make
+        the check unusable and is why it keys on the parent rather than the
+        placeholder alone.
+        """
+        self._write_skill_doc(
+            'Ask "List the next behavior for <feature>." Scope IDs use '
+            "`<feature>:<sub-scope>`. Entities live in `src/domain/<feature>/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1 must not flag `<feature>` outside A.I.D.E. artifact paths.\noutput:\n{out}",
+        )
+
+
+class TestFeatureRegistry(unittest.TestCase):
+    """Check N2 — feature registry validation (`--features-toml` fixture mode)."""
+
+    def _write(self, tmp: Path, name: str, body: str) -> Path:
+        path = tmp / name
+        path.write_text(textwrap.dedent(body), encoding="utf-8")
+        return path
+
+    def test_committed_example_is_valid(self) -> None:
+        """The shipped example must satisfy its own schema, paired with project.toml.example."""
+        proc = run_validate(
+            "--features-toml", "config/features.toml.example",
+            "--project-toml", "config/project.toml.example",
+        )
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"config/features.toml.example should validate cleanly.\noutput:\n{out}",
+        )
+
+    def test_reject_malformed_id(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-1-bad"\n')
+            proc = run_validate("--features-toml", str(f))
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(proc.returncode, 0, out)
+        self.assertIn("does not match FEAT-NNNN", out)
+
+    def test_reject_reused_ordinal_under_different_slug(self) -> None:
+        """An assigned ordinal is a stable identity — reuse is rejected even with a new slug."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(
+                tmp, "features.toml",
+                '[[features]]\nid = "FEAT-0002-alpha"\n\n[[features]]\nid = "FEAT-0002-beta"\n',
+            )
+            proc = run_validate("--features-toml", str(f))
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(proc.returncode, 0, out)
+        self.assertIn("already used by", out)
+
+    def test_reject_stale_active_feature(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-0001-real"\n')
+            u = self._write(tmp, "project.user.toml", '[user]\nactive_feature = "FEAT-0099-nope"\n')
+            proc = run_validate("--features-toml", str(f), "--project-user-toml", str(u))
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(proc.returncode, 0, out)
+        self.assertIn("resolves to no", out)
+
+    def test_reject_unknown_repo_code(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(
+                tmp, "features.toml",
+                '[[features]]\nid = "FEAT-0001-real"\nrepos = ["ghost-repo"]\n',
+            )
+            p = self._write(
+                tmp, "project.toml",
+                '[[project.repos]]\ncode = "api-billing"\n',
+            )
+            proc = run_validate("--features-toml", str(f), "--project-toml", str(p))
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(proc.returncode, 0, out)
+        self.assertIn("matches no [[project.repos]].code", out)
+
+    def test_accept_valid_registry_with_both_companions(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(
+                tmp, "features.toml",
+                '[[features]]\nid = "FEAT-0001-alert-customer"\nrepos = ["api-billing"]\n'
+                '\n[[features]]\nid = "FEAT-0002-refund-fee-waiver"\n',
+            )
+            p = self._write(tmp, "project.toml", '[[project.repos]]\ncode = "api-billing"\n')
+            u = self._write(
+                tmp, "project.user.toml",
+                '[user]\nactive_feature = "FEAT-0002-refund-fee-waiver"\n',
+            )
+            proc = run_validate(
+                "--features-toml", str(f), "--project-toml", str(p), "--project-user-toml", str(u),
+            )
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, f"valid registry should pass.\noutput:\n{out}")
+
+    def test_empty_registry_is_legal(self) -> None:
+        """An empty-but-present file means 'opted in, no features yet' (SCHEMAS § 2.8.3)."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(tmp, "features.toml", "# opted in, nothing minted yet\n")
+            proc = run_validate("--features-toml", str(f))
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, f"empty registry should pass.\noutput:\n{out}")
+        self.assertIn("no features yet", out)
+
+    def test_missing_file_exits_nonzero(self) -> None:
+        proc = run_validate("--features-toml", "/nonexistent/features.toml")
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("file not found", proc.stdout + proc.stderr)
+
+    def test_malformed_toml_exits_nonzero(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            f = self._write(Path(td), "features.toml", "[[features]\nid = broken\n")
+            proc = run_validate("--features-toml", str(f))
+        self.assertNotEqual(proc.returncode, 0)
+        self.assertIn("malformed TOML", proc.stdout + proc.stderr)
 
 
 class TestFrameworkLayerGuardrail(unittest.TestCase):

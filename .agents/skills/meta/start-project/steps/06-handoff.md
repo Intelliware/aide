@@ -37,10 +37,10 @@ that `project.toml` is now in place and validated.
 
 3. Add the feature-scoping note, once, immediately before the handoff:
 
-   > Artifacts will be written per feature under `docs/<feature-name>/`. If you
-   > would rather have them keyed to a registered feature ID
-   > (`docs/FEAT-0001-<slug>/`), run `select-feature` at any point — including
-   > later, once work is already underway.
+   > Artifacts will be written per feature under `docs/`, in a folder named from
+   > your description. If you would rather have them keyed to a registered
+   > feature ID (`docs/FEAT-0001-refund-processing/`), run `select-feature` at
+   > any point — including later, once work is already underway.
 
    This is a statement, not a question. Do not wait for a reply, do not create
    `features.toml`, and do not re-raise it if the user says nothing — the note
