@@ -476,6 +476,88 @@ test('Check M — accept the {project.paths.<key>} synonym form', () => {
   );
 });
 
+// --- TOML parser — shapes the real config examples actually use ---
+//
+// `parseSimpleToml` is hand-rolled, because Node has no stdlib TOML reader where
+// Python has `tomllib`. That asymmetry let the two validators drift: Check I
+// passed in Python and failed in Node against `config/project.toml.example`,
+// because a multi-line basic string (`description = """`) matched the
+// quoted-string branch, mis-parsed, and then threw on the prose lines beneath
+// it. Two neighbouring gaps came from the same weakness — inline arrays stayed
+// raw strings, and trailing `# comments` were swallowed into the value.
+//
+// These cases pin the shapes the committed examples actually use, so the Node
+// parser cannot quietly fall behind `tomllib` again.
+
+const PARSER_TMP = path.join(REPO_ROOT, 'scripts', 'test_fixtures', '_parser-tmp');
+
+function writeTmpToml(name, body) {
+  fs.mkdirSync(PARSER_TMP, { recursive: true });
+  const p = path.join(PARSER_TMP, name);
+  fs.writeFileSync(p, body, 'utf-8');
+  return p;
+}
+
+function cleanTmpToml() {
+  fs.rmSync(PARSER_TMP, { recursive: true, force: true });
+}
+
+test('TOML parser — Check I parses config/project.toml.example (multi-line string)', () => {
+  const proc = runValidate('--project-toml', 'config/project.toml.example');
+  const out = proc.stdout + proc.stderr;
+  assertNotIn('TOML parse error', out, `the committed example must parse.\noutput:\n${out}`);
+  assertEqual(proc.returncode, 0, `Check I should pass on the committed example.\noutput:\n${out}`);
+});
+
+test('TOML parser — a trailing comment is not swallowed into the value', () => {
+  let proc;
+  try {
+    const p = writeTmpToml(
+      'project.toml',
+      '[[project.repos]]\ncode = "api-billing"   # trailing comment\nwrite_role = "Developer"\n'
+    );
+    proc = runValidate('--project-toml', `"${p}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotIn('TOML parse error', out, `should parse.\noutput:\n${out}`);
+  assertNotIn(
+    '# trailing comment', out,
+    `the comment leaked into the parsed value.\noutput:\n${out}`
+  );
+});
+
+test('TOML parser — an inline array parses as an array, not a raw string', () => {
+  let proc;
+  try {
+    const p = writeTmpToml(
+      'project.toml',
+      '[project.elicitation]\nparts_affected_vocabulary = ["api", "ui"]\n'
+    );
+    proc = runValidate('--project-toml', `"${p}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotIn('TOML parse error', out, `an inline array should parse.\noutput:\n${out}`);
+});
+
+test('TOML parser — an array spanning multiple lines closes correctly', () => {
+  let proc;
+  try {
+    const p = writeTmpToml(
+      'project.toml',
+      '[project.glossary]\nreferences = [\n  "one",\n  "two",\n]\n\n[[project.repos]]\ncode = "api-billing"\n'
+    );
+    proc = runValidate('--project-toml', `"${p}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotIn('TOML parse error', out, `a multi-line array should parse.\noutput:\n${out}`);
+});
+
 // --- Summary ---
 
 console.log('\n' + '='.repeat(60));

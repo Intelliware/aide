@@ -1075,6 +1075,78 @@ function checkSod(projectTomlPath, artifactPath = null) {
 }
 
 // Simple TOML parser for basic structures
+// Remove a trailing `# comment`, ignoring any `#` that sits inside a quoted
+// string. Without this, `code = "x"  # note` parses as the literal
+// `"x"  # note` — the value silently carries the comment.
+function stripInlineComment(line) {
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === "'" && !inDouble) inSingle = !inSingle;
+    else if (c === '"' && !inSingle) inDouble = !inDouble;
+    else if (c === '#' && !inSingle && !inDouble) return line.slice(0, i);
+  }
+  return line;
+}
+
+// Net `[` depth of a fragment, ignoring brackets inside quoted strings. Used to
+// decide whether an array value continues onto the next line.
+function bracketDepth(fragment) {
+  let depth = 0;
+  let inSingle = false;
+  let inDouble = false;
+  for (const c of fragment) {
+    if (c === "'" && !inDouble) inSingle = !inSingle;
+    else if (c === '"' && !inSingle) inDouble = !inDouble;
+    else if (!inSingle && !inDouble) {
+      if (c === '[') depth++;
+      else if (c === ']') depth--;
+    }
+  }
+  return depth;
+}
+
+// Split on top-level commas only, so nested arrays and quoted commas survive.
+function splitTopLevelCommas(inner) {
+  const parts = [];
+  let current = '';
+  let depth = 0;
+  let inSingle = false;
+  let inDouble = false;
+  for (const c of inner) {
+    if (c === "'" && !inDouble) { inSingle = !inSingle; current += c; continue; }
+    if (c === '"' && !inSingle) { inDouble = !inDouble; current += c; continue; }
+    if (!inSingle && !inDouble) {
+      if (c === '[') depth++;
+      else if (c === ']') depth--;
+      else if (c === ',' && depth === 0) { parts.push(current); current = ''; continue; }
+    }
+    current += c;
+  }
+  if (current.trim()) parts.push(current);
+  return parts;
+}
+
+function parseTomlValue(raw) {
+  const value = raw.trim();
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  if (value.startsWith('[') && value.endsWith(']')) {
+    const inner = value.slice(1, -1).trim();
+    if (!inner) return [];
+    return splitTopLevelCommas(inner).map(parseTomlValue);
+  }
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    return value.slice(1, -1);
+  }
+  if (value.length >= 2 && value.startsWith("'") && value.endsWith("'")) {
+    return value.slice(1, -1);
+  }
+  if (value !== '' && !isNaN(value)) return parseFloat(value);
+  return value;
+}
+
 function parseSimpleToml(text) {
   const lines = text.split('\n');
   const result = {};
@@ -1089,9 +1161,11 @@ function parseSimpleToml(text) {
       continue;
     }
 
-    // Section header
-    if (trimmed.startsWith('[') || trimmed.endsWith(']')) {
-      if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+    // Section header. Only a line *starting* with `[` qualifies: an inline
+    // array (`repos = ["api-billing"]`) also ends with `]` and has to reach the
+    // key/value branch below.
+    if (trimmed.startsWith('[')) {
+      if (!trimmed.endsWith(']')) {
         throw new Error(`line ${lineNo + 1}: malformed section header '${trimmed}'`);
       }
 
@@ -1155,20 +1229,52 @@ function parseSimpleToml(text) {
         throw new Error(`line ${lineNo + 1}: malformed key '${key}'`);
       }
 
-      // Parse value
-      if (value === 'true') {
-        value = true;
-      } else if (value === 'false') {
-        value = false;
-      } else if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.slice(1, -1);
-      } else if (value.startsWith("'") && value.endsWith("'")) {
-        value = value.slice(1, -1);
-      } else if (!isNaN(value)) {
-        value = parseFloat(value);
+      // Multi-line basic string (""" ... """). Checked before comment stripping,
+      // because the delimiter itself would confuse the quote tracking.
+      if (value.startsWith('"""')) {
+        const afterOpen = value.slice(3);
+        const closeOnSameLine = afterOpen.indexOf('"""');
+        if (closeOnSameLine >= 0) {
+          currentSection[key] = afterOpen.slice(0, closeOnSameLine);
+          continue;
+        }
+        const segments = [];
+        if (afterOpen !== '') segments.push(afterOpen);
+        let closed = false;
+        while (++lineNo < lines.length) {
+          const idx = lines[lineNo].indexOf('"""');
+          if (idx >= 0) {
+            segments.push(lines[lineNo].slice(0, idx));
+            closed = true;
+            break;
+          }
+          segments.push(lines[lineNo]);
+        }
+        if (!closed) {
+          throw new Error(`line ${lineNo}: unterminated multi-line string for key '${key}'`);
+        }
+        currentSection[key] = segments.join('\n');
+        continue;
       }
 
-      currentSection[key] = value;
+      let valueText = stripInlineComment(value).trim();
+
+      // Array spanning multiple lines — keep consuming until the brackets close.
+      if (valueText.startsWith('[') && bracketDepth(valueText) > 0) {
+        const segments = [valueText];
+        let depth = bracketDepth(valueText);
+        while (depth > 0 && ++lineNo < lines.length) {
+          const cleaned = stripInlineComment(lines[lineNo]).trim();
+          segments.push(cleaned);
+          depth += bracketDepth(cleaned);
+        }
+        if (depth > 0) {
+          throw new Error(`line ${lineNo}: unterminated array for key '${key}'`);
+        }
+        valueText = segments.join(' ');
+      }
+
+      currentSection[key] = parseTomlValue(valueText);
       continue;
     }
 
