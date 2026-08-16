@@ -424,7 +424,10 @@ function writeCheckMFixture(token) {
       'applies-to-flow: any',
       'package-type: test-fixture',
       '',
-      `default-output-path: "${token}/{feature-id}-test.md"`,
+      // The `{feature-id}/` segment is required because Check N1 scans the same
+      // tree: a fixture rooted at a feature-scoped key without one is a real N1
+      // violation, and these cases must isolate M rather than trip a second check.
+      `default-output-path: "${token}/{feature-id}/{feature-id}-test.md"`,
       '',
     ].join('\n'),
     'utf-8'
@@ -556,6 +559,298 @@ test('TOML parser — an array spanning multiple lines closes correctly', () => 
   }
   const out = proc.stdout + proc.stderr;
   assertNotIn('TOML parse error', out, `a multi-line array should parse.\noutput:\n${out}`);
+});
+
+// --- Check N1 — feature-segment / retired-placeholder guardrail ---
+//
+// Like Check M, N1 asserts the framework's own consistency and has no fixture
+// mode, so the fixtures go into the live trees it scans and are removed in
+// `finally`. The document fixture sits in `templates/` rather than
+// `templates/blocks/` because a .md under blocks/ also answers to Check E's
+// frontmatter rules and Check A's orphan scan, either of which would mask the
+// N1 result these cases exist to observe.
+
+const CHECK_N1_COMPOSITION = path.join(REPO_ROOT, 'templates', 'compositions', '_check-n1-test-fixture.yaml');
+const CHECK_N1_DOC = path.join(REPO_ROOT, 'templates', '_check-n1-test-fixture.md');
+
+function writeN1Composition(outPath) {
+  fs.writeFileSync(
+    CHECK_N1_COMPOSITION,
+    [
+      'name: check-n1-test-fixture',
+      'description: Ephemeral fixture for test-validate.js Check N1 test. Deleted immediately after the assertion.',
+      'applies-to-flow: any',
+      'package-type: test-fixture',
+      '',
+      `default-output-path: "${outPath}"`,
+      '',
+    ].join('\n'),
+    'utf-8'
+  );
+}
+
+function writeN1Doc(body) {
+  fs.writeFileSync(
+    CHECK_N1_DOC,
+    `# Ephemeral fixture for test-validate.js Check N1\n\n${body}\n`,
+    'utf-8'
+  );
+}
+
+test('Check N1 — reject a feature-scoped composition with no {feature-id}/ segment', () => {
+  writeN1Composition('{paths.design_package}/{feature-id}-design.md');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_COMPOSITION);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1 should reject a missing segment.\noutput:\n${out}`);
+  assertIn('Check N1', out, `output missing 'Check N1'.\noutput:\n${out}`);
+  assertIn('carries no', out, `output missing the segment complaint.\noutput:\n${out}`);
+});
+
+test('Check N1 — accept the same composition once the segment is present', () => {
+  writeN1Composition('{paths.design_package}/{feature-id}/{feature-id}-design.md');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_COMPOSITION);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1 should accept a path carrying the segment.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N1 — a KB path is keyed by repo-slug, so no segment is required', () => {
+  writeN1Composition('{paths.knowledge_base_path}/source-docs/{repo-slug}/api-consumer/');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_COMPOSITION);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1 must not require a segment on a non-feature-scoped path.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N1 — reject the retired docs/<feature>/ spelling', () => {
+  writeN1Doc('Write the section to `docs/<feature>/requirements-package/`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1 should reject docs/<feature>/.\noutput:\n${out}`);
+  assertIn('retired placeholder', out, `output missing the retired-placeholder complaint.\noutput:\n${out}`);
+});
+
+test('Check N1 — reject <feature-folder> under a {paths.*} token', () => {
+  writeN1Doc('Assemble to `{paths.quality_package}/<feature-folder>/x.md`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1 should reject <feature-folder>.\noutput:\n${out}`);
+  assertIn('retired placeholder', out, `output missing the retired-placeholder complaint.\noutput:\n${out}`);
+});
+
+test('Check N1 — accept docs/<feature-id>/, the one permitted spelling', () => {
+  writeN1Doc('Write the section to `docs/<feature-id>/requirements-package/`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1 should accept docs/<feature-id>/.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N1 — <feature> stays legal in prose, scope IDs and documented source trees', () => {
+  writeN1Doc(
+    'Ask "List the next behavior for <feature>." Scope IDs use `<feature>:<sub-scope>`. ' +
+    'Entities live in `src/domain/<feature>/`.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1 must not flag <feature> outside A.I.D.E. artifact paths.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+// --- Check N2 — feature registry (--features-toml fixture mode) ---
+//
+// Reuses the temp-TOML helpers from the parser section above. Sub-rules that
+// need a companion file are exercised both ways: supplied, and absent (where
+// N2 must warn that it skipped rather than pass silently).
+
+test('Check N2 — the committed example validates against project.toml.example', () => {
+  const proc = runValidate(
+    '--features-toml', 'config/features.toml.example',
+    '--project-toml', 'config/project.toml.example'
+  );
+  assertEqual(
+    proc.returncode, 0,
+    `config/features.toml.example should validate cleanly.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N2 — reject a malformed feature id', () => {
+  let proc;
+  try {
+    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-1-bad"\n');
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, out);
+  assertIn('does not match FEAT-NNNN', out, out);
+});
+
+test('Check N2 — reject a reused ordinal under a different slug', () => {
+  let proc;
+  try {
+    const f = writeTmpToml(
+      'features.toml',
+      '[[features]]\nid = "FEAT-0002-alpha"\n\n[[features]]\nid = "FEAT-0002-beta"\n'
+    );
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, out);
+  assertIn('already used by', out, out);
+});
+
+test('Check N2 — reject a duplicate feature id', () => {
+  let proc;
+  try {
+    const f = writeTmpToml(
+      'features.toml',
+      '[[features]]\nid = "FEAT-0001-same"\n\n[[features]]\nid = "FEAT-0001-same"\n'
+    );
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, out);
+  assertIn('duplicate', out, out);
+});
+
+test('Check N2 — reject a stale active_feature pointer', () => {
+  let proc;
+  try {
+    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-0001-real"\n');
+    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "FEAT-0099-nope"\n');
+    proc = runValidate('--features-toml', `"${f}"`, '--project-user-toml', `"${u}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, out);
+  assertIn('resolves to no', out, out);
+});
+
+test('Check N2 — reject a repos entry naming no declared repo code', () => {
+  let proc;
+  try {
+    const f = writeTmpToml(
+      'features.toml',
+      '[[features]]\nid = "FEAT-0001-real"\nrepos = ["ghost-repo"]\n'
+    );
+    const p = writeTmpToml('project.toml', '[[project.repos]]\ncode = "api-billing"\n');
+    proc = runValidate('--features-toml', `"${f}"`, '--project-toml', `"${p}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, out);
+  assertIn('matches no [[project.repos]].code', out, out);
+});
+
+test('Check N2 — accept a valid registry with both companion files', () => {
+  let proc;
+  try {
+    const f = writeTmpToml(
+      'features.toml',
+      '[[features]]\nid = "FEAT-0001-alert-customer"\nrepos = ["api-billing"]\n' +
+      '\n[[features]]\nid = "FEAT-0002-refund-fee-waiver"\n'
+    );
+    const p = writeTmpToml('project.toml', '[[project.repos]]\ncode = "api-billing"\n');
+    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "FEAT-0002-refund-fee-waiver"\n');
+    proc = runValidate(
+      '--features-toml', `"${f}"`, '--project-toml', `"${p}"`, '--project-user-toml', `"${u}"`
+    );
+  } finally {
+    cleanTmpToml();
+  }
+  assertEqual(proc.returncode, 0, `valid registry should pass.\noutput:\n${proc.stdout + proc.stderr}`);
+});
+
+test('Check N2 — companion-file sub-rules report that they were skipped', () => {
+  let proc;
+  try {
+    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-0001-real"\n');
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertEqual(proc.returncode, 0, out);
+  assertIn('`repos` cross-reference skipped', out, `a partial run must say so.\noutput:\n${out}`);
+  assertIn('`active_feature` resolution skipped', out, `a partial run must say so.\noutput:\n${out}`);
+});
+
+test('Check N2 — an empty registry is legal (opted in, nothing minted yet)', () => {
+  let proc;
+  try {
+    const f = writeTmpToml('features.toml', '# opted in, nothing minted yet\n');
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  const out = proc.stdout + proc.stderr;
+  assertEqual(proc.returncode, 0, `empty registry should pass.\noutput:\n${out}`);
+  assertIn('no features yet', out, out);
+});
+
+test('Check N2 — a missing registry file exits non-zero', () => {
+  const proc = runValidate('--features-toml', '/nonexistent/features.toml');
+  assertNotEqual(proc.returncode, 0, 'missing file should exit non-zero');
+  assertIn('file not found', proc.stdout + proc.stderr, 'should say file not found');
+});
+
+test('Check N2 — malformed TOML exits non-zero', () => {
+  let proc;
+  try {
+    const f = writeTmpToml('features.toml', '[[features]\nid = broken\n');
+    proc = runValidate('--features-toml', `"${f}"`);
+  } finally {
+    cleanTmpToml();
+  }
+  assertNotEqual(proc.returncode, 0, 'malformed TOML should exit non-zero');
+  assertIn('malformed TOML', proc.stdout + proc.stderr, 'should say malformed TOML');
 });
 
 // --- Summary ---

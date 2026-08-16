@@ -628,6 +628,30 @@ class TestFeatureRegistry(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0, out)
         self.assertIn("already used by", out)
 
+    def test_reject_duplicate_id(self) -> None:
+        """The same full ID twice is a registry that cannot resolve a feature."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(
+                tmp, "features.toml",
+                '[[features]]\nid = "FEAT-0001-same"\n\n[[features]]\nid = "FEAT-0001-same"\n',
+            )
+            proc = run_validate("--features-toml", str(f))
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(proc.returncode, 0, out)
+        self.assertIn("duplicate", out)
+
+    def test_skipped_sub_rules_are_reported(self) -> None:
+        """A partial run must announce what it could not check, not pass silently."""
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-0001-real"\n')
+            proc = run_validate("--features-toml", str(f))
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, out)
+        self.assertIn("`repos` cross-reference skipped", out)
+        self.assertIn("`active_feature` resolution skipped", out)
+
     def test_reject_stale_active_feature(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
