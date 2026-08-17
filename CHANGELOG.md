@@ -54,20 +54,22 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ### `2.4.0` — 2026-08-16
 
-Phases 1 (Foundation), 2 (Preconditions), 3b (Working tree) and 3 (Path segments) of
-`_docs/feature-id-minimal-plan.md`, shipped as one release. Phase 1 gives the
+Phases 1 (Foundation), 2 (Preconditions), 3b (Working tree), 3 (Path segments) and 4
+(Guardrails) of `_docs/feature-id-minimal-plan.md`, shipped as one release. Phase 1 gives the
 `{feature-id}` token — already load-bearing in every stage's output paths — a source
 of truth: the opt-in feature registry (`features.toml`), the personal active-feature
 pointer (`[user].active_feature`), and the `select-feature` skill that mints and
 activates features. Phase 2 makes that source of truth binding: every feature-aware
 skill now resolves the active feature and refuses to guess when it cannot, instead of
 inventing an ID or a slug from the request. Phase 3b binds the working-tree directory
-to the resolved ID, and phase 3 puts that ID into the assembled paths themselves.
+to the resolved ID, phase 3 puts that ID into the assembled paths themselves, and phase 4
+adds the validator checks that stop either from silently regressing.
 
 The phases ship together because none of them is much use alone. Phase 1 registers a
 skill nothing routes to; phase 2 makes it reachable but moves no artifact; 3b and 3
-are what actually stop one feature's work from landing in two places under two names.
-Shipping 1 and 2 by themselves would have released a registry that nothing consumed.
+are what actually stop one feature's work from landing in two places under two names;
+and phase 4 is what stops the three retired spellings from creeping back one file at a
+time. Shipping 1 and 2 by themselves would have released a registry that nothing consumed.
 
 A project with no `features.toml` remains byte-for-byte unaffected, which is the
 constraint the whole design is built around rather than a courtesy. Each
@@ -90,6 +92,8 @@ opting in, not globs that match on filename.
 | 8 | 2026-08-14 | Addition | skills | `framework-navigator` (`SKILL.md`, `references/state-probe.md`, `steps/03-match-or-render.md`, `steps/04-recommend.md`) | State probe gains `features_toml_present` / `active_feature` fields (opt-in, no-op when `features.toml` is absent). The recommendation gate filter now surfaces `select-feature` as a prerequisite — using the same mechanism as an unmet `workflow-graph.yaml` gate, no score penalty — when the probe shows no active feature ahead of a feature-aware recommendation. The navigator never halts on this itself: per its own "Side effects: none" contract, it recommends, it does not block. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 9 | 2026-08-16 | Addition | skills | `start-project` (`SKILL.md`, `steps/06-handoff.md`) | Bootstrap now states once, at handoff, that feature-scoped paths exist and that `select-feature` enables them at any point. Closes a discoverability hole rather than changing a default: `start-project` never mentioned `features.toml`, and a feature-aware skill cannot route a user to `select-feature` on a project without a registry because the precondition returns before it could — so the only way in was to already know to ask. Deliberately a statement, not a question: it writes no `features.toml`, does not wait for a reply, and is not re-raised. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 | 10 | 2026-08-16 | Addition | references | `references/ai-principles/feature-precondition.md` | New *Worked example — one feature, both ways* section showing a single feature's full tree opted in and not, placed where the working-tree and assembled-path rules meet so the two can be read together. This is the only end-to-end illustration of the opted-in tree: every skill's own `references/EXAMPLE.md` depicts the not-opted-in shape, correctly, because that is what a project gets until someone runs `select-feature`. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 11 | 2026-08-16 | Addition | scripts | `scripts/validate.py`, `scripts/test_validate.py` | Phase 4 — Check **N1** (framework, default run): every feature-scoped composition's `default-output-path` carries `{feature-id}` as a complete path segment, and no retired placeholder names a per-feature directory in an A.I.D.E. artifact path. Feature-scoping is *derived* from the four per-feature `[project.paths]` keys rather than listed, so a stage composition added later is covered the day it lands. Check **N2** (project, `--features-toml PATH`): `id` format, full-ID and bare-ordinal uniqueness, `active_feature` resolution, `repos` cross-referencing — following the `--project-toml` seam Check I established, because this script is anchored to the framework repo and cannot see a project's registry. Sub-rules needing a companion file warn that they were skipped rather than passing silently. Hard errors, not warnings: both land green in the same change that fixes every violation they report. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 12 | 2026-08-16 | Addition | scripts | `scripts/validate.js`, `scripts/test-validate.js` | N1 and N2 ported to the Node validator with matching messages and exit behaviour. § 8 of the plan had required every validator change to land twice; phase 4 initially shipped Python-only, which left half the entry points without the guardrail, since `validate.js` is a live twin carrying checks A through M. Both suites now run 47 cases green, and the two cases Python lacked (duplicate ID; the skipped-sub-rule warnings) were added so the twins match on behaviour rather than on check names. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 
 #### Changed
 
@@ -107,6 +111,9 @@ opting in, not globs that match on filename.
 | # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
 |---|---|---|---|---|---|---|---|
 | 1 | 2026-08-16 | Correction | skills | `plan-quick-change` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`), `execute-quick-change/references/INPUTS-OUTPUTS.md` | The quick-dev spec handoff was broken and had been since before this work: `document-quick-change` writes the spec to `{paths.requirements_package}/<feature-id>/`, but both downstream skills loaded it from `docs/<feature-id>/quick-dev-package/`. It survived only because the agent carried the spec in conversation across the three skills and so never had to resolve the path it had been given. `quick-dev-spec.yaml`'s `default-output-path` settles which side was wrong — the spec is a deliverable, so the readers were fixed. Resulting split: the spec assembled, and the plan, change tracker, orientation notes and review findings in the working tree. Recorded as a known defect at line 69 of the superseded plan; retiring `<feature-folder>` did not cause it but did remove the last ambiguity that let it pass unnoticed, since both sides now name the same directory in the same spelling and simply disagree about the parent. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 2 | 2026-08-16 | Correction | config | `config/features.toml.example` | `repos = ["billing-api"]` did not match any `[[project.repos]].code` in `project.toml.example`, which declares `api-billing`. Found by Check N2 on its first run against the committed examples — the cross-reference rule existed in `SCHEMAS.md` § 4 from phase 1, but nothing enforced it, so the two examples had been shipped inconsistent. Exactly the class of drift N2 exists to catch, caught on the pair it ships with. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 3 | 2026-08-16 | Correction | skills | `start-project` (`SKILL.md`, `steps/06-handoff.md`) | The opt-in note introduced a *fourth* spelling, `docs/<feature-name>/`, in the same change that retired the other two — written before Check N1 existed to reject it. Replaced with a plain-language description of the default, since the note's whole purpose is to describe the state of a project that has not opted in and therefore has no ID to show. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
+| 4 | 2026-08-16 | Correction | scripts | `scripts/validate.js`, `scripts/test-validate.js` | The Node validator's hand-rolled `parseSimpleToml` mis-parsed multi-line basic strings: `description = """` matched the quoted-string branch, collapsed to a single quote character, and then threw on the prose beneath it. `validate.js --project-toml config/project.toml.example` had therefore been failing where `validate.py` passed the same file, so Check I was effectively Python-only. Two neighbouring gaps shared the cause — inline arrays stayed raw strings and trailing `# comments` were swallowed into values. Adds multi-line strings, inline and multi-line arrays, and quote-aware comment stripping, and narrows section-header detection to lines that actually start with `[` (the old test also matched any line *ending* in `]`, which an inline array does). Pre-existing and unrelated to feature IDs; surfaced because N2 was the first check to read an array out of a project file. | branch `feat/feature-id-minimal-plan` | ☐ Pending |
 
 #### Branch Dependency
 
@@ -124,13 +131,24 @@ projects and 3 adds a directory level to every assembled path. What is preserved
 narrower and worth stating exactly — a project with no `features.toml` is unchanged,
 and an opted-in project's *filenames* are unchanged. Directory depth is not.
 
-`python3 scripts/validate.py` (0 errors, 3 pre-existing unrelated warnings), `python3
-scripts/test_validate.py` (29/29 passing), and `python3 scripts/build-registry.py`
+`python3 scripts/validate.py` (0 errors, 3 pre-existing unrelated warnings), `node
+scripts/validate.js` (0 errors, 4 warnings — the same 3 plus a pre-existing 201-line
+`SKILL.md` notice only the Node registry check reports), `python3 scripts/test_validate.py`
+(47/47), `node scripts/test-validate.js` (47/47), and `python3 scripts/build-registry.py`
 (50 skills, 0 warnings — phases 2 onward added no new skill, only wired existing ones)
 all green.
 
-Phase 4 (validator checks that would stop the retired spellings reappearing) is not in
-this release.
+**Known documentation debt, deliberately not discharged here.** § 8 of the plan predicted
+five files it then failed to touch, and predicted the consequence correctly: "leaving them
+describing the old shape is documentation debt, not a saving". Outstanding are
+`references/ai-principles/write-discipline.md` (per-section paths still described as
+non-feature-scoped), `_docs/ai-sdlc-stage-map-new.md` (the canonical tree, lines 123-291,
+still shows the pre-phase-3 shape and is the document a reader consults *for* the layout),
+`AGENTS.md` (no `feature-id` vocabulary entry),
+`references/elicitation-patterns/project-bootstrap.md` and `config/framework.toml.example`
+(both cosmetic). Check N1 does not catch these because none of them spells a retired
+placeholder — they describe the old *shape* in prose, which no regex can police. They should
+be cleared before merge.
 
 `README.md`'s version line is set to `2.4.0`, per the synchronisation rule at the foot
 of this file. It had been left at `2.2.0` — the `2.3.0` bump on `path-token-reconciliation`

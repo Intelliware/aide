@@ -586,6 +586,49 @@ twins, and the orientation docs; then ~96 before §2.6's working tree was measur
 a scope audit against the full plan's Tier 1 recovered `framework.toml.example`,
 `project-bootstrap.md` and the stage map. Corrected upward three times; see §11.)*
 
+### As built — 101 files
+
+The estimate was accurate at the headline and wrong in its composition, so the closeness is
+partly luck. `git diff --name-only path-token-reconciliation...HEAD` reports **101 files** against
+the predicted ~102, but roughly five predicted files were never touched and roughly five
+unpredicted ones were.
+
+**Predicted, not done — outstanding work, not a saving:**
+
+| File | Why it was predicted | Status |
+|---|---|---|
+| `references/ai-principles/write-discipline.md` | Per-section paths become feature-scoped | **Outstanding.** The per-section write contract still describes non-feature-scoped paths |
+| `_docs/ai-sdlc-stage-map-new.md` | The canonical tree (lines 123-291) | **Outstanding.** This is the document a reader consults *for* the layout, and it now describes the pre-phase-3 shape |
+| `AGENTS.md` | Vocabulary | **Outstanding.** No `feature-id` entry in the vocabulary list |
+| `references/elicitation-patterns/project-bootstrap.md` | Legacy `docs/` example paths | **Outstanding**, and harmless only because §2.3's minting question was dropped |
+| `config/framework.toml.example` | `output_root` commentary | **Outstanding**, cosmetic |
+
+§8 predicted this exact failure mode and named it correctly: "leaving them describing the old shape
+is documentation debt, not a saving". The debt was taken. It should be discharged before the branch
+merges, or logged where someone will find it.
+
+**Not predicted, done:**
+
+- The implementation stage absorbed far more than the tier table implies — 45 occurrences across 12
+  files, because `implementation_package` roots four support artifacts (`increment-status.md`,
+  `bugs-and-issues-log.md`, `change-tracker.md`, the package index) in addition to the per-increment
+  files, and all five had to move inside the segment together.
+- `config/customizations/review-implementation-package.toml.example`, to converge a stray
+  `{feature-id}-review/` on `{feature-id}/review/`.
+- Two reader skills, to fix the quick-dev spec handoff (§12 territory — a pre-existing defect
+  surfaced by this work, not caused by it).
+- `start-project`, but for opt-in discoverability rather than the predicted `FEAT-0001` minting,
+  which was dropped as premature.
+
+**The one prediction that was right and initially ignored.** The Validator row says "Every
+validator change lands twice, in Python and Node". Phase 4 shipped N1 and N2 in `validate.py`
+alone, and the omission was caught only when this section was re-read to write this reckoning.
+`validate.js` is a live twin carrying checks A through M, so a Python-only guardrail is a guardrail
+that half the entry points do not have. Ported in a follow-up commit, which also closed a
+pre-existing divergence: `validate.js --project-toml config/project.toml.example` had been failing
+on a multi-line TOML string that `tomllib` parses without complaint, so Check I was silently
+Python-only too. Both suites now run 47 cases green.
+
 **§2.6 widens the work inside already-counted files more than it adds new ones.** Of its 144
 occurrences across 44 files, 41 files sit in the requirements, design, quality and quick-dev
 skills already tallied above — but those files now need **two** kinds of edit rather than one: the
@@ -628,12 +671,35 @@ same seam:
 
 | Mode | Asserts | Runs |
 |---|---|---|
-| **N1 — framework** (default) | Every feature-scoped `default-output-path` contains `{feature-id}` as a path segment, **and no `docs/<feature>/` placeholder survives** — after phase 3b the literal `<feature>` should appear nowhere outside the two prose exceptions named in §2.6 | Always, in CI |
+| **N1 — framework** (default) | Every feature-scoped `default-output-path` contains `{feature-id}` as a path segment, **and no retired feature placeholder survives in an artifact path** — see the correction below, which narrows this from what was first drafted | Always, in CI |
 | **N2 — project** (`--features-toml PATH`, or folded into the existing `--project-toml` mode) | Every `id` matches `^FEAT-\d{4}-[a-z0-9]+(-[a-z0-9]+)*$`; full ID *and* bare ordinal are unique; `active_feature` resolves to a declared `id`; each `repos` entry resolves to a `[[project.repos]].code` — which requires both files, so this sub-rule only runs when `--project-toml` is also supplied | Opt-in, against a committed fixture in the framework repo and against real projects on demand |
 
 N1 must cover `.agents/skills/` as well as `templates/compositions/` — scoping it to
 compositions reproduces the exact gap that let the current drift survive, since
 `config/SCHEMAS.md:647` rule 5 governs only tokens inside `project.toml` values.
+
+**Correction — N1's placeholder half is narrower than drafted, and the exception count was
+wrong.** This section originally asserted that after phase 3b "the literal `<feature>` should
+appear nowhere outside the two prose exceptions named in §2.6". A census taken while building the
+check found that wrong in both directions.
+
+There are **three** retired spellings, not one: `<feature>`, `<feature-folder>` (introduced by a
+superseded plan) and `<feature-name>` (introduced, and then removed, by this one — see §11). And
+`<feature>` has **three** classes of legitimate surviving use, none of them prose exceptions to be
+grandfathered:
+
+1. **Conversational placeholders** in elicitation prompts and trigger phrases — "List the next
+   behavior for `<feature>`". Nothing to do with a directory.
+2. **Scope IDs** of the form `<feature>:<sub-scope>`, which are identifiers, not paths.
+3. **The documented application's source tree**, e.g. `src/domain/<feature>/` in the
+   reverse-engineering blocks. These describe *the codebase being documented*, not A.I.D.E.'s
+   own output layout, and A.I.D.E. has no business renaming them.
+
+A ban on the literal token would therefore have fired on all three and been unshippable. As built,
+N1 matches a retired spelling only where the parent marks the string as an A.I.D.E. artifact path
+— immediately under `docs/` or under a `{paths.*}` token. That keeps the guardrail meaningful
+without legislating over vocabulary it does not own, and needs no exception list, which is what
+makes it durable: a new legitimate `<feature>` in prose cannot break the build.
 
 N1 pairs naturally with the prerequisite's Check M: M asserts every path token names a real
 key, N1 asserts every feature-scoped path carries a feature segment. Together they close both
@@ -666,12 +732,24 @@ first as the canonical case, quality last as the highest-touch. If phase 3 stall
 1, 2 and 4 still leave the project better off: features are registered, named
 consistently, and validated, even while artifacts remain flat.
 
-**Phase 3b is worth keeping distinct from 3, and is the better one to do first.** Phase 3 moves
-files, so it breaks depth-assuming globs and needs migration thought; 3b moves nothing and only
-changes what a placeholder resolves to, so it is safe in isolation and delivers the larger share
-of the consistency benefit — the working tree holds more files than the assembled deliverables do.
-Doing 3b first also means that if phase 3 is abandoned entirely, features are still
-registry-named everywhere it matters.
+**Phase 3b is worth keeping distinct from 3, and is the better one to do first.** Phase 3 changes
+the *shape* of assembled paths by adding a directory level, so it breaks depth-assuming globs and
+needs migration thought; 3b leaves the shape alone and only changes what an existing placeholder
+resolves to. It is therefore safe in isolation, and delivers the larger share of the consistency
+benefit — the working tree holds more files than the assembled deliverables do. Doing 3b first also
+means that if phase 3 is abandoned entirely, features are still registry-named everywhere it
+matters.
+
+**Correction — "3b moves nothing" was too strong.** An earlier draft of this paragraph said 3b
+"moves nothing". That is true of the framework's own files, and true of any project adopting
+feature IDs from the start, but false for the case that turns out to matter most: a project that
+improvised `docs/checkout-refunds/` before opting in. For that project, binding the placeholder to
+the registry ID means its existing feature directory now resolves somewhere else, and the tree has
+to be reconciled. Phase 3b therefore needed a rule it was not originally scoped to carry — see the
+reconciliation section of `references/ai-principles/feature-precondition.md`, which detects the
+pre-existing bare-slug directory and offers a `git mv` or an explicit decision to keep it. The
+distinction to draw between 3 and 3b is *shape versus resolution*, not *moves versus does not
+move*.
 
 **Positive fixtures matter as much as negative ones.** A project with no `features.toml`
 must validate clean, or every existing project fails on upgrade.
