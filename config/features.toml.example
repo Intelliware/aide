@@ -26,7 +26,9 @@
 # directory, so name near-neighbours apart (refunds-api / refunds-ui).
 #
 # There is no FEAT-NNNN- ordinal prefix. Nothing ever consumed the number, and
-# `created` below records chronology more accurately than allocation order does.
+# `created` below records when a feature was minted, which is what the ordinal was
+# really being read for. It is day-granular, so two features minted the same day
+# tie; this file is append-only, so their order here is the tiebreaker.
 # See config/SCHEMAS.md § 2.8 for the full reasoning.
 
 [[features]]

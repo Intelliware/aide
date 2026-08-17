@@ -592,8 +592,17 @@ before the format was ever used in anger, because **nothing consumed the number.
 No skill, template or check read the ordinal and did anything with it: every
 reference to it was machinery for maintaining it — allocation, uniqueness
 validation, and a prefix-stripping rule for matching pre-opt-in directories. Its
-only real consumer was `ls`, and `created` records chronology more accurately
-anyway, since it captures the date rather than the allocation order.
+only real consumer was `ls`.
+
+`created` covers what the ordinal was really being read for, and more truthfully:
+it records the date a feature was minted rather than its position in an allocation
+sequence, and it survives gaps. It is not a strict replacement, and the difference
+is worth stating plainly — an ordinal is a *total* order, whereas `created` is
+day-granular, so two features minted on the same day tie, and the field is required
+by convention rather than by any check (§ 4's rules 13-16 do not mention it).
+Neither limit costs anything in practice: this file is append-only, so entry order
+is itself a total order and a finer-grained one than any date, and nothing in the
+framework sorts on `created` today.
 
 Removing it also removed a manufactured hazard. Allocating `max + 1` invents a
 shared counter, so two people minting a feature on separate branches at the same

@@ -153,7 +153,8 @@ const RETIRED_IN_TOKEN_RE = new RegExp(
 // Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
 // used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
 // and allocating one manufactured a shared counter for concurrent minters to contend
-// over. Chronology lives in the registry's `created` field instead.
+// over. The registry's `created` date records when a feature was minted; it is
+// day-granular and advisory, so file order is the finer-grained sequence.
 const FEATURE_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // --- frontmatter parser (same shape as build-registry.js) -------------------

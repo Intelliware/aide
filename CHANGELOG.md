@@ -94,8 +94,12 @@ dropped before release once it became clear that **nothing consumed the number.*
 reference to the ordinal was machinery for maintaining it: allocation, uniqueness
 validation, and a rule for stripping the prefix back off to match pre-opt-in directories.
 No skill, template or check read it. Its only consumer was `ls`, and the registry's
-required `created` field records chronology more accurately, since it captures the date
-rather than the allocation order.
+`created` field covers what the ordinal was really being read for — the date a feature
+was minted, rather than its position in an allocation sequence. To be precise about the
+trade rather than overstating it: `created` is day-granular and unvalidated, so it is
+not the total order an ordinal was. Neither limit bites, because `features.toml` is
+append-only and entry order is therefore a finer-grained sequence than any date, and
+nothing sorts on the field today.
 
 Dropping it also removed a hazard the format had manufactured. Allocating `max + 1`
 invents a shared counter, so two people minting features simultaneously on separate

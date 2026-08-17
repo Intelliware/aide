@@ -129,8 +129,15 @@ The reasoning is recorded in full at `config/SCHEMAS.md` § 2.8; the short form 
 machinery for maintaining it — allocation, uniqueness validation, and the prefix-stripping
 rule § 3's reconciliation used to match pre-opt-in directories. No skill, template or check
 ever read the number and did anything with it. Its only consumer was `ls`, and the
-registry's required `created` field records chronology more accurately anyway, since it
-captures the date rather than the allocation order.
+registry's `created` field covers what the ordinal was really being read for — the date a
+feature was minted, rather than its position in an allocation sequence.
+
+State the trade precisely rather than overstating it, because `created` is not a strict
+replacement: it is day-granular, so two features minted on the same day tie where two
+ordinals never could, and it is required by convention rather than by any check — § 8's
+rules for N2 do not mention it, by decision. Neither limit bites. `features.toml` is
+append-only, so entry order is itself a total order and a finer-grained one than any date,
+and nothing in the framework sorts on `created` today.
 
 Three consequences ripple back through this document, and each is amended at its own
 section rather than only here:
