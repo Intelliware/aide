@@ -463,6 +463,25 @@ the original design are what make this a safe change rather than a breaking one:
 flat paths, where enabling feature scoping moves the *next* write and orphans everything
 already written. That is a migration, and the position below still holds.
 
+**The registry is created empty, and `start-project` does not mint `FEAT-0001`.** This finally
+settles §2.3, which had proposed minting the first feature at bootstrap; a draft of this
+amendment briefly reinstated it by routing the handoff through `select-feature`, which was wrong
+for the same reason §2.3 was. **Brownfield decides it.** That flow's opening skills —
+`analyze-repository`, the `reverse-engineer-*` family, `build-knowledge-base` — carry no
+active-feature precondition at all, because RE documentation and KB components are keyed by
+repo-slug and domain rather than by feature (the same reason `knowledge_base_path` is absent
+from Check N1's feature-scoped keys). A brownfield project does substantial work before any
+feature exists to name. Minting at bootstrap would therefore force the user to invent a feature
+for work that is not feature work, and would leave that invented ID *active* when their first
+genuine feature arrives — so it gets either reused under a wrong name or duplicated by a second
+entry, which is the duplicate-identity hazard `select-feature` was built to prevent.
+
+Letting each skill's precondition fire on its own costs nothing and puts the question at the
+right moment. For greenfield and quick-dev the next skill is feature-scoped, so it halts at once
+and returns automatically via `## Next skill\n<caller>`; for brownfield the question arrives when
+requirements work does. The general principle: **creating the registry and naming a feature are
+separate decisions, and only the first one belongs to bootstrap.**
+
 **Mixed layouts are tolerated, not prevented.** A project that opts in mid-flight has old
 features flat and new ones nested. This is mildly untidy and entirely harmless: each
 feature is internally consistent, and nothing reads across features. A one-time

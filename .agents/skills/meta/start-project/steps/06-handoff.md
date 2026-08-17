@@ -35,14 +35,14 @@ that `project.toml` is now in place and validated.
    - The trigger phrase the user can repeat to invoke the next skill
      manually if they want to come back to it later
 
-3. **When step 05 wrote `features.toml`**, state the default once and name the
-   extra hop, immediately before the handoff:
+3. **When step 05 wrote `features.toml`**, state the default once, immediately
+   before the handoff:
 
    > This project is feature-scoped: each delivery unit gets an ID like
-   > `FEAT-0001-refund-processing`, and that ID is a directory segment in every
-   > artifact path, so two features can never write over each other. I'll hand you
-   > to `select-feature` first to name this one, then straight on to
-   > `<next skill>`. If you'd rather not work this way, delete `features.toml` and
+   > `FEAT-0001-refund-processing`, and that ID becomes a directory segment in
+   > every artifact path, so two features can never write over each other. The
+   > first skill that produces feature-scoped work will ask you to name the
+   > feature. If you'd rather not work this way, delete `features.toml` and
    > everything reverts to flat paths.
 
    A statement, not a question — do not wait for a reply. It names the opt-*out*
@@ -50,27 +50,31 @@ that `project.toml` is now in place and validated.
    migration, which is exactly why it is safe to default on for a project with no
    artifacts yet.
 
+   **Do not mint a feature here, and do not route through `select-feature`.** The
+   registry is created empty on purpose. Which skill comes next decides when a
+   feature ID is meaningful, and for `brownfield` that is much later:
+   `analyze-repository`, the `reverse-engineer-*` skills and
+   `build-knowledge-base` carry no active-feature precondition at all, because RE
+   documentation and KB components are keyed by repo-slug and domain rather than
+   by feature. Forcing a name at bootstrap would make the user invent a feature
+   for work that is not feature work, and that premature ID would then be the
+   active one when their first real feature arrives — so it either gets reused
+   under a wrong name or a second entry gets minted for the same work, which is
+   the duplicate-identity hazard `select-feature` exists to prevent.
+
+   Letting the precondition fire on its own costs nothing and lands the question
+   at the right moment. For `greenfield` and `quick-dev` the very next skill is
+   feature-scoped, so it halts immediately, redirects to `select-feature`, and is
+   returned to automatically via `## Next skill\n<caller>` — the same destination,
+   asked while the user is describing the work instead of configuring a project.
+
    When step 05 **skipped** `features.toml` (mode = `rebaseline` or
    `extend-repos`), say nothing about feature scoping. That project's paths are
    unchanged and an unprompted offer to restructure an existing artifact tree is a
    migration conversation this skill cannot finish — `select-feature` is there when
    its owner raises it.
 
-4. **Route through `select-feature` when `features.toml` was written.** Hand off to
-   `select-feature`, passing the flow's next skill (from the table above) as
-   `caller` and the user's project description as `description`. Its empty-registry
-   path goes straight to create, and its step 6 closes with
-   `## Next skill\n<caller>`, so the user lands in the stage skill with
-   `FEAT-0001` already active.
-
-   Routing this way rather than handing straight to the stage skill avoids an
-   immediate halt: with a registry present and no `[user].active_feature`, every
-   write-side skill's Mode A precondition stops on its first step and sends the
-   user to `select-feature` anyway. Same destination, one less dead end, and the
-   feature gets named when the user is describing work instead of configuring a
-   project.
-
-5. Emit the handoff. Do not invoke the next skill silently — the user
+4. Emit the handoff. Do not invoke the next skill silently — the user
    should see the transition.
 
 ## Hard gates
@@ -85,8 +89,8 @@ that `project.toml` is now in place and validated.
 - [ ] Handoff message emitted.
 - [ ] Feature-scoping note stated once iff step 05 wrote `features.toml`, naming
       the opt-out; silent otherwise.
-- [ ] Handoff routed via `select-feature` (with `caller` set) iff `features.toml`
-      was written; direct to the flow's next skill otherwise.
+- [ ] No feature minted and no `[user].active_feature` set by this skill — the
+      registry is handed over empty.
 - [ ] User has the trigger phrase for the next skill.
 - [ ] Skill terminates cleanly (no further elicitation in this thread
       from `start-project`).
@@ -95,9 +99,9 @@ that `project.toml` is now in place and validated.
 
 This is the last step of `start-project`. Control passes to:
 
-- `select-feature` when step 05 wrote `features.toml`, carrying the flow's skill
-  below as `caller` so control continues there once a feature is active; otherwise
-  directly to:
 - `create-requirements-package` (greenfield), or
 - `analyze-repository` (brownfield), or
 - `document-quick-change` (quick-dev).
+
+Unchanged by the feature-registry default: the first skill that needs a feature
+asks for one, which for brownfield is several skills later.

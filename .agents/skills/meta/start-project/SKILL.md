@@ -62,7 +62,7 @@ The skill does NOT create `framework.toml` or `framework.user.toml` — those be
 
 Three deliberate limits on that default:
 
-- **No ordinal is minted here.** The file ships empty, which `config/SCHEMAS.md` § 2.8 declares legal and calls the normal post-opt-in state. Step 06 hands to `select-feature` — passing the flow's next skill as `caller` — so the first feature is named while the user is describing work, and all minting stays in the one skill that owns it.
+- **No feature is minted here, and no active feature is set.** The registry ships empty, which `config/SCHEMAS.md` § 2.8 declares legal and calls the normal post-opt-in state. The first skill that produces feature-scoped work asks for the name via its own precondition, which for `brownfield` is several skills later — `analyze-repository`, the `reverse-engineer-*` skills and `build-knowledge-base` have no active-feature precondition, because RE docs and KB components are keyed by repo-slug and domain rather than by feature. Naming a feature at bootstrap would mean inventing one for work that is not feature work, and leaving it active when the first real feature arrives.
 - **`rebaseline` and `extend-repos` are excluded.** Those modes imply artifacts already on flat paths, where turning on feature scoping moves the next write and leaves everything already written behind. That is a migration, and this skill does not perform migrations.
 - **Opting out is a deletion.** Remove `features.toml` and every path reverts, because presence of the file is the only signal. Say so once at handoff and move on — no question, no wait.
 
@@ -70,7 +70,7 @@ Existing projects are unaffected: they have no `features.toml`, they never gain 
 
 ## Next skill
 
-When `features.toml` was written, `select-feature` runs first — carrying the flow's skill below as `caller`, so control continues there once a feature is active. Otherwise control passes straight to it. Determined by the flow chosen in step 2:
+Determined by the flow chosen in step 2, and unaffected by whether `features.toml` was written:
 - `greenfield` → `create-requirements-package`
 - `brownfield` → `analyze-repository` (then onward to `build-knowledge-base` and `create-requirements-package` in brownfield mode)
 - `quick-dev` → `document-quick-change`
