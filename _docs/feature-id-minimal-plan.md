@@ -1131,6 +1131,32 @@ solving together because they are one user journey:
 3. **A sweep is explicitly out of scope today** — one feature, one question, at the moment that
    feature is next worked. Reconsider only alongside (1) and (2); a sweep without a story for
    assembled artifacts would move half of each feature.
+4. **Nothing verifies a migration finished, which makes a hand-run one unsafe at scale.** No
+   check validates a *project's* artifact layout — the validator's only project-artifact mode is
+   `--cross-cutting-artifact`, which reads `affects_repos` frontmatter and says nothing about
+   paths. So a partial migration is silent, and the reconciliation rule actively confirms it:
+   seeing `docs/FEAT-0001-refunds/` present it takes the "already migrated" branch, uses the
+   directory, and never looks at the assembled side. The result is a project whose working tree
+   is feature-scoped, whose deliverables are still flat, and where every skill reports success.
+
+**On migrating by hand.** Worth recording, because it will be attempted: the work is pure file
+movement with no content rewriting, so an agent prompted ad hoc can do it, and `git mv` preserves
+history. Two things make it unreliable rather than merely tedious. First, **two different renaming
+rules apply** — the five single-file stage deliverables (`-requirements.md`,
+`-enhancement-spec.md`, `-quick-dev-spec.md`, `-design.md`, `-quality.md`) change directory *and*
+filename, because the filename's `{feature-id}-` prefix changes value from inferred slug to
+registry ID, while `implementation_package`'s children (`INC-XXX.md`, `increment-status.md`,
+`bugs-and-issues-log.md`, `change-tracker.md`, `implementation-package.md`, `plan/`, `review/`)
+change directory only, since per-item files carry no prefix. A hand migration will tend to apply
+one rule uniformly. Second, under SoD directory mode the segment nests *inside* `<repo-code>/`
+(and `_cross-cutting/<feature-id>/` for cross-cutting features), so the correct target depends on
+`project.toml`.
+
+The conclusion that matters for sequencing: the missing piece is **verification, not tooling**. A
+one-or-two-feature project can be migrated by prompt and eyeballed. At ten features the moves are
+still easy and the silence is the hazard, so an opt-in completeness check — given `project.toml`
+and `features.toml`, report artifacts still sitting on flat paths — buys more safety per line than
+a migration command would, and it is the one part a prompt cannot supply for itself.
 
 **Knowledge-base reconciliation** (§10 item 4, ~17 files). Validate the KB's `last_feature_id`
 frontmatter against the registry and settle `update-knowledge-base`'s feature handling. This is
