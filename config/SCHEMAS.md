@@ -543,9 +543,20 @@ If features.toml exists  → resolve the active feature; write feature-scoped pa
 If it does not           → behave exactly as today.
 ```
 
-Existing projects are untouched until someone runs `select-feature` for the first
-time. Artifacts already on disk in a flat (non-feature-scoped) layout stay where
-they are and keep working.
+**New projects get this file at bootstrap; existing projects never do.** A `fresh`
+`start-project` run writes a comment-only `features.toml`, so feature-scoped paths
+are the default for new adoption rather than something a team has to discover. A
+project bootstrapped before that default, or one re-baselined onto an existing
+artifact tree, is untouched: `start-project` skips the file in its `rebaseline` and
+`extend-repos` modes, precisely because artifacts already on flat paths would be
+left behind by a change that only moves the *next* write. Those projects opt in
+through `select-feature` when their owner chooses to.
+
+Artifacts already on disk in a flat (non-feature-scoped) layout stay where they are
+and keep working. The framework offers a migration for one feature's working-tree
+directory at the moment that feature is next worked (see
+`references/ai-principles/feature-precondition.md`); it never sweeps a project, and
+it never moves anything unasked.
 
 **Shape** (see `features.toml.example` for the full annotated file):
 
@@ -555,7 +566,7 @@ id      = "FEAT-0001-alert-customer"
 title   = "Alert customer when a refund is delayed"
 created = 2026-08-11
 ticket  = "ACME-1247"          # optional
-repos   = ["billing-api"]      # optional; codes from [[project.repos]]
+repos   = ["api-billing"]      # optional; codes from [[project.repos]]
 ```
 
 | Field | Type | Required | Purpose |
@@ -566,11 +577,13 @@ repos   = ["billing-api"]      # optional; codes from [[project.repos]]
 | `ticket` | string | no | External tracker reference (Jira key, ADO work item, etc.). |
 | `repos` | array<string> | no | `[[project.repos]].code` values this feature is expected to touch. **Advisory, not authoritative** — each `create-*` skill's own run-time scope prompt (single-repo vs. cross-cutting) always wins when it diverges, because scope genuinely changes during discovery. When the run-time answer diverges from `repos`, the skill should offer to update this field rather than let the two drift apart silently. |
 
-**Absence vs. emptiness.** No `features.toml` means the project has not opted in.
-An empty-but-present file (no `[[features]]` entries) is also legal and means
-"opted in, no features yet" — this is the normal state immediately after opt-in
-and needs no scaffolding trick to represent, unlike an empty array-of-tables
-declared inline in TOML.
+**Absence vs. emptiness.** No `features.toml` means the project is not
+feature-scoped. An empty-but-present file (no `[[features]]` entries) is also legal
+and means "feature-scoped, nothing minted yet" — the normal state immediately after
+a `fresh` bootstrap or a manual opt-in, and it needs no scaffolding trick to
+represent, unlike an empty array-of-tables declared inline in TOML. Validation
+treats it as a warning-level observation, never an error, so a newly bootstrapped
+project passes cleanly before its first feature exists.
 
 **Minting is concurrency-safe by construction, not by cleverness.** Ordinal
 allocation reads the highest existing entry and adds one, so two people minting a

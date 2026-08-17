@@ -7,13 +7,13 @@ drifting. See `config/SCHEMAS.md` § 2.8 (the registry) and § 2.9 (the active-f
 pointer) for the underlying schema, and `_docs/feature-id-minimal-plan.md` § 7 for
 the design rationale.
 
-**Phase note.** Resolving the active feature now determines the **per-section
-working-tree** directory: every stage writes its working artifacts under
-`docs/<feature-id>/` (phase 3b). It does **not** yet affect the **assembled**
-artifact path — no composition's `default-output-path` carries a `<feature-id>/`
-segment yet (that is `_docs/feature-id-minimal-plan.md` phase 3 proper). Keep the two
-straight when reading the mode steps below: the echo in step 4 names the working-tree
-directory, which is registry-bound today.
+**Scope note.** Resolving the active feature determines **both** paths a stage
+writes to, and they are separate rules in this file. The **per-section working
+tree** is `docs/<feature-id>/` (*Resolving the working-tree directory*, below).
+The **assembled artifact** gains a `<feature-id>/` directory immediately above it
+(*Resolving the assembled artifact path*). Keep the two straight when reading the
+mode steps: step 4's echo names whichever of the two the calling skill is about to
+write, and for most `create-*` skills that is the assembled path.
 
 ## The two-line resolution rule
 
@@ -24,8 +24,13 @@ If it is present            → resolve [user].active_feature and follow the mod
                                below that matches this skill.
 ```
 
-A project that has never run `select-feature` is never affected by anything in this
-document — the check is the first line, and it is a pure no-op for that project.
+The signal is the file's presence and nothing else. What changed with the bootstrap
+default is only *who creates it*: `start-project` now writes an empty `features.toml`
+for a genuinely new project, so feature-scoped paths are the default for new
+adoption. An absent registry therefore means one of two things — a project that
+predates the default, or one that deliberately removed the file — and both must
+behave exactly as they did before any of this existed. That guarantee is what makes
+the default safe to flip; it is not softened by flipping it.
 
 ## Resolving the working-tree directory
 
@@ -216,9 +221,11 @@ feature" is a legitimate answer, not a failure. See
 - **Minting logic.** All of it — ordinal allocation, slug proposal, registry
   writes — lives in `select-feature`. This precondition only decides *whether* to
   call it and in which mode.
-- **Assembled-path construction.** This precondition resolves the working-tree
-  directory (see above) but not the assembled artifact path. Inserting
-  `<feature-id>/` into composition `default-output-path` values is phase 3 proper.
+- **Authoring the composition path.** This precondition supplies the *rule* for
+  resolving the `<feature-id>/` segment (see above); the segment itself is written
+  into each composition's `default-output-path`. If a new feature-scoped
+  composition omits it, Check N1 fails the build — the guardrail lives in
+  `scripts/validate.py` / `validate.js`, not here.
 - **Performing the migration.** The reconciliation rule *offers* to rename a
   pre-opt-in directory and honours the answer. It never runs `git mv` unprompted,
   and it does not sweep the project for other unmigrated directories — one feature,

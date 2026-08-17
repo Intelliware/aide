@@ -82,6 +82,26 @@ See `references/INPUTS-OUTPUTS.md`.
    before appending — a stale read is the one concurrency hazard ordinal
    allocation has (see `config/SCHEMAS.md` § 2.8). Append the entry to
    `features.toml` and set it as `[user].active_feature`.
+
+   **When proposing the slug, look at `docs/` first.** If the project has
+   pre-opt-in working directories (`docs/<slug>/` with no `FEAT-NNNN-` prefix)
+   and one plausibly covers the work being minted, propose *that directory's
+   name* as the slug and say why:
+
+   > `docs/refunds/` looks like this work. Using `refunds` as the slug gives
+   > `FEAT-0001-refunds`, so I can offer to rename that directory instead of
+   > starting a second one beside it.
+
+   This is not cosmetic. The reconciliation rule in
+   `references/ai-principles/feature-precondition.md` finds a feature's
+   pre-opt-in directory by stripping `FEAT-NNNN-` from the ID and matching the
+   remainder, so a slug that does not match is a slug that makes the rule
+   invisible: the next skill takes the "neither exists" branch and creates a
+   second tree without asking. Deriving the slug purely from a freshly typed
+   title is the likeliest way to land there, since "Refund processing fixes"
+   yields `refund-processing-fixes`, not `refunds`. The user may still override
+   — an unrelated directory should not capture the name — but the match must be
+   offered before a title-derived slug wins by default.
 5. **Echo the resolved output paths.** Print, for each stage the project
    uses, where that stage's artifacts will land once the feature is active
    (e.g. `.framework-output/requirements/FEAT-0001-alert-customer/`). This is
@@ -112,6 +132,11 @@ feature and stops.
   except in the two skip cases in step 2.
 - **Silently creating `features.toml`.** Its creation is the project's opt-in
   moment; confirm with the user rather than scaffolding it as a side effect.
+- **Deriving the slug from the title alone on a project with existing
+  `docs/<slug>/` directories.** The reconciliation rule matches a feature's
+  pre-opt-in directory on the slug, so a title-derived slug that misses it
+  silently starts a second tree for one feature — the exact failure feature IDs
+  exist to prevent. Check `docs/` before proposing.
 - **Minting without checking registry freshness.** Two people minting on
   separate branches can both compute the same next ordinal — warn when the
   working tree looks behind, and let the (loud, small) merge conflict be the
