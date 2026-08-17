@@ -32,6 +32,28 @@ Users rarely categorize their repos as "API" or "UI framework" — they say "doc
 
 ## Workflow
 
+### Stage 0: Repository Registration Check
+
+Before classification, check if this repository is registered in `project.toml`:
+
+1. Read `project.toml` and look for a `[[project.repos]]` entry matching the given path
+2. If found:
+   - Note any `type` field as a classification hint
+   - Note the `role` field if present (api, web-app, framework, etc.)
+   - Continue to Stage 1
+3. If not found:
+   - Ask user: "This repository is not registered in project.toml. Would you like to add it?"
+   - If yes, elicit:
+     - `code` (kebab-case slug, e.g., `orderhub-api`)
+     - `name` (human-readable, e.g., `OrderHub Backend API`)
+     - `role` (api, web-app, ui-framework, api-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job, test-suite)
+     - `type` (optional, e.g., `node-typescript-nest`, `java-spring-boot`)
+     - `primary` (optional, boolean — is this the main repo?)
+   - Append the entry to `project.toml`
+   - Continue to Stage 1
+
+Registration helps track which repos have been analyzed and documented, and provides hints for classification.
+
 ### Stage 1: Locate and Scan the Repository
 
 Ask the user for the repository path (or identify from context). Then perform a structural scan:
@@ -72,6 +94,42 @@ Apply the classification table. The eleven types are:
 | Test-Suite Repository | Repo's primary output is **test artefacts** — features/specs, step-defs, page-objects, fixtures, runners (e.g. dedicated Cucumber / Playwright / Cypress / Selenium / pytest / RestAssured / Karate / k6 project). No production code; no end-users. Often named `*-e2e`, `*-tests`, `*-qa-suite`, or sits as a sibling to the application it tests. | `reverse-engineer-test-suite` |
 
 **The application-vs-framework distinction** — most common ambiguity. Ask: who consumes this code? End users → application; other developers as a dependency → framework/library. Concrete signals: presence of `peerDependencies` (framework), `main`/`exports` field without a `start` script (framework), being listed as a dependency in other repos (framework), having its own deployment pipeline (application).
+
+### Stage 2b: Unsupported Stack Detection
+
+If none of the eleven domain types match and classification confidence is low:
+
+1. **Present findings to user:**
+
+   > "This repository appears to be a **[detected pattern]** which doesn't match any of my eleven reverse-engineering domain types:
+   >
+   > - **Detected:** [language], [framework], [architectural style]
+   > - **Closest matches:** [type1] (~X% fit), [type2] (~Y% fit)
+   > - **Key distinguishing signals:** [list what makes this different]
+   >
+   > For example: GraphQL server (not REST), serverless functions (no persistent server), ML pipeline (training/inference modes), CLI tool (command structure), message queue consumer (event-driven), etc."
+
+2. **Offer two paths:**
+
+   > **A) Force-fit to closest type**
+   > Use `reverse-engineer-<closest>` and adapt manually. Some sections may be irrelevant; others may need manual additions.
+   >
+   > **B) Create a new RE skill**
+   > Run `generate-re-skill` to build a tailored documentation pattern for this technology stack. This creates a reusable skill, not just one-off documentation.
+
+3. **Route based on user choice:**
+   - **A → Force-fit:** Hand off to the closest RE skill with a warning that some sections may not apply. The user can skip irrelevant sections during extraction.
+   - **B → Generate new skill:** Hand off by name to `generate-re-skill`. That skill will analyze the stack, research documentation patterns, and generate a complete RE skill.
+
+**When to trigger Stage 2b:**
+- No domain type matches with >70% confidence
+- User expresses doubt about the classification
+- The repository has characteristics not covered by any type's key distinguisher
+
+**When NOT to trigger Stage 2b:**
+- A domain type clearly matches (>80% confidence)
+- The mismatch is minor (e.g., Django REST vs. Flask — both are API)
+- User already indicated willingness to force-fit
 
 ### Stage 3: Handle Special Cases
 
@@ -114,6 +172,7 @@ Tell the user the exact phrase to use to invoke the first recommended skill. Rec
 - `reverse-engineer-copybook-library`
 - `reverse-engineer-jcl-job`
 - `reverse-engineer-test-suite`
+- `generate-re-skill` (when Stage 2b routes to option B — creating a new RE skill for an unsupported stack)
 
 Each recommended RE skill ends at its own **close-out gate**, where it asks the user
 whether to attest the extraction via automated verification or via
@@ -142,6 +201,7 @@ Dynamic — depends on classification:
 - Single-type repos → the matching `reverse-engineer-<type>` skill
 - Monorepos → first the framework/library RE skill, then app RE skills, then `build-knowledge-base`
 - Hybrid repos → primary RE skill first, then secondary RE skill(s)
+- Unsupported stacks (Stage 2b, option B) → `generate-re-skill` to create a new RE skill
 
 After each repo's RE work completes: that skill's close-out gate (automated verification
 or `review-reverse-engineering-package`), then `build-knowledge-base` (aggregates Part B

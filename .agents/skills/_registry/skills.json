@@ -335,6 +335,15 @@
       "origin": "core"
     },
     {
+      "canonical_id": "generate-re-skill",
+      "name": "generate-re-skill",
+      "description": "Use when analyze-repository cannot match a repository to any of the eleven existing RE domain types, when the user wants to create documentation patterns for an unsupported technology stack (e.g., GraphQL servers, serverless functions, ML pipelines, CLI tools), or when they say 'create a new RE skill for this stack'. Creates a complete reverse-engineering skill with compositions and block templates.",
+      "stage": "reverse-engineering",
+      "package": "",
+      "path": ".agents/skills/reverse-engineering/generate-re-skill/SKILL.md",
+      "origin": "core"
+    },
+    {
       "canonical_id": "reverse-engineer-api",
       "name": "reverse-engineer-api",
       "description": "Use when the user asks to document an API repository, reverse-engineer API docs, extract API documentation from source code, create OpenAPI specs from existing code, or build API consumer guides. Produces Part A (internal docs), Part B1 (OpenAPI spec), and Part B2 (consumer companion guide).",
