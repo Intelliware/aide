@@ -35,20 +35,42 @@ that `project.toml` is now in place and validated.
    - The trigger phrase the user can repeat to invoke the next skill
      manually if they want to come back to it later
 
-3. Add the feature-scoping note, once, immediately before the handoff:
+3. **When step 05 wrote `features.toml`**, state the default once and name the
+   extra hop, immediately before the handoff:
 
-   > Artifacts will be written per feature under `docs/`, in a folder named from
-   > your description. If you would rather have them keyed to a registered
-   > feature ID (`docs/FEAT-0001-refund-processing/`), run `select-feature` at
-   > any point — including later, once work is already underway.
+   > This project is feature-scoped: each delivery unit gets an ID like
+   > `FEAT-0001-refund-processing`, and that ID is a directory segment in every
+   > artifact path, so two features can never write over each other. I'll hand you
+   > to `select-feature` first to name this one, then straight on to
+   > `<next skill>`. If you'd rather not work this way, delete `features.toml` and
+   > everything reverts to flat paths.
 
-   This is a statement, not a question. Do not wait for a reply, do not create
-   `features.toml`, and do not re-raise it if the user says nothing — the note
-   exists because opt-in is otherwise undiscoverable from bootstrap, not because
-   the project needs to decide now. `select-feature` handles a mid-flight opt-in,
-   including renaming an existing `docs/<slug>/`.
+   A statement, not a question — do not wait for a reply. It names the opt-*out*
+   because the file is already written; the reversal is one deletion and no
+   migration, which is exactly why it is safe to default on for a project with no
+   artifacts yet.
 
-4. Emit the handoff. Do not invoke the next skill silently — the user
+   When step 05 **skipped** `features.toml` (mode = `rebaseline` or
+   `extend-repos`), say nothing about feature scoping. That project's paths are
+   unchanged and an unprompted offer to restructure an existing artifact tree is a
+   migration conversation this skill cannot finish — `select-feature` is there when
+   its owner raises it.
+
+4. **Route through `select-feature` when `features.toml` was written.** Hand off to
+   `select-feature`, passing the flow's next skill (from the table above) as
+   `caller` and the user's project description as `description`. Its empty-registry
+   path goes straight to create, and its step 6 closes with
+   `## Next skill\n<caller>`, so the user lands in the stage skill with
+   `FEAT-0001` already active.
+
+   Routing this way rather than handing straight to the stage skill avoids an
+   immediate halt: with a registry present and no `[user].active_feature`, every
+   write-side skill's Mode A precondition stops on its first step and sends the
+   user to `select-feature` anyway. Same destination, one less dead end, and the
+   feature gets named when the user is describing work instead of configuring a
+   project.
+
+5. Emit the handoff. Do not invoke the next skill silently — the user
    should see the transition.
 
 ## Hard gates
@@ -61,7 +83,10 @@ that `project.toml` is now in place and validated.
 ## Exit criteria
 
 - [ ] Handoff message emitted.
-- [ ] Feature-scoping note stated once, with no `features.toml` written.
+- [ ] Feature-scoping note stated once iff step 05 wrote `features.toml`, naming
+      the opt-out; silent otherwise.
+- [ ] Handoff routed via `select-feature` (with `caller` set) iff `features.toml`
+      was written; direct to the flow's next skill otherwise.
 - [ ] User has the trigger phrase for the next skill.
 - [ ] Skill terminates cleanly (no further elicitation in this thread
       from `start-project`).
@@ -70,6 +95,9 @@ that `project.toml` is now in place and validated.
 
 This is the last step of `start-project`. Control passes to:
 
+- `select-feature` when step 05 wrote `features.toml`, carrying the flow's skill
+  below as `caller` so control continues there once a feature is active; otherwise
+  directly to:
 - `create-requirements-package` (greenfield), or
 - `analyze-repository` (brownfield), or
 - `document-quick-change` (quick-dev).

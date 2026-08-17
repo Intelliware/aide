@@ -59,6 +59,43 @@ Materialize the canonical `project.toml`. Optionally materialize a
    `project.user.toml` to `{project-root}/.gitignore` if not already
    present. Create the file if absent.
 
+6b. **`features.toml` — feature-scoped paths, on by default for new projects.**
+   When mode = `fresh` **and** no artifact tree already exists (no `docs/`
+   containing per-feature directories, no populated stage roots under
+   `[project.paths]`), write a comment-only `features.toml` at
+   `{project-root}/features.toml`:
+
+   ```toml
+   # Feature registry — managed by skills/meta/select-feature.
+   # Each [[features]] entry gives one delivery unit a stable ID of the form
+   # FEAT-NNNN-<kebab-slug>, which becomes a directory segment in every artifact
+   # path. See config/SCHEMAS.md § 2.8. Empty is legal and means
+   # "feature-scoped, nothing minted yet".
+   ```
+
+   Comment-only is deliberate: `config/SCHEMAS.md` § 2.8 declares an
+   empty-but-present file legal and calls it "the normal state immediately after
+   opt-in", so the file needs no placeholder entry and TOML needs no trick to
+   express an empty array of tables. **Do not mint `FEAT-0001` here** — ordinal
+   allocation and slug proposal live in `select-feature` and must not be
+   reimplemented in a second skill. Step 06 routes through it, so the first
+   feature is named when the user describes actual work rather than during
+   project setup.
+
+   **Skip this sub-step entirely when mode = `rebaseline` or `extend-repos`.**
+   Those modes mean artifacts may already exist on flat paths, and turning on
+   feature scoping under them changes where the *next* write lands while leaving
+   everything already written behind. Migrating an existing tree is a separate
+   problem this skill does not solve — see the reconciliation rule in
+   `references/ai-principles/feature-precondition.md`, which handles one feature
+   at a time and only for the working tree. A project in those modes keeps the
+   pre-existing behaviour, and `select-feature` remains available when its owner
+   chooses to switch.
+
+   `features.toml` is **committed** — it is project data every contributor shares,
+   unlike `[user].active_feature`, which is personal and gitignored. Do not add it
+   to `.gitignore`.
+
 7. **Read-back confirmation.** Re-read both files from disk; print a
    compact summary back to the user (project name, code, default flow,
    repo count, KB path). The user confirms or asks for an edit.
@@ -75,7 +112,10 @@ Materialize the canonical `project.toml`. Optionally materialize a
 - [ ] `project.toml` exists and validates.
 - [ ] `project.user.toml` written iff the user supplied personal
       overrides.
-- [ ] `.gitignore` updated iff `project.user.toml` was written.
+- [ ] `.gitignore` updated iff `project.user.toml` was written, and
+      `features.toml` was *not* added to it.
+- [ ] `features.toml` written iff mode = `fresh` and no artifact tree
+      pre-existed; comment-only, with no `[[features]]` entry minted.
 - [ ] Read-back acknowledged by the user.
 
 ## Next

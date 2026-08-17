@@ -54,18 +54,23 @@ Use elicitation prompts referenced from `references/elicitation-patterns/project
 | Committed project config | `{project-root}/project.toml` | TOML (schema per `config/project.toml.example`) | Always |
 | Personal project config | `{project-root}/project.user.toml` | TOML (schema per `config/project.user.toml.example`) | Only when user supplies a personal override |
 | `.gitignore` patch | `{project-root}/.gitignore` | line append: `project.user.toml` | Always when `project.user.toml` is written |
+| Feature registry | `{project-root}/features.toml` | TOML, comment-only (schema per `config/SCHEMAS.md` § 2.8) | Only when mode = `fresh` and no artifact tree pre-exists |
 
 The skill does NOT create `framework.toml` or `framework.user.toml` — those belong to the framework installation, not the project.
 
-It also does not create `features.toml`. Feature-scoped paths are opt-in, and creating that file *is* the opt-in, so it stays the user's decision — see `references/ai-principles/feature-precondition.md`. Mention the option once, at handoff, without asking a question or waiting for an answer:
+**Feature-scoped paths are the default for new projects.** A `fresh` bootstrap writes a comment-only `features.toml`, which is what makes every artifact path carry a `FEAT-NNNN-<slug>/` segment — so two features can never write over each other, and nobody has to know the option exists to get it. `features.toml` is committed; it is shared project data, unlike the personal, gitignored `[user].active_feature`.
 
-> Artifacts will be written per feature under `docs/`, in a folder named from your description. If you would rather have them keyed to a registered feature ID (`docs/FEAT-0001-refund-processing/`), run `select-feature` at any point — including later, once work is already underway.
+Three deliberate limits on that default:
 
-Say it once and move on. A project that ignores the note behaves exactly as it does today, which is the point of the default.
+- **No ordinal is minted here.** The file ships empty, which `config/SCHEMAS.md` § 2.8 declares legal and calls the normal post-opt-in state. Step 06 hands to `select-feature` — passing the flow's next skill as `caller` — so the first feature is named while the user is describing work, and all minting stays in the one skill that owns it.
+- **`rebaseline` and `extend-repos` are excluded.** Those modes imply artifacts already on flat paths, where turning on feature scoping moves the next write and leaves everything already written behind. That is a migration, and this skill does not perform migrations.
+- **Opting out is a deletion.** Remove `features.toml` and every path reverts, because presence of the file is the only signal. Say so once at handoff and move on — no question, no wait.
+
+Existing projects are unaffected: they have no `features.toml`, they never gain one from this skill, and absence still means "behave exactly as before".
 
 ## Next skill
 
-Determined by the flow chosen in step 2:
+When `features.toml` was written, `select-feature` runs first — carrying the flow's skill below as `caller`, so control continues there once a feature is active. Otherwise control passes straight to it. Determined by the flow chosen in step 2:
 - `greenfield` → `create-requirements-package`
 - `brownfield` → `analyze-repository` (then onward to `build-knowledge-base` and `create-requirements-package` in brownfield mode)
 - `quick-dev` → `document-quick-change`

@@ -436,6 +436,33 @@ disk in the flat layout stay where they are and keep working; the framework does
 looking for them at a new depth, because without a registry it is not in feature-scoped
 mode at all.
 
+**AMENDED — new projects are feature-scoped by default; the signal is unchanged.** As
+originally written, this section made opt-in wholly manual: `start-project` deliberately did
+not create `features.toml`, and the only advertisement was a one-line note at handoff. That
+was the wrong default for the framework's own goal. Feature IDs are the intended way forward
+for teams newly adopting A.I.D.E., and an opt-in nobody is told about twice is an opt-in
+almost nobody takes — the note fires once, at the moment a user has no features and no
+artifacts and is least able to evaluate it, and is deliberately never raised again.
+
+A `fresh` `start-project` run now writes a comment-only `features.toml`. Three properties of
+the original design are what make this a safe change rather than a breaking one:
+
+- **The signal did not change.** Presence of the file still means feature-scoped, absence
+  still means behave exactly as before. Nothing in the two-line rule moved; only *who creates
+  the file* did. Had the opt-in been a config flag, this would have been a schema change.
+- **The empty registry was already a first-class state.** `config/SCHEMAS.md` § 2.8 already
+  declared an empty-but-present file legal and called it "the normal state immediately after
+  opt-in", and Check N2 already treated it as a warning rather than an error. Bootstrap
+  produces exactly that state, so no schema or validator change was needed.
+- **Opting out is a deletion.** Because presence is the whole signal, `rm features.toml`
+  reverts every path with no migration. That asymmetry — trivially reversible on a project
+  with no artifacts, genuinely hard on one with a populated tree — is what justifies
+  defaulting it on for the former and never for the latter.
+
+`rebaseline` and `extend-repos` are excluded for that reason: they imply artifacts already on
+flat paths, where enabling feature scoping moves the *next* write and orphans everything
+already written. That is a migration, and the position below still holds.
+
 **Mixed layouts are tolerated, not prevented.** A project that opts in mid-flight has old
 features flat and new ones nested. This is mildly untidy and entirely harmless: each
 feature is internally consistent, and nothing reads across features. A one-time
@@ -1082,6 +1109,28 @@ should be fixed in the same change, since the current workaround can destroy han
 solution context.
 
 ### 13.2 Then — completing the feature-ID work
+
+**Adoption for projects that already have a flat artifact tree.** The bootstrap default in §6
+covers new projects only, which leaves the harder half untouched. Three related gaps, worth
+solving together because they are one user journey:
+
+1. **Nothing detects a flat layout.** Every feature-aware skill's precondition returns on its
+   first line when `features.toml` is absent, so no skill ever looks at the tree. The framework
+   therefore cannot notice "this project has five packages on flat paths" and cannot offer the
+   switch. Any detection has to be added *outside* the precondition, or the precondition's
+   cheap-exit property is lost — and that property is what guarantees existing projects are
+   unaffected.
+2. **Assembled artifacts have no migration path.** The reconciliation rule covers the
+   working-tree directory only. On opt-in the assembled path changes in both depth *and*
+   filename, because `{feature-id}` resolves to the inferred slug before opt-in and to the
+   registry ID after: `alert-customer-requirements.md` becomes
+   `FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md`. The pre-opt-in file is
+   left orphaned and nothing mentions it. Note this qualifies §2.1's "only depth changes"
+   claim: depth is all that changes for a *glob* like `*-requirements.md`, but the specific
+   filename changes too, which is what strands the old file.
+3. **A sweep is explicitly out of scope today** — one feature, one question, at the moment that
+   feature is next worked. Reconsider only alongside (1) and (2); a sweep without a story for
+   assembled artifacts would move half of each feature.
 
 **Knowledge-base reconciliation** (§10 item 4, ~17 files). Validate the KB's `last_feature_id`
 frontmatter against the registry and settle `update-knowledge-base`'s feature handling. This is
