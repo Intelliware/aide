@@ -571,7 +571,7 @@ repos   = ["api-billing"]      # optional; codes from [[project.repos]]
 
 | Field | Type | Required | Purpose |
 |---|---|---|---|
-| `id` | string | yes | The directory segment and the feature's stable identity. A lowercase kebab slug (`^[a-z0-9]+(-[a-z0-9]+)*$`), used verbatim as a directory name and as the `{feature-id}-` filename prefix. Chosen at mint time, unique across the registry, and **not** derived from the title — it is frozen once artifacts exist under it, and renaming the title does not rename it. There is no allocated number; see the note on ordinals below. |
+| `id` | string | yes | The directory segment and the feature's stable identity. A lowercase kebab slug (`^[a-z0-9]+(-[a-z0-9]+)*$`), used verbatim as a directory name and as the `{feature-id}-` filename prefix. Proposed at mint time — from an existing `docs/` directory name when one matches this work, otherwise from the title — and unique across the registry. Independent of the title thereafter: once artifacts exist under it the `id` is frozen, so editing a `title` never renames a directory. There is no allocated number; see the note on ordinals below. |
 | `title` | string | yes | Human-readable one-line description. Freely editable after minting — renaming the title does not rename the directory. |
 | `created` | date | yes | ISO date the entry was minted. |
 | `ticket` | string | no | External tracker reference (Jira key, ADO work item, etc.). |
@@ -608,8 +608,16 @@ directory self-identifying — `docs/FEAT-0001-refunds/` was unmistakably a feat
 where `docs/refunds/` could be any folder. The mitigation is to treat this file as
 the only source of truth for what features exist: **enumerate features from the
 registry, never by listing directories.** Nothing in the framework does otherwise
-today. The corollary is that a slug must not collide with a non-feature directory
-already sitting alongside feature directories.
+today.
+
+The corollary is a convention rather than a validated rule: a slug should not
+collide with a non-feature directory under `docs/`. Nothing here can enforce it,
+because a registry file says nothing about what else lives in the tree, and the
+consequence is not an error but a silent merge — the resolution rule in
+`references/ai-principles/feature-precondition.md` finds `docs/architecture/`
+matching a feature named `architecture` and adopts it as that feature's working
+tree. `select-feature` warns at mint time, which is the only moment both the
+proposed name and the directory listing are in view.
 
 The prefix also allowed two features to share a slug, distinguished only by number.
 That is a loss worth taking: `FEAT-0003-refunds` and `FEAT-0007-refunds` are near

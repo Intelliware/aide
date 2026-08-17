@@ -84,8 +84,16 @@ See `references/INPUTS-OUTPUTS.md`.
    **Reject a slug already in the registry** and ask for another. Two features
    cannot share a directory, and with no ordinal there is nothing to
    disambiguate them by — so near-neighbours must be named apart
-   (`refunds-api` and `refunds-ui`, not two `refunds`). This is the one
-   validation this step owns; the rest is `select-feature` echoing choices back.
+   (`refunds-api` and `refunds-ui`, not two `refunds`).
+
+   **Also warn if the slug matches a `docs/` directory the user has just said is
+   *not* this feature.** Because the id is the directory name, the resolution
+   rule would adopt that directory as this feature's working tree without
+   asking — so naming a feature `architecture` on a project with a hand-written
+   `docs/architecture/` quietly merges the two. Nothing validates this (a
+   registry file says nothing about what else lives under `docs/`), which is why
+   the check belongs here, at the only point where both the proposed name and
+   the directory listing are in view.
 
    **When proposing the slug, look at `docs/` first.** If the project has
    pre-opt-in working directories (a `docs/<name>/` matching no registered

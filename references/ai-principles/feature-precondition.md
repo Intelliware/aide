@@ -240,7 +240,7 @@ feature" is a legitimate answer, not a failure. See
 
 ## Explicitly not this precondition's job
 
-- **Minting logic.** All of it — ordinal allocation, slug proposal, registry
+- **Minting logic.** All of it — slug proposal, the uniqueness check, registry
   writes — lives in `select-feature`. This precondition only decides *whether* to
   call it and in which mode.
 - **Authoring the composition path.** This precondition supplies the *rule* for
