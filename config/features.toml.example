@@ -13,22 +13,24 @@
 # segment is inserted anywhere. An empty-but-present file is also legal and
 # means "opted in, no features yet" — see § 2.8.3.
 #
-# Minted and appended to by `select-feature` (create mode). Do not hand-edit
-# the `id` or `created` fields of an existing entry — the ordinal is a stable
-# identity (config/SCHEMAS.md § 2.8). Renaming the title / slug in place is
-# fine; the directory name on disk does not follow a title change.
+# Minted and appended to by `select-feature` (create mode). Do not hand-edit the
+# `id` of an entry that already has artifacts on disk — it is the directory name
+# they live under (config/SCHEMAS.md § 2.8). Editing the `title` in place is fine;
+# the directory does not follow a title change.
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-# ─── Format: FEAT-NNNN-<kebab-slug> ───────────────────────────────────────────
-# NNNN is a zero-padded 4-digit ordinal, allocated sequentially in creation
-# order (max existing ordinal + 1). Gaps are legal (an abandoned draft that
-# never got an entry); reuse of an ordinal once it has been assigned is not.
-# The slug is a label frozen at mint time for readability — it does not have
-# to keep matching the title verbatim if the title is refined later.
+# ─── Format: a lowercase kebab slug ───────────────────────────────────────────
+# `^[a-z0-9]+(-[a-z0-9]+)*$` — used verbatim as the directory name, so keep it
+# short and recognisable. It must be unique: two features cannot share a
+# directory, so name near-neighbours apart (refunds-api / refunds-ui).
+#
+# There is no FEAT-NNNN- ordinal prefix. Nothing ever consumed the number, and
+# `created` below records chronology more accurately than allocation order does.
+# See config/SCHEMAS.md § 2.8 for the full reasoning.
 
 [[features]]
-id      = "FEAT-0001-alert-customer"
+id      = "alert-customer"
 title   = "Alert customer when a refund is delayed"
 created = 2026-08-11
 ticket  = "ACME-1247"          # optional — Jira key / ticket reference
@@ -37,7 +39,7 @@ repos   = ["api-billing"]      # optional — codes from [[project.repos]] in pr
                                 # skill's step 00 always wins on divergence (config/SCHEMAS.md § 2.8)
 
 [[features]]
-id      = "FEAT-0002-refund-fee-waiver"
+id      = "refund-fee-waiver"
 title   = "Waive processing fee on approved refunds"
 created = 2026-08-13
 # ticket and repos are both optional — omit either or both freely.

@@ -150,8 +150,11 @@ const RETIRED_IN_TOKEN_RE = new RegExp(
   'g'
 );
 
-// Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): FEAT-NNNN-<kebab-slug>.
-const FEATURE_ID_RE = /^FEAT-(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$/;
+// Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
+// used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
+// and allocating one manufactured a shared counter for concurrent minters to contend
+// over. Chronology lives in the registry's `created` field instead.
+const FEATURE_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // --- frontmatter parser (same shape as build-registry.js) -------------------
 
@@ -1081,7 +1084,6 @@ function checkFeaturesRegistry(featuresTomlPath, projectTomlPath = null, project
   }
 
   const idsSeen = new Map();
-  const ordinalsSeen = new Map();
   const declaredIds = new Set();
 
   features.forEach((entry, i) => {
@@ -1096,11 +1098,11 @@ function checkFeaturesRegistry(featuresTomlPath, projectTomlPath = null, project
       errors.push(`${where}: missing required \`id\`.`);
       return;
     }
-    const match = FEATURE_ID_RE.exec(fid);
-    if (!match) {
+    if (!FEATURE_ID_RE.test(fid)) {
       errors.push(
-        `${where}: \`id\` = ${JSON.stringify(fid)} does not match ` +
-        `FEAT-NNNN-<kebab-slug> (4-digit zero-padded ordinal, lowercase kebab slug).`
+        `${where}: \`id\` = ${JSON.stringify(fid)} is not a lowercase kebab slug ` +
+        `(letters, digits and single hyphens; no leading, trailing or doubled ` +
+        `hyphens). It is used verbatim as a directory name.`
       );
       return;
     }
@@ -1108,20 +1110,11 @@ function checkFeaturesRegistry(featuresTomlPath, projectTomlPath = null, project
     if (idsSeen.has(fid)) {
       errors.push(
         `${where}: duplicate \`id\` ${JSON.stringify(fid)} — first declared at ` +
-        `#${idsSeen.get(fid)}.`
+        `#${idsSeen.get(fid)}. Two features cannot share a directory; ` +
+        `differentiate the slug.`
       );
     } else {
       idsSeen.set(fid, idx);
-    }
-    const ordinal = match[1];
-    if (ordinalsSeen.has(ordinal) && ordinalsSeen.get(ordinal) !== fid) {
-      errors.push(
-        `${where}: ordinal ${ordinal} is already used by ` +
-        `${JSON.stringify(ordinalsSeen.get(ordinal))} — an assigned ordinal is a ` +
-        `stable identity and is never reused, even under a different slug.`
-      );
-    } else if (!ordinalsSeen.has(ordinal)) {
-      ordinalsSeen.set(ordinal, fid);
     }
   });
 

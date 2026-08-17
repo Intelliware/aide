@@ -12,8 +12,8 @@
 | title (create mode) | yes, in create mode | user input | "Alert customer when a refund is delayed" |
 | slug override (create mode) | no | user input; a kebab slug is proposed from the title and may be accepted or overridden | `alert-customer` |
 | `ticket` (create mode) | no | user input | `ACME-1247` |
-| `repos` (create mode) | no | user input; codes from `[[project.repos]]` in `project.toml` | `["billing-api"]` |
-| selection (select mode) | yes, in select mode | user's choice from the listed features | `FEAT-0002-refund-fee-waiver` |
+| `repos` (create mode) | no | user input; codes from `[[project.repos]]` in `project.toml` | `["api-billing"]` |
+| selection (select mode) | yes, in select mode | user's choice from the listed features | `refund-fee-waiver` |
 
 ## Outputs
 
@@ -41,10 +41,11 @@ Enforced by `config/SCHEMAS.md` § 4 rules 13-16 and mirrored here as the
 skill's own write-time checks, so a bad entry is caught before it lands
 rather than only at the next `validate.py` run:
 
-- `id` matches `^FEAT-\d{4}-[a-z0-9]+(-[a-z0-9]+)*$`
-- `id` is unique — both the full string and the bare ordinal (a duplicate
-  ordinal with a different slug is still a collision, not a new feature)
-- Ordinal is `max(existing ordinals) + 1`; never reused, gaps tolerated
+- `id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` — a lowercase kebab slug, used
+  verbatim as the directory name
+- `id` is unique. Two features cannot share a directory and there is no ordinal
+  to tell same-named ones apart, so a duplicate is rejected at mint time and the
+  user is asked for a different slug
 - `active_feature`, once written, resolves to a declared `id` — this skill
   never writes a pointer it did not just mint or select from the registry
 - `repos` entries (when set) resolve to a declared `[[project.repos]].code`

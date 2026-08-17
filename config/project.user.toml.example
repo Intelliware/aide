@@ -66,4 +66,4 @@ testing_strategy = "tdd-required"
 # # project-scoped for the same reason `role` is: two people on this project
 # # work different features at once, and neither's choice should affect the
 # # other's. See config/SCHEMAS.md § 2.9.
-# active_feature = "FEAT-0001-alert-customer"
+# active_feature = "alert-customer"

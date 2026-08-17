@@ -22,8 +22,8 @@ This skill is the single place that reads and writes both files. Two modes:
 
 **Select leads; create follows.** A skill that opens by offering to add a
 feature re-creates the exact hazard this skill exists to prevent: a user who
-does not recall that `FEAT-0007-refund-delays` already exists will cheerfully
-mint `FEAT-0012-delayed-refund-alerts` for the same work. Presenting what
+does not recall that `refund-delays` already exists will cheerfully
+mint `delayed-refund-alerts` for the same work. Presenting what
 already exists first makes reuse the path of least resistance. See
 `references/OVERVIEW.md` for the full reasoning and the two cases that skip
 straight to create.
@@ -75,36 +75,39 @@ See `references/INPUTS-OUTPUTS.md`.
    permanently visible option in the same list, not buried beneath it. On
    choice, set `[user].active_feature` in `project.user.toml`, creating the
    `[user]` block if needed. Go to step 5.
-4. **Create.** Compute the next ordinal as `max(existing ordinals) + 1` (or
-   `1` for an empty/absent registry). Prompt for a one-line title, propose a
-   kebab slug from it, let the user override the slug, optionally capture
-   `ticket` and `repos`. Warn if the local working tree is behind its remote
-   before appending — a stale read is the one concurrency hazard ordinal
-   allocation has (see `config/SCHEMAS.md` § 2.8). Append the entry to
-   `features.toml` and set it as `[user].active_feature`.
+4. **Create.** Prompt for a one-line title, propose a kebab slug as the `id`,
+   let the user override it, optionally capture `ticket` and `repos`. Append the
+   entry to `features.toml` and set it as `[user].active_feature`. There is no
+   number to allocate: the `id` is the slug and nothing else (`config/SCHEMAS.md`
+   § 2.8).
+
+   **Reject a slug already in the registry** and ask for another. Two features
+   cannot share a directory, and with no ordinal there is nothing to
+   disambiguate them by — so near-neighbours must be named apart
+   (`refunds-api` and `refunds-ui`, not two `refunds`). This is the one
+   validation this step owns; the rest is `select-feature` echoing choices back.
 
    **When proposing the slug, look at `docs/` first.** If the project has
-   pre-opt-in working directories (`docs/<slug>/` with no `FEAT-NNNN-` prefix)
-   and one plausibly covers the work being minted, propose *that directory's
-   name* as the slug and say why:
+   pre-opt-in working directories (a `docs/<name>/` matching no registered
+   feature) and one plausibly covers the work being minted, propose *that
+   directory's name* and say why:
 
-   > `docs/refunds/` looks like this work. Using `refunds` as the slug gives
-   > `FEAT-0001-refunds`, so I can offer to rename that directory instead of
-   > starting a second one beside it.
+   > `docs/refunds/` looks like this work. Using `refunds` as the id means that
+   > directory already matches, so nothing has to move.
 
-   This is not cosmetic. The reconciliation rule in
-   `references/ai-principles/feature-precondition.md` finds a feature's
-   pre-opt-in directory by stripping `FEAT-NNNN-` from the ID and matching the
-   remainder, so a slug that does not match is a slug that makes the rule
-   invisible: the next skill takes the "neither exists" branch and creates a
-   second tree without asking. Deriving the slug purely from a freshly typed
-   title is the likeliest way to land there, since "Refund processing fixes"
-   yields `refund-processing-fixes`, not `refunds`. The user may still override
-   — an unrelated directory should not capture the name — but the match must be
-   offered before a title-derived slug wins by default.
+   This is load-bearing, not cosmetic. When the id matches an existing
+   directory, the resolution rule in
+   `references/ai-principles/feature-precondition.md` takes its first branch and
+   the feature simply continues in place — no rename, no question, no second
+   tree. Deriving the slug purely from a freshly typed title is the likeliest way
+   to miss that, since "Refund processing fixes" yields
+   `refund-processing-fixes`, not `refunds`, and the next skill would then offer
+   to reconcile a mismatch that never needed to exist. The user may still
+   override — an unrelated directory should not capture the name — but the match
+   must be offered before a title-derived slug wins by default.
 5. **Echo the resolved output paths.** Print, for each stage the project
    uses, where that stage's artifacts will land once the feature is active
-   (e.g. `.framework-output/requirements/FEAT-0001-alert-customer/`). This is
+   (e.g. `.framework-output/requirements/alert-customer/`). This is
    the cheapest possible guard against writing to the wrong place — the user
    sees it before any work starts.
 6. **Return to the caller.** If invoked from a halted skill's precondition,
@@ -133,14 +136,13 @@ feature and stops.
 - **Silently creating `features.toml`.** Its creation is the project's opt-in
   moment; confirm with the user rather than scaffolding it as a side effect.
 - **Deriving the slug from the title alone on a project with existing
-  `docs/<slug>/` directories.** The reconciliation rule matches a feature's
-  pre-opt-in directory on the slug, so a title-derived slug that misses it
-  silently starts a second tree for one feature — the exact failure feature IDs
-  exist to prevent. Check `docs/` before proposing.
-- **Minting without checking registry freshness.** Two people minting on
-  separate branches can both compute the same next ordinal — warn when the
-  working tree looks behind, and let the (loud, small) merge conflict be the
-  final backstop rather than the first line of defense.
+  `docs/<name>/` directories.** An id that matches the existing directory needs
+  no migration at all; a title-derived one that misses it turns a non-event into
+  a reconciliation prompt, and if that prompt is answered carelessly, into a
+  second tree for one feature. Check `docs/` before proposing.
+- **Reusing an id that is already registered.** There is no ordinal to tell two
+  `refunds` apart, so a duplicate is a directory collision, not a variant.
+  Reject it at mint time rather than letting Check N2 catch it in CI.
 - **Skipping the output-path echo.** It is the one moment a wrong resolution
   is cheap to catch, before anything is written to disk.
 - **Treating `repos` as authoritative.** It is advisory; the calling skill's

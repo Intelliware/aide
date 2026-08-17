@@ -10,14 +10,14 @@ Project: `feat-2041-checkout-redesign`. Design package assembled. Requirements p
 
 ```
 review-edge-case-hunter \
-  --target=docs/FEAT-2041/design-package/design-package.md \
+  --target=docs/refund-delay-alerts/design-package/design-package.md \
   --stage=design
 ```
 
 `--output-path` is omitted, so the skill defaults to:
 
 ```
-_review/FEAT-2041-design-package/2026-04-29T14-15-00Z/review-edge-case-hunter.md
+_review/refund-delay-alerts-design-package/2026-04-29T14-15-00Z/review-edge-case-hunter.md
 ```
 
 ## What the skill produces
@@ -26,7 +26,7 @@ _review/FEAT-2041-design-package/2026-04-29T14-15-00Z/review-edge-case-hunter.md
 ---
 schema: aide-adversarial-findings@1
 target_artifact: design-package
-target_path: docs/FEAT-2041/design-package/design-package.md
+target_path: docs/refund-delay-alerts/design-package/design-package.md
 target_commit: a3f9c12
 produced_by: review-edge-case-hunter
 produced_at: 2026-04-29T14:15:00Z
@@ -37,7 +37,7 @@ worst_severity: critical
 finding_ids: [ADV-001, ADV-002, ADV-003, ADV-004, ADV-005, ADV-006, ADV-007, ADV-008]
 ---
 
-# Adversarial findings — Design Package FEAT-2041
+# Adversarial findings — Design Package refund-delay-alerts
 
 ## Triage summary
 

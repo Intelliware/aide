@@ -39,37 +39,52 @@ opted-in project that directory is `docs/<feature-id>/`. Resolve it in this orde
 
 1. `docs/<feature-id>/` exists → use it. This is the steady state and the common
    case; stop here.
-2. Neither exists → create `docs/<feature-id>/`. Ordinary first run for a new
-   feature.
-3. `docs/<slug>/` exists but `docs/<feature-id>/` does not → this is the feature's
-   **pre-opt-in directory**, and the rule below applies. `<slug>` is the feature ID
-   with its `FEAT-NNNN-` prefix stripped: `FEAT-0007-notification-mark-as-read`
-   yields `notification-mark-as-read`.
+2. It does not exist → apply the reconciliation check below, then create
+   `docs/<feature-id>/`.
 
-Case 3 exists because a project that opts in mid-flight already has a directory
-that was named by inference before the registry existed. Creating
-`docs/FEAT-0007-notification-mark-as-read/` alongside an existing
-`docs/notification-mark-as-read/` would split one feature's work across two trees —
-the precise failure this whole change exists to prevent, reintroduced by the fix
-for it. So on case 3, **halt** and offer exactly two options:
+**Because the feature ID *is* the directory name, case 1 absorbs most of the
+mid-flight adoption problem by itself.** A project that opts in after improvising
+`docs/refunds/` keeps working the moment its feature is minted as `refunds`: the
+directory already matches, nothing is renamed, and there is nothing to reconcile.
+That is why `select-feature` proposes an existing `docs/` directory name as the slug
+rather than deriving one from the title — the proposal is what steers the common
+case into case 1, so treat it as load-bearing rather than a convenience.
 
-> `docs/notification-mark-as-read/` already holds this feature's work from before
-> the registry existed. Either:
-> **(a) rename it** to `docs/FEAT-0007-notification-mark-as-read/` — one
-> `git mv`, history preserved, everything registry-bound afterwards; or
-> **(b) keep it** where it is, and I will keep using it for this feature.
+**Reconciliation, for the case the proposal did not catch.** A registry hand-written
+without `select-feature`, or a slug the user deliberately overrode, can leave a
+feature whose ID does not match the directory holding its work. Creating
+`docs/refund-processing/` next to an existing `docs/refunds/` would split one
+feature across two trees — the precise failure this whole mechanism exists to
+prevent, reintroduced by the fix for it. So before creating, check whether `docs/`
+holds any directory that is **not** a registered feature ID (the registry lists
+every legitimate name, so this set is exact). If one plausibly holds this feature's
+work, **halt** and offer two options:
 
-Both answers are legitimate and neither needs a new registry field. Option (b) is
-stable across sessions precisely because the slug is derivable from the ID, so this
-same rule re-finds the directory on every subsequent run — which is why the match is
-defined on the slug rather than recorded somewhere. This also honours
-`config/SCHEMAS.md` § 2.8's promise that artifacts already on disk in a flat layout
-"stay where they are and keep working": the framework offers the migration, it never
-performs it unasked.
+> `docs/refunds/` holds work that looks like this feature, but the active feature is
+> `refund-processing`, so I would create a second directory beside it. Either:
+> **(a) rename the directory** to `docs/refund-processing/` — one `git mv`, history
+> preserved; or
+> **(b) rename the feature** to `refunds` in `features.toml` and `active_feature`,
+> leaving the directory untouched.
 
-Never resolve case 3 silently in either direction. Renaming a directory the user
-did not ask you to rename and starting a second tree beside theirs are both worse
-than one question.
+Both answers end with the ID and the directory in agreement, so case 1 handles every
+subsequent run and no registry field records an exception. That symmetry is a
+consequence of the ID being the directory name: under the retired `FEAT-NNNN-`
+format only (a) was really available, because "keep the old directory" meant binding
+an ID to a differently-named directory forever, and the binding had to be
+re-derived by stripping the prefix on every run.
+
+Option (b) has one precondition: it is safe only while **no artifacts exist under
+the current ID**, on either the working-tree or the assembled side. If some do, the
+rename strands them, and (a) is the only correct answer. Check before offering it.
+
+Never resolve this silently in either direction. Renaming a directory the user did
+not ask you to rename and starting a second tree beside theirs are both worse than
+one question. Listing a non-feature directory as a candidate is a normal outcome of
+`docs/` holding hand-written folders too — offer "none of these" and move on. This
+also honours `config/SCHEMAS.md` § 2.8's promise that artifacts already on disk in a
+flat layout "stay where they are and keep working": the framework offers the
+migration, it never performs it unasked.
 
 ## Resolving the assembled artifact path
 
@@ -99,13 +114,13 @@ sake of a tidier path string.
 Three details that are easy to get wrong:
 
 - **Filenames keep the `{feature-id}-` prefix.** The names are redundant
-  (`FEAT-0001-refund/FEAT-0001-refund-requirements.md`) and deliberately so — every
-  existing filename stays valid, so only globs that assume directory *depth* break,
-  not globs that match on filename. See § 2.1 of the plan.
+  (`refund/refund-requirements.md`) and deliberately so — every existing filename
+  stays valid, so only globs that assume directory *depth* break, not globs that
+  match on filename. See § 2.1 of the plan.
 - **Per-item files never gain a prefix.** `INC-XXX.md`, `TC-XXX.md` and bug-log
   entries are per-feature counters, and the enclosing feature directory is what
-  associates them, so `FEAT-0001-alert-customer/INC-001.md` is already unambiguous.
-  They gain the enclosing segment, not a prefix.
+  associates them, so `alert-customer/INC-001.md` is already unambiguous. They gain
+  the enclosing segment, not a prefix.
 - **SoD colocate mode is already correct** and changes nothing — it has always nested
   under `<feature-id>/`. In SoD directory mode the segment goes *inside* the
   `<repo-code>/` directory (`<repo-code>/<feature-id>/`), never outside it, because
@@ -116,21 +131,21 @@ Three details that are easy to get wrong:
 ## Worked example — one feature, both ways
 
 The two rules above are easier to trust side by side than in isolation. Below is a
-single feature, `FEAT-0001-alert-customer`, laid out under both configurations.
-This is the only place the opted-in tree is shown end to end: the skills' own
+single feature, `alert-customer`, laid out under both configurations. This is the
+only place the opted-in tree is shown end to end: the skills' own
 `references/EXAMPLE.md` files all depict the **not-opted-in** column, because that
 is what a project gets until someone runs `select-feature`.
 
-Opted in — `features.toml` exists, `[user].active_feature = "FEAT-0001-alert-customer"`:
+Opted in — `features.toml` exists, `[user].active_feature = "alert-customer"`:
 
 ```
-docs/FEAT-0001-alert-customer/          ← working tree, per-section files
+docs/alert-customer/                    ← working tree, per-section files
   requirements-package/
   design-package/
   CHANGE-TRACKER.md
-.framework-output/requirements/FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md
-.framework-output/design/FEAT-0001-alert-customer/FEAT-0001-alert-customer-design.md
-.framework-output/implementation/FEAT-0001-alert-customer/INC-001.md
+.framework-output/requirements/alert-customer/alert-customer-requirements.md
+.framework-output/design/alert-customer/alert-customer-design.md
+.framework-output/implementation/alert-customer/INC-001.md
 ```
 
 Not opted in — no `features.toml`, the folder name inferred from the request:
@@ -145,14 +160,21 @@ docs/alert-customer/                    ← working tree, per-section files
 .framework-output/implementation/INC-001.md
 ```
 
-Three things the comparison makes concrete. The assembled files differ by exactly
-one directory level, never by filename — which is why filename globs survive opt-in
-and depth-sensitive ones do not. `INC-001.md` gains the segment but no prefix, so
-the not-opted-in column has nothing distinguishing it from a second feature's
-`INC-001.md`, which is the collision opting in exists to fix. And the working-tree
-directory is the one place the two columns disagree on a *name* rather than a
-depth, which is why a project opting in mid-flight hits case 3 above and gets asked
-before anything moves.
+**The two columns differ by exactly one directory level and nothing else.** No file
+is renamed and the working-tree directory is identical, because the inferred folder
+name and the registry ID are now the same kind of string — a kebab slug. That is the
+single largest practical consequence of dropping the `FEAT-NNNN-` prefix: under it,
+the opted-in column read
+`.framework-output/requirements/FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md`,
+so opting in changed the depth *and* the filename *and* the working-tree directory
+name, and this section's claim that the columns "differ by exactly one directory
+level, never by filename" was not actually true of its own example.
+
+Two consequences worth holding onto. Filename globs survive opt-in unconditionally,
+and only depth-sensitive ones break. And `INC-001.md` gains the segment but no
+prefix, so the not-opted-in column has nothing distinguishing it from a second
+feature's `INC-001.md` — that collision is what opting in exists to fix, and it is
+now the *only* thing opting in changes.
 
 ## Mode A — Write-side (select-and-create)
 
@@ -174,8 +196,8 @@ Applies to skills that produce new artifacts:
 4. If it resolved cleanly, **echo** the feature ID and the resolved output
    directory before the first write:
 
-   > Working feature: `FEAT-0001-alert-customer`. Artifacts will be written under
-   > `.framework-output/design/FEAT-0001-alert-customer/`.
+   > Working feature: `alert-customer`. Artifacts will be written under
+   > `.framework-output/design/alert-customer/`.
 
    Cheap, no round-trip in the common case, and it catches a stale pointer at the
    one moment it matters — before anything lands in the wrong place.

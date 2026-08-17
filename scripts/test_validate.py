@@ -607,34 +607,49 @@ class TestFeatureRegistry(unittest.TestCase):
         )
 
     def test_reject_malformed_id(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            tmp = Path(td)
-            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-1-bad"\n')
-            proc = run_validate("--features-toml", str(f))
-        out = proc.stdout + proc.stderr
-        self.assertNotEqual(proc.returncode, 0, out)
-        self.assertIn("does not match FEAT-NNNN", out)
+        """The ID is used verbatim as a directory name, so every non-slug shape is rejected."""
+        for bad in (
+            "Alert-Customer",   # uppercase
+            "alert_customer",   # underscore
+            "-alert",           # leading hyphen
+            "alert-",           # trailing hyphen
+            "alert--customer",  # doubled hyphen
+            "alert customer",   # space
+        ):
+            with self.subTest(bad=bad):
+                with tempfile.TemporaryDirectory() as td:
+                    tmp = Path(td)
+                    f = self._write(
+                        tmp, "features.toml", f'[[features]]\nid = "{bad}"\n'
+                    )
+                    proc = run_validate("--features-toml", str(f))
+                out = proc.stdout + proc.stderr
+                self.assertNotEqual(proc.returncode, 0, out)
+                self.assertIn("not a lowercase kebab slug", out)
 
-    def test_reject_reused_ordinal_under_different_slug(self) -> None:
-        """An assigned ordinal is a stable identity — reuse is rejected even with a new slug."""
+    def test_accept_ordinal_prefixed_id_as_an_ordinary_slug(self) -> None:
+        """The retired FEAT-NNNN- prefix is not special-cased — lowercased, it is just a slug.
+
+        Nothing rejects `feat-0001-alert-customer`; it is a legal (if redundant) slug.
+        The format rule is about what makes a safe directory name, not about banning a
+        convention the framework no longer mints.
+        """
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
             f = self._write(
-                tmp, "features.toml",
-                '[[features]]\nid = "FEAT-0002-alpha"\n\n[[features]]\nid = "FEAT-0002-beta"\n',
+                tmp, "features.toml", '[[features]]\nid = "feat-0001-alert-customer"\n'
             )
             proc = run_validate("--features-toml", str(f))
         out = proc.stdout + proc.stderr
-        self.assertNotEqual(proc.returncode, 0, out)
-        self.assertIn("already used by", out)
+        self.assertEqual(proc.returncode, 0, out)
 
     def test_reject_duplicate_id(self) -> None:
-        """The same full ID twice is a registry that cannot resolve a feature."""
+        """Two features cannot share a directory."""
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
             f = self._write(
                 tmp, "features.toml",
-                '[[features]]\nid = "FEAT-0001-same"\n\n[[features]]\nid = "FEAT-0001-same"\n',
+                '[[features]]\nid = "refunds"\n\n[[features]]\nid = "refunds"\n',
             )
             proc = run_validate("--features-toml", str(f))
         out = proc.stdout + proc.stderr
@@ -645,7 +660,7 @@ class TestFeatureRegistry(unittest.TestCase):
         """A partial run must announce what it could not check, not pass silently."""
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
-            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-0001-real"\n')
+            f = self._write(tmp, "features.toml", '[[features]]\nid = "real-feature"\n')
             proc = run_validate("--features-toml", str(f))
         out = proc.stdout + proc.stderr
         self.assertEqual(proc.returncode, 0, out)
@@ -655,8 +670,8 @@ class TestFeatureRegistry(unittest.TestCase):
     def test_reject_stale_active_feature(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             tmp = Path(td)
-            f = self._write(tmp, "features.toml", '[[features]]\nid = "FEAT-0001-real"\n')
-            u = self._write(tmp, "project.user.toml", '[user]\nactive_feature = "FEAT-0099-nope"\n')
+            f = self._write(tmp, "features.toml", '[[features]]\nid = "real-feature"\n')
+            u = self._write(tmp, "project.user.toml", '[user]\nactive_feature = "nope-not-registered"\n')
             proc = run_validate("--features-toml", str(f), "--project-user-toml", str(u))
         out = proc.stdout + proc.stderr
         self.assertNotEqual(proc.returncode, 0, out)
@@ -667,7 +682,7 @@ class TestFeatureRegistry(unittest.TestCase):
             tmp = Path(td)
             f = self._write(
                 tmp, "features.toml",
-                '[[features]]\nid = "FEAT-0001-real"\nrepos = ["ghost-repo"]\n',
+                '[[features]]\nid = "real-feature"\nrepos = ["ghost-repo"]\n',
             )
             p = self._write(
                 tmp, "project.toml",
@@ -683,13 +698,13 @@ class TestFeatureRegistry(unittest.TestCase):
             tmp = Path(td)
             f = self._write(
                 tmp, "features.toml",
-                '[[features]]\nid = "FEAT-0001-alert-customer"\nrepos = ["api-billing"]\n'
-                '\n[[features]]\nid = "FEAT-0002-refund-fee-waiver"\n',
+                '[[features]]\nid = "alert-customer"\nrepos = ["api-billing"]\n'
+                '\n[[features]]\nid = "refund-fee-waiver"\n',
             )
             p = self._write(tmp, "project.toml", '[[project.repos]]\ncode = "api-billing"\n')
             u = self._write(
                 tmp, "project.user.toml",
-                '[user]\nactive_feature = "FEAT-0002-refund-fee-waiver"\n',
+                '[user]\nactive_feature = "refund-fee-waiver"\n',
             )
             proc = run_validate(
                 "--features-toml", str(f), "--project-toml", str(p), "--project-user-toml", str(u),

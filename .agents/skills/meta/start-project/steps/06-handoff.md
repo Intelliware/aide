@@ -39,7 +39,7 @@ that `project.toml` is now in place and validated.
    before the handoff:
 
    > This project is feature-scoped: each delivery unit gets an ID like
-   > `FEAT-0001-refund-processing`, and that ID becomes a directory segment in
+   > `refund-processing`, and that ID becomes a directory segment in
    > every artifact path, so two features can never write over each other. The
    > first skill that produces feature-scoped work will ask you to name the
    > feature. If you'd rather not work this way, delete `features.toml` and

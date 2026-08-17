@@ -6,7 +6,7 @@
 |---|---|---|---|
 | developer description | yes | conversation | "Add a 'mark as read' button to notification cards" |
 | existing artifacts | no — but always asked about | tickets, incident notes, screenshots, PRs, ADRs | Linear ticket NOT-142, Slack screenshot |
-| feature folder | yes | the registry's feature ID, via the active-feature precondition — not opted in: reuse an existing folder under `docs/`, else kebab-case from description | `docs/FEAT-0007-notification-mark-as-read/` |
+| feature folder | yes | the registry's feature ID, via the active-feature precondition — not opted in: reuse an existing folder under `docs/`, else kebab-case from description | `docs/notification-mark-as-read/` |
 | `templates/compositions/quick-dev-spec.yaml` | yes | framework | structural template for the spec |
 | project paths | yes | `project.toml` `[project.paths]` | `requirements_package` |
 

@@ -122,6 +122,36 @@ This mirrors the framework's existing ADR convention (`ADR-NNNN-<kebab-title>`),
 sequential allocation and the no-reuse rule already specified at
 `_docs/skills-test-plan.md:1210-1211`. Gaps in the sequence are legal; reuse is not.
 
+**AMENDED — the ordinal prefix was dropped. The ID is a plain kebab slug:
+`alert-customer`.** As shipped, `id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` and nothing else.
+The reasoning is recorded in full at `config/SCHEMAS.md` § 2.8; the short form is that
+**nothing consumed the number.** Every reference to the ordinal in the codebase was
+machinery for maintaining it — allocation, uniqueness validation, and the prefix-stripping
+rule § 3's reconciliation used to match pre-opt-in directories. No skill, template or check
+ever read the number and did anything with it. Its only consumer was `ls`, and the
+registry's required `created` field records chronology more accurately anyway, since it
+captures the date rather than the allocation order.
+
+Three consequences ripple back through this document, and each is amended at its own
+section rather than only here:
+
+- **§ 5 and § 6's concurrency mitigation is moot.** Allocating `max + 1` invents a shared
+  counter, so the hazard of two people minting simultaneously was manufactured by the
+  format. A slug has nothing to contend over. What remains — two people naming the *same*
+  work independently — is a genuine duplicate identity, not an allocation artefact.
+- **§ 13.2's migration analysis gets materially easier**, because the inferred folder name
+  a flat project already uses and the registry ID are now the same kind of string. Opt-in
+  renames nothing; it only adds a directory level.
+- **§ 2.1's "only depth changes" claim becomes true.** Under the ordinal it was not: the
+  filename's `{feature-id}-` prefix changed value too. That is now the one qualification
+  this plan asserted and could not honour, and it is honoured.
+
+The ADR parallel was the weakest of the original arguments and does not survive scrutiny:
+an ADR log is chronological by nature, where features are worked in parallel. The real
+loss is that `docs/FEAT-0001-refunds/` was self-evidently a feature directory and
+`docs/refunds/` is not — mitigated by enumerating features from the registry rather than
+from the filesystem, which is what everything already does.
+
 ### 2.3 The greenfield build is `FEAT-0001`
 
 Greenfield is a property of *work*, not of a project. After the first delivery lands, the
@@ -305,7 +335,10 @@ reasons, in order of weight:
 2. **It preserves the loud-conflict property.** The registry being committed is the
    mechanism that catches two people minting `FEAT-0008` on separate branches — the
    collision surfaces as a git conflict in one small file. A dedicated file keeps that
-   property while reducing false conflicts on unrelated edits.
+   property while reducing false conflicts on unrelated edits. (**Amended by §2.2:** the
+   specific collision named here — two minters computing the same next ordinal — no longer
+   exists. The property still matters, but for genuine duplicate naming rather than
+   contention over an allocated number.)
 3. **It keeps the config model honest.** `project.toml` is configuration — declarative
    settings the framework reads. The registry is project *data*. Filing data under the
    config schema would have meant `SCHEMAS.md` growing a section that is not
@@ -411,6 +444,19 @@ is structural rather than clever: because `features.toml` is committed, the dupl
 surfaces as a merge conflict in a small file. The validator rule in §8 catches it locally
 first. Worth stating in the skill itself so the minting agent warns when the working tree
 is behind its remote.
+
+**AMENDED by §2.2 — the hazard was manufactured by the format and left with it.** This
+paragraph correctly identified allocation as the design's only concurrency problem, and
+that is precisely the argument that retired the ordinal: `max + 1` invents a shared counter
+where none was needed. With slug IDs, two people minting *different* features on separate
+branches do not interact at all, so no warning and no backstop are required, and
+`select-feature` no longer checks whether the working tree is behind its remote.
+
+The residual case is not an allocation artefact but a real duplicate: two people
+independently naming the *same* work, arriving at the same slug. The committed-file
+property in §4 above still catches it as a loud conflict, and Check N2's uniqueness rule
+catches it if a merge resolves badly. Both are correct — it is one feature with two
+entries, and no number would have fixed it.
 
 ---
 
@@ -673,7 +719,7 @@ alone, and the omission was caught only when this section was re-read to write t
 that half the entry points do not have. Ported in a follow-up commit, which also closed a
 pre-existing divergence: `validate.js --project-toml config/project.toml.example` had been failing
 on a multi-line TOML string that `tomllib` parses without complaint, so Check I was silently
-Python-only too. Both suites now run 47 cases green.
+Python-only too. Both suites now run green: 47 Python cases, 52 Node (Python groups the malformed-slug inputs under one `subTest`; Node registers each).
 
 **§2.6 widens the work inside already-counted files more than it adds new ones.** Of its 144
 occurrences across 44 files, 41 files sit in the requirements, design, quality and quick-dev
@@ -718,7 +764,7 @@ same seam:
 | Mode | Asserts | Runs |
 |---|---|---|
 | **N1 — framework** (default) | Every feature-scoped `default-output-path` contains `{feature-id}` as a path segment, **and no retired feature placeholder survives in an artifact path** — see the correction below, which narrows this from what was first drafted | Always, in CI |
-| **N2 — project** (`--features-toml PATH`, or folded into the existing `--project-toml` mode) | Every `id` matches `^FEAT-\d{4}-[a-z0-9]+(-[a-z0-9]+)*$`; full ID *and* bare ordinal are unique; `active_feature` resolves to a declared `id`; each `repos` entry resolves to a `[[project.repos]].code` — which requires both files, so this sub-rule only runs when `--project-toml` is also supplied | Opt-in, against a committed fixture in the framework repo and against real projects on demand |
+| **N2 — project** (`--features-toml PATH`, or folded into the existing `--project-toml` mode) | Every `id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` (**amended** — §2.2 dropped the `FEAT-NNNN-` prefix this row originally specified); every `id` is unique, which is now one rule rather than two, since dropping the ordinal removed the "bare ordinal collides under a different slug" case; `active_feature` resolves to a declared `id`; each `repos` entry resolves to a `[[project.repos]].code` — which requires both files, so this sub-rule only runs when `--project-toml` is also supplied | Opt-in, against a committed fixture in the framework repo and against real projects on demand |
 
 N1 must cover `.agents/skills/` as well as `templates/compositions/` — scoping it to
 compositions reproduces the exact gap that let the current drift survive, since
@@ -1010,7 +1056,7 @@ remaining gaps are the three §11.1 exclusions plus one open process question.**
 |---|---|---|
 | **D0** identity-layer split | §3 + §4 | Substance identical; the registry is a committed peer file rather than a `project.toml` section |
 | **D1** feature-under-stage, one layout | §2.1 | Carried, including not-configurable |
-| **D2** `FEAT-NNNN-<kebab-slug>` | §2.2 | Carried verbatim |
+| **D2** `FEAT-NNNN-<kebab-slug>` | §2.2 — **reversed** | Carried verbatim into this plan, then dropped before release: the ID as shipped is a plain kebab slug. Nothing consumed the ordinal, and allocating it manufactured a concurrency hazard. See §2.2's amendment and `config/SCHEMAS.md` § 2.8 |
 | **D3** prefix on assembled, not per-section | §2.1 | Carried. The "drop from per-section" half is a no-op — per-section files (`01-executive-summary.md`) never had a prefix (§2.6) |
 | **D4** PR description not persisted | **Already implemented** | `pr-description.yaml`'s `default-output-path` is removed and the omission documented inline |
 | **D5** repo-first SoD ordering | §2.1 | Carried with the same `write_role` reasoning |
@@ -1140,13 +1186,20 @@ solving together because they are one user journey:
    cheap-exit property is lost — and that property is what guarantees existing projects are
    unaffected.
 2. **Assembled artifacts have no migration path.** The reconciliation rule covers the
-   working-tree directory only. On opt-in the assembled path changes in both depth *and*
-   filename, because `{feature-id}` resolves to the inferred slug before opt-in and to the
-   registry ID after: `alert-customer-requirements.md` becomes
-   `FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md`. The pre-opt-in file is
-   left orphaned and nothing mentions it. Note this qualifies §2.1's "only depth changes"
-   claim: depth is all that changes for a *glob* like `*-requirements.md`, but the specific
-   filename changes too, which is what strands the old file.
+   working-tree directory only. On opt-in the assembled artifact gains a directory level,
+   and the pre-opt-in file is left orphaned where it sits with nothing mentioning it.
+
+   **AMENDED by §2.2 — this is now a move, not a rename.** As originally written this item
+   said the path changed in both depth *and* filename, because `{feature-id}` resolved to
+   the inferred slug before opt-in and to the ordinal-prefixed registry ID after, so
+   `alert-customer-requirements.md` became
+   `FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md`. With slug IDs both
+   occurrences resolve to the same value, so the file keeps its name and only moves down one
+   level: `requirements/alert-customer-requirements.md` →
+   `requirements/alert-customer/alert-customer-requirements.md`. The orphaning problem is
+   unchanged — nothing moves it for you — but the operation is now a pure move, which is
+   materially safer to do by hand and removes the qualification this item made against
+   §2.1's "only depth changes" claim.
 3. **A sweep is explicitly out of scope today** — one feature, one question, at the moment that
    feature is next worked. Reconsider only alongside (1) and (2); a sweep without a story for
    assembled artifacts would move half of each feature.
@@ -1154,22 +1207,31 @@ solving together because they are one user journey:
    check validates a *project's* artifact layout — the validator's only project-artifact mode is
    `--cross-cutting-artifact`, which reads `affects_repos` frontmatter and says nothing about
    paths. So a partial migration is silent, and the reconciliation rule actively confirms it:
-   seeing `docs/FEAT-0001-refunds/` present it takes the "already migrated" branch, uses the
+   seeing `docs/refunds/` already matching the feature ID it takes the first branch, uses the
    directory, and never looks at the assembled side. The result is a project whose working tree
    is feature-scoped, whose deliverables are still flat, and where every skill reports success.
+   Slug IDs make this *more* likely rather than less, because the working-tree side now
+   requires no action at all to look correct.
 
 **On migrating by hand.** Worth recording, because it will be attempted: the work is pure file
 movement with no content rewriting, so an agent prompted ad hoc can do it, and `git mv` preserves
-history. Two things make it unreliable rather than merely tedious. First, **two different renaming
-rules apply** — the five single-file stage deliverables (`-requirements.md`,
-`-enhancement-spec.md`, `-quick-dev-spec.md`, `-design.md`, `-quality.md`) change directory *and*
-filename, because the filename's `{feature-id}-` prefix changes value from inferred slug to
-registry ID, while `implementation_package`'s children (`INC-XXX.md`, `increment-status.md`,
+history.
+
+**AMENDED by §2.2 — one renaming rule, not two, and the working tree needs nothing.** As
+originally written this paragraph gave two reasons a hand migration was unreliable rather than
+merely tedious, and the first has been designed away. It said **two different renaming rules
+apply**: the five single-file stage deliverables (`-requirements.md`, `-enhancement-spec.md`,
+`-quick-dev-spec.md`, `-design.md`, `-quality.md`) changed directory *and* filename because the
+filename's `{feature-id}-` prefix changed value from inferred slug to registry ID, while
+`implementation_package`'s children (`INC-XXX.md`, `increment-status.md`,
 `bugs-and-issues-log.md`, `change-tracker.md`, `implementation-package.md`, `plan/`, `review/`)
-change directory only, since per-item files carry no prefix. A hand migration will tend to apply
-one rule uniformly. Second, under SoD directory mode the segment nests *inside* `<repo-code>/`
-(and `_cross-cutting/<feature-id>/` for cross-cutting features), so the correct target depends on
-`project.toml`.
+changed directory only. A hand migration would tend to apply one rule uniformly to both. With
+slug IDs there is one rule for everything — **insert a directory level, rename nothing** — and
+the working-tree directory is already correct, so the whole `docs/` side drops out of the job.
+
+The second reason stands unchanged: under SoD directory mode the segment nests *inside*
+`<repo-code>/` (and `_cross-cutting/<feature-id>/` for cross-cutting features), so the correct
+target still depends on `project.toml`.
 
 The conclusion that matters for sequencing: the missing piece is **verification, not tooling**. A
 one-or-two-feature project can be migrated by prompt and eyeballed. At ten features the moves are

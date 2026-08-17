@@ -160,8 +160,11 @@ RETIRED_IN_TOKEN_RE = re.compile(
     r"\{(?:project\.)?paths\.[A-Za-z_][A-Za-z0-9_]*\}/" + _RETIRED_FEATURE_ALT
 )
 
-# Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): FEAT-NNNN-<kebab-slug>.
-FEATURE_ID_RE = re.compile(r"^FEAT-(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*$")
+# Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
+# used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
+# and allocating one manufactured a shared counter for concurrent minters to contend
+# over. Chronology lives in the registry's `created` field instead.
+FEATURE_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 # --- frontmatter parser (same shape as build-registry.py) -------------------
@@ -944,7 +947,6 @@ def check_features_registry(
         )
 
     ids_seen: dict[str, int] = {}
-    ordinals_seen: dict[str, str] = {}
     declared_ids: set[str] = set()
 
     for idx, entry in enumerate(features, start=1):
@@ -956,30 +958,22 @@ def check_features_registry(
         if not isinstance(fid, str) or not fid:
             errors.append(f"{where}: missing required `id`.")
             continue
-        match = FEATURE_ID_RE.match(fid)
-        if not match:
+        if not FEATURE_ID_RE.match(fid):
             errors.append(
-                f"{where}: `id` = {fid!r} does not match FEAT-NNNN-<kebab-slug> "
-                f"(4-digit zero-padded ordinal, lowercase kebab slug)."
+                f"{where}: `id` = {fid!r} is not a lowercase kebab slug "
+                f"(letters, digits and single hyphens; no leading, trailing or "
+                f"doubled hyphens). It is used verbatim as a directory name."
             )
             continue
         declared_ids.add(fid)
         if fid in ids_seen:
             errors.append(
                 f"{where}: duplicate `id` {fid!r} — first declared at "
-                f"#{ids_seen[fid]}."
+                f"#{ids_seen[fid]}. Two features cannot share a directory; "
+                f"differentiate the slug."
             )
         else:
             ids_seen[fid] = idx
-        ordinal = match.group(1)
-        if ordinal in ordinals_seen and ordinals_seen[ordinal] != fid:
-            errors.append(
-                f"{where}: ordinal {ordinal} is already used by "
-                f"{ordinals_seen[ordinal]!r} — an assigned ordinal is a stable "
-                f"identity and is never reused, even under a different slug."
-            )
-        else:
-            ordinals_seen.setdefault(ordinal, fid)
 
     if project_toml_path is None:
         warnings.append(
@@ -1379,7 +1373,7 @@ def main() -> int:
         help=(
             "Path to a features.toml fixture or a real project registry. Switches "
             "the validator into feature-registry mode (Check N2): evaluates rules "
-            "13-16 from config/SCHEMAS.md — id format, id and ordinal uniqueness, "
+            "13-16 from config/SCHEMAS.md — id format, id uniqueness, "
             "active_feature resolution, repos cross-reference. Exits non-zero on "
             "violation. Skips the regular A-H checks. Pair with --project-toml to "
             "check `repos`, and --project-user-toml to check active_feature."

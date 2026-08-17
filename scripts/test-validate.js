@@ -713,33 +713,45 @@ test('Check N2 — the committed example validates against project.toml.example'
   );
 });
 
-test('Check N2 — reject a malformed feature id', () => {
-  let proc;
-  try {
-    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-1-bad"\n');
-    proc = runValidate('--features-toml', `"${f}"`);
-  } finally {
-    cleanTmpToml();
-  }
-  const out = proc.stdout + proc.stderr;
-  assertNotEqual(proc.returncode, 0, out);
-  assertIn('does not match FEAT-NNNN', out, out);
-});
+// The ID is used verbatim as a directory name, so every non-slug shape is rejected.
+for (const bad of [
+  'Alert-Customer',  // uppercase
+  'alert_customer',  // underscore
+  '-alert',          // leading hyphen
+  'alert-',          // trailing hyphen
+  'alert--customer', // doubled hyphen
+  'alert customer',  // space
+]) {
+  test(`Check N2 — reject a malformed feature id (${bad})`, () => {
+    let proc;
+    try {
+      const f = writeTmpToml('features.toml', `[[features]]\nid = "${bad}"\n`);
+      proc = runValidate('--features-toml', `"${f}"`);
+    } finally {
+      cleanTmpToml();
+    }
+    const out = proc.stdout + proc.stderr;
+    assertNotEqual(proc.returncode, 0, out);
+    assertIn('not a lowercase kebab slug', out, out);
+  });
+}
 
-test('Check N2 — reject a reused ordinal under a different slug', () => {
+// The retired FEAT-NNNN- prefix is not special-cased: lowercased, it is just a slug.
+// The format rule is about what makes a safe directory name, not about banning a
+// convention the framework no longer mints.
+test('Check N2 — accept an ordinal-prefixed id as an ordinary slug', () => {
   let proc;
   try {
     const f = writeTmpToml(
       'features.toml',
-      '[[features]]\nid = "FEAT-0002-alpha"\n\n[[features]]\nid = "FEAT-0002-beta"\n'
+      '[[features]]\nid = "feat-0001-alert-customer"\n'
     );
     proc = runValidate('--features-toml', `"${f}"`);
   } finally {
     cleanTmpToml();
   }
   const out = proc.stdout + proc.stderr;
-  assertNotEqual(proc.returncode, 0, out);
-  assertIn('already used by', out, out);
+  assertEqual(proc.returncode, 0, out);
 });
 
 test('Check N2 — reject a duplicate feature id', () => {
@@ -747,7 +759,7 @@ test('Check N2 — reject a duplicate feature id', () => {
   try {
     const f = writeTmpToml(
       'features.toml',
-      '[[features]]\nid = "FEAT-0001-same"\n\n[[features]]\nid = "FEAT-0001-same"\n'
+      '[[features]]\nid = "refunds"\n\n[[features]]\nid = "refunds"\n'
     );
     proc = runValidate('--features-toml', `"${f}"`);
   } finally {
@@ -761,8 +773,8 @@ test('Check N2 — reject a duplicate feature id', () => {
 test('Check N2 — reject a stale active_feature pointer', () => {
   let proc;
   try {
-    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-0001-real"\n');
-    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "FEAT-0099-nope"\n');
+    const f = writeTmpToml('features.toml', '[[features]]\nid = "real-feature"\n');
+    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "nope-not-registered"\n');
     proc = runValidate('--features-toml', `"${f}"`, '--project-user-toml', `"${u}"`);
   } finally {
     cleanTmpToml();
@@ -777,7 +789,7 @@ test('Check N2 — reject a repos entry naming no declared repo code', () => {
   try {
     const f = writeTmpToml(
       'features.toml',
-      '[[features]]\nid = "FEAT-0001-real"\nrepos = ["ghost-repo"]\n'
+      '[[features]]\nid = "real-feature"\nrepos = ["ghost-repo"]\n'
     );
     const p = writeTmpToml('project.toml', '[[project.repos]]\ncode = "api-billing"\n');
     proc = runValidate('--features-toml', `"${f}"`, '--project-toml', `"${p}"`);
@@ -794,11 +806,11 @@ test('Check N2 — accept a valid registry with both companion files', () => {
   try {
     const f = writeTmpToml(
       'features.toml',
-      '[[features]]\nid = "FEAT-0001-alert-customer"\nrepos = ["api-billing"]\n' +
-      '\n[[features]]\nid = "FEAT-0002-refund-fee-waiver"\n'
+      '[[features]]\nid = "alert-customer"\nrepos = ["api-billing"]\n' +
+      '\n[[features]]\nid = "refund-fee-waiver"\n'
     );
     const p = writeTmpToml('project.toml', '[[project.repos]]\ncode = "api-billing"\n');
-    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "FEAT-0002-refund-fee-waiver"\n');
+    const u = writeTmpToml('project.user.toml', '[user]\nactive_feature = "refund-fee-waiver"\n');
     proc = runValidate(
       '--features-toml', `"${f}"`, '--project-toml', `"${p}"`, '--project-user-toml', `"${u}"`
     );
@@ -811,7 +823,7 @@ test('Check N2 — accept a valid registry with both companion files', () => {
 test('Check N2 — companion-file sub-rules report that they were skipped', () => {
   let proc;
   try {
-    const f = writeTmpToml('features.toml', '[[features]]\nid = "FEAT-0001-real"\n');
+    const f = writeTmpToml('features.toml', '[[features]]\nid = "real-feature"\n');
     proc = runValidate('--features-toml', `"${f}"`);
   } finally {
     cleanTmpToml();

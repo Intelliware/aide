@@ -26,8 +26,8 @@ behind splitting registry (Layer 3 territory) from pointer (Layer 4).
 The failure this skill exists to prevent is the same piece of work acquiring
 two identities. A skill that opens by offering to *add* a feature reproduces
 that hazard at exactly the moment it was meant to stop it: a user who does not
-recall that `FEAT-0007-refund-delays` exists will cheerfully mint
-`FEAT-0012-delayed-refund-alerts` for the same work. Presenting what already
+recall that `refund-delays` exists will cheerfully mint
+`delayed-refund-alerts` for the same work. Presenting what already
 exists first — with enough context per entry to be recognised (ID, title,
 ticket, which stages already have artifacts) — makes reuse the path of least
 resistance and creation the deliberate choice.
@@ -85,10 +85,16 @@ forward-handoff convention, pointed backwards.
 
 ## Concurrency note
 
-Ordinal allocation (`max + 1`) is the one hazard in this design: two people
-minting a feature on separate branches at the same moment can both compute the
-same next ordinal. Because `features.toml` is committed, the collision
-surfaces as a git merge conflict in one small file — loud and blocking —
-rather than as two directories quietly coexisting. This skill warns when the
-local working tree appears behind its remote before minting, but the merge
-conflict is the actual backstop.
+Minting has no shared counter to contend over, so concurrent minting is
+mostly a non-event: two people creating different features on separate
+branches choose different slugs and nothing collides. This is why the `id` is
+a plain slug rather than the `FEAT-NNNN-` form originally specified —
+allocating `max + 1` manufactured a contended resource, and the contention
+then had to be caught (see `config/SCHEMAS.md` § 2.8).
+
+What remains is a genuine collision rather than an allocation artefact: two
+people independently naming the *same* work with the same slug. Because
+`features.toml` is committed, that surfaces as a git merge conflict in one
+small file — loud and blocking — and Check N2's uniqueness rule catches it if
+a merge resolves badly. Both are correct outcomes: it is one feature with two
+entries, and the fix is a conversation, not a number.

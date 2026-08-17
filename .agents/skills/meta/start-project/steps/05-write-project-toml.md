@@ -67,20 +67,21 @@ Materialize the canonical `project.toml`. Optionally materialize a
 
    ```toml
    # Feature registry — managed by skills/meta/select-feature.
-   # Each [[features]] entry gives one delivery unit a stable ID of the form
-   # FEAT-NNNN-<kebab-slug>, which becomes a directory segment in every artifact
-   # path. See config/SCHEMAS.md § 2.8. Empty is legal and means
+   # Each [[features]] entry gives one delivery unit a stable ID — a lowercase
+   # kebab slug — which becomes a directory segment in every artifact path.
+   # See config/SCHEMAS.md § 2.8. Empty is legal and means
    # "feature-scoped, nothing minted yet".
    ```
 
    Comment-only is deliberate: `config/SCHEMAS.md` § 2.8 declares an
    empty-but-present file legal and calls it "the normal state immediately after
    opt-in", so the file needs no placeholder entry and TOML needs no trick to
-   express an empty array of tables. **Do not mint `FEAT-0001` here** — ordinal
-   allocation and slug proposal live in `select-feature` and must not be
-   reimplemented in a second skill. Step 06 routes through it, so the first
-   feature is named when the user describes actual work rather than during
-   project setup.
+   express an empty array of tables. **Do not mint a first feature here** — slug
+   proposal and the `docs/` check that informs it live in `select-feature` and
+   must not be reimplemented in a second skill. Step 06 does not route through it
+   either; the first feature is named when the first feature-scoped skill's
+   precondition asks for one, which is when the user is describing actual work
+   rather than setting up a project.
 
    **Skip this sub-step entirely when mode = `rebaseline` or `extend-repos`.**
    Those modes mean artifacts may already exist on flat paths, and turning on

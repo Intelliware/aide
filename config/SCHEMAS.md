@@ -562,7 +562,7 @@ it never moves anything unasked.
 
 ```toml
 [[features]]
-id      = "FEAT-0001-alert-customer"
+id      = "alert-customer"
 title   = "Alert customer when a refund is delayed"
 created = 2026-08-11
 ticket  = "ACME-1247"          # optional
@@ -571,7 +571,7 @@ repos   = ["api-billing"]      # optional; codes from [[project.repos]]
 
 | Field | Type | Required | Purpose |
 |---|---|---|---|
-| `id` | string | yes | The directory segment and the feature's stable identity. Format `FEAT-NNNN-<kebab-slug>` — zero-padded 4-digit ordinal, allocated sequentially in creation order (max existing ordinal + 1), plus a descriptive kebab slug. Mirrors the framework's existing ADR convention (`ADR-NNNN-<kebab-title>`). The ordinal is the permanent identity; the slug is a label frozen at mint time and does not need to track later title edits. Gaps in the ordinal sequence are legal; reuse of an already-assigned ordinal is not. |
+| `id` | string | yes | The directory segment and the feature's stable identity. A lowercase kebab slug (`^[a-z0-9]+(-[a-z0-9]+)*$`), used verbatim as a directory name and as the `{feature-id}-` filename prefix. Chosen at mint time, unique across the registry, and **not** derived from the title — it is frozen once artifacts exist under it, and renaming the title does not rename it. There is no allocated number; see the note on ordinals below. |
 | `title` | string | yes | Human-readable one-line description. Freely editable after minting — renaming the title does not rename the directory. |
 | `created` | date | yes | ISO date the entry was minted. |
 | `ticket` | string | no | External tracker reference (Jira key, ADO work item, etc.). |
@@ -585,13 +585,36 @@ represent, unlike an empty array-of-tables declared inline in TOML. Validation
 treats it as a warning-level observation, never an error, so a newly bootstrapped
 project passes cleanly before its first feature exists.
 
-**Minting is concurrency-safe by construction, not by cleverness.** Ordinal
-allocation reads the highest existing entry and adds one, so two people minting a
-feature on separate branches at the same time can both compute the same next
-ordinal. Because this file is committed, that collision surfaces as an ordinary
-**git merge conflict in one small file** — loud and blocking — rather than as two
-directories quietly coexisting on disk. `select-feature` warns when the working
-tree is behind its remote for exactly this reason.
+**There is no ordinal prefix, and the reason is worth recording.** IDs were
+originally specified as `FEAT-NNNN-<kebab-slug>`, mirroring the `ADR-NNNN-` naming
+convention, so that `ls` would show features in creation order. That was dropped
+before the format was ever used in anger, because **nothing consumed the number.**
+No skill, template or check read the ordinal and did anything with it: every
+reference to it was machinery for maintaining it — allocation, uniqueness
+validation, and a prefix-stripping rule for matching pre-opt-in directories. Its
+only real consumer was `ls`, and `created` records chronology more accurately
+anyway, since it captures the date rather than the allocation order.
+
+Removing it also removed a manufactured hazard. Allocating `max + 1` invents a
+shared counter, so two people minting a feature on separate branches at the same
+time would compute the *same* next ordinal — a collision that had to be caught by
+this file being committed, surfacing as a git merge conflict. A slug has no counter
+to contend over: two people minting different features never collide at all, and
+two people choosing the *same* slug is a genuine duplicate identity that rule 14
+rejects. The safety mechanism was protecting the design from itself.
+
+**What the prefix did buy, and how that is covered instead.** It made a feature
+directory self-identifying — `docs/FEAT-0001-refunds/` was unmistakably a feature,
+where `docs/refunds/` could be any folder. The mitigation is to treat this file as
+the only source of truth for what features exist: **enumerate features from the
+registry, never by listing directories.** Nothing in the framework does otherwise
+today. The corollary is that a slug must not collide with a non-feature directory
+already sitting alongside feature directories.
+
+The prefix also allowed two features to share a slug, distinguished only by number.
+That is a loss worth taking: `FEAT-0003-refunds` and `FEAT-0007-refunds` are near
+identical at a glance and invite exactly the confusion feature scoping exists to
+prevent, so being forced to name them apart is the better outcome.
 
 **Deliberately not in the registry:** any `status` or `lifecycle` field. Feature
 status/lifecycle tracking is out of scope for this change (see
@@ -605,7 +628,7 @@ see the `active_feature` row in § 2.4's field table.
 ```toml
 [user]
 role           = "BA"
-active_feature = "FEAT-0001-alert-customer"
+active_feature = "alert-customer"
 ```
 
 **The registry is shared truth; the pointer is personal state.** Two people on the
@@ -788,10 +811,11 @@ skill's contract assumes these have already passed.
 when `features.toml` exists; a project without one is not in feature-scoped mode
 and none of the following fires.
 
-13. Every `[[features]].id` matches `^FEAT-\d{4}-[a-z0-9]+(-[a-z0-9]+)*$`.
-14. Every `[[features]].id` is unique — both the full string and the bare 4-digit
-    ordinal (a duplicate ordinal with a differing slug is still a collision).
-    Gaps in the ordinal sequence are legal; only reuse is an error.
+13. Every `[[features]].id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` — a lowercase kebab
+    slug, used verbatim as a directory name.
+14. Every `[[features]].id` is unique. Two features cannot share a directory, so a
+    duplicate is an error rather than a warning; the fix is to differentiate the
+    slug (`refunds-api` and `refunds-ui`, not two `refunds`).
 15. `[user].active_feature` (when set in `project.user.toml`) resolves to a
     declared `[[features]].id`. Unset is valid (see § 2.9); set-but-unresolvable
     is an error, including when `features.toml` is present but empty.

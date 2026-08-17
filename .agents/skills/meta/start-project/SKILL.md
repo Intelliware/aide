@@ -58,7 +58,7 @@ Use elicitation prompts referenced from `references/elicitation-patterns/project
 
 The skill does NOT create `framework.toml` or `framework.user.toml` — those belong to the framework installation, not the project.
 
-**Feature-scoped paths are the default for new projects.** A `fresh` bootstrap writes a comment-only `features.toml`, which is what makes every artifact path carry a `FEAT-NNNN-<slug>/` segment — so two features can never write over each other, and nobody has to know the option exists to get it. `features.toml` is committed; it is shared project data, unlike the personal, gitignored `[user].active_feature`.
+**Feature-scoped paths are the default for new projects.** A `fresh` bootstrap writes a comment-only `features.toml`, which is what makes every artifact path carry a `<feature-id>/` segment — so two features can never write over each other, and nobody has to know the option exists to get it. `features.toml` is committed; it is shared project data, unlike the personal, gitignored `[user].active_feature`.
 
 Three deliberate limits on that default:
 
