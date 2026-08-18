@@ -57,7 +57,7 @@ See `references/INPUTS-OUTPUTS.md` for full inputs/outputs tables.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-pr`) rather than guessing which feature the diff belongs to. If it resolves, echo the feature ID and include it in the generated PR description's traceability block.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: create-pr`) rather than guessing which feature the diff belongs to — do not fall back to creating one, because a diff waiting to be PR'd belongs to a feature that already exists. If it resolves, echo the feature ID and include it in the generated PR description's traceability block.
 
 ## Workflow
 

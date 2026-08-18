@@ -17,15 +17,15 @@ This plan is the narrow complement: **~2–3 hours, no clones, no knowledge base
 
 Getting the contract right matters more than step count, because two of its properties are counter-intuitive:
 
-1. **Both precondition modes halt.** Mode A (write-side, 11 skills) and Mode B (read-side, 5 skills) *both* stop when no feature resolves. The difference is only whether `select-feature`'s **create path is reachable**: Mode B invokes it with `caller_mode = select-only`, making create unreachable for that call. Neither mode mints silently, and neither derives an ID from the request text — that silent guess is the defect the precondition exists to close. Any test asserting "Mode A mints automatically" is testing the wrong contract.
+1. **Both precondition modes halt.** Mode A (mint reachable, 7 skills) and Mode B (mint suppressed, 10 skills) *both* stop when no feature resolves. The difference is only whether `select-feature`'s **create path is reachable**: Mode B invokes it with `caller_mode = select-only`, making create unreachable for that call. Neither mode mints silently, and neither derives an ID from the request text — that silent guess is the defect the precondition exists to close. Any test asserting "Mode A mints automatically" is testing the wrong contract. Note the split is about whether minting is *legitimate*, not about how much the skill writes — `execute-increments` writes production code and is Mode B.
 2. **There are two paths, resolved by two separate rules.** The per-section **working tree** is `docs/<feature-id>/`; the **assembled artifact** gains a `<feature-id>/` directory immediately above it (`{paths.requirements_package}/{feature-id}/…`). They have different resolution rules and different failure modes, so they need separate assertions.
 
 Mode membership, as declared in `references/ai-principles/feature-precondition.md`:
 
 | Mode | Count | Skills |
 |---|---|---|
-| **A** — write-side, create reachable | 11 | `create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `execute-increments`, `execute-quality-increments`, `document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`, `create-pr` |
-| **B** — read-side, create suppressed | 6 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`, `review-test-failures` |
+| **A** — mint reachable | 7 | `create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `document-quick-change`, `execute-quick-change`, `manage-bugs` |
+| **B** — mint suppressed | 10 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`, `review-test-failures`, `plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr` |
 | **C** — probe-only, never halts | 1 | `framework-navigator` (recommends `select-feature`; a recommendation is a legitimate answer, not a failure) |
 
 `select-feature` itself references the precondition without being bound by it, so **19** `SKILL.md` files cite the contract while **17** are governed by it. Tests must pin the exact sets — a bare count of 17 passes with the wrong seventeen.

@@ -178,11 +178,21 @@ now the *only* thing opting in changes.
 
 ## Mode A — Write-side (select-and-create)
 
-Applies to skills that produce new artifacts:
+Applies to skills that may legitimately need to **mint** a feature — those producing a
+feature's first artifact, where nothing upstream exists to select from:
 `create-requirements-package`, `create-design-package`, `create-implementation-package`,
-`create-quality-package`, `execute-increments`, `execute-quality-increments`,
-`document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`,
-`create-pr`.
+`create-quality-package`, `document-quick-change`, `execute-quick-change`, `manage-bugs`.
+
+**The A/B split turns on whether minting is legitimate, not on whether the skill writes.**
+Both modes write and both halt. A skill operating on an artifact that must already exist — a
+spec to load, increments to run, a log to open, a diff to describe — belongs in Mode B even
+though it writes plenty. The skill's own halt message is the tell: "rather than guessing which
+feature's X" means X pre-exists, so Mode B; "rather than inventing a feature ID" means nothing
+pre-exists, so Mode A.
+
+`execute-quick-change` and `manage-bugs` sit here pending a decision. Both read artifacts that
+must already exist, so by the rule above both are Mode B candidates; `manage-bugs` is the
+harder call because it is independently invocable and may be the first thing run on a project.
 
 1. If `features.toml` is absent, proceed as today. Stop here.
 2. Resolve `[user].active_feature` from `project.user.toml`.
@@ -205,19 +215,25 @@ Applies to skills that produce new artifacts:
 `select-feature` closes with `## Next skill\n<caller>` once a feature is active, so
 the user is carried straight back into the skill that halted.
 
-## Mode B — Read-side (select-only)
+## Mode B — Select-only (the feature already exists)
 
-Applies to skills that only read/audit existing artifacts and to the review gates
-that write a verdict file or a tracker row (both are working artifacts, not
-deliverables — see `config/SCHEMAS.md` § 2.8):
+Applies to skills whose feature necessarily already exists, because they operate on
+something an earlier skill produced: the read/audit skills, the review gates that write a
+verdict file or a tracker row (working artifacts, not deliverables — see
+`config/SCHEMAS.md` § 2.8), and the execution skills that work a plan written upstream.
 `review-requirements-package`, `review-design-package`, `review-implementation-package`,
-`review-quality-package`, `audit-quality-coverage`, `review-test-failures`.
+`review-quality-package`, `audit-quality-coverage`, `review-test-failures`,
+`plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr`.
 
-Identical to Mode A, with one difference at step 3: **suppress create.** Reviewing or
-auditing is not a reason to mint a feature that has nothing to review yet, so
-`select-feature` is invoked with `caller_mode = select-only` and its create path is
-unreachable for this call. If the registry is genuinely empty, the halt message
-changes to name the producing skill instead:
+**How much a skill writes is irrelevant to the mode.** `execute-increments` writes
+production code and is still Mode B: increments to run cannot exist without a package that
+named them, so minting a feature here would produce one with nothing to execute.
+
+Identical to Mode A, with one difference at step 3: **suppress create.** Needing something
+to read is not a reason to mint a feature that has nothing in it yet, so `select-feature`
+is invoked with `caller_mode = select-only` and its create path is unreachable for this
+call. If the registry is genuinely empty, the halt message changes to name the producing
+skill instead:
 
 > No active feature, and no features are registered yet. Run the stage's `create-*`
 > skill first.
