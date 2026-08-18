@@ -164,12 +164,15 @@ release, see § 13.2 of the plan — but the move is now a pure move.
 
 #### Branch Dependency
 
-Minor release stacked on top of the (not-yet-merged) `2.3.0` / `path-token-reconciliation`
-branch — this branch is `feat/feature-id-minimal-plan`, based on `path-token-reconciliation`
-rather than `main`, because the `{feature-id}` work assumes every `{paths.<key>}` token
-already resolves (the `2.3.0` prerequisite). Because `2.3.0` is itself unmerged and
-untagged, this version number assumes the stack lands in order; renumber if it does
-not.
+Ships together with `2.3.0` in a single pull request against `main`. The two were
+originally stacked — `feat/feature-id-minimal-plan` branched from
+`path-token-reconciliation` rather than `main`, because the `{feature-id}` work assumes
+every `{paths.<key>}` token already resolves (the `2.3.0` prerequisite). That ordering
+still holds in the commit history, and the two version entries are kept separate here
+to preserve it. What changed is the delivery: `path-token-reconciliation` was folded
+into this PR rather than merged on its own, so `2.3.0` is a numbered entry in this log
+that was never tagged as a release of its own. `main` moves from `2.2.0` to `2.4.0` in
+one step.
 
 `_docs/feature-id-minimal-plan.md` § 9 describes phases 1 and 2 as adding capability
 without moving a byte of any existing artifact. That held for those two phases and no
@@ -198,21 +201,22 @@ placeholder — they describe the old *shape* in prose, which no regex can polic
 be cleared before merge.
 
 `README.md`'s version line is set to `2.4.0`, per the synchronisation rule at the foot
-of this file. It had been left at `2.2.0` — the `2.3.0` bump on `path-token-reconciliation`
-did not carry it forward, and the phase 1 bump here did not either, so the line was two
-releases stale rather than one. Setting it to this release's number is the correct end
-state for the stack; expect a one-line conflict if `2.3.0` is later amended to fix its
-own half.
+of this file. It had been left at `2.2.0` — the `2.3.0` bump did not carry it forward,
+and the phase 1 bump here did not either, so the line was two releases stale rather
+than one. Because both releases land in the same PR, `2.4.0` is the correct final
+value and there is no second half left to reconcile.
 
 ### `2.3.0` — 2026-08-14
 
 Reconciles every `{paths.<name>}` composition/skill token against the `[project.paths]`
 keys actually declared in `config/SCHEMAS.md`, and adds the missing `quality_package`
 key those tokens should have resolved to all along. See
-`_docs/path-token-reconciliation-plan.md` for the full defect analysis — this is a
-clean, independently-mergeable predecessor to the (not-yet-landed) feature-ID-as-
-path-segment work in `_docs/feature-id-minimal-plan.md`, which itself would have
-inherited the same phantom-token confusion had it landed first.
+`_docs/path-token-reconciliation-plan.md` for the full defect analysis — this is the
+prerequisite for the feature-ID-as-path-segment work in
+`_docs/feature-id-minimal-plan.md` (`2.4.0`), which would have inherited the same
+phantom-token confusion had it landed first. Both ship in the same pull request; this
+entry stays separate to record that the reconciliation stands on its own and came
+first.
 
 #### Added
 
