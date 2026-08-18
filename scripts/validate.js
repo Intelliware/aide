@@ -19,6 +19,14 @@
  *   I. Separation-of-duties (SoD) rule enforcement against a fixture
  *      project.toml (and optional cross-cutting artifact). Run with
  *      `--project-toml PATH` to evaluate rules 7–12 from `config/SCHEMAS.md`.
+ *   J. Write-discipline binding — every `create-*` SKILL.md MUST contain a
+ *      `## Preconditions` section that cites
+ *      `references/ai-principles/write-discipline.md`. Prevents silent
+ *      decay of the write-on-acknowledge contract.
+ *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
+ *      reference under `.agents/skills/` and `templates/compositions/` must
+ *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
+ *      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
  *   N1. Feature-segment / retired-placeholder guardrail — every feature-scoped
  *      composition's `default-output-path` carries `{feature-id}` as a path
  *      segment, and no retired placeholder (`<feature>`, `<feature-folder>`,
@@ -28,10 +36,6 @@
  *      project registry. Run with `--features-toml PATH` to evaluate rules
  *      13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
  *      and `--project-user-toml` for `active_feature`.
- *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
- *      reference under `.agents/skills/` and `templates/compositions/` must
- *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
- *      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
  *
  * Hard errors fail the run (exit 1):
  *   - Composition references a non-existent block (A).
@@ -40,12 +44,12 @@
  *     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
  *   - Composition or skill cites an elicitation pattern that does not exist (G).
  *   - Any SoD rule violation when running in --project-toml mode (I).
+ *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
+ *     undeclared `[project.paths]` key (M).
  *   - A feature-scoped composition missing its `{feature-id}` segment, or any
  *     retired feature placeholder in an artifact path (N1).
  *   - Any feature-registry rule violation when running in --features-toml
  *     mode (N2).
- *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
- *     undeclared `[project.paths]` key (M).
  *
  * Everything else is a soft warning (does not fail). Stdlib-only.
  */
