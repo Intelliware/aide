@@ -666,7 +666,7 @@ class TestFeatureRegistry(unittest.TestCase):
                 self.assertIn("not a lowercase kebab slug", out)
 
     def test_accept_ordinal_prefixed_id_as_an_ordinary_slug(self) -> None:
-        """The retired FEAT-NNNN- prefix is not special-cased — lowercased, it is just a slug.
+        """An ordinal-prefixed id is not special-cased — lowercased, it is just a slug.
 
         Nothing rejects `feat-0001-alert-customer`; it is a legal (if redundant) slug.
         The format rule is about what makes a safe directory name, not about banning a

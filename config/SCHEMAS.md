@@ -586,8 +586,8 @@ treats it as a warning-level observation, never an error, so a newly bootstrappe
 project passes cleanly before its first feature exists.
 
 **There is no ordinal prefix, and the reason is worth recording.** IDs were
-originally specified as `FEAT-NNNN-<kebab-slug>`, mirroring the `ADR-NNNN-` naming
-convention, so that `ls` would show features in creation order. That was dropped
+originally specified with an allocated ordinal ahead of the slug, mirroring the
+`ADR-NNNN-` naming convention, so that `ls` would show features in creation order. That was dropped
 before the format was ever used in anger, because **nothing consumed the number.**
 No skill, template or check read the ordinal and did anything with it: every
 reference to it was machinery for maintaining it — allocation, uniqueness
@@ -613,8 +613,8 @@ two people choosing the *same* slug is a genuine duplicate identity that rule 14
 rejects. The safety mechanism was protecting the design from itself.
 
 **What the prefix did buy, and how that is covered instead.** It made a feature
-directory self-identifying — `docs/FEAT-0001-refunds/` was unmistakably a feature,
-where `docs/refunds/` could be any folder. The mitigation is to treat this file as
+directory self-identifying — an ordinal-prefixed entry under `docs/` was unmistakably
+a feature, where `docs/refunds/` could be any folder. The mitigation is to treat this file as
 the only source of truth for what features exist: **enumerate features from the
 registry, never by listing directories.** Nothing in the framework does otherwise
 today.
@@ -629,9 +629,9 @@ tree. `select-feature` warns at mint time, which is the only moment both the
 proposed name and the directory listing are in view.
 
 The prefix also allowed two features to share a slug, distinguished only by number.
-That is a loss worth taking: `FEAT-0003-refunds` and `FEAT-0007-refunds` are near
-identical at a glance and invite exactly the confusion feature scoping exists to
-prevent, so being forced to name them apart is the better outcome.
+That is a loss worth taking: two `refunds` features separated only by their ordinals
+are near identical at a glance and invite exactly the confusion feature scoping exists
+to prevent, so being forced to name them apart is the better outcome.
 
 **Deliberately not in the registry:** any `status` or `lifecycle` field. Feature
 status/lifecycle tracking is out of scope for this change (see

@@ -69,7 +69,7 @@ work, **halt** and offer two options:
 
 Both answers end with the ID and the directory in agreement, so case 1 handles every
 subsequent run and no registry field records an exception. That symmetry is a
-consequence of the ID being the directory name: under the retired `FEAT-NNNN-`
+consequence of the ID being the directory name: under the retired ordinal-prefixed
 format only (a) was really available, because "keep the old directory" meant binding
 an ID to a differently-named directory forever, and the binding had to be
 re-derived by stripping the prefix on every run.
@@ -163,12 +163,11 @@ docs/alert-customer/                    ← working tree, per-section files
 **The two columns differ by exactly one directory level and nothing else.** No file
 is renamed and the working-tree directory is identical, because the inferred folder
 name and the registry ID are now the same kind of string — a kebab slug. That is the
-single largest practical consequence of dropping the `FEAT-NNNN-` prefix: under it,
-the opted-in column read
-`.framework-output/requirements/FEAT-0001-alert-customer/FEAT-0001-alert-customer-requirements.md`,
-so opting in changed the depth *and* the filename *and* the working-tree directory
-name, and this section's claim that the columns "differ by exactly one directory
-level, never by filename" was not actually true of its own example.
+single largest practical consequence of dropping the ordinal prefix: under it, the
+opted-in column repeated an ordinal-prefixed ID in both the directory and the
+filename, so opting in changed the depth *and* the filename *and* the working-tree
+directory name, and this section's claim that the columns "differ by exactly one
+directory level, never by filename" was not actually true of its own example.
 
 Two consequences worth holding onto. Filename globs survive opt-in unconditionally,
 and only depth-sensitive ones break. And `INC-001.md` gains the segment but no

@@ -88,7 +88,7 @@ forward-handoff convention, pointed backwards.
 Minting has no shared counter to contend over, so concurrent minting is
 mostly a non-event: two people creating different features on separate
 branches choose different slugs and nothing collides. This is why the `id` is
-a plain slug rather than the `FEAT-NNNN-` form originally specified —
+a plain slug rather than the ordinal-prefixed form originally specified —
 allocating `max + 1` manufactured a contended resource, and the contention
 then had to be caught (see `config/SCHEMAS.md` § 2.8).
 

@@ -124,7 +124,7 @@ cp /tmp/f2.bak templates/compositions/greenfield-requirements-package.yaml
 
 | Variant | Placement | Expected |
 |---|---|---|
-| a | a retired `FEAT-NNNN-` placeholder in prose, outside any code fence | **rejected**, naming Check N1 |
+| a | a retired feature-directory spelling (`<feature>`, placed directly under `docs/`) in prose, outside any code fence | **rejected**, naming Check N1 |
 | b | the same placeholder inside a ` ``` ` fenced block | **accepted** — fences exempt historical examples |
 | c | the same placeholder after a fence has closed | **rejected** — the fence guard must not leak past its terminator |
 

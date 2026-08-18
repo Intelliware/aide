@@ -220,7 +220,10 @@ function discoverInRoot(skillsRoot, pathBase, origin, verbose) {
       frontmatter: fm,
       path: pathStr,
       absPath: skillPath,
-      lineCount: text.split('\n').length,
+      // Matches Python's `splitlines()`: a trailing newline terminates the last
+      // line rather than starting an empty one, so the two builders agree on the
+      // 200-line threshold instead of diverging by one on every file.
+      lineCount: text.replace(/\r?\n$/, '').split('\n').length,
       origin
     });
 

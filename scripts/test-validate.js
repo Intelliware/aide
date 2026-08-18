@@ -831,7 +831,7 @@ test('Check N2 — reject a malformed feature id', () => {
   }
 });
 
-// The retired FEAT-NNNN- prefix is not special-cased: lowercased, it is just a slug.
+// An ordinal-prefixed id is not special-cased: lowercased, it is just a slug.
 // The format rule is about what makes a safe directory name, not about banning a
 // convention the framework no longer mints.
 test('Check N2 — accept an ordinal-prefixed id as an ordinary slug', () => {
