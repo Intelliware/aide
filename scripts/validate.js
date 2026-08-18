@@ -977,6 +977,10 @@ function checkM() {
 //      `docs/<feature>/`, `<feature-folder>` and `<feature-name>` were three
 //      spellings of one concept, and having three is what let a single
 //      feature's work be described in three mutually-consistent-looking ways.
+//      Fenced blocks are exempt, as in Check M: migration guidance has to be
+//      able to show the retired spelling to be worth reading, and a check that
+//      forbids quoting the thing it retired can only be satisfied by writing
+//      worse documentation.
 //
 // Hard errors, not warnings: this lands green in the same change that fixes
 // every violation it would report, and a warning would only invite the
@@ -1034,6 +1038,7 @@ function checkN1() {
     for (let i = 0; i < lines.length; i++) {
       for (const regex of [RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE]) {
         for (const hit of lines[i].matchAll(regex)) {
+          if (inCodeFence(lines, i)) continue;
           errors.push(
             `${rel}:${i + 1}: \`${hit[0]}\` uses the retired placeholder ` +
             `\`${hit[1]}\` — the per-feature directory is spelled \`<feature-id>\`.`
@@ -1680,6 +1685,13 @@ function main() {
   const projectUserTomlIdx = args.indexOf('--project-user-toml');
   const projectUserTomlPath = projectUserTomlIdx >= 0 ? args[projectUserTomlIdx + 1] : null;
 
+  // The fixture modes below are mutually exclusive early returns, so their
+  // order is precedence, not presentation — which is why it does not follow the
+  // check letters. `--features-toml` must be tested before `--project-toml`: N2
+  // accepts a project.toml as a *companion* (rule 16 resolves `repos` against
+  // `[[project.repos]]`), so testing `--project-toml` first would capture the
+  // paired invocation as Check I and N2 would never run. Reordering these
+  // breaks two tests in test-validate.js.
   if (featuresTomlPath) {
     console.log(`validate.js — feature-registry check against ${featuresTomlPath}`);
     const [n2Err, n2Warn] = checkFeaturesRegistry(

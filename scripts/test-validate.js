@@ -696,6 +696,39 @@ test('Check N1 — <feature> stays legal in prose, scope IDs and documented sour
   );
 });
 
+// Mirrors Check M, which has exempted fenced content since it shipped. Without
+// this, the doc debt the 2.4.0 entry still owes cannot be written: showing the
+// old layout beside the new one is the whole point of it.
+test('Check N1 — a retired spelling inside a fenced block is exempt', () => {
+  writeN1Doc(
+    'Rename the directory:\n\n```\ndocs/<feature>/requirements-package/\n```\n\n' +
+    'becomes `docs/<feature-id>/requirements-package/`.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1 should exempt a retired spelling inside a fence.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N1 — the fence exemption is positional, not file-wide', () => {
+  writeN1Doc('```\ndocs/<feature-id>/ok/\n```\n\nThen write to `docs/<feature-name>/x/`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1 must still flag prose below a closed fence.\noutput:\n${out}`);
+  assertIn('retired placeholder', out, `output missing the retired-placeholder complaint.\noutput:\n${out}`);
+});
+
 // --- Check N2 — feature registry (--features-toml fixture mode) ---
 //
 // Reuses the temp-TOML helpers from the parser section above. Sub-rules that

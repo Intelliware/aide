@@ -851,6 +851,10 @@ def check_n1() -> tuple[list[str], list[str]]:
          `docs/<feature>/`, `<feature-folder>` and `<feature-name>` were three
          spellings of one concept, and having three is what let a single
          feature's work be described in three mutually-consistent-looking ways.
+         Fenced blocks are exempt, as in Check M: migration guidance has to be
+         able to show the retired spelling to be worth reading, and a check that
+         forbids quoting the thing it retired can only be satisfied by writing
+         worse documentation.
 
     Hard errors, not warnings: this lands green in the same change that fixes
     every violation it would report, and a warning would only invite the
@@ -895,9 +899,12 @@ def check_n1() -> tuple[list[str], list[str]]:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        for i, line in enumerate(text.splitlines()):
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
             for regex in (RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE):
                 for hit in regex.finditer(line):
+                    if _in_code_fence(lines, i):
+                        continue
                     errors.append(
                         f"{rel}:{i+1}: `{hit.group(0)}` uses the retired "
                         f"placeholder `{hit.group(1)}` — the per-feature "
@@ -1390,6 +1397,13 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    # The fixture modes below are mutually exclusive early returns, so their
+    # order is precedence, not presentation — which is why it does not follow
+    # the check letters. `--features-toml` must be tested before
+    # `--project-toml`: N2 accepts a project.toml as a *companion* (rule 16
+    # resolves `repos` against `[[project.repos]]`), so testing `--project-toml`
+    # first would capture the paired invocation as Check I and N2 would never
+    # run. Reordering these breaks two tests in test_validate.py.
     if args.features_toml:
         ftoml = Path(args.features_toml)
         ptoml = Path(args.project_toml) if args.project_toml else None

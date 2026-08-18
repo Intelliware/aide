@@ -585,6 +585,44 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
             f"N1 must not flag `<feature>` outside A.I.D.E. artifact paths.\noutput:\n{out}",
         )
 
+    def test_accept_retired_placeholder_inside_fenced_block(self) -> None:
+        """Migration guidance must be able to quote the spelling it retires.
+
+        Mirrors Check M, which has exempted fenced content since it shipped.
+        Without this, the doc debt the 2.4.0 entry still owes cannot be written:
+        showing the old layout beside the new one is the whole point of it.
+        """
+        self._write_skill_doc(
+            "Rename the directory:\n\n```\ndocs/<feature>/requirements-package/\n```\n\n"
+            "becomes `docs/<feature-id>/requirements-package/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1 should exempt a retired spelling inside a fenced block.\noutput:\n{out}",
+        )
+
+    def test_reject_retired_placeholder_after_a_fence_closes(self) -> None:
+        """The exemption is positional, not file-wide — a fence earlier in the
+        file must not buy amnesty for prose below it."""
+        self._write_skill_doc(
+            "```\ndocs/<feature-id>/ok/\n```\n\nThen write to `docs/<feature-name>/x/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1 must still flag a retired spelling after a fence closes.\noutput:\n{out}",
+        )
+        self.assertIn("retired placeholder", out)
+
 
 class TestFeatureRegistry(unittest.TestCase):
     """Check N2 — feature registry validation (`--features-toml` fixture mode)."""
