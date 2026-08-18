@@ -25,10 +25,10 @@ Mode membership, as declared in `references/ai-principles/feature-precondition.m
 | Mode | Count | Skills |
 |---|---|---|
 | **A** — write-side, create reachable | 11 | `create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `execute-increments`, `execute-quality-increments`, `document-quick-change`, `plan-quick-change`, `execute-quick-change`, `manage-bugs`, `create-pr` |
-| **B** — read-side, create suppressed | 5 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage` |
+| **B** — read-side, create suppressed | 6 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`, `review-test-failures` |
 | **C** — probe-only, never halts | 1 | `framework-navigator` (recommends `select-feature`; a recommendation is a legitimate answer, not a failure) |
 
-`select-feature` itself references the precondition without being bound by it, so **18** `SKILL.md` files cite the contract while **16** are governed by it. Tests must pin the exact sets — a bare count of 16 passes with the wrong sixteen.
+`select-feature` itself references the precondition without being bound by it, so **19** `SKILL.md` files cite the contract while **17** are governed by it. Tests must pin the exact sets — a bare count of 17 passes with the wrong seventeen.
 
 ## Environment
 

@@ -208,10 +208,10 @@ the user is carried straight back into the skill that halted.
 ## Mode B — Read-side (select-only)
 
 Applies to skills that only read/audit existing artifacts and to the review gates
-that write verdict files (which are working artifacts, not deliverables — see
-`config/SCHEMAS.md` § 2.8):
+that write a verdict file or a tracker row (both are working artifacts, not
+deliverables — see `config/SCHEMAS.md` § 2.8):
 `review-requirements-package`, `review-design-package`, `review-implementation-package`,
-`review-quality-package`, `audit-quality-coverage`.
+`review-quality-package`, `audit-quality-coverage`, `review-test-failures`.
 
 Identical to Mode A, with one difference at step 3: **suppress create.** Reviewing or
 auditing is not a reason to mint a feature that has nothing to review yet, so
