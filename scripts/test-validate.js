@@ -181,6 +181,13 @@ test('Rule 12 — cross-cutting unknown repo', () => {
 // Rejection matters more than it looks: a silent fallback to "ask" would make an
 // unattended run fail fast while the operator believed it was self-closing, and a
 // fallback the other way would imply human sign-off that never happened.
+test('Rule 6a — qe_repo names no declared repo', () => {
+  expectReject(
+    ['--project-toml', path.join(FIXTURES, 'unknown-qe-repo.toml')],
+    ['project.testing', 'qe_repo', 'unknown repo', 'not declared']
+  );
+});
+
 test('Rule 6b — re_verification_gate out of enum', () => {
   expectReject(
     ['--project-toml', path.join(FIXTURES, 'bad-re-verification-gate.toml')],
@@ -292,6 +299,49 @@ Body.
   ]);
 });
 
+test('QE repo naming a declared test-automation repo passes', () => {
+  const p = createTempToml(`
+[project]
+code = "qe-ok"
+
+[project.testing]
+qe_repo = "qe-automation"
+
+[[project.repos]]
+code = "app"
+path = "."
+role = "api"
+
+[[project.repos]]
+code = "qe-automation"
+path = "{project-root}/../qe-automation"
+role = "test-automation"
+  `);
+  expectAccept(['--project-toml', p]);
+});
+
+test('RE verification gate accepts every enum value, and an absent key stays legal', () => {
+  for (const value of ['ask', 'review', 'automated']) {
+    const p = createTempToml(`
+[project]
+code = "re-gate-ok"
+
+[project.elicitation]
+re_verification_gate = "${value}"
+    `);
+    expectAccept(['--project-toml', p]);
+  }
+
+  const absent = createTempToml(`
+[project]
+code = "re-gate-absent"
+
+[project.elicitation]
+team_size = "10-25"
+  `);
+  expectAccept(['--project-toml', absent]);
+});
+
 // --- Test SoD Edge Cases ---
 
 test('Missing project.toml exits nonzero', () => {
@@ -378,6 +428,15 @@ function reSkillFiles() {
     .filter(p => fs.existsSync(p))
     .sort();
 }
+
+test('Check L — a default run reports Check L', () => {
+  const proc = runValidate();
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assertIn(
+    'Check L — RE close-out gate binding', proc.stdout,
+    `default run should report Check L.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
 
 test('Check L — routing pattern exists on disk', () => {
   const abs = path.join(REPO_ROOT, RE_GATE_PATTERN_PATH);
@@ -747,15 +806,18 @@ test('Check N2 — the committed example validates against project.toml.example'
 });
 
 // The ID is used verbatim as a directory name, so every non-slug shape is rejected.
-for (const bad of [
-  'Alert-Customer',  // uppercase
-  'alert_customer',  // underscore
-  '-alert',          // leading hyphen
-  'alert-',          // trailing hyphen
-  'alert--customer', // doubled hyphen
-  'alert customer',  // space
-]) {
-  test(`Check N2 — reject a malformed feature id (${bad})`, () => {
+// One test over all six shapes, mirroring test_validate.py's subTest loop, so the
+// two suites' totals stay directly comparable. The rejected value is named in each
+// assertion message, so a failure still says which shape broke.
+test('Check N2 — reject a malformed feature id', () => {
+  for (const bad of [
+    'Alert-Customer',  // uppercase
+    'alert_customer',  // underscore
+    '-alert',          // leading hyphen
+    'alert-',          // trailing hyphen
+    'alert--customer', // doubled hyphen
+    'alert customer',  // space
+  ]) {
     let proc;
     try {
       const f = writeTmpToml('features.toml', `[[features]]\nid = "${bad}"\n`);
@@ -764,10 +826,10 @@ for (const bad of [
       cleanTmpToml();
     }
     const out = proc.stdout + proc.stderr;
-    assertNotEqual(proc.returncode, 0, out);
-    assertIn('not a lowercase kebab slug', out, out);
-  });
-}
+    assertNotEqual(proc.returncode, 0, `id "${bad}" should be rejected.\noutput:\n${out}`);
+    assertIn('not a lowercase kebab slug', out, `id "${bad}" rejected for the wrong reason.\noutput:\n${out}`);
+  }
+});
 
 // The retired FEAT-NNNN- prefix is not special-cased: lowercased, it is just a slug.
 // The format rule is about what makes a safe directory name, not about banning a
