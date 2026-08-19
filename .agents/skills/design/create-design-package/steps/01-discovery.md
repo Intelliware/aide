@@ -20,7 +20,7 @@ Read one reference at a time. Produce the artifact, present it, wait for acknowl
 
 | # | Sub-step | Output (under `docs/<feature-id>/solutions-package/discovery/`) |
 |---|---|---|
-| 0a | (workflow — no reference) | feature-folder resolution |
+| 0 | (workflow — no reference) | feature-folder resolution |
 | 1 | `references/solution-discovery-workflow.md` § architecture-discovery | `raw-architectural-observations.md` |
 | 2 | `references/solution-discovery-workflow.md` § technical-debt-assessment | `technical-debt-assessment.md` |
 | 3 | `references/solution-discovery-workflow.md` § existing-architecture-assessment | `architecture-baseline.md` |

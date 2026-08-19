@@ -20,7 +20,7 @@ Do not:
 - Skip a sub-step because a previous sub-step seemed to cover it.
 - Run sub-steps in parallel.
 
-## Sub-step 0a — Resolve feature folder
+## Sub-step 0 — Resolve feature folder
 
 1. The feature folder is the **registry's feature ID**, already resolved by this skill's active-feature precondition (`references/ai-principles/feature-precondition.md`). Read it; do not infer one, and do not put the folder name to the user as a question — the requirements package this design implements already sits under that folder, so re-negotiating the name here is how a design ends up filed away from its own requirements.
 2. **Not opted in** (no `features.toml`): fall back to the prior behaviour — check for an existing `docs/*/requirements-package/` and reuse that feature folder if present, else infer a kebab-case name from the change description / executive summary and confirm it with the user.
