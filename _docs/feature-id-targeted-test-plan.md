@@ -69,7 +69,7 @@ node       scripts/test-validate.js
 ### F.1  Precondition binding — pin the exact skill sets, not a count
 **Trigger:**
 ```
-# every SKILL.md citing the contract (expect 18)
+# every SKILL.md citing the contract (expect 19)
 rg -l "feature-precondition" .agents/skills/ --glob 'SKILL.md' | sort
 
 # the two that cite it without being governed by it
@@ -77,12 +77,12 @@ rg -l "feature-precondition" .agents/skills/meta/select-feature/SKILL.md \
                              .agents/skills/meta/framework-navigator/SKILL.md
 ```
 **Inputs:** Read-only.
-**Expected outputs:** 18 `SKILL.md` hits; the 11 Mode-A and 5 Mode-B skills from the table above all present by name.
+**Expected outputs:** 19 `SKILL.md` hits; the 7 Mode-A and 10 Mode-B skills from the table above all present by name.
 
 **Pass criteria:**
-- [ ] [auto] All 11 Mode-A skills cite the contract, **by name** against the table above.
-- [ ] [auto] All 5 Mode-B skills cite it, by name.
-- [ ] [auto] `framework-navigator` cites it and `select-feature` cites it — 18 total, no more and no fewer. An 19th hit means a skill was bound without being added to the contract's own mode lists, which is a drift the contract cannot self-detect.
+- [ ] [auto] All 7 Mode-A skills cite the contract, **by name** against the table above.
+- [ ] [auto] All 10 Mode-B skills cite it, by name.
+- [ ] [auto] `framework-navigator` cites it and `select-feature` cites it — 19 total, no more and no fewer. A 20th hit means a skill was bound without being added to the contract's own mode lists, which is a drift the contract cannot self-detect.
 - [ ] [user] Spot-check three Mode-A and two Mode-B skills: the precondition is invoked **before** the skill's first write / read, not buried mid-workflow. A precondition that fires after the first write cannot prevent a misplaced one.
 
 **Rollback:** none — read-only.
