@@ -262,7 +262,36 @@ This is worse than a missing check, because the resulting state is *ambiguous ra
 
 **Fix options:** narrow step 3 to "resolves to **exactly one** entry" (cheap, catches rule 14), or state plainly that registry validity is CI's job alone. The current text implies coverage it does not provide.
 
-### F-12 (HIGH) — the `{feature-id}/` segment is missing from five path strings across three files, and Check N1 is structurally unable to see any of them
+### F-12 (HIGH) — the `{feature-id}/` segment is missing from 22 path strings across seven files, and Check N1 is structurally unable to see any of them
+
+> **Resolved 2026-08-20, and this finding's own count was wrong.** Fixed in
+> `1c99c85` (paths + schema) and the follow-up commit adding Check N1c. The true
+> extent is **22 strings across 7 files**, not the 5 across 3 recorded below,
+> and the undercount was structural rather than careless: the sweep counted the
+> "Legacy mode" bullet in each review gate, but every Step 0 carries **four**
+> path strings — legacy, SoD single-repo, SoD cross-cutting, SoD colocate — and
+> `feature-precondition.md` puts the segment in all four. The quality stage was
+> missed entirely (6 more), and `create-design-package/steps/00` was missed (3).
+>
+> The root cause is one level up from anything recorded below: **`config/SCHEMAS.md`
+> § 5.1**, the canonical directory-mode geometry, omitted the feature directory,
+> while § 5.2's colocate geometry immediately below it had it. The defect tracks
+> exactly which section each stage inherits from — requirements, design and
+> quality are the dir-mode stages § 5.1 names and all three were wrong in all
+> three modes; planning and execution are the colocate stages § 5.2 names, and
+> `execute-increments/steps/00` has all three right. So this was one un-migrated
+> schema section faithfully mirrored six times, which is why the wrong form
+> looked so consistent — and it means `review-quality-package` was **not** the
+> control case claimed below: only its legacy line was right, its three SoD
+> lines were wrong. The real control is `execute-increments`.
+>
+> Two further corrections to the analysis below: the overstating docstring
+> quoted as `check_m()`'s is in fact `check_n1()`'s, and the recommended fix
+> ("extending N1a's assertion to any path rooted at one of the four
+> `FEATURE_SCOPED_PATH_KEYS`") would have caught **2 of the 20** — the SoD paths
+> begin at `<repo-code>/` or `_cross-cutting/` and are rooted at no token at
+> all. N1c keys on the artifact filename and requires an enclosing
+> `{feature-id}/` directory instead, which catches all 20.
 
 Reported from the F.16–F.18 run as two instances; **my own sweep of `.agents/skills/`, `templates/`, `references/` and `config/` found a third file the run did not reach.** This is the most consequential finding of the run, because it is a live artifact-location split in exactly the layer the plan exists to test.
 

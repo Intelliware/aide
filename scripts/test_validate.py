@@ -623,6 +623,98 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         )
         self.assertIn("retired placeholder", out)
 
+    def test_n1c_reject_sod_path_with_no_feature_directory(self) -> None:
+        """N1c — the defect N1a could not see, in the file type that resolves it.
+
+        This exact string shipped green in `review-design-package/SKILL.md`
+        while the character-identical string in a composition was rejected by
+        N1a. Note it is rooted at no `{paths.*}` token, which is why N1c keys on
+        the filename rather than the root.
+        """
+        self._write_skill_doc("Single-repo: under `<repo-code>/<feature-id>-design.md`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1c should reject a per-feature artifact with no enclosing directory.\noutput:\n{out}",
+        )
+        self.assertIn("names a per-feature artifact", out)
+
+    def test_n1c_accept_sod_path_once_the_directory_is_present(self) -> None:
+        """The same path passes once the feature directory encloses the artifact."""
+        self._write_skill_doc(
+            "Single-repo: under `<repo-code>/<feature-id>/<feature-id>-design.md`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1c should accept a path carrying the feature directory.\noutput:\n{out}",
+        )
+
+    def test_n1c_accepts_an_ancestor_feature_directory_not_only_a_parent(self) -> None:
+        """The assertion is containment, not adjacency.
+
+        The working tree nests a package subdirectory between the feature
+        directory and the file, so requiring the *immediate* parent to be
+        `<feature-id>/` would reject three correct quick-dev paths.
+        """
+        self._write_skill_doc(
+            "Write to `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1c must accept the feature directory as an ancestor.\noutput:\n{out}",
+        )
+
+    def test_n1c_ignores_a_bare_filename_with_no_path(self) -> None:
+        """A filename that claims no location is not a routing defect.
+
+        Report templates display the artifact's name, and prose discusses the
+        `<feature-id>-` prefix itself. Requiring a parent segment is what keeps
+        those out of scope.
+        """
+        self._write_skill_doc(
+            "Report line: `Quality package: <feature-id>-quality.md @ <version>`. "
+            "Filenames keep the `<feature-id>-` prefix."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1c must not flag a bare filename outside a path.\noutput:\n{out}",
+        )
+
+    def test_n1c_exempts_a_fenced_block(self) -> None:
+        """Migration guidance has to be able to show the pre-segment layout."""
+        self._write_skill_doc(
+            "Before:\n\n```\n<repo-code>/<feature-id>-design.md\n```\n\n"
+            "After: `<repo-code>/<feature-id>/<feature-id>-design.md`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1c should exempt a fenced block, as N1b and M do.\noutput:\n{out}",
+        )
+
 
 class TestFeatureRegistry(unittest.TestCase):
     """Check N2 — feature registry validation (`--features-toml` fixture mode)."""

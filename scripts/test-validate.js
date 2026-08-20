@@ -788,6 +788,93 @@ test('Check N1 — the fence exemption is positional, not file-wide', () => {
   assertIn('retired placeholder', out, `output missing the retired-placeholder complaint.\noutput:\n${out}`);
 });
 
+// N1c — the defect N1a could not see, in the file type that resolves it. This
+// exact string shipped green in `review-design-package/SKILL.md` while the
+// character-identical string in a composition was rejected by N1a. Note it is
+// rooted at no `{paths.*}` token, which is why N1c keys on the filename rather
+// than the root.
+test('Check N1c — reject a per-feature artifact with no enclosing directory', () => {
+  writeN1Doc('Single-repo: under `<repo-code>/<feature-id>-design.md`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1c should reject a missing feature directory.\noutput:\n${out}`);
+  assertIn('names a per-feature artifact', out, `output missing the N1c complaint.\noutput:\n${out}`);
+});
+
+test('Check N1c — accept the same path once the feature directory is present', () => {
+  writeN1Doc('Single-repo: under `<repo-code>/<feature-id>/<feature-id>-design.md`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1c should accept a path carrying the feature directory.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+// The assertion is containment, not adjacency: the working tree nests a package
+// subdirectory between the feature directory and the file, so requiring the
+// *immediate* parent to be `<feature-id>/` would reject three correct quick-dev
+// paths.
+test('Check N1c — the feature directory may be an ancestor, not only a parent', () => {
+  writeN1Doc('Write to `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1c must accept the feature directory as an ancestor.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+// A filename that claims no location is not a routing defect: report templates
+// display the artifact's name, and prose discusses the `<feature-id>-` prefix
+// itself. Requiring a parent segment is what keeps those out of scope.
+test('Check N1c — a bare filename with no path is ignored', () => {
+  writeN1Doc(
+    'Report line: `Quality package: <feature-id>-quality.md @ <version>`. ' +
+    'Filenames keep the `<feature-id>-` prefix.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1c must not flag a bare filename outside a path.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check N1c — a fenced block is exempt, as in N1b and M', () => {
+  writeN1Doc(
+    'Before:\n\n```\n<repo-code>/<feature-id>-design.md\n```\n\n' +
+    'After: `<repo-code>/<feature-id>/<feature-id>-design.md`.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1c should exempt a fenced block.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
 // --- Check N2 — feature registry (--features-toml fixture mode) ---
 //
 // Reuses the temp-TOML helpers from the parser section above. Sub-rules that

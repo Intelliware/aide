@@ -29,9 +29,11 @@
  *      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
  *   N1. Feature-segment / retired-placeholder guardrail — every feature-scoped
  *      composition's `default-output-path` carries `{feature-id}` as a path
- *      segment, and no retired placeholder (`<feature>`, `<feature-folder>`,
+ *      segment (N1a); no retired placeholder (`<feature>`, `<feature-folder>`,
  *      `<feature-name>`) names a per-feature directory under `docs/` or under
- *      a `{paths.*}` token. See `references/ai-principles/feature-precondition.md`.
+ *      a `{paths.*}` token (N1b); and every per-feature artifact path spelled
+ *      out in skill or template markdown is enclosed by a `{feature-id}/`
+ *      directory (N1c). See `references/ai-principles/feature-precondition.md`.
  *   N2. Feature registry validation against a features.toml fixture or a real
  *      project registry. Run with `--features-toml PATH` to evaluate rules
  *      13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
@@ -46,8 +48,9 @@
  *   - Any SoD rule violation when running in --project-toml mode (I).
  *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
  *     undeclared `[project.paths]` key (M).
- *   - A feature-scoped composition missing its `{feature-id}` segment, or any
- *     retired feature placeholder in an artifact path (N1).
+ *   - A feature-scoped composition missing its `{feature-id}` segment, a
+ *     per-feature artifact path with no enclosing `{feature-id}/` directory, or
+ *     any retired feature placeholder in an artifact path (N1).
  *   - Any feature-registry rule violation when running in --features-toml
  *     mode (N2).
  *
@@ -138,6 +141,20 @@ const FEATURE_SCOPED_PATH_KEYS = new Set([
 ]);
 const DEFAULT_OUTPUT_PATH_RE = /^[ \t]*default-output-path:[ \t]*"([^"]*)"/m;
 const FEATURE_SEGMENT = '{feature-id}';
+
+// Check N1c — a per-feature artifact filename carries the `{feature-id}-` prefix,
+// and the artifact must sit inside a `{feature-id}/` directory. Matching the
+// *filename* and then requiring a parent path is what separates a real path from
+// the legitimate bare-filename uses: report templates that display
+// `<feature-id>-quality.md`, prose about the prefix itself, and `filename_pattern`
+// values. The directory need not be the immediate parent, because the working
+// tree nests a package subdirectory under it
+// (`docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`), so the
+// assertion is containment, not adjacency. Both spellings are accepted: `.md`
+// prose uses `<feature-id>`, composition YAML uses `{feature-id}`.
+const FEATURE_ARTIFACT_IN_PATH_RE =
+  /([A-Za-z0-9_.<>{}/-]*\/)?[{<]feature-id[}>]-[A-Za-z0-9-]+\.md/g;
+const FEATURE_DIR_SPELLINGS = ['{feature-id}/', '<feature-id>/'];
 
 // Check N1 — spellings retired by the feature-ID rollout (phase 3b).
 // `<feature-id>` is the only placeholder permitted to name the per-feature
@@ -969,7 +986,7 @@ function checkM() {
 
 // N1 — feature-segment presence and retired-placeholder guardrail.
 //
-// Two assertions, both about the framework's own consistency:
+// Three assertions, all about the framework's own consistency:
 //
 // N1a. Every feature-scoped composition's `default-output-path` carries
 //      `{feature-id}` as a complete path segment. Feature-scoped is derived,
@@ -986,14 +1003,30 @@ function checkM() {
 //      forbids quoting the thing it retired can only be satisfied by writing
 //      worse documentation.
 //
+// N1c. Every per-feature artifact path spelled out in skill or template
+//      markdown encloses the artifact in a `{feature-id}/` directory. N1a
+//      asserts this for composition `default-output-path` values only, which
+//      left the same defect invisible in the skill markdown that resolves
+//      those paths at runtime: `<repo-code>/<feature-id>-design.md` shipped
+//      green while the character-identical string in a composition was
+//      rejected. Note the assertion is *not* the narrower "rooted at a
+//      FEATURE_SCOPED_PATH_KEYS token" — the SoD paths begin at
+//      `<repo-code>/` or `_cross-cutting/` and are rooted at no token at all,
+//      so that form would have caught 2 of the 20 real instances. Fenced
+//      blocks are exempt, as in N1b and M.
+//
 // Hard errors, not warnings: this lands green in the same change that fixes
 // every violation it would report, and a warning would only invite the
 // spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
 // `references/ai-principles/feature-precondition.md`.
 //
 // Pairs with Check M: M asserts every path token names a real key, N1 asserts
-// every feature-scoped path carries a feature segment. Together they close
-// both halves of the routing contract.
+// that a feature-scoped path carries the feature segment — N1a for composition
+// output paths, N1c for paths written out in skill and template markdown. The
+// pair is not exhaustive, and the gap is worth knowing: a path assembled
+// across several prose sentences, or drawn as an ASCII directory tree, matches
+// no path-shaped regex and is checked by neither. `config/SCHEMAS.md` § 5.1's
+// geometry diagram was exactly that case.
 function checkN1() {
   const errors = [];
   const warnings = [];
@@ -1048,6 +1081,19 @@ function checkN1() {
             `\`${hit[1]}\` — the per-feature directory is spelled \`<feature-id>\`.`
           );
         }
+      }
+      for (const hit of lines[i].matchAll(FEATURE_ARTIFACT_IN_PATH_RE)) {
+        const prefix = hit[1];
+        // A bare filename, not a path: nothing claims where it lives.
+        if (!prefix) continue;
+        if (FEATURE_DIR_SPELLINGS.some((seg) => prefix.includes(seg))) continue;
+        if (inCodeFence(lines, i)) continue;
+        errors.push(
+          `${rel}:${i + 1}: \`${hit[0]}\` names a per-feature artifact but ` +
+          `no enclosing \`${FEATURE_SEGMENT}/\` directory — two features' ` +
+          `artifacts would collide in one directory. See ` +
+          `references/ai-principles/feature-precondition.md.`
+        );
       }
     }
   }
