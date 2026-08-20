@@ -180,7 +180,7 @@ now the *only* thing opting in changes.
 Applies to skills that may legitimately need to **mint** a feature — those producing a
 feature's first artifact, where nothing upstream exists to select from:
 `create-requirements-package`, `create-design-package`, `create-implementation-package`,
-`create-quality-package`, `document-quick-change`, `execute-quick-change`, `manage-bugs`.
+`create-quality-package`, `document-quick-change`.
 
 **The A/B split turns on whether minting is legitimate, not on whether the skill writes.**
 Both modes write and both halt. A skill operating on an artifact that must already exist — a
@@ -189,9 +189,16 @@ though it writes plenty. The skill's own halt message is the tell: "rather than 
 feature's X" means X pre-exists, so Mode B; "rather than inventing a feature ID" means nothing
 pre-exists, so Mode A.
 
-`execute-quick-change` and `manage-bugs` sit here pending a decision. Both read artifacts that
-must already exist, so by the rule above both are Mode B candidates; `manage-bugs` is the
-harder call because it is independently invocable and may be the first thing run on a project.
+`execute-quick-change` and `manage-bugs` were listed here pending a decision and are now
+**Mode B**, by the rule above and by their own halt messages. `execute-quick-change` says
+"which feature's *plan* to execute" — and its own upstream producer, `plan-quick-change`, is
+already Mode B, so leaving the consumer in Mode A let it mint a feature its producer could
+not. `manage-bugs` says "which feature's *log* to operate on", and the worry that it "may be
+the first thing run on a project" does not survive its own required-inputs table: the
+implementation-package directory is a required input, and the log is written inside it, so a
+feature must already have reached planning. Its "independently invocable" note means
+independent of an increment *session*, not of the package. Creating `bugs-and-issues-log.md`
+when missing is not minting a feature — it is a file inside a directory that must exist.
 
 1. If `features.toml` is absent, proceed as today. Stop here.
 2. Resolve `[user].active_feature` from `project.user.toml`.
@@ -246,7 +253,8 @@ verdict file or a tracker row (working artifacts, not deliverables — see
 `config/SCHEMAS.md` § 2.8), and the execution skills that work a plan written upstream.
 `review-requirements-package`, `review-design-package`, `review-implementation-package`,
 `review-quality-package`, `audit-quality-coverage`, `review-test-failures`,
-`plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr`.
+`plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr`,
+`execute-quick-change`, `manage-bugs`.
 
 **How much a skill writes is irrelevant to the mode.** `execute-increments` writes
 production code and is still Mode B: increments to run cannot exist without a package that

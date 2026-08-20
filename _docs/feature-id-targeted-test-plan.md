@@ -24,8 +24,8 @@ Mode membership, as declared in `references/ai-principles/feature-precondition.m
 
 | Mode | Count | Skills |
 |---|---|---|
-| **A** — mint reachable | 7 | `create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `document-quick-change`, `execute-quick-change`, `manage-bugs` |
-| **B** — mint suppressed | 10 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`, `review-test-failures`, `plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr` |
+| **A** — mint reachable | 5 | `create-requirements-package`, `create-design-package`, `create-implementation-package`, `create-quality-package`, `document-quick-change` |
+| **B** — mint suppressed | 12 | `review-requirements-package`, `review-design-package`, `review-implementation-package`, `review-quality-package`, `audit-quality-coverage`, `review-test-failures`, `plan-quick-change`, `execute-increments`, `execute-quality-increments`, `create-pr`, `execute-quick-change`, `manage-bugs` |
 | **C** — probe-only, never halts | 1 | `framework-navigator` (recommends `select-feature`; a recommendation is a legitimate answer, not a failure) |
 
 `select-feature` itself references the precondition without being bound by it, so **19** `SKILL.md` files cite the contract while **17** are governed by it. Tests must pin the exact sets — a bare count of 17 passes with the wrong seventeen.
@@ -77,11 +77,11 @@ rg -l "feature-precondition" .agents/skills/meta/select-feature/SKILL.md \
                              .agents/skills/meta/framework-navigator/SKILL.md
 ```
 **Inputs:** Read-only.
-**Expected outputs:** 19 `SKILL.md` hits; the 7 Mode-A and 10 Mode-B skills from the table above all present by name.
+**Expected outputs:** 19 `SKILL.md` hits; the 5 Mode-A and 12 Mode-B skills from the table above all present by name.
 
 **Pass criteria:**
-- [ ] [auto] All 7 Mode-A skills cite the contract, **by name** against the table above.
-- [ ] [auto] All 10 Mode-B skills cite it, by name.
+- [ ] [auto] All 5 Mode-A skills cite the contract, **by name** against the table above.
+- [ ] [auto] All 12 Mode-B skills cite it, by name.
 - [ ] [auto] `framework-navigator` cites it and `select-feature` cites it — 19 total, no more and no fewer. A 20th hit means a skill was bound without being added to the contract's own mode lists, which is a drift the contract cannot self-detect.
 - [ ] [user] Spot-check three Mode-A and two Mode-B skills: the precondition is invoked **before** the skill's first write / read, not buried mid-workflow. A precondition that fires after the first write cannot prevent a misplaced one.
 

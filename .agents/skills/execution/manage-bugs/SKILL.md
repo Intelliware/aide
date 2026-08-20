@@ -64,7 +64,7 @@ the bug schema.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before determining the mode. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: manage-bugs`) rather than guessing which feature's log to operate on. If it resolves, echo the feature ID and the resolved log path before the first read or write. Applies to all four modes, including REVIEW.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before determining the mode. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: manage-bugs`, `caller_mode: select-only`) rather than guessing which feature's log to operate on. Create is suppressed because the implementation-package directory is a required input and the log is written inside it — a feature with no package has no log to operate on, so minting one here would produce a feature with nothing in it. "Independently invocable" means independent of an increment *session*, not of the package. If it resolves, echo the feature ID and the resolved log path before the first read or write. Applies to all four modes, including REVIEW.
 
 ## Workflow — four operating modes
 

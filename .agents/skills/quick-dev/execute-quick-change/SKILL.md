@@ -52,7 +52,7 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: execute-quick-change`) rather than guessing which feature's plan to execute. If it resolves, echo the feature ID before opening the TDD loop.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: execute-quick-change`, `caller_mode: select-only`) rather than guessing which feature's plan to execute. Create is suppressed because a plan cannot exist for a feature that was just minted — `plan-quick-change`, which produces that plan, is Mode B for the same reason. If it resolves, echo the feature ID before opening the TDD loop.
 
 ## Workflow
 
