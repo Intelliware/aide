@@ -195,13 +195,37 @@ harder call because it is independently invocable and may be the first thing run
 
 1. If `features.toml` is absent, proceed as today. Stop here.
 2. Resolve `[user].active_feature` from `project.user.toml`.
-3. If unset, or set to a value not present in `features.toml`: **halt.**
+3. The pointer must resolve to **exactly one** well-formed entry. Three outcomes:
+
+   **a. Unset** — nothing to resolve: **halt.**
    > No active feature. Run `select-feature`, then re-run this skill.
 
-   Invoke `select-feature` by name, passing this skill's own name (as `caller`) and
-   the user's request text (as `description`, if one exists in this turn). **Do not**
-   invent an ID and **do not** fall back to a slug derived from the request — that
-   silent-guess behaviour is the exact defect this precondition exists to close.
+   **b. Set, but matching no entry** — a stale pointer: **halt**, naming the value,
+   because "no active feature" contradicts the config file the user will open next.
+   > `[user].active_feature` is `refunds-v2`, which no entry in `features.toml`
+   > declares. A stale pointer sends every write to a feature that does not exist.
+   > Run `select-feature` to pick a registered feature, then re-run this skill.
+
+   **c. Set, but matching more than one entry** — ambiguous: **halt.** Do not pick
+   one. Two entries sharing an `id` carry their own `title` and `repos`, and nothing
+   ranks them, so continuing means writing under a feature chosen arbitrarily.
+   > `features.toml` declares `refunds` twice. Which entry governs is undefined, so
+   > I can't tell which feature's directory to write under. Give the two entries
+   > distinct ids — `refunds-api` / `refunds-ui`, or whatever tells them apart — then
+   > re-run this skill.
+
+   For (a) and (b), invoke `select-feature` by name, passing this skill's own name (as
+   `caller`) and the user's request text (as `description`, if one exists in this turn).
+   **Do not** invent an ID and **do not** fall back to a slug derived from the request —
+   that silent-guess behaviour is the exact defect this precondition exists to close.
+   For (c) do **not** invoke `select-feature`: the fix is an edit to `features.toml`,
+   and minting a third feature would not resolve the collision between the first two.
+
+   Checking (c) costs nothing beyond (b) — both read the same `features.toml` this step
+   already opens, and counting matches is the same pass as testing for one. Scope is
+   deliberately the **resolved** entry only: a malformed or duplicated `id` elsewhere in
+   the registry does not affect where *this* run writes, so it is left to Check N2 rather
+   than blocking unrelated work.
 4. If it resolved cleanly, **echo** the feature ID and the resolved output
    directory before the first write:
 
@@ -231,8 +255,10 @@ named them, so minting a feature here would produce one with nothing to execute.
 Identical to Mode A, with one difference at step 3: **suppress create.** Needing something
 to read is not a reason to mint a feature that has nothing in it yet, so `select-feature`
 is invoked with `caller_mode = select-only` and its create path is unreachable for this
-call. If the registry is genuinely empty, the halt message changes to name the producing
-skill instead:
+call. This applies to step 3's cases (a) and (b) — the two that invoke `select-feature` at
+all. Case (c), an ambiguous pointer, behaves identically in both modes: it halts and invokes
+nothing, because a duplicate is fixed by editing `features.toml`, not by selecting. If the
+registry is genuinely empty, the halt message changes to name the producing skill instead:
 
 > No active feature, and no features are registered yet. Run the stage's `create-*`
 > skill first.
@@ -255,9 +281,20 @@ feature" is a legitimate answer, not a failure. See
 
 ## Explicitly not this precondition's job
 
-- **Minting logic.** All of it — slug proposal, the uniqueness check, registry
-  writes — lives in `select-feature`. This precondition only decides *whether* to
-  call it and in which mode.
+- **Minting logic.** All of it — slug proposal, the *mint-time* uniqueness check,
+  registry writes — lives in `select-feature`. This precondition only decides
+  *whether* to call it and in which mode.
+
+  The delegation is **mint-time only**, and the distinction matters because
+  `select-feature` is reached only when the pointer *fails* to resolve. A duplicate
+  `id` is a state where it resolves fine, so deferring every uniqueness question to
+  `select-feature` would leave that state unchecked on every subsequent run. The two
+  checks answer different questions and both are needed: `select-feature` asks "may
+  this new id join the registry," step 3(c) asks "does the active pointer name
+  exactly one entry." Registry-wide validity — `id` format across all entries, and
+  `repos` resolving against `[[project.repos]]` — stays with Check N2, which is the
+  only one of the three that can see the whole file at once and the only one that
+  needs a second file to do it.
 - **Authoring the composition path.** This precondition supplies the *rule* for
   resolving the `<feature-id>/` segment (see above); the segment itself is written
   into each composition's `default-output-path`. If a new feature-scoped
