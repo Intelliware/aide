@@ -41,19 +41,26 @@ See `references/INPUTS-OUTPUTS.md` for the full table.
 Before running the review sequence, resolve the path to the assembled design
 artifact under the project's current stage configuration.
 
+All three modes below nest the artifact under a `<feature-id>/` directory, and
+that segment is conditional on `features.toml` existing — resolve it by
+`references/ai-principles/feature-precondition.md`, which drops the segment
+(keeping the filename prefix) for a project that has not opted in. "Legacy"
+names the non-SoD layout only; it is orthogonal to feature-ID opt-in, so an
+opted-in project in legacy mode still carries the segment.
+
 - **Legacy mode.** If `[stages.design]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
-  `{project.paths.design_package}/{feature-id}-design.md` (or its
+  `{project.paths.design_package}/{feature-id}/{feature-id}-design.md` (or its
   `solution-package.md` alias). No scoping needed.
 - **SoD directory mode** (`[stages.design].dir = "..."`). The artifact lives
   under `<host-repo>/<artifact_subdir>/design/`:
-  - **Single-repo:** under `<repo-code>/<feature-id>-design.md`. The user
-    identifies the feature; if the `<repo-code>` is ambiguous, prompt.
-  - **Cross-cutting:** under `_cross-cutting/<feature-id>-design.md`. The
-    artifact's YAML frontmatter carries `affects_repos` (must match the
+  - **Single-repo:** under `<repo-code>/<feature-id>/<feature-id>-design.md`.
+    The user identifies the feature; if the `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** under `_cross-cutting/<feature-id>/<feature-id>-design.md`.
+    The artifact's YAML frontmatter carries `affects_repos` (must match the
     upstream requirements artifact; cross-checked during review-architecture).
 - **SoD colocate mode** (uncommon for design): single-repo only; artifact
-  lives under `<source-repo-path>/<artifact_subdir>/design/<feature-id>-design.md`.
+  lives under `<source-repo-path>/<artifact_subdir>/design/<feature-id>/<feature-id>-design.md`.
 
 This step is **read-only** — no permission check required (the review skill
 does not write to the upstream artifact). When the review skill writes its

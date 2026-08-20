@@ -867,16 +867,24 @@ two subdirectory conventions:
 ```
 <host-repo>/<artifact_subdir>/<stage>/
   ├── <repo-code-1>/                     ← single-repo features for that source repo
-  │   ├── <feature-id>-<stage>.md
+  │   ├── <feature-id>/                  ← one directory per feature
+  │   │   └── <feature-id>-<stage>.md
   │   └── ...
   ├── <repo-code-2>/
   │   └── ...
   └── _cross-cutting/                    ← features spanning >1 source repo
-      └── <feature-id>-<stage>.md
+      └── <feature-id>/
+          └── <feature-id>-<stage>.md
 ```
 
 - `<repo-code>/` directories hold artifacts for single-repo features. The
   directory name matches a `code` value from `[[project.repos]]`.
+- `<feature-id>/` nests *inside* `<repo-code>/` and `_cross-cutting/`, never
+  outside either. `<repo-code>/` is the boundary `[stages.<stage>].write_role`
+  enforces, and a role check must keep corresponding to a subtree, so the
+  feature directory cannot straddle it. The segment is conditional on
+  `features.toml` existing; see
+  `references/ai-principles/feature-precondition.md`.
 - `_cross-cutting/` holds artifacts for features that span multiple source
   repos. Every artifact under `_cross-cutting/` MUST carry an `affects_repos`
   array in its YAML frontmatter listing the affected `[[project.repos]].code`

@@ -58,18 +58,25 @@ See `references/INPUTS-OUTPUTS.md` for the full table.
 Before running the review sequence, resolve the path to the assembled quality
 artifact under the project's current stage configuration.
 
+All three modes below nest the artifact under a `<feature-id>/` directory, and
+that segment is conditional on `features.toml` existing — resolve it by
+`references/ai-principles/feature-precondition.md`, which drops the segment
+(keeping the filename prefix) for a project that has not opted in. "Legacy"
+names the non-SoD layout only; it is orthogonal to feature-ID opt-in, so an
+opted-in project in legacy mode still carries the segment.
+
 - **Legacy mode.** If `[stages.quality]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
   `{paths.quality_package}/{feature-id}/{feature-id}-quality.md`. No scoping needed.
 - **SoD directory mode** (`[stages.quality].dir = "..."`). The artifact lives
   under `<host-repo>/<artifact_subdir>/quality/`:
-  - **Single-repo:** `<repo-code>/<feature-id>-quality.md`. The user identifies
-    the feature; if `<repo-code>` is ambiguous, prompt.
-  - **Cross-cutting:** `_cross-cutting/<feature-id>-quality.md`. The frontmatter
-    `affects_repos` must match the upstream requirements/design artifacts
-    (cross-checked during review-coverage).
+  - **Single-repo:** `<repo-code>/<feature-id>/<feature-id>-quality.md`. The user
+    identifies the feature; if `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** `_cross-cutting/<feature-id>/<feature-id>-quality.md`. The
+    frontmatter `affects_repos` must match the upstream requirements/design
+    artifacts (cross-checked during review-coverage).
 - **SoD colocate mode:** single-repo only; artifact lives under
-  `<source-repo-path>/<artifact_subdir>/quality/<feature-id>-quality.md`.
+  `<source-repo-path>/<artifact_subdir>/quality/<feature-id>/<feature-id>-quality.md`.
 
 This step is read-only — no permission check required. When the review skill
 writes its own findings, it writes under the same host repo at

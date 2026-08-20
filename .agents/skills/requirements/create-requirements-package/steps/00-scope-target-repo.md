@@ -24,11 +24,11 @@ Ask the user — *"Is this a single-repo feature or cross-cutting (spanning
 multiple source repos)?"* — and act on the answer:
 
 - **Single-repo:** ask which `<repo-code>` from `[[project.repos]]`. The artifact
-  path is `{project-root}/<stages.requirements.dir>/<artifact_subdir>/requirements/<repo-code>/<feature-id>-requirements.md`.
+  path is `{project-root}/<stages.requirements.dir>/<artifact_subdir>/requirements/<repo-code>/<feature-id>/<feature-id>-requirements.md`.
   No `affects_repos` frontmatter needed (the directory encodes the scope).
 - **Cross-cutting:** ask which repos the feature affects (must be ≥ 2 entries
   from `[[project.repos]]`). The artifact path is
-  `{project-root}/<stages.requirements.dir>/<artifact_subdir>/requirements/_cross-cutting/<feature-id>-requirements.md`.
+  `{project-root}/<stages.requirements.dir>/<artifact_subdir>/requirements/_cross-cutting/<feature-id>/<feature-id>-requirements.md`.
   Capture the chosen repos as `affects_repos` for the artifact's YAML frontmatter
   (Step 4 — writing — emits this).
 
@@ -41,7 +41,7 @@ If `[stages.requirements].colocate_with_source = true` (an unusual choice for
 the requirements stage; recommended layout uses `dir` mode), only single-repo
 features are supported — a cross-cutting requirements artifact has no host
 repo to live in. Ask which `<repo-code>` and write to
-`<source-repo-path>/<artifact_subdir>/requirements/<feature-id>-requirements.md`.
+`<source-repo-path>/<artifact_subdir>/requirements/<feature-id>/<feature-id>-requirements.md`.
 
 ## Interactive-only contract
 
