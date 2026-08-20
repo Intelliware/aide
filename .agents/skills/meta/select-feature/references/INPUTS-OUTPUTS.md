@@ -7,7 +7,7 @@
 | `features.toml` | conditional | `{project-root}/features.toml` | see `config/features.toml.example` |
 | `project.user.toml` | conditional | `{project-root}/project.user.toml` | read for the current `[user].active_feature`; created if absent and a value needs writing |
 | `caller` | no | the halted skill's own name, when invoked as a precondition redirect | `create-requirements-package` |
-| `caller_mode` | no | `select-and-create` (default) or `select-only` — read-side skills (`review-*`, `audit-quality-coverage`, `framework-navigator`) suppress create, since reviewing is not a reason to mint a feature that has nothing to review yet | `select-only` |
+| `caller_mode` | no | `select-and-create` (default) or `select-only` — the Mode B skills named in `references/ai-principles/feature-precondition.md` suppress create, since needing something to read or run is not a reason to mint a feature that has nothing in it yet. That roster is the single source of truth; how much a skill writes does not determine its mode | `select-only` |
 | `description` | no | the user's own request text, forwarded by a halted skill or typed directly | "customers aren't notified when a refund is delayed" |
 | title (create mode) | yes, in create mode | user input | "Alert customer when a refund is delayed" |
 | slug override (create mode) | no | user input; a kebab slug is proposed from the title and may be accepted or overridden | `alert-customer` |
