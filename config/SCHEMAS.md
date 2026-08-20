@@ -625,8 +625,14 @@ because a registry file says nothing about what else lives in the tree, and the
 consequence is not an error but a silent merge — the resolution rule in
 `references/ai-principles/feature-precondition.md` finds `docs/architecture/`
 matching a feature named `architecture` and adopts it as that feature's working
-tree. `select-feature` warns at mint time, which is the only moment both the
-proposed name and the directory listing are in view.
+tree. `select-feature` therefore *asks* at mint time — unconditionally, whenever
+a proposed `id` matches a `docs/` directory no registered feature owns — because
+that is the only moment both the proposed name and the directory listing are in
+view, and because a match is equally consistent with the directory being this
+feature's work (the desired outcome, nothing to move) or something unrelated (a
+silent merge). Nothing on disk distinguishes the two, so it cannot be inferred.
+Since no validator can enforce the convention, that question is the only
+defence, and it must not be conditional on the user raising it first.
 
 The prefix also allowed two features to share a slug, distinguished only by number.
 That is a loss worth taking: two `refunds` features separated only by their ordinals

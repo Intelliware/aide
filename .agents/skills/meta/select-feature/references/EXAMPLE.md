@@ -122,6 +122,52 @@ feature title, so the no-match branch is the *common* path for a review, not an 
 case. If it routed to create, minting-at-review would be the default behaviour rather
 than a rare accident.
 
+## Scenario 4 — the proposed id matches a `docs/` directory that is *not* this feature
+
+### Trigger
+
+> "New feature: architecture refresh for the billing service."
+
+`features.toml` exists with two unrelated features. The project also has a
+hand-written `docs/architecture/` — long-standing design notes, owned by no
+registered feature.
+
+### What the skill did
+
+1. Read `features.toml` — present, no plausible match for "architecture
+   refresh", so it went to create.
+2. Checked `docs/` first. Found `architecture/` matching no registered feature.
+   The title would independently have yielded `architecture` anyway, so the
+   proposed id collided either way — which is the point: the question below is
+   keyed on the *match*, not on how the slug was derived.
+3. Asked, before accepting the id:
+
+   > `architecture` matches `docs/architecture/`, which no registered feature
+   > owns. Is that directory this feature's work, or something else?
+
+4. The user answered that it is long-standing design notes, not this work. The
+   skill refused the name and said why:
+
+   > Then `architecture` can't be the id: this feature would adopt
+   > `docs/architecture/` as its working tree and merge the two. Pick a name
+   > that isn't already a directory.
+
+5. The user supplied `billing-architecture-refresh`. Confirmed unregistered and
+   matching no `docs/` directory, so no further question was needed.
+6. Appended the entry, set it active, echoed the resolved paths.
+
+The point of the scenario: had the skill inferred the answer instead of asking,
+the id `architecture` would have been accepted — the title made it the obvious
+slug and the matching directory made it look *confirmed* rather than dangerous.
+Nothing downstream would have objected: both validators accept a registry whose
+`id` is `architecture` (`config/SCHEMAS.md` § 2.8 makes this a convention, not a
+validated rule), and the resolution rule would have adopted the notes directory
+silently. This question is the only defence, which is why it has no safe
+default and is not conditional on the user having volunteered anything.
+
+Answering "this feature's work" is the ordinary case and takes the other branch:
+the id is used as-is and the work continues in place, with nothing to move.
+
 ## Hand-off
 
 The skill suggested:

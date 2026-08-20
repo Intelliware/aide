@@ -49,6 +49,41 @@ is why create stays a visible, first-class option in the select list rather
 than something buried beneath it — the design leans toward reuse, it does not
 mandate it.
 
+## Why the `docs/` question is unconditional
+
+The `id` *is* the directory name, so a proposed `id` that matches an existing
+`docs/<name>/` is one of two completely different situations, and nothing on
+disk distinguishes them:
+
+1. **The directory is this work.** Then the match is the desired outcome. The
+   resolution rule in `references/ai-principles/feature-precondition.md` takes
+   its first branch and the feature continues in place — no rename, no
+   migration, no second tree. Deriving the slug from a freshly typed title is
+   the likeliest way to miss this, since "Refund processing fixes" yields
+   `refund-processing-fixes` rather than `refunds`, manufacturing a
+   reconciliation prompt that never needed to exist.
+2. **The directory is something else** — hand-written notes, an unrelated
+   subject area. Then that same first branch silently adopts it as this
+   feature's working tree, merging two unrelated bodies of work under one ID.
+
+Both readings are plausible from the name alone, which is why this is a
+question rather than an inference, and why it is asked every time rather than
+only when something looks wrong. It previously existed as *two* rules that read
+the same `docs/` listing and reached opposite conclusions — a proposal that
+recommended the matching directory, and a warning that fired only "if the user
+has just said the directory is *not* this feature", a thing no step ever asked.
+On a project with hand-written `docs/architecture/` and the title "Architecture
+refresh", the proposal won by default and used the warning's own subject matter
+as the selling point. Since `config/SCHEMAS.md` § 2.8 makes this a convention
+rather than a validated rule — the validators accept a registry whose `id` is
+`architecture` — the mint-time question is the only defence there is, so it
+cannot be reachable only by user initiative.
+
+The third branch covers the inverse, which is the one that actually produces
+the failure the mechanism exists to prevent: *declining* a matching directory
+is what creates two trees for one feature. Warning coverage used to be
+inverted relative to risk, the louder case being the safer one.
+
 ## When to use
 
 - Choosing or switching the active feature before starting work in a

@@ -121,33 +121,33 @@ See `references/INPUTS-OUTPUTS.md`.
    disambiguate them by — so near-neighbours must be named apart
    (`refunds-api` and `refunds-ui`, not two `refunds`).
 
-   **Also warn if the slug matches a `docs/` directory the user has just said is
-   *not* this feature.** Because the id is the directory name, the resolution
-   rule would adopt that directory as this feature's working tree without
-   asking — so naming a feature `architecture` on a project with a hand-written
-   `docs/architecture/` quietly merges the two. Nothing validates this (a
-   registry file says nothing about what else lives under `docs/`), which is why
-   the check belongs here, at the only point where both the proposed name and
-   the directory listing are in view.
+   **When proposing the slug, look at `docs/` first.** If a `docs/<name>/`
+   matches no registered feature and plausibly covers this work, propose *that
+   directory's name*: "Refund processing fixes" yields
+   `refund-processing-fixes`, not `refunds`, leaving a mismatch to reconcile
+   downstream instead of one that never needed to exist.
 
-   **When proposing the slug, look at `docs/` first.** If the project has
-   pre-opt-in working directories (a `docs/<name>/` matching no registered
-   feature) and one plausibly covers the work being minted, propose *that
-   directory's name* and say why:
+   **Then, before accepting any `id` that matches a `docs/` directory no
+   registered feature owns, ask — every time, however the slug was derived:**
 
-   > `docs/refunds/` looks like this work. Using `refunds` as the id means that
-   > directory already matches, so nothing has to move.
+   > `architecture` matches `docs/architecture/`, which no registered feature
+   > owns. Is that directory this feature's work, or something else?
 
-   This is load-bearing, not cosmetic. When the id matches an existing
-   directory, the resolution rule in
-   `references/ai-principles/feature-precondition.md` takes its first branch and
-   the feature simply continues in place — no rename, no question, no second
-   tree. Deriving the slug purely from a freshly typed title is the likeliest way
-   to miss that, since "Refund processing fixes" yields
-   `refund-processing-fixes`, not `refunds`, and the next skill would then offer
-   to reconcile a mismatch that never needed to exist. The user may still
-   override — an unrelated directory should not capture the name — but the match
-   must be offered before a title-derived slug wins by default.
+   Never infer this from the title, and never skip the question because the
+   match looks obvious: the `id` *is* the directory name, so resolution adopts a
+   match as the working tree without asking, and nothing validates the answer.
+
+   - **"This feature's work"** → use it; the work continues in place.
+     > Using `architecture`, then — `docs/architecture/` already matches, so
+     > nothing has to move.
+   - **"Something else"** → the name is unavailable; ask for another.
+     > Then `architecture` can't be the id: this feature would adopt
+     > `docs/architecture/` as its working tree and merge the two. Pick a name
+     > that isn't already a directory.
+   - **Overriding a proposed match** → name the cost, because declining is what
+     actually produces two trees for one feature.
+     > That leaves `docs/refunds/` where it is and starts a second directory
+     > beside it, so this feature's artifacts live apart from it.
 5. **Echo the resolved output paths.** Print, for each stage the project
    uses, where that stage's artifacts will land once the feature is active
    (e.g. `.framework-output/requirements/alert-customer/`). This is
@@ -183,11 +183,11 @@ feature and stops.
   about it. Check `caller_mode` before rendering any create affordance.
 - **Silently creating `features.toml`.** Its creation is the project's opt-in
   moment; confirm with the user rather than scaffolding it as a side effect.
-- **Deriving the slug from the title alone on a project with existing
-  `docs/<name>/` directories.** An id that matches the existing directory needs
-  no migration at all; a title-derived one that misses it turns a non-event into
-  a reconciliation prompt, and if that prompt is answered carelessly, into a
-  second tree for one feature. Check `docs/` before proposing.
+- **Deriving the slug from the title alone when `docs/<name>/` directories
+  exist, or accepting a matching id without asking whose work that directory
+  is.** The id *is* the directory name, so that answer decides whether the
+  feature continues in place or silently absorbs unrelated work. Check `docs/`
+  first, then ask — the question has no safe default.
 - **Reusing an id that is already registered.** There is no ordinal to tell two
   `refunds` apart, so a duplicate is a directory collision, not a variant.
   Reject it at mint time rather than letting Check N2 catch it in CI.

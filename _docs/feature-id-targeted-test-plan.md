@@ -293,9 +293,14 @@ Rules 13–16 (`config/SCHEMAS.md` § 2.8) are already unit-tested as **files**.
 ### F.19  A slug colliding with a non-feature `docs/` directory
 **Trigger:** sandbox with a hand-written `docs/architecture/`; attempt to mint a feature named `architecture`.
 
+**Second trigger (inverse path):** sandbox with a hand-written `docs/refunds/` that *does* plausibly cover the work; accept the proposal prompt, then override the id to something else.
+
 **Pass criteria:**
-- [ ] [user] `select-feature` **warns** before accepting, explaining that the id is the directory name so the resolution rule would adopt `docs/architecture/` as this feature's working tree without asking.
-- [ ] [auto] Nothing validates this elsewhere — confirm both validators accept the registry, establishing that the mint-time warning is the *only* defence and must not be removed.
+- [ ] [user] `select-feature` **asks** before accepting the id — unprompted — whether `docs/architecture/` is this feature's work or something else. The question must fire without the user having volunteered anything about that directory, and must not be pre-answered by inference from the title (which independently yields `architecture` here, so a skill that infers will look correct while testing nothing).
+- [ ] [user] Answering **"something else"** refuses the id and asks for another, explaining that the feature would otherwise adopt `docs/architecture/` as its working tree and merge the two.
+- [ ] [user] Answering **"this feature's work"** accepts the id and states that nothing has to move.
+- [ ] [user] On the second trigger, **overriding a proposed match** states the cost — that the existing directory stays put and a second one is started beside it — rather than proceeding silently. This is the path that actually produces two trees for one feature.
+- [ ] [auto] Nothing validates this elsewhere — confirm both validators accept a registry whose sole `id` is `architecture`, establishing that the mint-time question is the *only* defence and must not be removed, nor made conditional on the user raising it.
 
 **Rollback:** `rm -rf` the sandbox.
 

@@ -130,6 +130,20 @@ The second is false in create mode, which is the mode where a wrong resolution i
 
 ### F-4 (HIGH) — the collision warning's trigger is never asked, and the proposal rule recommends the very collision it warns about
 
+> **Resolved 2026-08-20.** Both rules are replaced by the single unconditional
+> question this finding recommends, with a drafted blockquote per branch and a
+> third branch covering the inverse gap. Rationale moved to
+> `references/OVERVIEW.md` to hold `SKILL.md` at the 200-line cap; the rule and
+> all four blockquotes stay in `SKILL.md`, per F-9's lesson that behaviour
+> documented only in `references/` is behaviour an agent reading `SKILL.md` will
+> contradict. `EXAMPLE.md` gains Scenario 4. Two cross-references that would
+> have gone stale were updated in the same pass: `config/SCHEMAS.md` § 2.8 said
+> "`select-feature` warns at mint time", and **F.19's own pass criteria in the
+> test plan still specified the warning** — a re-run would have tested the
+> retired behaviour and could have failed a correct implementation. F.19 is now
+> pinned to the question, both answers, and the override path, and carries a
+> second trigger for the inverse case. CHANGELOG entry 22.
+
 Two rules inside `select-feature` step 4 read the same `docs/` listing and reach opposite conclusions, and which one fires depends on whether the user volunteered something the skill never asks for.
 
 - **The warning** (`SKILL.md:89`): "Also warn if the slug matches a `docs/` directory **the user has just said is *not* this feature**." Nothing in step 4 — or anywhere in the workflow — asks the user whether a `docs/` directory is theirs.
