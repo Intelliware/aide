@@ -20,6 +20,22 @@ This skill is the single place that reads and writes both files. Two modes:
 - **Create** — reachable directly, or offered from inside select — mint the
   next feature ID and set it active.
 
+**`caller_mode` decides whether create is reachable at all.** When a halted skill
+redirects here it passes its own name as `caller` and, if it is a Mode B skill, also
+`caller_mode = select-only` (see `references/INPUTS-OUTPUTS.md` and
+`references/ai-principles/feature-precondition.md` Mode B). Under `select-only`
+**create is unreachable for that call** — every branch below that would otherwise
+route to or offer create is suppressed, and the steps say so individually. The
+default is `select-and-create`, which is also what a direct invocation gets: a user
+who runs this skill themselves may always mint.
+
+This is not a stylistic preference. Twelve Mode B skills — every `review-*`, the
+audit and execution skills, `manage-bugs`, `execute-quick-change` — depend on the
+suppression, because each operates on an artifact that must already exist. Minting a
+feature at a review would produce one with nothing to review, then attach a confident
+verdict to it. If create is offered on a `select-only` call, that is a defect in this
+skill, not a judgement call.
+
 **Select leads; create follows.** A skill that opens by offering to add a
 feature re-creates the exact hazard this skill exists to prevent: a user who
 does not recall that `refund-delays` already exists will cheerfully
@@ -61,21 +77,40 @@ See `references/INPUTS-OUTPUTS.md`.
    Confirm with the user before scaffolding it; do not create it silently.
 2. **Branch on registry state:**
    - **Empty registry** → skip straight to create (step 4). There is nothing
-     to select from.
+     to select from. **Under `select-only`** create is unreachable and there is
+     nothing to select, so this call cannot succeed: halt, naming the `create-*`
+     skill that produces what the caller wanted to read.
+     > No features are registered yet, and `<caller>` needs one that already has
+     > artifacts. Run the stage's `create-*` skill first — that is what mints the
+     > feature and writes its first artifact.
    - **Non-empty, caller supplied a description** (e.g. the user's own request
      text, passed through from a halted skill) → rank existing features
      against it. If a plausible match surfaces, present it first; if none
      plausibly matches, skip straight to create rather than making the user
-     reject a list first.
+     reject a list first. **Under `select-only`**, fall through to step 3 and
+     present the full list instead. A weak ranking is not evidence that the
+     feature is absent — a Mode B caller's description is usually an *action*
+     ("review the requirements package"), which resembles no feature title, so
+     this branch would otherwise route almost every review to a suppressed step.
    - **Otherwise** → go to step 3.
 3. **Select.** List every registered feature: `id`, `title`, `ticket` (if
    set), and which stages already have artifacts on disk (a cheap
    existence check under each stage root). Mark the current
    `[user].active_feature`, if any. Offer "create a new feature" as a
-   permanently visible option in the same list, not buried beneath it. On
-   choice, set `[user].active_feature` in `project.user.toml`, creating the
-   `[user]` block if needed. Go to step 5.
-4. **Create.** Prompt for a one-line title, propose a kebab slug as the `id`,
+   permanently visible option in the same list, not buried beneath it —
+   **except under `select-only`, where that option is omitted entirely.** Do not
+   render it greyed out or explain that it is disabled; an unreachable option
+   invites the user to ask for it. The list is then exactly the registered
+   features. On choice, set `[user].active_feature` in `project.user.toml`,
+   creating the `[user]` block if needed. Go to step 5.
+
+   If the user asks to create one anyway, say why it is not available here and
+   name the way in:
+   > `<caller>` works on a feature that already has artifacts, so it can't mint a
+   > new one. Pick an existing feature, or run the stage's `create-*` skill to
+   > start a new one and come back.
+4. **Create** — *unreachable under `select-only`*; step 2 and step 3 are the only
+   routes in, and both suppress it. Prompt for a one-line title, propose a kebab slug as the `id`,
    let the user override it, optionally capture `ticket` and `repos`. Append the
    entry to `features.toml` and set it as `[user].active_feature`. There is no
    number to allocate: the `id` is the slug and nothing else (`config/SCHEMAS.md`
@@ -141,6 +176,11 @@ feature and stops.
 - **Offering create before select.** Reproduces the duplicate-identity hazard
   this skill exists to prevent — always list what already exists first,
   except in the two skip cases in step 2.
+- **Offering create at all on a `select-only` call.** The two step-2 skip cases and
+  step 3's permanently-visible option are all suppressed when a Mode B caller sets
+  `caller_mode = select-only`. Twelve skills depend on this; letting a `review-*`
+  caller mint a feature produces one with nothing to review and then a verdict
+  about it. Check `caller_mode` before rendering any create affordance.
 - **Silently creating `features.toml`.** Its creation is the project's opt-in
   moment; confirm with the user rather than scaffolding it as a side effect.
 - **Deriving the slug from the title alone on a project with existing

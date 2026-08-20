@@ -82,6 +82,46 @@ No `features.toml` exists yet.
    resolve under `.framework-output/<stage>/alert-customer/`).
 10. No caller to return to — invoked directly, so the skill stopped here.
 
+## Scenario 3 — redirected from a Mode B skill, create suppressed
+
+### Trigger
+
+`review-requirements-package` halted with "No active feature. Run `select-feature`,
+then re-run this skill." and invoked this skill with
+`caller: review-requirements-package`, `caller_mode: select-only`,
+`description: "review the requirements package"`. The registry holds two features,
+`alert-customer` and `refund-fee-waiver`; `[user].active_feature` was unset.
+
+### What the skill did
+
+1. Read `features.toml` — present, two entries.
+2. Registry non-empty and a description was supplied, so it ranked both against
+   "review the requirements package". Neither matched, because the description
+   names an *action*, not a feature. Under `select-and-create` that would have
+   skipped straight to create; under `select-only` it fell through to step 3 and
+   presented the full list instead.
+3. Listed both features with their on-disk stage coverage, marking neither as
+   active. **No "create a new feature" option was shown** — not greyed out, not
+   footnoted, simply absent.
+4. The user asked whether they could start a new feature instead. The skill
+   declined and named the way in:
+
+   > `review-requirements-package` works on a feature that already has artifacts,
+   > so it can't mint a new one. Pick an existing feature, or run the stage's
+   > `create-*` skill to start a new one and come back.
+
+5. The user chose `alert-customer`. Set `[user].active_feature = "alert-customer"`
+   in `project.user.toml`. **`features.toml` was not touched** — select mode never
+   writes to the registry.
+6. Echoed the resolved artifact path before the caller's first read.
+7. Closed with `## Next skill\nreview-requirements-package`, returning the user to
+   the skill that halted.
+
+The point of the scenario: a Mode B caller's description almost never resembles a
+feature title, so the no-match branch is the *common* path for a review, not an edge
+case. If it routed to create, minting-at-review would be the default behaviour rather
+than a rare accident.
+
 ## Hand-off
 
 The skill suggested:
