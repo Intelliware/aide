@@ -5,6 +5,7 @@ applies-to: [re-cobol-program-consumer]
 requires-decision-from: [code-reader]
 optional: false
 order-hint: 300
+last_verified_against_commit: ""  # populated by the reverse-engineer-* skill at render time — full 40-char SHA of the source repo
 ---
 
 ## 18. Expected DD Bindings

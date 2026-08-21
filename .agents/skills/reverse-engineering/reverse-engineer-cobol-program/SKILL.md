@@ -109,6 +109,7 @@ Per-block file naming (applies to BOTH parts): `<NN>-<bare-slug>.md`, where:
 - `<NN>` is the 1-based, zero-padded position of the block in the **full** `order`-sorted block list (first block → `01`, second → `02`, …). The index is assigned over the complete list **before** decision-gating, so a gated-out block leaves a **numbering gap** — survivors keep their full-list index and are **not** renumbered contiguously (e.g. if the block at `03` is omitted, the next rendered file is still `04-…`, not `03-…`).
 - `<bare-slug>` is the block slug with the `reverse-eng/cobol-program/internal/` (or `…/consumer/`) prefix stripped.
 - Block content shape comes from `templates/blocks/reverse-eng/cobol-program/<part>/<bare-slug>.md`. Extracted source content fills the rendered block; the block's structural shape is preserved.
+- Every rendered block's `last_verified_against_commit` frontmatter field MUST be set to the full 40-character SHA of the source repo at extraction time (`git rev-parse HEAD`) — this is what `review-reverse-engineering-package`'s review-freshness sub-review checks; leaving it as the template's empty placeholder is a defect, not an omission.
 - A block whose `decision-gates: include-if:` evaluates false is **omitted entirely** — do not author an empty placeholder.
 
 Side artifacts at the Part-A directory root:
