@@ -34,25 +34,7 @@ Users rarely categorize their repos as "API" or "UI framework" — they say "doc
 
 ### Stage 0: Repository Registration Check
 
-Before classification, check if this repository is registered in `project.toml`:
-
-1. Read `project.toml` and look for a `[[project.repos]]` entry matching the given path
-2. If found:
-   - Note any `type` field as a classification hint
-   - Note the `role` field if present (api, web-app, framework, etc.)
-   - Continue to Stage 1
-3. If not found:
-   - Ask user: "This repository is not registered in project.toml. Would you like to add it?"
-   - If yes, elicit:
-     - `code` (kebab-case slug, e.g., `orderhub-api`)
-     - `name` (human-readable, e.g., `OrderHub Backend API`)
-     - `role` (api, web-app, ui-framework, api-framework, database, mobile-app, mobile-framework, cobol-program, copybook-library, jcl-job, test-suite)
-     - `type` (optional, e.g., `node-typescript-nest`, `java-spring-boot`)
-     - `primary` (optional, boolean — is this the main repo?)
-   - Append the entry to `project.toml`
-   - Continue to Stage 1
-
-Registration helps track which repos have been analyzed and documented, and provides hints for classification.
+Check whether this repository is already registered in `project.toml`'s `[[project.repos]]`. If found, use its `type` / `role` as a classification hint and continue to Stage 1. If not, offer to register it (`code`, `name`, `role`, optional `type` / `primary`) before continuing. See `references/repo-registration.md` for the full elicitation shape.
 
 ### Stage 1: Locate and Scan the Repository
 
@@ -97,39 +79,7 @@ Apply the classification table. The eleven types are:
 
 ### Stage 2b: Unsupported Stack Detection
 
-If none of the eleven domain types match and classification confidence is low:
-
-1. **Present findings to user:**
-
-   > "This repository appears to be a **[detected pattern]** which doesn't match any of my eleven reverse-engineering domain types:
-   >
-   > - **Detected:** [language], [framework], [architectural style]
-   > - **Closest matches:** [type1] (~X% fit), [type2] (~Y% fit)
-   > - **Key distinguishing signals:** [list what makes this different]
-   >
-   > For example: GraphQL server (not REST), serverless functions (no persistent server), ML pipeline (training/inference modes), CLI tool (command structure), message queue consumer (event-driven), etc."
-
-2. **Offer two paths:**
-
-   > **A) Force-fit to closest type**
-   > Use `reverse-engineer-<closest>` and adapt manually. Some sections may be irrelevant; others may need manual additions.
-   >
-   > **B) Create a new RE skill**
-   > Run `generate-re-skill` to build a tailored documentation pattern for this technology stack. This creates a reusable skill, not just one-off documentation.
-
-3. **Route based on user choice:**
-   - **A → Force-fit:** Hand off to the closest RE skill with a warning that some sections may not apply. The user can skip irrelevant sections during extraction.
-   - **B → Generate new skill:** Hand off by name to `generate-re-skill`. That skill will analyze the stack, research documentation patterns, and generate a complete RE skill.
-
-**When to trigger Stage 2b:**
-- No domain type matches with >70% confidence
-- User expresses doubt about the classification
-- The repository has characteristics not covered by any type's key distinguisher
-
-**When NOT to trigger Stage 2b:**
-- A domain type clearly matches (>80% confidence)
-- The mismatch is minor (e.g., Django REST vs. Flask — both are API)
-- User already indicated willingness to force-fit
+If no domain type matches with reasonable confidence (roughly <70%, or the user expresses doubt), present the detected pattern plus the closest-fit types, then offer two paths: force-fit to the closest `reverse-engineer-<type>` skill, or hand off to `generate-re-skill` to build a new tailored RE skill for this stack. Skip this stage when a type clearly matches (>80% confidence) or the mismatch is minor. See `references/unsupported-stack-routing.md` for the full presentation script and routing rules.
 
 ### Stage 3: Handle Special Cases
 
