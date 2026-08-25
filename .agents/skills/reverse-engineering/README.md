@@ -1,6 +1,6 @@
 # Reverse-engineering stage
 
-Skills for documenting existing repositories. Eleven domain skills, a thin dispatcher, and a readiness gate.
+Skills for documenting existing repositories. Eleven domain skills, a thin dispatcher, a readiness gate, and a skill generator for unsupported stacks.
 
 ## Produces
 Per repo, a Part A (internal implementation docs) and Part B (consumer-facing docs) artifact set. Part A renders under `<source-repo-path>/docs/<domain>-internal/`; Part B under the user's KB repo at `source-docs/<repo-slug>/<domain>-consumer/`. The KB index aggregator (`skills/knowledge-base/build-knowledge-base/`) consumes these.
@@ -35,7 +35,8 @@ fast — the AI does not pick a mode on the user's behalf.
 - Repo type identification (api / api-framework / web-app / ui-framework / database / mobile-app / mobile-framework / cobol-program / copybook-library / jcl-job / test-suite — the dispatcher routes)
 
 ## Skills
-- `analyze-repository/` — thin dispatcher: detects repo type, recommends a domain skill
+- `analyze-repository/` — thin dispatcher: detects repo type, recommends a domain skill. Now includes Stage 0 (project.toml registration check) and Stage 2b (unsupported stack fallback to `generate-re-skill`).
+- `generate-re-skill/` — creates new RE skills for technology stacks not covered by the eleven domain types (e.g., GraphQL servers, serverless functions, ML pipelines, CLI tools). Invoked when `analyze-repository` cannot match a repository or when the user explicitly requests a new skill.
 - `reverse-engineer-api/`
 - `reverse-engineer-api-framework/`
 - `reverse-engineer-web-app/`

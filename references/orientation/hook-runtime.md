@@ -146,7 +146,7 @@ Skipped after-hook: review-adversarial (code: adversarial-review-optional) — u
 **Hook skill not found:**
 
 If `[[hooks]].skill` does not resolve to a registered skill, the loader rejects
-the config at merge time (validation rule 14). This is a hard error.
+the config at merge time (validation rule 18). This is a hard error.
 
 **Hook skill fails during execution:**
 
@@ -168,7 +168,7 @@ The loader must detect circular hook dependencies at config-merge time:
 - Skill A hooks skill B
 - Skill B hooks skill A (directly or transitively)
 
-This is validation rule 19. The loader rejects the config with:
+This is validation rule 23. The loader rejects the config with:
 
 ```
 Error: Circular hook dependency detected: create-requirements-package →

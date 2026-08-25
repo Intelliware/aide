@@ -41,10 +41,10 @@ appears under the workflow graph's `anytime:` block.
 | Input | Source | Required |
 |---|---|---|
 | Feature ID / scope | User-provided or auto-detected from INC ID or open quality package | Yes |
-| Implementation package | `{paths.implementation_package}/` (all `INC-XXX.md` + `increment-status.md`) | Yes |
-| Quality package | `{paths.quality_path}/{feature-id}-quality.md` (or SoD-resolved path) | Yes (use the latest assembled version) |
-| Test-traceability matrix | `docs/<feature>/quality-package/quality/traceability.md` | Yes — primary source of "what's claimed to be covered" |
-| Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |
+| Implementation package | `{paths.implementation_package}/{feature-id}/` (all `INC-XXX.md` + `increment-status.md`) | Yes |
+| Quality package | `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` (or SoD-resolved path) | Yes (use the latest assembled version) |
+| Test-traceability matrix | `docs/<feature-id>/quality-package/quality/traceability.md` | Yes — primary source of "what's claimed to be covered" |
+| Test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base | `{paths.knowledge_base_path}/` via `navigate-knowledge-base --profile=test-suite` (with `--profile-subkind=marker-vocabulary` and `--profile-subkind=feature-inventory` for the live drift check) | Optional but recommended — enables the live drift check |
 | Test suite codebase | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to in-scope code repo when unset | Optional — enables direct marker search when the KB is unavailable |
@@ -55,6 +55,8 @@ counts, and the recommended actions; wait for explicit user
 acknowledgement before declaring the audit closed. If any input is
 missing or ambiguous, surface that to the user before producing the
 report rather than silently substituting defaults.
+## Precondition — active feature
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: audit-quality-coverage`) rather than guessing which feature to audit — do not fall back to creating one. If it resolves, echo the feature ID before locating the packages.
 ## Workflow
 Execute one step at a time. Read each step file only when starting that
 step.
@@ -80,8 +82,8 @@ step.
 | Artifact | Destination | Format |
 |---|---|---|
 | Coverage report | Chat | Markdown — summary table + coverage-detail table + gaps table + recommended next actions |
-| Bootstrapped test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Markdown table — **only when the tracker did not previously exist** |
-| Updated change-tracker row | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the audit and its findings (Trigger note: `Coverage audit`) |
+| Bootstrapped test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Markdown table — **only when the tracker did not previously exist** |
+| Updated change-tracker row | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the audit and its findings (Trigger note: `Coverage audit`) |
 ## Next skill
 Selected per the gap type (the skill offers a choice; the user picks):
 - **Uncovered INC** → `create-quality-package` (extend the package) or

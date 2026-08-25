@@ -38,6 +38,10 @@ See `references/INPUTS-OUTPUTS.md` for the full table. Required:
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before the write-discipline preconditions below. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-requirements-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
+
 ## Preconditions (MUST run before any step)
 
 Before executing Step 0 — and before any discovery, analysis, writing, or assembly work — the AI MUST:
@@ -66,12 +70,12 @@ Use elicitation prompts referenced from the active composition (`references/elic
 
 | Artifact | Path | Format |
 |---|---|---|
-| Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>-requirements.md`; legacy: `{paths.requirements_path}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
-| Per-section files (when sharded) | `docs/<feature>/requirements-package/requirements/*.md` | Markdown (one block per file) |
-| Discovery artifacts (brownfield) | `docs/<feature>/requirements-package/discovery/*.md` | Markdown |
-| Analysis artifacts | `docs/<feature>/requirements-package/analysis/*.md` | Markdown |
-| Change tracker | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table |
-| Completeness tracker | `docs/<feature>/requirements-package/requirements/completeness-tracker.md` | Markdown table |
+| Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>/<feature-id>-requirements.md`; legacy: `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
+| Per-section files (when sharded) | `docs/<feature-id>/requirements-package/requirements/*.md` | Markdown (one block per file) |
+| Discovery artifacts (brownfield) | `docs/<feature-id>/requirements-package/discovery/*.md` | Markdown |
+| Analysis artifacts | `docs/<feature-id>/requirements-package/analysis/*.md` | Markdown |
+| Change tracker | `docs/<feature-id>/requirements-package/requirements/change-tracker.md` | Markdown table |
+| Completeness tracker | `docs/<feature-id>/requirements-package/requirements/completeness-tracker.md` | Markdown table |
 
 ## Next skill
 review-requirements-package

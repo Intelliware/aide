@@ -53,7 +53,7 @@ This step runs before any design sub-step. Determines which sections are needed 
 Read:
 - The requirements package — specifically functional requirements, data requirements, user journeys, business rules, permissions-access-control, and NFRs.
 - The requirements `change-tracker.md` — Package Version Log + Version Diff Summary.
-- The architecture baseline (`docs/<feature>/solutions-package/discovery/architecture-baseline.md`) when discovery ran — component architecture, tech stack, integration points, areas affected.
+- The architecture baseline (`docs/<feature-id>/solutions-package/discovery/architecture-baseline.md`) when discovery ran — component architecture, tech stack, integration points, areas affected.
 
 If solution discovery was skipped, do not fail. Before scoping:
 1. Tell the user that design is starting without an architecture baseline.
@@ -85,7 +85,7 @@ Then answer the scoping questions: which of the gated blocks (`design/frontend-d
 | 15 | non-functional-requirements-technical | `design/non-functional-requirements-technical` | `15-non-functional-requirements-technical.md` | Translates requirements-stage NFRs into technical targets |
 | 16 | risk-assessment | `design/risk-assessment` | `16-risk-assessment.md` | Gated by `requires_risk_assessment` |
 | 17 | adr-authoring | `knowledge-base/adr-template` | `{paths.knowledge_base_path}/adr/<id>.md` (or fallback) | One ADR per significant decision |
-| 18 | package-synthesis | (assembly) | `solution-package.md` (alias) and `{paths.design_path}/{feature-id}-design.md` | All blocks assembled per composition order |
+| 18 | package-synthesis | (assembly) | `solution-package.md` (alias) and `{paths.design_package}/{feature-id}/{feature-id}-design.md` | All blocks assembled per composition order |
 
 ## Hard gates
 

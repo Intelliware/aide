@@ -32,6 +32,10 @@ Users rarely categorize their repos as "API" or "UI framework" — they say "doc
 
 ## Workflow
 
+### Stage 0: Repository Registration Check
+
+Check whether this repository is already registered in `project.toml`'s `[[project.repos]]`. If found, use its `type` / `role` as a classification hint and continue to Stage 1. If not, offer to register it (`code`, `name`, `role`, optional `type` / `primary`) before continuing. See `references/repo-registration.md` for the full elicitation shape.
+
 ### Stage 1: Locate and Scan the Repository
 
 Ask the user for the repository path (or identify from context). Then perform a structural scan:
@@ -72,6 +76,10 @@ Apply the classification table. The eleven types are:
 | Test-Suite Repository | Repo's primary output is **test artefacts** — features/specs, step-defs, page-objects, fixtures, runners (e.g. dedicated Cucumber / Playwright / Cypress / Selenium / pytest / RestAssured / Karate / k6 project). No production code; no end-users. Often named `*-e2e`, `*-tests`, `*-qa-suite`, or sits as a sibling to the application it tests. | `reverse-engineer-test-suite` |
 
 **The application-vs-framework distinction** — most common ambiguity. Ask: who consumes this code? End users → application; other developers as a dependency → framework/library. Concrete signals: presence of `peerDependencies` (framework), `main`/`exports` field without a `start` script (framework), being listed as a dependency in other repos (framework), having its own deployment pipeline (application).
+
+### Stage 2b: Unsupported Stack Detection
+
+If no domain type matches with reasonable confidence (roughly <70%, or the user expresses doubt), present the detected pattern plus the closest-fit types, then offer two paths: force-fit to the closest `reverse-engineer-<type>` skill, or hand off to `generate-re-skill` to build a new tailored RE skill for this stack. Skip this stage when a type clearly matches (>80% confidence) or the mismatch is minor. See `references/unsupported-stack-routing.md` for the full presentation script and routing rules.
 
 ### Stage 3: Handle Special Cases
 
@@ -114,6 +122,7 @@ Tell the user the exact phrase to use to invoke the first recommended skill. Rec
 - `reverse-engineer-copybook-library`
 - `reverse-engineer-jcl-job`
 - `reverse-engineer-test-suite`
+- `generate-re-skill` (when Stage 2b routes to option B — creating a new RE skill for an unsupported stack)
 
 Each recommended RE skill ends at its own **close-out gate**, where it asks the user
 whether to attest the extraction via automated verification or via
@@ -142,6 +151,7 @@ Dynamic — depends on classification:
 - Single-type repos → the matching `reverse-engineer-<type>` skill
 - Monorepos → first the framework/library RE skill, then app RE skills, then `build-knowledge-base`
 - Hybrid repos → primary RE skill first, then secondary RE skill(s)
+- Unsupported stacks (Stage 2b, option B) → `generate-re-skill` to create a new RE skill
 
 After each repo's RE work completes: that skill's close-out gate (automated verification
 or `review-reverse-engineering-package`), then `build-knowledge-base` (aggregates Part B

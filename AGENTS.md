@@ -85,7 +85,7 @@ Presets are shareable bundles of customization files. They ship in add-on repos 
 - `enable` / `disable` — toggle presets without removing them
 - `show` — inspect what a preset contains before installing
 
-Presets merge between Layer 4 and Layer 5, so project-local customizations always win. See `config/SCHEMAS.md` § 2.8–2.9.
+Presets merge between Layer 4 and Layer 5, so project-local customizations always win. See `config/SCHEMAS.md` § 2.10–2.11.
 
 ## What this folder is NOT
 

@@ -5,6 +5,7 @@ applies-to: [re-copybook-library-internal]
 requires-decision-from: [code-reader, architect]
 optional: false
 order-hint: 140
+last_verified_against_commit: ""  # populated by the reverse-engineer-* skill at render time — full 40-char SHA of the source repo
 ---
 
 ## 4. REDEFINES and Variant Handling

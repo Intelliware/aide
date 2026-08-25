@@ -26,13 +26,13 @@
 
 | Output | Path | Produced by | Purpose |
 |---|---|---|---|
-| Per-increment file | `{project.paths.implementation_package}/INC-XXX.md` | composition `greenfield-implementation-package.yaml` | One file per increment; all 8 Canonical Increment Shape sections plus shared overview/glossary/change-log |
-| Implementation package overview | `{project.paths.implementation_package}/implementation-package.md` | Step 5 (support docs) | Lists every increment with ID, name, FR mapping, dependencies, status |
-| Increment status tracker | `{project.paths.implementation_package}/increment-status.md` | Step 5 (support docs) | Tracks state per increment: not-started / in-progress / completed / blocked / on-hold |
-| Bugs and issues log | `{project.paths.implementation_package}/bugs-and-issues-log.md` | Step 5 (support docs) | Initialized empty; populated during execution by `execute-increments` and `manage-bugs` |
-| Change tracker | `{project.paths.implementation_package}/change-tracker.md` | Step 5 (support docs) | Records changes that propagate from requirements/design into implementation |
-| Codebase analysis (brownfield only) | `{project.paths.implementation_package}/plan/codebase-analysis.md` | `steps/codebase-analysis.md` | File/module map, conventions, integration strategy |
-| Test plan | `{project.paths.implementation_package}/plan/test-plan.md` | `steps/test-planning.md` | Test strategy, regression coverage, test modifications |
+| Per-increment file | `{project.paths.implementation_package}/{feature-id}/INC-XXX.md` | composition `greenfield-implementation-package.yaml` | One file per increment; all 8 Canonical Increment Shape sections plus shared overview/glossary/change-log |
+| Implementation package overview | `{project.paths.implementation_package}/{feature-id}/implementation-package.md` | Step 5 (support docs) | Lists every increment with ID, name, FR mapping, dependencies, status |
+| Increment status tracker | `{project.paths.implementation_package}/{feature-id}/increment-status.md` | Step 5 (support docs) | Tracks state per increment: not-started / in-progress / completed / blocked / on-hold |
+| Bugs and issues log | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` | Step 5 (support docs) | Initialized empty; populated during execution by `execute-increments` and `manage-bugs` |
+| Change tracker | `{project.paths.implementation_package}/{feature-id}/change-tracker.md` | Step 5 (support docs) | Records changes that propagate from requirements/design into implementation |
+| Codebase analysis (brownfield only) | `{project.paths.implementation_package}/{feature-id}/plan/codebase-analysis.md` | `steps/codebase-analysis.md` | File/module map, conventions, integration strategy |
+| Test plan | `{project.paths.implementation_package}/{feature-id}/plan/test-plan.md` | `steps/test-planning.md` | Test strategy, regression coverage, test modifications |
 | Plan-readiness verdict | reported in chat + recorded in change tracker | `steps/plan-readiness-review.md` | GO / NO-GO before handoff to review-implementation-package |
 
 ### Per-increment file shape (the Canonical Increment Shape)

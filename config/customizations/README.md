@@ -109,7 +109,7 @@ to manage hooks interactively.
 
 Presets are reusable bundles of customization files. They ship in add-on
 repos or local `presets/` directories and are registered in
-`{project-root}/presets.toml`. See `config/SCHEMAS.md` § 2.8–2.9.
+`{project-root}/presets.toml`. See `config/SCHEMAS.md` § 2.10–2.11.
 
 Use `manage-presets` to discover, install, enable/disable, and inspect
 presets. Customizations in this directory always override preset values,

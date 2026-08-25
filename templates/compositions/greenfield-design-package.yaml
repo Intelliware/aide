@@ -10,7 +10,9 @@ description: Full design package for a greenfield project (all elaborate design 
 applies-to-flow: greenfield
 package-type: design
 
-default-output-path: "{paths.design_path}/{feature-id}-design.md"
+# The `{feature-id}/` segment applies only when `features.toml` exists; drop it
+# otherwise. See references/ai-principles/feature-precondition.md.
+default-output-path: "{paths.design_package}/{feature-id}/{feature-id}-design.md"
 
 blocks:
   # ---- Front matter / framing ----

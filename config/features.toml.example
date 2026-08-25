@@ -1,0 +1,47 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# features.toml — the project's feature registry.
+#
+# COMMITTED. Sits at {project-root}, as a peer of project.toml rather than a
+# layer within it — see config/SCHEMAS.md § 2.8 for why it is a separate file.
+#
+# One entry per feature. Append-only in practice: entries are not deleted when
+# a feature ships, because artifacts already on disk still cite the ID.
+#
+# THE PRESENCE OF THIS FILE IS THE OPT-IN. A project with no features.toml
+# (or none of this shape) is not in feature-scoped mode: every skill behaves
+# exactly as it did before this file existed, and no feature-id directory
+# segment is inserted anywhere. An empty-but-present file is also legal and
+# means "opted in, no features yet" — see § 2.8.3.
+#
+# Minted and appended to by `select-feature` (create mode). Do not hand-edit the
+# `id` of an entry that already has artifacts on disk — it is the directory name
+# they live under (config/SCHEMAS.md § 2.8). Editing the `title` in place is fine;
+# the directory does not follow a title change.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ─── Format: a lowercase kebab slug ───────────────────────────────────────────
+# `^[a-z0-9]+(-[a-z0-9]+)*$` — used verbatim as the directory name, so keep it
+# short and recognisable. It must be unique: two features cannot share a
+# directory, so name near-neighbours apart (refunds-api / refunds-ui).
+#
+# There is no FEAT-NNNN- ordinal prefix. Nothing ever consumed the number, and
+# `created` below records when a feature was minted, which is what the ordinal was
+# really being read for. It is day-granular, so two features minted the same day
+# tie; this file is append-only, so their order here is the tiebreaker.
+# See config/SCHEMAS.md § 2.8 for the full reasoning.
+
+[[features]]
+id      = "alert-customer"
+title   = "Alert customer when a refund is delayed"
+created = 2026-08-11
+ticket  = "ACME-1247"          # optional — Jira key / ticket reference
+repos   = ["api-billing"]      # optional — codes from [[project.repos]] in project.toml;
+                                # advisory only, the run-time scope prompt in each create-*
+                                # skill's step 00 always wins on divergence (config/SCHEMAS.md § 2.8)
+
+[[features]]
+id      = "refund-fee-waiver"
+title   = "Waive processing fee on approved refunds"
+created = 2026-08-13
+# ticket and repos are both optional — omit either or both freely.

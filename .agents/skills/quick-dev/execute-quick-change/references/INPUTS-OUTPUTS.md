@@ -4,8 +4,8 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| quick-dev plan | yes | `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-plan.md` | approved plan with 1–3 increments |
-| quick-dev spec | yes | `<feature-folder>/quick-dev-package/<feature-id>-quick-dev-spec.md` | for spec-compliance review and PR description |
+| quick-dev plan | yes | `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md` | approved plan with 1–3 increments |
+| quick-dev spec | yes | `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` | for spec-compliance review and PR description |
 | solution constraints | yes | spec §12.2a (or inline if the spec is trivial) | guardrails the implementation must honor on every iteration, including any Solution Pivot — e.g. "no regex", "no new dependencies", "must reuse `useRetry`" |
 | codebase | yes | local filesystem | repos referenced by the plan |
 | project paths | yes | `project.toml` `[project.paths]` | `implementation_package`, `knowledge_base_path` |
@@ -18,9 +18,9 @@
 | Working code with passing tests | source files in the target repos | the user, CI |
 | Atomic commits with conventional messages | git history on `feature/<inc-id>-<short>` | reviewers |
 | Open PR with generated description | git host (GitHub/GitLab/etc.) | reviewers |
-| `<feature-folder>/quick-dev-package/CHANGE-TRACKER.md` updated entries — including any Solution Pivot rows and the user-confirmation row that closes the change | markdown | `track-change`, drift detection, audit |
+| `docs/<feature-id>/quick-dev-package/CHANGE-TRACKER.md` updated entries — including any Solution Pivot rows and the user-confirmation row that closes the change | markdown | `track-change`, drift detection, audit |
 | KB catalog update (via `update-knowledge-base --scope=catalog-only`) — only triggered after the Completion Confirmation Gate clears | KB component frontmatter refresh | `navigate-knowledge-base` |
-| Adversarial review findings (when any) | inline + persisted to `<feature-folder>/quick-dev-package/review-YYYY-MM-DD.md` | the user |
+| Adversarial review findings (when any) | inline + persisted to `docs/<feature-id>/quick-dev-package/review-YYYY-MM-DD.md` | the user |
 | Pivot summary (when a Solution Pivot fired) | inline message + CHANGE-TRACKER row capturing root cause, alternative chosen, approver, timestamp | the user, audit |
 
 ## Side effects

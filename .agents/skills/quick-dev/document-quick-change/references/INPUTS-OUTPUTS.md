@@ -6,16 +6,16 @@
 |---|---|---|---|
 | developer description | yes | conversation | "Add a 'mark as read' button to notification cards" |
 | existing artifacts | no — but always asked about | tickets, incident notes, screenshots, PRs, ADRs | Linear ticket NOT-142, Slack screenshot |
-| feature folder | yes — inferred or provided | reuse existing `docs/<feature>/` or kebab-case from description | `docs/notification-mark-as-read/` |
+| feature folder | yes | the registry's feature ID, via the active-feature precondition — not opted in: reuse an existing folder under `docs/`, else kebab-case from description | `docs/notification-mark-as-read/` |
 | `templates/compositions/quick-dev-spec.yaml` | yes | framework | structural template for the spec |
-| project paths | yes | `project.toml` `[project.paths]` | `requirements_path` |
+| project paths | yes | `project.toml` `[project.paths]` | `requirements_package` |
 
 ## Outputs
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| `{paths.requirements_path}/<feature-id>-quick-dev-spec.md` (small/medium) OR inline (trivial) | markdown — populated four-block composition | `plan-quick-change` |
-| `<feature-folder>/CHANGE-TRACKER.md` (created if missing) | markdown — initialized | `track-change` |
+| `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` (small/medium) OR inline (trivial) | markdown — populated four-block composition | `plan-quick-change` |
+| `docs/<feature-id>/CHANGE-TRACKER.md` (created if missing) | markdown — initialized | `track-change` |
 | Glossary additions (when new terms appear) | markdown table inside the spec | downstream skills, glossary linter |
 
 ## Side effects

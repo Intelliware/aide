@@ -151,7 +151,7 @@ After the examples above, `{project-root}/presets.toml` contains:
 ```toml
 # Preset registry — managed by skills/meta/manage-presets
 # Edit via the skill or by hand; both are supported.
-# See config/SCHEMAS.md § 2.9 for schema.
+# See config/SCHEMAS.md § 2.11 for schema.
 
 [[presets]]
 name = "enterprise-compliance"

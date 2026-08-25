@@ -54,13 +54,17 @@ in-scope fixes) or a future bug-fix increment. This skill manages the log.
 
 | Input | Source | Required |
 |---|---|---|
-| Implementation package | `{project.paths.implementation_package}/` | Yes (for path to `bugs-and-issues-log.md`) |
-| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/bugs-and-issues-log.md` | Yes (created if missing) |
+| Implementation package | `{project.paths.implementation_package}/{feature-id}/` | Yes (for path to `bugs-and-issues-log.md`) |
+| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` | Yes (created if missing) |
 | Increment context | the calling increment ID, if invoked from `execute-increments` | Conditional |
 | project.toml | `{project-root}/project.toml` | Yes |
 
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables and
 the bug schema.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before determining the mode. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: manage-bugs`, `caller_mode: select-only`) rather than guessing which feature's log to operate on. Create is suppressed because the implementation-package directory is a required input and the log is written inside it — a feature with no package has no log to operate on, so minting one here would produce a feature with nothing in it. "Independently invocable" means independent of an increment *session*, not of the package. If it resolves, echo the feature ID and the resolved log path before the first read or write. Applies to all four modes, including REVIEW.
 
 ## Workflow — four operating modes
 

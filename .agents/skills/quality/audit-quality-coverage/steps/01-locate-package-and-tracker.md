@@ -40,15 +40,15 @@ the rest of the audit.
 
 ### 1b. Locate the implementation package
 
-Confirm that `{paths.implementation_package}/increment-status.md`
+Confirm that `{paths.implementation_package}/{feature-id}/increment-status.md`
 exists at the resolved location. If missing, halt with a clear error:
 
 > No implementation package found at
-> `{paths.implementation_package}/`. The coverage audit requires a
+> `{paths.implementation_package}/{feature-id}/`. The coverage audit requires a
 > GO implementation package. Route the user to
 > `create-implementation-package` or `review-implementation-package`.
 
-Read the file list under `{paths.implementation_package}/`:
+Read the file list under `{paths.implementation_package}/{feature-id}/`:
 - `increment-status.md` (required)
 - `INC-XXX.md` for each increment (required — shard-aware: read per-file
   paths from `increment-status.md` if the package is sharded)
@@ -58,21 +58,21 @@ Read the file list under `{paths.implementation_package}/`:
 Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 `review-quality-package` for the full SoD geometry). Required artifacts:
 
-- `{paths.quality_path}/{feature-id}-quality.md` — the assembled package
-- `docs/<feature>/quality-package/quality/traceability.md` — the matrix
-- `docs/<feature>/quality-package/quality/test-design.md` — the test-design block
-- `docs/<feature>/quality-package/quality/automation-and-cicd.md` — the
+- `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` — the assembled package
+- `docs/<feature-id>/quality-package/quality/traceability.md` — the matrix
+- `docs/<feature-id>/quality-package/quality/test-design.md` — the test-design block
+- `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` — the
   automation block (used in Step 3 for the marker scheme)
 
 If the quality package is missing, halt with:
 
-> No quality package found at `{paths.quality_path}/`. The coverage
+> No quality package found at `{paths.quality_package}/`. The coverage
 > audit requires an assembled quality package. Route the user to
 > `create-quality-package`.
 
 ### 1d. Locate or bootstrap the test-case status tracker
 
-Check whether `docs/<feature>/quality-package/quality/plan/test-case-status.md`
+Check whether `docs/<feature-id>/quality-package/quality/plan/test-case-status.md`
 exists.
 
 **If found:** record its current state (TC IDs, statuses) for use in

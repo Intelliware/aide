@@ -40,7 +40,7 @@ emoji set, summary-table extra columns).
 
 ```
 Summary: <N> gaps requiring action across <M> categories.
-Audit recorded in: docs/<feature>/quality-package/quality/change-tracker.md (Trigger: Coverage audit)
+Audit recorded in: docs/<feature-id>/quality-package/quality/change-tracker.md (Trigger: Coverage audit)
 ```
 
 ### 4c. Lightweight / CI variants
@@ -60,7 +60,7 @@ Both variants are off by default.
 ### 4d. Append the change-tracker row
 
 Append one row to
-`docs/<feature>/quality-package/quality/change-tracker.md`:
+`docs/<feature-id>/quality-package/quality/change-tracker.md`:
 
 | Field | Value |
 |---|---|

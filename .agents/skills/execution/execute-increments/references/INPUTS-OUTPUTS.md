@@ -4,7 +4,7 @@
 
 | Input | Source | Required | Purpose |
 |---|---|---|---|
-| Implementation package | `{project.paths.implementation_package}/` (with GO from `review-implementation-package`) | Yes | Source of `INC-XXX.md` files and support docs |
+| Implementation package | `{project.paths.implementation_package}/{feature-id}/` (with GO from `review-implementation-package`) | Yes | Source of `INC-XXX.md` files and support docs |
 | Target codebase | filesystem | Yes | Where Plan items operate |
 | Test runner | environment (project's test framework) | Yes | Runs the AI Gate |
 | Build tools | environment | Yes | Verify clean build before claiming completion |
@@ -33,8 +33,8 @@ Per increment:
 | AI Gate evidence | reported in chat (fresh from current turn) | step 03 | Verification that Plan is correctly implemented |
 | Human Gate sign-off | reported in chat | step 04 | Human confirmation of intent alignment |
 | Success Criteria check | reported in chat | step 05 | All 4-8 binary criteria checked |
-| Updated `increment-status.md` | `{project.paths.implementation_package}/increment-status.md` | step 06 | `not-started` → `in-progress` → `completed` |
-| Bug entries (if any) | `{project.paths.implementation_package}/bugs-and-issues-log.md` (via `manage-bugs`) | invoked by step 02-05 as needed | Defects, missed requirements, deferred work |
+| Updated `increment-status.md` | `{project.paths.implementation_package}/{feature-id}/increment-status.md` | step 06 | `not-started` → `in-progress` → `completed` |
+| Bug entries (if any) | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` (via `manage-bugs`) | invoked by step 02-05 as needed | Defects, missed requirements, deferred work |
 | KB update handoff | invokes `knowledge-base/update-knowledge-base` | step 06 | Keeps KB current after each shipped increment |
 
 ### What this skill does NOT produce

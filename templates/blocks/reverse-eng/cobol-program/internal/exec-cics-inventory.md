@@ -5,6 +5,7 @@ applies-to: [re-cobol-program-internal]
 requires-decision-from: [code-reader]
 optional: false
 order-hint: 180
+last_verified_against_commit: ""  # populated by the reverse-engineer-* skill at render time — full 40-char SHA of the source repo
 ---
 
 ## 8. EXEC CICS Inventory

@@ -10,7 +10,9 @@ description: Full requirements package for a greenfield project (all elaborate b
 applies-to-flow: greenfield
 package-type: requirements
 
-default-output-path: "{paths.requirements_path}/{feature-id}-requirements.md"
+# The `{feature-id}/` segment applies only when `features.toml` exists; drop it
+# otherwise. See references/ai-principles/feature-precondition.md.
+default-output-path: "{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md"
 
 blocks:
   # ---- Front matter / framing ----

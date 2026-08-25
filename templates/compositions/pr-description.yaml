@@ -16,7 +16,9 @@ description: PR body produced by create-pr — summary, changes, test plan, trac
 applies-to-flow: any
 package-type: pr-description
 
-default-output-path: "{paths.execution_path}/pr-{change-id}.md"
+# No `default-output-path`: this composition has no file output. The rendered
+# body goes to chat for review and then into the PR itself via `gh pr create`.
+# It is the only composition in this directory without the field, deliberately.
 
 blocks:
   - slug: execution/pr/summary
@@ -60,3 +62,9 @@ notes: |
   bug-log entry — those are runtime / append-only artifacts authored
   inline by their owning skills. See `_archive/skill-disposition.md` for
   the rationale.
+
+  It also writes nothing to disk. The PR body's durable home is the pull
+  request on the remote; per-increment and per-FR traceability is already
+  carried in the conventional commit messages (`Implements: INC-XXX`,
+  `Traceability: FR-...`), so a local copy would only duplicate git
+  history. This is why the execution stage has no `[project.paths]` entry.

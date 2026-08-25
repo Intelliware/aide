@@ -17,7 +17,7 @@ This skill provides four operations:
 3. **enable/disable** — Toggle a preset's active state
 4. **show** — Display a preset's contents and effects
 
-For the preset schema, see `config/SCHEMAS.md` § 2.8 (preset.toml) and § 2.9 (presets.toml).
+For the preset schema, see `config/SCHEMAS.md` § 2.10 (preset.toml) and § 2.11 (presets.toml).
 
 ## When to use
 

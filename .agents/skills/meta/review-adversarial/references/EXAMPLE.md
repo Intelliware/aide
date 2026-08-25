@@ -8,7 +8,7 @@ Project: `feat-2041-checkout-redesign`. Requirements package already assembled. 
 
 ```
 docs/
-└── FEAT-2041/
+└── refund-delay-alerts/
     └── requirements-package/
         ├── requirements-package.md
         ├── requirements/
@@ -22,14 +22,14 @@ docs/
 
 ```
 review-adversarial \
-  --target=docs/FEAT-2041/requirements-package/requirements-package.md \
+  --target=docs/refund-delay-alerts/requirements-package/requirements-package.md \
   --stage=requirements
 ```
 
 `--output-path` is omitted, so the skill defaults to:
 
 ```
-_review/FEAT-2041-requirements-package/2026-04-29T13-42-00Z/review-adversarial.md
+_review/refund-delay-alerts-requirements-package/2026-04-29T13-42-00Z/review-adversarial.md
 ```
 
 `--target-commit` is omitted, so the skill runs `git rev-parse --short HEAD` and records `a3f9c12`.
@@ -46,7 +46,7 @@ _review/FEAT-2041-requirements-package/2026-04-29T13-42-00Z/review-adversarial.m
 ---
 schema: aide-adversarial-findings@1
 target_artifact: requirements-package
-target_path: docs/FEAT-2041/requirements-package/requirements-package.md
+target_path: docs/refund-delay-alerts/requirements-package/requirements-package.md
 target_commit: a3f9c12
 produced_by: review-adversarial
 produced_at: 2026-04-29T13:42:00Z
@@ -57,7 +57,7 @@ worst_severity: critical
 finding_ids: [ADV-001, ADV-002, ADV-003, ADV-004, ADV-005, ADV-006, ADV-007]
 ---
 
-# Adversarial findings — Requirements Package FEAT-2041
+# Adversarial findings — Requirements Package refund-delay-alerts
 
 ## Triage summary
 
@@ -112,7 +112,7 @@ finding_ids: [ADV-001, ADV-002, ADV-003, ADV-004, ADV-005, ADV-006, ADV-007]
 
 ### ADV-006 · medium · Scope ambiguity
 - **Evidence:** requirements-package.md § 1.4 references "Phase 2 features" without listing them
-- **Risk:** ambiguous out-of-scope items have historically caused scope creep in this team's prior packages (see retro for FEAT-1893)
+- **Risk:** ambiguous out-of-scope items have historically caused scope creep in this team's prior packages (see retro for ACME-1893)
 - **Recommendation:** enumerate Phase 2 explicitly OR remove the reference
 
 ### ADV-007 · low · Weasel word
@@ -135,7 +135,7 @@ If the same skill ran against a clean package and found nothing:
 ---
 schema: aide-adversarial-findings@1
 target_artifact: requirements-package
-target_path: docs/FEAT-2041/requirements-package/requirements-package.md
+target_path: docs/refund-delay-alerts/requirements-package/requirements-package.md
 target_commit: a3f9c12
 produced_by: review-adversarial
 produced_at: 2026-04-29T13:42:00Z
@@ -146,7 +146,7 @@ worst_severity: none
 finding_ids: []
 ---
 
-# Adversarial findings — Requirements Package FEAT-2041
+# Adversarial findings — Requirements Package refund-delay-alerts
 
 No findings.
 ```

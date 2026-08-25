@@ -59,7 +59,7 @@ the single `Failure triage` row it appends to the quality package's
 | Input | Source | Required |
 |---|---|---|
 | Failure set | Hand-off from `execute-quality-increments` / `execute-increments` / a CI run, or user-provided | Yes |
-| Quality package automation-and-cicd block | `docs/<feature>/quality-package/quality/automation-and-cicd.md` | Yes — pins evidence locations (reports, logs, screenshots) |
+| Quality package automation-and-cicd block | `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` | Yes — pins evidence locations (reports, logs, screenshots) |
 | Failure categories taxonomy | `references/failure-categories.md` (generic) + `templates/blocks/quality/failure-categories.md` (team-overridable) | Yes |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Per-test reports, execution log, screenshots | paths declared in automation-and-cicd | Recommended — drives evidence-first triage |
@@ -76,6 +76,16 @@ way to mis-classify. After every proposed classification, wait for
 explicit `APPROVED` or `user-override`. Before closing the skill,
 summarise the triage results, the actions taken, and the audit
 record location; wait for user acknowledgement before terminating.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If
+`features.toml` is absent, this is a no-op. If present and `[user].active_feature` does
+not resolve, halt and invoke `select-feature` in select-only mode (`caller:
+review-test-failures`) rather than guessing which feature's failures are being triaged —
+do not fall back to creating one, because a run with failures to triage already has a
+quality package. If it resolves, echo the feature ID and the resolved
+`automation-and-cicd` path before reading any evidence.
 
 ## Workflow
 
@@ -107,7 +117,7 @@ that step.
 | Per-failure presentation + classification | Chat (interactive) | Markdown block per failure |
 | Running summary table | Chat | Markdown table, grown one row at a time |
 | Final summary block + action items | Chat | Markdown — summary + disposition counts + routed action items |
-| `change-tracker.md` row | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the triage (Trigger note: `Failure triage`) |
+| `change-tracker.md` row | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the triage (Trigger note: `Failure triage`) |
 
 ## Next skill
 

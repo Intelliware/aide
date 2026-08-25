@@ -14,6 +14,7 @@
 | `framework.user.toml.example` | Annotated example of the gitignored personal global preferences layer. |
 | `project.toml.example` | Annotated example of the committed project super-context for a 3-repo setup with a sibling KB repo. |
 | `project.user.toml.example` | Annotated example of the gitignored personal project preferences layer. |
+| `features.toml.example` | Annotated example of the committed, opt-in feature registry — a peer of `project.toml`, not a layer within it. See § 2.8. |
 | `customizations/README.md` | Layer-5 directory orientation: file-naming rules, precedence inside Layer 5, when-to-use-which-layer guide, and how `customize-framework` interacts with this folder. |
 | `customizations/example-skill.toml.example` | Comprehensive merge-behaviour reference for a hypothetical skill: scalar override, array-of-tables merge by `code`, `_suppress: true`, array-of-scalars replacement. |
 | `customizations/create-requirements-package.toml.example` | Worked example for a stage-driver skill (composition pin, deepened elicitation, suppressed optional artifact, custom block). |
@@ -144,6 +145,26 @@ Relative paths (no leading `/` or `~`) are resolved relative to `{project-root}`
 when they appear in `project.toml` / `project.user.toml` / `customizations/`,
 and relative to `{framework-root}` when they appear in
 `framework.toml` / `framework.user.toml`.
+
+**The `{paths.<key>}` family.** Compositions and skill markdown reference
+`[project.paths]` fields (§2.3) using either `{paths.<key>}` or
+`{project.paths.<key>}` — the two are synonyms, both legal, and both resolve
+identically to that field's configured (or default) value. `<key>` must name
+a field actually declared in `[project.paths]` (`requirements_package`,
+`design_package`, `implementation_package`, `quality_package`,
+`knowledge_base_path`); a `<key>` that names no declared field is a broken
+reference, not an informal spelling. This is a distinct mechanism from the
+environment tokens above: `{project-root}` et al. expand to a filesystem
+location at config-load time, while `{paths.<key>}` is a lookup into
+already-resolved config.
+
+**Skill-supplied runtime substitutions.** `{feature-id}`, `{increment-id}`,
+`{repo-slug}`, `{component-slug}` and similar are **not** config-load
+tokens — no layer declares them and no loader expands them. They are
+placeholders that the invoking skill fills in from its own runtime context
+(the active feature, the increment being executed, the repo or component in
+scope) before a path is used. Documented here so the token table above is
+not read as the complete list of every `{...}` placeholder in the tree.
 
 ---
 
@@ -297,6 +318,7 @@ All paths may use the tokens in § 1.5. Relative paths resolve under
 | `requirements_package` | path | `"{project-root}/.framework-output/requirements"` | Where the requirements stage writes its package. |
 | `design_package` | path | `"{project-root}/.framework-output/design"` | Where the design stage writes. |
 | `implementation_package` | path | `"{project-root}/.framework-output/implementation"` | Where the implementation stage writes. |
+| `quality_package` | path | `"{project-root}/.framework-output/quality"` | Where the quality stage writes its package. Restores a key defined in the archived QE work but dropped when those skills merged into the live tree; adding it with a default breaks no existing `project.toml`. |
 | `knowledge_base_path` | path | _(no default)_ | Path to the KB repository. **Critical:** the KB lives in its own repo, so this path almost always points outside `{project-root}` (typically `"../knowledge-base"` for a sibling repo). Absolute paths are also valid. If unset, the KB-stage skills error early with a helpful message. |
 
 #### `[project.testing]`
@@ -418,6 +440,7 @@ preferences. The block deep-merges field-by-field with `framework.user.toml`'s
 | Field | Type | Purpose |
 |---|---|---|
 | `role` | enum | (SoD only) The role this user operates as on this project. Values: `BA`, `Architect`, `BSA`, `Developer`, `Tester`, `KB-Steward`. Compared against `[stages.<stage>].write_role` at every write boundary. Project-scoped because the same person may act as different roles on different projects. |
+| `active_feature` | string | (only meaningful when `features.toml` exists) Which registered feature this person is currently working on. Must resolve to a declared `id` in `features.toml` — see § 2.8/§ 2.9. Project-scoped and personal for the identical reason `role` is: the same person works different features on different projects, and both fields are consulted at the same write boundaries. |
 
 Typical contents are one or two sections — see `project.user.toml.example`.
 
@@ -567,7 +590,156 @@ An add-on is **discovered** by the host's multi-root `.agents/skills/` scan when
 opened as a workspace folder — the manifest does not drive discovery; it drives
 enumeration and registry labelling.
 
-### 2.8 Preset manifest — `preset.toml`
+### 2.8 The feature registry — `features.toml`
+
+**Location:** `{project-root}/features.toml`. **Not one of the five layers above** —
+it is project *data* (which features exist), not configuration (how the framework
+should behave), so it is filed as a committed peer of `project.toml` rather than a
+section within it. Filing it under `[project]` would have meant answering
+layer-precedence questions it does not deserve (can `project.user.toml` override a
+feature?) and would have made the registry conflict-prone in the same file that
+holds rarely-edited settings like SoD policy and repo definitions.
+
+**The presence of this file is the opt-in — no separate config flag.** Resolution in
+every feature-aware skill is exactly two lines:
+
+```
+If features.toml exists  → resolve the active feature; write feature-scoped paths.
+If it does not           → behave exactly as today.
+```
+
+**New projects get this file at bootstrap; existing projects never do.** A `fresh`
+`start-project` run writes a comment-only `features.toml`, so feature-scoped paths
+are the default for new adoption rather than something a team has to discover. A
+project bootstrapped before that default, or one re-baselined onto an existing
+artifact tree, is untouched: `start-project` skips the file in its `rebaseline` and
+`extend-repos` modes, precisely because artifacts already on flat paths would be
+left behind by a change that only moves the *next* write. Those projects opt in
+through `select-feature` when their owner chooses to.
+
+Artifacts already on disk in a flat (non-feature-scoped) layout stay where they are
+and keep working. The framework offers a migration for one feature's working-tree
+directory at the moment that feature is next worked (see
+`references/ai-principles/feature-precondition.md`); it never sweeps a project, and
+it never moves anything unasked.
+
+**Shape** (see `features.toml.example` for the full annotated file):
+
+```toml
+[[features]]
+id      = "alert-customer"
+title   = "Alert customer when a refund is delayed"
+created = 2026-08-11
+ticket  = "ACME-1247"          # optional
+repos   = ["api-billing"]      # optional; codes from [[project.repos]]
+```
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `id` | string | yes | The directory segment and the feature's stable identity. A lowercase kebab slug (`^[a-z0-9]+(-[a-z0-9]+)*$`), used verbatim as a directory name and as the `{feature-id}-` filename prefix. Proposed at mint time — from an existing `docs/` directory name when one matches this work, otherwise from the title — and unique across the registry. Independent of the title thereafter: once artifacts exist under it the `id` is frozen, so editing a `title` never renames a directory. There is no allocated number; see the note on ordinals below. |
+| `title` | string | yes | Human-readable one-line description. Freely editable after minting — renaming the title does not rename the directory. |
+| `created` | date | yes | ISO date the entry was minted. |
+| `ticket` | string | no | External tracker reference (Jira key, ADO work item, etc.). |
+| `repos` | array<string> | no | `[[project.repos]].code` values this feature is expected to touch. **Advisory, not authoritative** — each `create-*` skill's own run-time scope prompt (single-repo vs. cross-cutting) always wins when it diverges, because scope genuinely changes during discovery. When the run-time answer diverges from `repos`, the skill should offer to update this field rather than let the two drift apart silently. |
+
+**Absence vs. emptiness.** No `features.toml` means the project is not
+feature-scoped. An empty-but-present file (no `[[features]]` entries) is also legal
+and means "feature-scoped, nothing minted yet" — the normal state immediately after
+a `fresh` bootstrap or a manual opt-in, and it needs no scaffolding trick to
+represent, unlike an empty array-of-tables declared inline in TOML. Validation
+treats it as a warning-level observation, never an error, so a newly bootstrapped
+project passes cleanly before its first feature exists.
+
+**There is no ordinal prefix, and the reason is worth recording.** IDs were
+originally specified with an allocated ordinal ahead of the slug, mirroring the
+`ADR-NNNN-` naming convention, so that `ls` would show features in creation order. That was dropped
+before the format was ever used in anger, because **nothing consumed the number.**
+No skill, template or check read the ordinal and did anything with it: every
+reference to it was machinery for maintaining it — allocation, uniqueness
+validation, and a prefix-stripping rule for matching pre-opt-in directories. Its
+only real consumer was `ls`.
+
+`created` covers what the ordinal was really being read for, and more truthfully:
+it records the date a feature was minted rather than its position in an allocation
+sequence, and it survives gaps. It is not a strict replacement, and the difference
+is worth stating plainly — an ordinal is a *total* order, whereas `created` is
+day-granular, so two features minted on the same day tie, and the field is required
+by convention rather than by any check (§ 4's rules 13-16 do not mention it).
+Neither limit costs anything in practice: this file is append-only, so entry order
+is itself a total order and a finer-grained one than any date, and nothing in the
+framework sorts on `created` today.
+
+Removing it also removed a manufactured hazard. Allocating `max + 1` invents a
+shared counter, so two people minting a feature on separate branches at the same
+time would compute the *same* next ordinal — a collision that had to be caught by
+this file being committed, surfacing as a git merge conflict. A slug has no counter
+to contend over: two people minting different features never collide at all, and
+two people choosing the *same* slug is a genuine duplicate identity that rule 14
+rejects. The safety mechanism was protecting the design from itself.
+
+**What the prefix did buy, and how that is covered instead.** It made a feature
+directory self-identifying — an ordinal-prefixed entry under `docs/` was unmistakably
+a feature, where `docs/refunds/` could be any folder. The mitigation is to treat this file as
+the only source of truth for what features exist: **enumerate features from the
+registry, never by listing directories.** Nothing in the framework does otherwise
+today.
+
+The corollary is a convention rather than a validated rule: a slug should not
+collide with a non-feature directory under `docs/`. Nothing here can enforce it,
+because a registry file says nothing about what else lives in the tree, and the
+consequence is not an error but a silent merge — the resolution rule in
+`references/ai-principles/feature-precondition.md` finds `docs/architecture/`
+matching a feature named `architecture` and adopts it as that feature's working
+tree. `select-feature` therefore *asks* at mint time — unconditionally, whenever
+a proposed `id` matches a `docs/` directory no registered feature owns — because
+that is the only moment both the proposed name and the directory listing are in
+view, and because a match is equally consistent with the directory being this
+feature's work (the desired outcome, nothing to move) or something unrelated (a
+silent merge). Nothing on disk distinguishes the two, so it cannot be inferred.
+Since no validator can enforce the convention, that question is the only
+defence, and it must not be conditional on the user raising it first.
+
+The prefix also allowed two features to share a slug, distinguished only by number.
+That is a loss worth taking: two `refunds` features separated only by their ordinals
+are near identical at a glance and invite exactly the confusion feature scoping exists
+to prevent, so being forced to name them apart is the better outcome.
+
+**Deliberately not in the registry:** any `status` or `lifecycle` field. Feature
+status/lifecycle tracking is out of scope for this change (see
+`_docs/feature-id-minimal-plan.md` § 1) — the registry carries identity only.
+
+### 2.9 The active feature — `[user].active_feature`
+
+**Location:** `project.user.toml`, Layer 4 (gitignored, personal, machine-local) —
+see the `active_feature` row in § 2.4's field table.
+
+```toml
+[user]
+role           = "BA"
+active_feature = "alert-customer"
+```
+
+**The registry is shared truth; the pointer is personal state.** Two people on the
+same project routinely work different features at the same time; neither should be
+able to change the other's working context by committing a file. Putting the
+pointer in Layer 4 makes concurrent work the default rather than a special case.
+
+**Resolution rule.** `active_feature` must resolve to a declared `id` in
+`features.toml`. If it is set but unresolvable (typo, or the feature was never
+committed), that is an **error**, not a silent fallback — inventing a directory for
+an unregistered feature is exactly the drift this mechanism exists to prevent.
+
+**Selected, never inferred.** `active_feature` is written only by `select-feature`
+(directly, or as the closing step of minting a new feature). No other skill writes
+it as a side effect of running.
+
+**Every feature-scoped skill echoes the resolved feature before its first
+read/write.** A `review-*` or coverage run against the wrong feature returns a
+confident verdict about the wrong artifacts, which is as damaging as a misplaced
+write and harder to notice — so the echo applies to read-side skills too, before
+their first read rather than their first write.
+
+### 2.10 Preset manifest — `preset.toml`
 
 A **preset** is a reusable bundle of customization files installable as a unit.
 Presets ship in add-on repos or local `presets/` directories and are registered
@@ -634,7 +806,7 @@ The `[[preset.files]]` array is documentation — the loader actually globs
 The manifest provides upfront discoverability so `manage-presets show` can
 describe a preset without parsing every file.
 
-### 2.9 Preset registry — `presets.toml`
+### 2.11 Preset registry — `presets.toml`
 
 The **preset registry** tracks which presets are installed and their enable
 state. It lives at `{project-root}/presets.toml` (committed) with an optional
@@ -832,7 +1004,7 @@ skill's contract assumes these have already passed.
 2. Every `[[project.repos]]` entry has a unique `code`.
 3. At most one `[[project.repos]]` entry has `primary = true`.
 4. `project.default_flow`, when set, is one of the three flow values.
-5. Every path token used (`{project-root}` etc.) is one of the four defined in § 1.5.
+5. Every path token used (`{project-root}` etc.) is one of the five defined in § 1.5.
 6. `_suppress = true` only appears in array-of-table entries with a `code` or `id`.
 6a. `[project.testing].qe_repo`, when set, must be a non-empty string matching one declared `[[project.repos]].code`. Warn when the referenced repo's `role` is not `test-automation` or `qe`.
 6b. `[project.elicitation].re_verification_gate`, when set, must be one of `ask`, `review`, `automated`. An unrecognised value is an error, not a silent fallback to `ask` — a typo'd gate mode must not quietly downgrade the close-out to the AI's choice.
@@ -846,23 +1018,38 @@ skill's contract assumes these have already passed.
 11. `[project].artifact_subdir` (when set) is a bare relative path: no leading slash, no path tokens.
 12. **Artifact frontmatter (cross-cutting):** any artifact written under a `_cross-cutting/` directory MUST carry an `affects_repos` array in its YAML frontmatter, and every value MUST resolve to a known `[[project.repos]].code`. Single-repo artifacts MAY omit the field; if present, must have exactly one entry matching the artifact's `<repo-code>` directory.
 
+**Config — feature registry (opt-in, `features.toml`):** these rules apply only
+when `features.toml` exists; a project without one is not in feature-scoped mode
+and none of the following fires.
+
+13. Every `[[features]].id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` — a lowercase kebab
+    slug, used verbatim as a directory name.
+14. Every `[[features]].id` is unique. Two features cannot share a directory, so a
+    duplicate is an error rather than a warning; the fix is to differentiate the
+    slug (`refunds-api` and `refunds-ui`, not two `refunds`).
+15. `[user].active_feature` (when set in `project.user.toml`) resolves to a
+    declared `[[features]].id`. Unset is valid (see § 2.9); set-but-unresolvable
+    is an error, including when `features.toml` is present but empty.
+16. Every `[[features]].repos` entry (when present) resolves to a known
+    `[[project.repos]].code`.
+
 **Config — hooks (per § 2.5.1):**
 
-13. `[[hooks]].code` must be unique within the skill after all layers are merged.
-14. `[[hooks]].skill` must resolve to a registered skill in the catalog.
-15. `[[hooks]].event` must be one of `before` or `after`.
-16. `[[hooks]].priority`, when specified, must be an integer in [1, 999].
-17. `[[hooks]].prompt` is required when `optional = true`.
-18. `[[hooks]].condition`, when specified, must be a syntactically valid expression (dot-path, comparison operator, value).
-19. No circular hook dependencies: if skill A hooks skill B, skill B cannot hook skill A (directly or transitively).
+17. `[[hooks]].code` must be unique within the skill after all layers are merged.
+18. `[[hooks]].skill` must resolve to a registered skill in the catalog.
+19. `[[hooks]].event` must be one of `before` or `after`.
+20. `[[hooks]].priority`, when specified, must be an integer in [1, 999].
+21. `[[hooks]].prompt` is required when `optional = true`.
+22. `[[hooks]].condition`, when specified, must be a syntactically valid expression (dot-path, comparison operator, value).
+23. No circular hook dependencies: if skill A hooks skill B, skill B cannot hook skill A (directly or transitively).
 
-**Config — presets (per § 2.8 and § 2.9):**
+**Config — presets (per § 2.10 and § 2.11):**
 
-20. `[[presets]].name` must match the `[preset].name` in the referenced `preset.toml`.
-21. `[[presets]].source` must be a resolvable path containing a valid `preset.toml`.
-22. `[preset].conflicts_with` entries must not include any preset that is also enabled in `presets.toml`.
-23. `[preset].extends` entries must resolve to registered presets and form an acyclic graph.
-24. `[[preset.files]].skill` must match a registered skill name.
+24. `[[presets]].name` must match the `[preset].name` in the referenced `preset.toml`.
+25. `[[presets]].source` must be a resolvable path containing a valid `preset.toml`.
+26. `[preset].conflicts_with` entries must not include any preset that is also enabled in `presets.toml`.
+27. `[preset].extends` entries must resolve to registered presets and form an acyclic graph.
+28. `[[preset.files]].skill` must match a registered skill name.
 
 **KB:**
 
@@ -892,16 +1079,24 @@ two subdirectory conventions:
 ```
 <host-repo>/<artifact_subdir>/<stage>/
   ├── <repo-code-1>/                     ← single-repo features for that source repo
-  │   ├── <feature-id>-<stage>.md
+  │   ├── <feature-id>/                  ← one directory per feature
+  │   │   └── <feature-id>-<stage>.md
   │   └── ...
   ├── <repo-code-2>/
   │   └── ...
   └── _cross-cutting/                    ← features spanning >1 source repo
-      └── <feature-id>-<stage>.md
+      └── <feature-id>/
+          └── <feature-id>-<stage>.md
 ```
 
 - `<repo-code>/` directories hold artifacts for single-repo features. The
   directory name matches a `code` value from `[[project.repos]]`.
+- `<feature-id>/` nests *inside* `<repo-code>/` and `_cross-cutting/`, never
+  outside either. `<repo-code>/` is the boundary `[stages.<stage>].write_role`
+  enforces, and a role check must keep corresponding to a subtree, so the
+  feature directory cannot straddle it. The segment is conditional on
+  `features.toml` existing; see
+  `references/ai-principles/feature-precondition.md`.
 - `_cross-cutting/` holds artifacts for features that span multiple source
   repos. Every artifact under `_cross-cutting/` MUST carry an `affects_repos`
   array in its YAML frontmatter listing the affected `[[project.repos]].code`

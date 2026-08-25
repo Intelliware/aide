@@ -28,7 +28,7 @@ re-run for re-validation.
 - The user says "review implementation package", "validate the implementation
   plan", "check increment readiness", "pre-execution review", "approve the
   implementation plan", or "is the plan ready for execution"
-- An implementation package exists at `{project.paths.implementation_package}/`
+- An implementation package exists at `{project.paths.implementation_package}/{feature-id}/`
 - The user has not yet started executing increments
 
 ## When NOT to use
@@ -46,12 +46,16 @@ re-run for re-validation.
 
 | Input | Source | Required |
 |---|---|---|
-| Implementation package | `{project.paths.implementation_package}/` (incl. all `INC-XXX.md`, `implementation-package.md`, `increment-status.md`, `bugs-and-issues-log.md`, `change-tracker.md`) | Yes |
+| Implementation package | `{project.paths.implementation_package}/{feature-id}/` (incl. all `INC-XXX.md`, `implementation-package.md`, `increment-status.md`, `bugs-and-issues-log.md`, `change-tracker.md`) | Yes |
 | Approved Requirements Package | `{project.paths.requirements_package}/` | Yes |
 | Approved Design Package | `{project.paths.design_package}/` | Yes |
 | Canonical Increment Shape spec | `templates/blocks/planning/*.md` (8 blocks) and `references/canonical-increment-shape-spec.md` | Yes |
 
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Review 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-implementation-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved package path before Review 1.
 
 ## Workflow
 
@@ -93,13 +97,13 @@ A review report containing:
 - Per-increment findings (organized by INC ID)
 - A consolidated issue list with severity (Critical / Important / Minor)
 - Two Format 4 findings files from reviews 8–9, written to
-  `{project.paths.implementation_package}/review/adversarial-findings.md` and
+  `{project.paths.implementation_package}/{feature-id}/review/adversarial-findings.md` and
   `.../edge-case-findings.md`
 - A final **GO** or **NO-GO** verdict
 - If NO-GO: explicit required fixes before re-validation
 
 The verdict is also recorded in
-`{project.paths.implementation_package}/change-tracker.md`.
+`{project.paths.implementation_package}/{feature-id}/change-tracker.md`.
 
 ## Next skill
 

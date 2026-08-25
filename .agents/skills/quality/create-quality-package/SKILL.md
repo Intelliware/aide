@@ -67,6 +67,10 @@ user what you understood and what you produced; wait for their explicit
 acknowledgement (or correction) before proceeding. This applies regardless of
 which step you are on. Halt the step if the user disagrees.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-quality-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
+
 ## Workflow
 
 Sequenced steps. Run one step at a time. Read each `steps/<n>.md` only when you
@@ -113,10 +117,10 @@ per-stage touchpoint map is in `references/quality-in-the-lifecycle.md`.
 
 | Artifact | Path | Format |
 |---|---|---|
-| Assembled quality package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/quality/<repo-code-or-_cross-cutting>/<feature-id>-quality.md`; legacy: `{paths.quality_path}/{feature-id}-quality.md`) | Markdown (composed per `templates/compositions/greenfield-quality-package.yaml`) |
-| Per-section block files | `docs/<feature>/quality-package/quality/*.md` | Markdown (one block per file) |
-| Test-traceability matrix | `docs/<feature>/quality-package/quality/traceability.md` | Markdown table — test ↔ AC ↔ FR/NFR ↔ INC |
-| Change tracker continuation | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table |
+| Assembled quality package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/quality/<repo-code-or-_cross-cutting>/<feature-id>/<feature-id>-quality.md`; legacy: `{paths.quality_package}/{feature-id}/{feature-id}-quality.md`) | Markdown (composed per `templates/compositions/greenfield-quality-package.yaml`) |
+| Per-section block files | `docs/<feature-id>/quality-package/quality/*.md` | Markdown (one block per file) |
+| Test-traceability matrix | `docs/<feature-id>/quality-package/quality/traceability.md` | Markdown table — test ↔ AC ↔ FR/NFR ↔ INC |
+| Change tracker continuation | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table |
 
 ## Next skill
 

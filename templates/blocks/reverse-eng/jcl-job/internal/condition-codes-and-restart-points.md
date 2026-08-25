@@ -5,6 +5,7 @@ applies-to: [re-jcl-job-internal]
 requires-decision-from: [code-reader]
 optional: false
 order-hint: 160
+last_verified_against_commit: ""  # populated by the reverse-engineer-* skill at render time — full 40-char SHA of the source repo
 ---
 
 ## 6. Condition Codes and Restart Points
