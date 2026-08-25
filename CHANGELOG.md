@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.4.0` |
+| Current artifact version | `2.5.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,46 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.5.0` — 2026-08-25
+
+Adds `generate-re-skill`, a skill that builds a complete reverse-engineering skill —
+`SKILL.md`, references, compositions, and block templates — for a technology stack the
+eleven built-in RE domain types don't cover (GraphQL servers, serverless functions, ML
+pipelines, CLI tools, etc.). `analyze-repository` gains two new stages that route to it:
+Stage 0 registers the repo in `project.toml` if it isn't already, and Stage 2b hands off
+to `generate-re-skill` when no domain type matches with reasonable confidence. Two
+unrelated fixes shipped in the same PR: a line-count fix that keeps
+`analyze-repository/SKILL.md` under the 200-line self-documenting-skill cap after Stage
+0/2b were added, and a `last_verified_against_commit` freshness field added to the
+mainframe block templates.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-25 | Addition | skills | `.agents/skills/reverse-engineering/generate-re-skill/` | New skill: six-stage workflow (analyze stack, research stack, define templates, generate skill, review flow, execute skill) that produces a complete `reverse-engineer-<type>` skill for a stack not covered by the eleven built-in domain types. | branch `feature/re-skill-generator` | ☐ Pending |
+| 2 | 2026-08-25 | Addition | references | `references/elicitation-patterns/stack-discovery.md` | New elicitation pattern for gathering the stack characteristics `generate-re-skill` needs before drafting templates. | branch `feature/re-skill-generator` | ☐ Pending |
+| 3 | 2026-08-25 | Addition | skills | `.agents/skills/reverse-engineering/analyze-repository/references/repo-registration.md`, `references/unsupported-stack-routing.md` | Procedural bodies for the new Stage 0 (`project.toml` registration check) and Stage 2b (unsupported-stack routing to `generate-re-skill`), kept in `references/` rather than inline so `SKILL.md` stays under the 200-line cap. | branch `feature/re-skill-generator` | ☐ Pending |
+| 4 | 2026-08-25 | Addition | docs | `_docs/skills-test-results-2026-08-19.md` | Test-plan run log covering the new skill. | branch `feature/re-skill-generator` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-25 | Source Update | skills | `.agents/skills/reverse-engineering/analyze-repository/SKILL.md` | Added Stage 0 (repository registration check) and Stage 2b (unsupported-stack detection, routing to `generate-re-skill` below ~70% confidence) as short pointers into the new reference files. | branch `feature/re-skill-generator` | ☐ Pending |
+| 2 | 2026-08-25 | Source Update | skills | `.agents/skills/reverse-engineering/README.md`, `.agents/skills/_registry/workflow-graph.yaml`, `.agents/skills/_registry/skills.csv`, `.agents/skills/_registry/skills.json` | Registered `generate-re-skill` in the `anytime` workflow list and the skill registry; README now documents it alongside the eleven domain skills. | branch `feature/re-skill-generator` | ☐ Pending |
+| 3 | 2026-08-25 | Correction | skills | `reverse-engineer-{cobol-program,copybook-library,jcl-job}/SKILL.md` and their block templates under `templates/blocks/reverse-eng/` | Added a `last_verified_against_commit` freshness field — none of the mainframe block templates declared a source-commit field despite their content going stale as the source repo changes. Bundled into this PR per operator instruction; not caused by this branch's own work. | branch `feature/re-skill-generator` | ☐ Pending |
+| 4 | 2026-08-25 | Correction | skills | `.agents/skills/reverse-engineering/analyze-repository/SKILL.md` | Fixed the file exceeding the 200-line self-documenting-skill cap (216 lines after Stage 0/2b were added inline) — the only `SKILL.md` in the registry over the limit. Moved both stages' procedural bodies to `references/`, back to 166 lines. | branch `feature/re-skill-generator` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.4.0` (new skill, new elicitation pattern — both
+backwards-compatible). Additive: `analyze-repository`'s existing eleven-way dispatch is
+unchanged for any repo that already matches a domain type — Stage 0 and Stage 2b are
+only reached when a repo doesn't already resolve as before. Landed via PR 2047.
+
+---
 
 ### `2.4.0` — 2026-08-16
 
