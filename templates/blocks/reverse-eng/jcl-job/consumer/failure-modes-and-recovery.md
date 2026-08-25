@@ -5,6 +5,7 @@ applies-to: [re-jcl-job-consumer]
 requires-decision-from: [code-reader]
 optional: false
 order-hint: 320
+last_verified_against_commit: ""  # populated by the reverse-engineer-* skill at render time — full 40-char SHA of the source repo
 ---
 
 ## 15. Failure Modes and Recovery

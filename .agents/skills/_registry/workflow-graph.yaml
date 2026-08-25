@@ -116,13 +116,15 @@ flows:
     sequence:
       - skill: start-project
       - skill: analyze-repository
-      # analyze-repository selects ONE of the eleven domain skills at runtime:
+      # analyze-repository selects ONE of the domain skills at runtime:
       #   reverse-engineer-api, reverse-engineer-api-framework,
       #   reverse-engineer-database, reverse-engineer-mobile-app,
       #   reverse-engineer-mobile-framework, reverse-engineer-ui-framework,
       #   reverse-engineer-web-app, reverse-engineer-cobol-program,
       #   reverse-engineer-copybook-library, reverse-engineer-jcl-job,
-      #   reverse-engineer-test-suite.
+      #   reverse-engineer-test-suite, reverse-engineer-serverless-lambda.
+      # When no domain matches, analyze-repository routes to generate-re-skill
+      # which can create new domain skills like reverse-engineer-serverless-lambda.
       # The placeholder below is a dispatcher slot — validation skips it.
       - skill: reverse-engineer-<dynamic>
         dispatcher: analyze-repository
@@ -228,6 +230,9 @@ anytime:
   - manage-bugs
   - navigate-knowledge-base
   - detect-knowledge-base-drift
+  # RE skill generator. Invoked by analyze-repository when no domain type matches,
+  # or directly when user wants to create a new RE skill for an unsupported stack.
+  - generate-re-skill
   # Adversarial-review layer. Both are runnable against any A.I.D.E. artifact and are
   # also invoked as sub-reviews 7-8 by review-reverse-engineering-package.
   - review-adversarial
