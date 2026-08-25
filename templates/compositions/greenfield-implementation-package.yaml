@@ -2,8 +2,9 @@
 #
 # Implementation plan composed of the 8 canonical planning blocks (the
 # "increment shape") wrapped with shared overview, glossary, and change-log.
-# This composition produces ONE increment per file. The set of all increments
-# for a project lives under paths.planning_path/.
+# This composition produces ONE increment per file. A feature's increments live
+# together under {project.paths.implementation_package}/{feature-id}/, so the
+# stage root holds one directory per feature rather than a flat set.
 #
 # Canonical increment shape:
 #   1. increment-identity     (id, title, status, owners, version)
@@ -20,7 +21,10 @@ description: Implementation plan for a single increment using the canonical 8-bl
 applies-to-flow: greenfield
 package-type: implementation
 
-default-output-path: "{paths.planning_path}/{increment-id}.md"
+# The `{feature-id}/` segment applies only when `features.toml` exists; drop it
+# otherwise. See references/ai-principles/feature-precondition.md. `{increment-id}`
+# takes no `{feature-id}-` prefix — the enclosing segment is what associates it.
+default-output-path: "{project.paths.implementation_package}/{feature-id}/{increment-id}.md"
 
 blocks:
   # ---- Wrapper: framing ----

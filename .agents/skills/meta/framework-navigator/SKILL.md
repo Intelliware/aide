@@ -43,7 +43,7 @@ See `references/INPUTS-OUTPUTS.md`. Primary inputs:
 ## Workflow
 
 1. **Detect mode** — goal vs. catalog. See `steps/01-detect-mode.md`.
-2. **State probe** (always; cheap, informs both modes). Read `project.toml` and check stage-artifact existence. See `steps/02-state-probe.md` and `references/state-probe.md`.
+2. **State probe** (always; cheap, informs both modes). Read `project.toml` and check stage-artifact existence, plus — when `features.toml` exists — the active feature (opt-in; no-op for projects that never ran `select-feature`). See `steps/02-state-probe.md` and `references/state-probe.md`.
 3. **Match or render**:
    - Goal mode: match utterance to catalog descriptions, score candidates via `references/recommendation-rubric.md`, ask up to 2 disambiguating questions if needed. See `steps/03-match-or-render.md`.
    - Catalog mode: render stage-grouped table + flow sequences + anytime list.
@@ -79,6 +79,7 @@ Common targets and the trigger phrase the navigator emits to the user:
 - `create-requirements-package` — "Create the requirements package for `<feature>`."
 - `document-quick-change` — "Document a quick change for `<scope>`."
 - `customize-framework` — "Customize the framework for this project."
+- `select-feature` — "Select (or start) the feature I'm working on." (surfaced as a prerequisite, not a standalone recommendation, when `features.toml` exists but no feature is active — see `references/ai-principles/feature-precondition.md` Mode C)
 
 ## Common mistakes
 
@@ -89,3 +90,4 @@ Common targets and the trigger phrase the navigator emits to the user:
 - Doing the recommended work yourself instead of handing off — emit the trigger phrase and stop.
 - Quoting a skill name that is not in `skills/_registry/skills.csv` (always cross-check).
 - Pulling stage names or flow names from training-data instinct rather than `workflow-graph.yaml`.
+- Halting or refusing to recommend when no feature is active. The navigator surfaces `select-feature` as a prerequisite note (like any other unmet gate) — it never blocks its own answer on it.

@@ -6,7 +6,7 @@
 |---|---|---|---|
 | Working-tree diff | `git diff` (uncommitted) | Yes | The artifact being packaged |
 | Test runner / build tools | environment | Yes | Re-verify after fix cycle |
-| Implementation package | `{project.paths.implementation_package}/` | If present | Provides INC / FR traceability for commit messages and PR body |
+| Implementation package | `{project.paths.implementation_package}/{feature-id}/` | If present | Provides INC / FR traceability for commit messages and PR body |
 | Requirements package | `{project.paths.requirements_package}/` | If present | Cites FR IDs in PR body |
 | Design package | `{project.paths.design_package}/` | If present | Cites design sections in PR body |
 | Coding standards | `_assets/standards/` | If present | Drives the standards-compliance review lens |

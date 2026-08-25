@@ -30,6 +30,21 @@ whichever comes first).
 | File present, malformed | Recommend `customize-framework` or manual repair; do not guess fields. |
 | File present, valid | Continue with subsequent checks; cache `[project].default_flow`, `[project.paths]`, `knowledge_base_path`, `[project.elicitation]`. |
 
+### Step 1b — feature registry (opt-in)
+
+Check for `features.toml` at the project root (sibling to `project.toml`).
+
+| Finding | Implication |
+|---|---|
+| Missing | Project has not opted into feature-scoped paths. `active_feature` stays `None`; no downstream implication — every other check proceeds exactly as if this step did not exist. |
+| Present | Resolve `[user].active_feature` from `project.user.toml` (see `config/SCHEMAS.md` § 2.9). Record it if it names a feature present in `features.toml`; otherwise record `None` and note the stale-pointer case. |
+
+This is a probe, not a gate — the navigator never halts on a missing or stale
+active feature. It only informs the recommendation (step 03 may add
+`select-feature` as a prerequisite ahead of a feature-aware skill) and the
+catalog-mode footer. See `references/ai-principles/feature-precondition.md`
+Mode C for the full rationale.
+
 ### Step 2 — flow declaration
 
 Inspect `[project].default_flow`:
@@ -103,6 +118,8 @@ on-disk artifact. Fields:
 {
   "project_toml_present": bool,
   "flow": "greenfield" | "brownfield" | "quick-dev" | None,
+  "features_toml_present": bool,
+  "active_feature": <feature-id string | None>,
   "knowledge_base_path": <resolved path | None>,
   "kb_built": bool,
   "stage_artifacts": {

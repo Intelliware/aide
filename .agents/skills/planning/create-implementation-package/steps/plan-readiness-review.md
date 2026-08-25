@@ -28,7 +28,7 @@ After all increments are written and the four support documents
 
 | Input | Source | Required |
 |---|---|---|
-| Implementation package directory | `{project.paths.implementation_package}/` | Yes |
+| Implementation package directory | `{project.paths.implementation_package}/{feature-id}/` | Yes |
 | Canonical Increment Shape spec | `references/canonical-increment-shape.md` + `templates/blocks/planning/*.md` | Yes |
 | Requirements Package | for FR coverage check | Yes |
 | Solution Design Package | for design coverage check | Yes |

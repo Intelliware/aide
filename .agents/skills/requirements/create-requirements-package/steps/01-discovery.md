@@ -22,7 +22,7 @@ Read one reference at a time. Produce the artifact, present it, wait for user ac
 
 ## Sub-steps (run in order)
 
-| Step | Reference | Output (under `docs/<feature>/requirements-package/discovery/`) |
+| Step | Reference | Output (under `docs/<feature-id>/requirements-package/discovery/`) |
 |---|---|---|
 | 0 | (workflow — no reference) | `change-description.md` (who/what/why; hard gate before Step 1) |
 | 1 | `references/discovery-workflow.md` § codebase-discovery | `codebase-discovery.md` |

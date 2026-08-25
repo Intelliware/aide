@@ -117,9 +117,9 @@ Follows the shared dispatcher pattern in
 
 ```
 meta/review-adversarial \
-  --target={project.paths.implementation_package}/implementation-package.md \
+  --target={project.paths.implementation_package}/{feature-id}/implementation-package.md \
   --stage=planning \
-  --output-path={project.paths.implementation_package}/review/adversarial-findings.md
+  --output-path={project.paths.implementation_package}/{feature-id}/review/adversarial-findings.md
 ```
 
 For a plan, the attitude lens earns its keep on increments that read as complete but
@@ -131,9 +131,9 @@ this one asks whether it is honest about what it will take.
 
 ```
 meta/review-edge-case-hunter \
-  --target={project.paths.implementation_package}/implementation-package.md \
+  --target={project.paths.implementation_package}/{feature-id}/implementation-package.md \
   --stage=planning \
-  --output-path={project.paths.implementation_package}/review/edge-case-findings.md
+  --output-path={project.paths.implementation_package}/{feature-id}/review/edge-case-findings.md
 ```
 
 Method-driven, so it targets what the dependency graph and gate reviews cannot see:

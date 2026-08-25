@@ -54,11 +54,11 @@ logs it and routes to `execute-increments` or `manage-bugs`.
 
 | Input | Source | Required |
 |---|---|---|
-| Assembled quality package | `{paths.quality_path}/{feature-id}-quality.md` (with GO from review) | Yes |
-| Test-case plan overview | `docs/<feature>/quality-package/quality/plan/qe-plan-overview.md` | Yes |
-| Per-increment files | `docs/<feature>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
-| Test-case status tracker | `docs/<feature>/quality-package/quality/plan/test-case-status.md` | Yes |
-| Review readiness verdict | `docs/<feature>/quality-package/review/readiness-verdict.md` | Yes (must be GO or accepted CONDITIONAL GO) |
+| Assembled quality package | `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` (with GO from review) | Yes |
+| Test-case plan overview | `docs/<feature-id>/quality-package/quality/plan/qe-plan-overview.md` | Yes |
+| Per-increment files | `docs/<feature-id>/quality-package/quality/plan/TC-XXX.md` (scaffolding) and `docs/<feature-id>/quality-package/quality/plan/<category>/TC-XXX.md` (test cases) | Yes |
+| Test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Yes |
+| Review readiness verdict | `docs/<feature-id>/quality-package/review/readiness-verdict.md` | Yes (must be GO or accepted CONDITIONAL GO) |
 | Test-artifact target repo | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to the in-scope code repo when unset | Yes |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base (when present) | `{paths.knowledge_base_path}/` via `navigate-knowledge-base` | Recommended — grounds reuse cross-check on existing test utilities |
@@ -71,6 +71,10 @@ After every drafted artifact and before any file write, summarize back to
 the user what you understood and what you produced; wait for their explicit
 acknowledgement (or correction) before proceeding. This applies regardless
 of which step you are on. Halt the step if the user disagrees.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: execute-quality-increments`) rather than guessing which feature's TC-XXX increments to run — do not fall back to creating one, because TC-XXX increments come from a quality package that already exists. If it resolves, echo the feature ID before loading the first increment.
 
 ## Workflow
 

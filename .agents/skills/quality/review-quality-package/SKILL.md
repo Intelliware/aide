@@ -43,7 +43,7 @@ is explicitly re-evaluated.
 
 | Name | Required? |
 |---|---|
-| Assembled quality package (`{paths.quality_path}/{feature-id}-quality.md`) | yes |
+| Assembled quality package (`{paths.quality_package}/{feature-id}/{feature-id}-quality.md`) | yes |
 | Quality `change-tracker.md` | yes |
 | Test-traceability matrix | yes |
 | Approved requirements package + readiness verdict | yes |
@@ -58,28 +58,39 @@ See `references/INPUTS-OUTPUTS.md` for the full table.
 Before running the review sequence, resolve the path to the assembled quality
 artifact under the project's current stage configuration.
 
+All three modes below nest the artifact under a `<feature-id>/` directory, and
+that segment is conditional on `features.toml` existing — resolve it by
+`references/ai-principles/feature-precondition.md`, which drops the segment
+(keeping the filename prefix) for a project that has not opted in. "Legacy"
+names the non-SoD layout only; it is orthogonal to feature-ID opt-in, so an
+opted-in project in legacy mode still carries the segment.
+
 - **Legacy mode.** If `[stages.quality]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
-  `{paths.quality_path}/{feature-id}-quality.md`. No scoping needed.
+  `{paths.quality_package}/{feature-id}/{feature-id}-quality.md`. No scoping needed.
 - **SoD directory mode** (`[stages.quality].dir = "..."`). The artifact lives
   under `<host-repo>/<artifact_subdir>/quality/`:
-  - **Single-repo:** `<repo-code>/<feature-id>-quality.md`. The user identifies
-    the feature; if `<repo-code>` is ambiguous, prompt.
-  - **Cross-cutting:** `_cross-cutting/<feature-id>-quality.md`. The frontmatter
-    `affects_repos` must match the upstream requirements/design artifacts
-    (cross-checked during review-coverage).
+  - **Single-repo:** `<repo-code>/<feature-id>/<feature-id>-quality.md`. The user
+    identifies the feature; if `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** `_cross-cutting/<feature-id>/<feature-id>-quality.md`. The
+    frontmatter `affects_repos` must match the upstream requirements/design
+    artifacts (cross-checked during review-coverage).
 - **SoD colocate mode:** single-repo only; artifact lives under
-  `<source-repo-path>/<artifact_subdir>/quality/<feature-id>-quality.md`.
+  `<source-repo-path>/<artifact_subdir>/quality/<feature-id>/<feature-id>-quality.md`.
 
 This step is read-only — no permission check required. When the review skill
 writes its own findings, it writes under the same host repo at
-`docs/<feature>/quality-package/review/...`.
+`docs/<feature-id>/quality-package/review/...`.
 
 If executed non-interactively without an explicit `feature-id` (and `scope` when
 ambiguous), fail fast with a clear error rather than blocking on a prompt.
 
 See `_docs/sod-multi-repo-proposal.md` § 5 and `config/SCHEMAS.md` § 5 for the
 full SoD layout geometry.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-quality-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved artifact path before Review 1.
 
 ## Workflow
 
@@ -103,9 +114,9 @@ The detailed instructions, halt conditions, and verdict templates live in
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature>/quality-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Final readiness verdict | `docs/<feature>/quality-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
-| Updated `change-tracker.md` rows | `docs/<feature>/quality-package/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+| Per-review findings | `docs/<feature-id>/quality-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Final readiness verdict | `docs/<feature-id>/quality-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 
 ## Next skill
 

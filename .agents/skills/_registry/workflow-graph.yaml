@@ -158,7 +158,7 @@ flows:
       # place, so components/, graph.json and ARCHITECTURE.md exist to link from.
       # They also feed the first requirements package below: solution-context is
       # PROJECT-scoped (<KB>/shared/), create-requirements-package is
-      # FEATURE-scoped (docs/<feature>/). The two layers do not overlap.
+      # FEATURE-scoped (docs/<feature-id>/). The two layers do not overlap.
       #
       # In brownfield, generate-ai-rules can run this early because RE Part A
       # already carries the exact stack and build/test commands it derives from —
@@ -219,6 +219,11 @@ anytime:
   - customize-framework
   - shard-document
   - track-change
+  # Feature registry / active-feature selection. Independently invocable, and
+  # also the redirect target every write-side and read-side feature-ID
+  # precondition names when no active feature resolves — see
+  # config/SCHEMAS.md § 2.8-2.9 and _docs/feature-id-minimal-plan.md § 7.
+  - select-feature
   - verify-source
   - manage-bugs
   - navigate-knowledge-base

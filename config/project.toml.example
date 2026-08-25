@@ -50,6 +50,7 @@ default_flow = "brownfield"
 requirements_package    = "{project-root}/.framework-output/requirements"
 design_package          = "{project-root}/.framework-output/design"
 implementation_package  = "{project-root}/.framework-output/implementation"
+quality_package         = "{project-root}/.framework-output/quality"
 
 # Knowledge-base path. The KB is a SEPARATE git repository — this path
 # almost always points outside {project-root}. Sibling-repo layout shown

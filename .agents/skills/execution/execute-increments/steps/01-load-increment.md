@@ -16,11 +16,11 @@ loop.
 
 1. **Resolve target increment.**
    - If the user named one (e.g., "execute INC-005"), use that.
-   - Otherwise, read `{project.paths.implementation_package}/increment-status.md`
+   - Otherwise, read `{project.paths.implementation_package}/{feature-id}/increment-status.md`
      and pick the lowest-numbered increment whose status is `not-started`
      and whose dependencies are all `completed`.
 2. **Read the increment file.** Open
-   `{project.paths.implementation_package}/INC-XXX.md`. Verify all 8
+   `{project.paths.implementation_package}/{feature-id}/INC-XXX.md`. Verify all 8
    sections of the Canonical Increment Shape are present. If any section is
    missing or empty, halt — the package failed review or has been edited;
    recommend re-running `review-implementation-package`.

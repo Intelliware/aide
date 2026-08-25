@@ -67,7 +67,7 @@ Before exiting, summarise:
 > - Gaps found: <N>
 > - Actions taken: <list — or "none, user chose to defer">
 > - Audit record:
->   `docs/<feature>/quality-package/quality/change-tracker.md` (latest
+>   `docs/<feature-id>/quality-package/quality/change-tracker.md` (latest
 >   row, Trigger: Coverage audit)
 > - Tracker bootstrap: <yes / no>
 

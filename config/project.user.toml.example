@@ -58,3 +58,12 @@ testing_strategy = "tdd-required"
 # # The role you operate as on this project. Compared against
 # # [stages.<stage>].write_role at every write boundary. Mismatch → write refused.
 # role = "Developer"   # one of: BA | Architect | BSA | Developer | Tester | KB-Steward
+#
+# # Which registered feature you are currently working on. Only meaningful once
+# # the project has opted into feature-scoped paths by creating features.toml
+# # (config/SCHEMAS.md § 2.8). Must resolve to a declared [[features]].id in
+# # that file — set by `select-feature`, not hand-edited. Personal and
+# # project-scoped for the same reason `role` is: two people on this project
+# # work different features at once, and neither's choice should affect the
+# # other's. See config/SCHEMAS.md § 2.9.
+# active_feature = "alert-customer"

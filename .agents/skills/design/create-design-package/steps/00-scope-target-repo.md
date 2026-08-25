@@ -24,13 +24,13 @@ Read the upstream requirements artifact's path to inherit scope:
 
 - **Upstream artifact under `<host-repo>/<artifact_subdir>/requirements/<repo-code>/...`:**
   this design covers the same single repo. Pin that `<repo-code>`. Output path:
-  `{project-root}/<stages.design.dir>/<artifact_subdir>/design/<repo-code>/<feature-id>-design.md`.
+  `{project-root}/<stages.design.dir>/<artifact_subdir>/design/<repo-code>/<feature-id>/<feature-id>-design.md`.
   No `affects_repos` frontmatter needed (directory encodes scope).
 
 - **Upstream artifact under `<host-repo>/<artifact_subdir>/requirements/_cross-cutting/...`:**
   read the upstream `affects_repos` frontmatter. The design inherits the same
   scope. Output path:
-  `{project-root}/<stages.design.dir>/<artifact_subdir>/design/_cross-cutting/<feature-id>-design.md`.
+  `{project-root}/<stages.design.dir>/<artifact_subdir>/design/_cross-cutting/<feature-id>/<feature-id>-design.md`.
   Copy `affects_repos` into the design artifact's YAML frontmatter (Step 2 —
   design — emits this).
 
@@ -45,7 +45,7 @@ If `[stages.design].colocate_with_source = true` (an unusual choice for the
 design stage; recommended layout uses `dir` mode), only single-repo features
 are supported — a cross-cutting design artifact has no host repo to live in.
 Inherit the upstream `<repo-code>` and write to
-`<source-repo-path>/<artifact_subdir>/design/<feature-id>-design.md`.
+`<source-repo-path>/<artifact_subdir>/design/<feature-id>/<feature-id>-design.md`.
 
 ## Interactive-only contract
 

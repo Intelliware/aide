@@ -31,7 +31,7 @@ The producing skill never decides the path; it accepts an
 ---
 schema: aide-adversarial-findings@1
 target_artifact: requirements-package      # see "target_artifact values" below
-target_path: docs/FEAT-2041/requirements-package/requirements-package.md
+target_path: docs/refund-delay-alerts/requirements-package/requirements-package.md
 target_commit: a3f9c12                     # short SHA of the repo containing the target, at review time
 produced_by: review-adversarial            # or review-edge-case-hunter
 produced_at: 2026-04-29T13:42:00Z          # ISO 8601 UTC

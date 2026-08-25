@@ -29,6 +29,14 @@ After mode detection (step 01) and the state probe (step 02), branch on mode.
    `workflow-graph.yaml` to see whether prerequisites in the active flow are
    met. Apply a 0.3 penalty if a gate is unmet, but **do not** drop the
    candidate (the recommendation will surface the prerequisite as a note).
+   **Feature-precondition gate:** if the probe reports `features_toml_present
+   == true` and `active_feature == None`, and the candidate is one of the
+   feature-aware skills listed in
+   `references/ai-principles/feature-precondition.md` (Mode A or B), add
+   `select-feature` to that candidate's prerequisites the same way an unmet
+   flow gate is added — no score penalty (selecting a feature is a one-turn
+   detour, not a missing artifact), but it must render as a prerequisite in
+   step 04's output.
 5. **Decision-rule loop:**
    - Single dominant candidate (top ≥ 0.55, ≥0.10 ahead of #2) → emit it.
    - Two close candidates → ask **one** disambiguating question chosen per

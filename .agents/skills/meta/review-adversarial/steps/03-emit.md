@@ -54,9 +54,9 @@ Title line:
 ```
 
 `<human title>` is derived from the target:
-- `requirements-package` → `Requirements Package <FEAT-ID>`
-- `design-package` → `Design Package <FEAT-ID>`
-- `implementation-package` → `Implementation Package <FEAT-ID>`
+- `requirements-package` → `Requirements Package <feature-id>`
+- `design-package` → `Design Package <feature-id>`
+- `implementation-package` → `Implementation Package <feature-id>`
 - `reverse-engineering-doc` → `RE <Part A | Part B> — <repo-slug>`
 - `knowledge-base-component` → `KB Component <component-id>`
 - `knowledge-base-instance` → `Knowledge Base — <project-slug>`

@@ -14,7 +14,7 @@ Produce the analytical foundation the requirements writing step consumes. No req
 
 ## Sequential execution rule
 
-Read one reference at a time. Each step writes a discrete artifact under `docs/<feature>/requirements-package/analysis/`. Update the assumption-log and decision-log after every sub-step (running checkpoint, not a separate skill invocation).
+Read one reference at a time. Each step writes a discrete artifact under `docs/<feature-id>/requirements-package/analysis/`. Update the assumption-log and decision-log after every sub-step (running checkpoint, not a separate skill invocation).
 
 ## Sub-steps (run in order)
 

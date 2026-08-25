@@ -135,7 +135,7 @@ with 2 entries, each tagged with the available evidence.
 > - (none)
 >
 > Triage session recorded in:
-> `docs/<feature>/quality-package/quality/change-tracker.md`
+> `docs/<feature-id>/quality-package/quality/change-tracker.md`
 > (Trigger: `Failure triage`).
 >
 > Would you like me to invoke `/manage-bugs` for the application

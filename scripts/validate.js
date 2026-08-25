@@ -19,6 +19,25 @@
  *   I. Separation-of-duties (SoD) rule enforcement against a fixture
  *      project.toml (and optional cross-cutting artifact). Run with
  *      `--project-toml PATH` to evaluate rules 7–12 from `config/SCHEMAS.md`.
+ *   J. Write-discipline binding — every `create-*` SKILL.md MUST contain a
+ *      `## Preconditions` section that cites
+ *      `references/ai-principles/write-discipline.md`. Prevents silent
+ *      decay of the write-on-acknowledge contract.
+ *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
+ *      reference under `.agents/skills/` and `templates/compositions/` must
+ *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
+ *      § 1.5, § 2.3). See `_docs/path-token-reconciliation-plan.md`.
+ *   N1. Feature-segment / retired-placeholder guardrail — every feature-scoped
+ *      composition's `default-output-path` carries `{feature-id}` as a path
+ *      segment (N1a); no retired placeholder (`<feature>`, `<feature-folder>`,
+ *      `<feature-name>`) names a per-feature directory under `docs/` or under
+ *      a `{paths.*}` token (N1b); and every per-feature artifact path spelled
+ *      out in skill or template markdown is enclosed by a `{feature-id}/`
+ *      directory (N1c). See `references/ai-principles/feature-precondition.md`.
+ *   N2. Feature registry validation against a features.toml fixture or a real
+ *      project registry. Run with `--features-toml PATH` to evaluate rules
+ *      13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
+ *      and `--project-user-toml` for `active_feature`.
  *
  * Hard errors fail the run (exit 1):
  *   - Composition references a non-existent block (A).
@@ -27,6 +46,13 @@
  *     slug != filename, applies-to empty, build-registry non-zero exit (E, F).
  *   - Composition or skill cites an elicitation pattern that does not exist (G).
  *   - Any SoD rule violation when running in --project-toml mode (I).
+ *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
+ *     undeclared `[project.paths]` key (M).
+ *   - A feature-scoped composition missing its `{feature-id}` segment, a
+ *     per-feature artifact path with no enclosing `{feature-id}/` directory, or
+ *     any retired feature placeholder in an artifact path (N1).
+ *   - Any feature-registry rule violation when running in --features-toml
+ *     mode (N2).
  *
  * Everything else is a soft warning (does not fail). Stdlib-only.
  */
@@ -90,6 +116,67 @@ const PHASE_VOCAB_ALLOW_PRAGMA = 'validate: allow-phase-vocab';
 
 // SoD enum (config/SCHEMAS.md § 4 rules 9 / 10).
 const SOD_ROLE_ENUM = ['BA', 'Architect', 'BSA', 'Developer', 'Tester', 'KB-Steward'];
+
+// Check M — [project.paths] keys a `{paths.<key>}` / `{project.paths.<key>}`
+// reference is allowed to name (config/SCHEMAS.md § 1.5 + § 2.3).
+const PROJECT_PATHS_KEYS = new Set([
+  'requirements_package',
+  'design_package',
+  'implementation_package',
+  'quality_package',
+  'knowledge_base_path',
+]);
+const PATHS_TOKEN_RE = /\{(?:project\.)?paths\.([A-Za-z_][A-Za-z0-9_]*)\}/g;
+
+// Check N1 — the [project.paths] keys whose artifacts are per-feature. A
+// composition rooted at one of these is feature-scoped and must carry the
+// {feature-id}/ segment. `knowledge_base_path` is deliberately absent: the KB
+// and the RE doc trees are keyed by repo-slug or domain, not by feature, and
+// project-change-log.yaml is rooted at {project-root} for the same reason.
+const FEATURE_SCOPED_PATH_KEYS = new Set([
+  'requirements_package',
+  'design_package',
+  'implementation_package',
+  'quality_package',
+]);
+const DEFAULT_OUTPUT_PATH_RE = /^[ \t]*default-output-path:[ \t]*"([^"]*)"/m;
+const FEATURE_SEGMENT = '{feature-id}';
+
+// Check N1c — a per-feature artifact filename carries the `{feature-id}-` prefix,
+// and the artifact must sit inside a `{feature-id}/` directory. Matching the
+// *filename* and then requiring a parent path is what separates a real path from
+// the legitimate bare-filename uses: report templates that display
+// `<feature-id>-quality.md`, prose about the prefix itself, and `filename_pattern`
+// values. The directory need not be the immediate parent, because the working
+// tree nests a package subdirectory under it
+// (`docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`), so the
+// assertion is containment, not adjacency. Both spellings are accepted: `.md`
+// prose uses `<feature-id>`, composition YAML uses `{feature-id}`.
+const FEATURE_ARTIFACT_IN_PATH_RE =
+  /([A-Za-z0-9_.<>{}/-]*\/)?[{<]feature-id[}>]-[A-Za-z0-9-]+\.md/g;
+const FEATURE_DIR_SPELLINGS = ['{feature-id}/', '<feature-id>/'];
+
+// Check N1 — spellings retired by the feature-ID rollout (phase 3b).
+// `<feature-id>` is the only placeholder permitted to name the per-feature
+// directory. These are matched only where the *parent* marks the path as an
+// A.I.D.E. artifact tree — under `docs/` or under a `{paths.*}` token — because
+// `<feature>` remains legitimate elsewhere: as a conversational placeholder in
+// elicitation prompts and trigger phrases, as the `<feature>:<sub-scope>` scope
+// ID, and as a source-tree convention in the RE blocks (`src/domain/<feature>/`),
+// which describe the *documented application's* layout, not ours.
+const RETIRED_FEATURE_ALT = '(<feature>|<feature-folder>|<feature-name>)';
+const RETIRED_IN_DOCS_RE = new RegExp(`(?<![\\w-])docs/${RETIRED_FEATURE_ALT}`, 'g');
+const RETIRED_IN_TOKEN_RE = new RegExp(
+  `\\{(?:project\\.)?paths\\.[A-Za-z_][A-Za-z0-9_]*\\}/${RETIRED_FEATURE_ALT}`,
+  'g'
+);
+
+// Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
+// used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
+// and allocating one manufactured a shared counter for concurrent minters to contend
+// over. The registry's `created` date records when a feature was minted; it is
+// day-granular and advisory, so file order is the finer-grained sequence.
+const FEATURE_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // --- frontmatter parser (same shape as build-registry.js) -------------------
 
@@ -848,6 +935,313 @@ function reGateEnumErrors(text, label) {
   return errors;
 }
 
+// M — `{paths.<key>}` / `{project.paths.<key>}` token resolution.
+//
+// Every `{paths.<name>}` or `{project.paths.<name>}` reference under
+// `templates/compositions/` and `.agents/skills/` must name a field
+// actually declared in `[project.paths]` (config/SCHEMAS.md § 2.3). These
+// are dotted addresses into config, not informal nicknames — a `<name>`
+// that matches no declared key is a broken pointer that silently diverges
+// from wherever a co-operating skill or composition actually writes. See
+// config/SCHEMAS.md § 1.5 and `_docs/path-token-reconciliation-plan.md`.
+//
+// Hard error, not a warning: this check lands green (every existing
+// violation fixed in the same change that adds it) and a warning would
+// only invite the naming scheme to drift back.
+function checkM() {
+  const errors = [];
+  const warnings = [];
+
+  const targets = [];
+  if (fs.existsSync(SKILLS_ROOT)) {
+    targets.push(...discoverFiles(SKILLS_ROOT, (name) => name.endsWith('.md')));
+  }
+  targets.push(...discoverCompositionFiles());
+
+  for (const filePath of targets.sort()) {
+    const rel = path.relative(REPO_ROOT, filePath);
+    let text;
+    try {
+      text = fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+      continue;
+    }
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      for (const tok of line.matchAll(PATHS_TOKEN_RE)) {
+        const key = tok[1];
+        if (PROJECT_PATHS_KEYS.has(key)) continue;
+        if (inCodeFence(lines, i)) continue;
+        errors.push(
+          `${rel}:${i + 1}: \`${tok[0]}\` names no declared [project.paths] ` +
+          `key — declared keys are ${[...PROJECT_PATHS_KEYS].sort().join(', ')}.`
+        );
+      }
+    }
+  }
+
+  return [errors, warnings];
+}
+
+// N1 — feature-segment presence and retired-placeholder guardrail.
+//
+// Three assertions, all about the framework's own consistency:
+//
+// N1a. Every feature-scoped composition's `default-output-path` carries
+//      `{feature-id}` as a complete path segment. Feature-scoped is derived,
+//      not listed: it means the path is rooted at one of the four per-feature
+//      `[project.paths]` keys (FEATURE_SCOPED_PATH_KEYS). Deriving it means a
+//      new stage composition is covered the day it is added.
+//
+// N1b. No retired feature placeholder survives in an A.I.D.E. artifact path.
+//      `docs/<feature>/`, `<feature-folder>` and `<feature-name>` were three
+//      spellings of one concept, and having three is what let a single
+//      feature's work be described in three mutually-consistent-looking ways.
+//      Fenced blocks are exempt, as in Check M: migration guidance has to be
+//      able to show the retired spelling to be worth reading, and a check that
+//      forbids quoting the thing it retired can only be satisfied by writing
+//      worse documentation.
+//
+// N1c. Every per-feature artifact path spelled out in skill or template
+//      markdown encloses the artifact in a `{feature-id}/` directory. N1a
+//      asserts this for composition `default-output-path` values only, which
+//      left the same defect invisible in the skill markdown that resolves
+//      those paths at runtime: `<repo-code>/<feature-id>-design.md` shipped
+//      green while the character-identical string in a composition was
+//      rejected. Note the assertion is *not* the narrower "rooted at a
+//      FEATURE_SCOPED_PATH_KEYS token" — the SoD paths begin at
+//      `<repo-code>/` or `_cross-cutting/` and are rooted at no token at all,
+//      so that form would have caught 2 of the 20 real instances. Fenced
+//      blocks are exempt, as in N1b and M.
+//
+// Hard errors, not warnings: this lands green in the same change that fixes
+// every violation it would report, and a warning would only invite the
+// spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
+// `references/ai-principles/feature-precondition.md`.
+//
+// Pairs with Check M: M asserts every path token names a real key, N1 asserts
+// that a feature-scoped path carries the feature segment — N1a for composition
+// output paths, N1c for paths written out in skill and template markdown. The
+// pair is not exhaustive, and the gap is worth knowing: a path assembled
+// across several prose sentences, or drawn as an ASCII directory tree, matches
+// no path-shaped regex and is checked by neither. `config/SCHEMAS.md` § 5.1's
+// geometry diagram was exactly that case.
+function checkN1() {
+  const errors = [];
+  const warnings = [];
+
+  for (const filePath of discoverCompositionFiles().sort()) {
+    const rel = path.relative(REPO_ROOT, filePath);
+    let text;
+    try {
+      text = fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+      continue;
+    }
+    const match = text.match(DEFAULT_OUTPUT_PATH_RE);
+    if (!match) continue;
+    const outPath = match[1];
+    const token = new RegExp(PATHS_TOKEN_RE.source).exec(outPath);
+    if (!token || !FEATURE_SCOPED_PATH_KEYS.has(token[1])) continue;
+    if (!outPath.includes(`/${FEATURE_SEGMENT}/`)) {
+      errors.push(
+        `${rel}: default-output-path \`${outPath}\` is rooted at the ` +
+        `per-feature key \`${token[1]}\` but carries no \`${FEATURE_SEGMENT}/\` ` +
+        `segment — two features' artifacts would collide in one directory. ` +
+        `See references/ai-principles/feature-precondition.md.`
+      );
+    }
+  }
+
+  const targets = [];
+  if (fs.existsSync(SKILLS_ROOT)) {
+    targets.push(...discoverFiles(SKILLS_ROOT, (name) => name.endsWith('.md')));
+  }
+  if (fs.existsSync(TEMPLATES_ROOT)) {
+    targets.push(...discoverFiles(TEMPLATES_ROOT, (name) => name.endsWith('.md')));
+  }
+  targets.push(...discoverCompositionFiles());
+
+  for (const filePath of targets.sort()) {
+    const rel = path.relative(REPO_ROOT, filePath);
+    let text;
+    try {
+      text = fs.readFileSync(filePath, 'utf-8');
+    } catch (err) {
+      continue;
+    }
+    const lines = text.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      for (const regex of [RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE]) {
+        for (const hit of lines[i].matchAll(regex)) {
+          if (inCodeFence(lines, i)) continue;
+          errors.push(
+            `${rel}:${i + 1}: \`${hit[0]}\` uses the retired placeholder ` +
+            `\`${hit[1]}\` — the per-feature directory is spelled \`<feature-id>\`.`
+          );
+        }
+      }
+      for (const hit of lines[i].matchAll(FEATURE_ARTIFACT_IN_PATH_RE)) {
+        const prefix = hit[1];
+        // A bare filename, not a path: nothing claims where it lives.
+        if (!prefix) continue;
+        if (FEATURE_DIR_SPELLINGS.some((seg) => prefix.includes(seg))) continue;
+        if (inCodeFence(lines, i)) continue;
+        errors.push(
+          `${rel}:${i + 1}: \`${hit[0]}\` names a per-feature artifact but ` +
+          `no enclosing \`${FEATURE_SEGMENT}/\` directory — two features' ` +
+          `artifacts would collide in one directory. See ` +
+          `references/ai-principles/feature-precondition.md.`
+        );
+      }
+    }
+  }
+
+  return [errors, warnings];
+}
+
+// N2 — feature registry validation (project data, opt-in).
+//
+// Implements `config/SCHEMAS.md` § 4 rules 13-16 against a real or fixture
+// `features.toml`. Separate from N1 because it validates project *data*, not
+// framework self-consistency: this script is hard-anchored to the framework
+// repo and cannot see a project's registry, which lives in another repo
+// entirely. Follows the seam Check I already established for `--project-toml`.
+//
+// Two sub-rules need a second file and are skipped when it is absent, rather
+// than assumed: `repos` cross-referencing needs `[[project.repos]]` from
+// `project.toml`, and `active_feature` resolution needs `[user]` from
+// `project.user.toml`. Skipping is reported so a partial run cannot be
+// mistaken for a clean one.
+function checkFeaturesRegistry(featuresTomlPath, projectTomlPath = null, projectUserTomlPath = null) {
+  const errors = [];
+  const warnings = [];
+
+  if (!fs.existsSync(featuresTomlPath)) {
+    return [[`${featuresTomlPath}: file not found.`], warnings];
+  }
+  let data;
+  try {
+    data = parseSimpleToml(fs.readFileSync(featuresTomlPath, 'utf-8'));
+  } catch (err) {
+    return [[`${featuresTomlPath}: malformed TOML — ${err.message}`], warnings];
+  }
+
+  const features = data.features === undefined ? [] : data.features;
+  if (!Array.isArray(features)) {
+    return [[`${featuresTomlPath}: \`features\` must be an array of tables.`], warnings];
+  }
+  if (features.length === 0) {
+    warnings.push(
+      `${featuresTomlPath}: no [[features]] entries — legal, and means ` +
+      `'opted in, no features yet' (config/SCHEMAS.md § 2.8.3).`
+    );
+  }
+
+  const idsSeen = new Map();
+  const declaredIds = new Set();
+
+  features.forEach((entry, i) => {
+    const idx = i + 1;
+    const where = `${featuresTomlPath}: [[features]] #${idx}`;
+    if (!entry || typeof entry !== 'object') {
+      errors.push(`${where}: not a table.`);
+      return;
+    }
+    const fid = entry.id;
+    if (typeof fid !== 'string' || !fid) {
+      errors.push(`${where}: missing required \`id\`.`);
+      return;
+    }
+    if (!FEATURE_ID_RE.test(fid)) {
+      errors.push(
+        `${where}: \`id\` = ${JSON.stringify(fid)} is not a lowercase kebab slug ` +
+        `(letters, digits and single hyphens; no leading, trailing or doubled ` +
+        `hyphens). It is used verbatim as a directory name.`
+      );
+      return;
+    }
+    declaredIds.add(fid);
+    if (idsSeen.has(fid)) {
+      errors.push(
+        `${where}: duplicate \`id\` ${JSON.stringify(fid)} — first declared at ` +
+        `#${idsSeen.get(fid)}. Two features cannot share a directory; ` +
+        `differentiate the slug.`
+      );
+    } else {
+      idsSeen.set(fid, idx);
+    }
+  });
+
+  if (projectTomlPath === null) {
+    warnings.push(
+      '`repos` cross-reference skipped — supply --project-toml to check each ' +
+      'entry against [[project.repos]].code.'
+    );
+  } else {
+    const repoCodes = new Set();
+    let pdata = {};
+    try {
+      pdata = parseSimpleToml(fs.readFileSync(projectTomlPath, 'utf-8'));
+    } catch (err) {
+      errors.push(`${projectTomlPath}: unreadable — ${err.message}`);
+    }
+    for (const repo of (pdata.project && pdata.project.repos) || []) {
+      if (repo && typeof repo.code === 'string') repoCodes.add(repo.code);
+    }
+    features.forEach((entry, i) => {
+      if (!entry || typeof entry !== 'object' || entry.repos === undefined) return;
+      if (!Array.isArray(entry.repos)) {
+        errors.push(
+          `${featuresTomlPath}: [[features]] #${i + 1}: \`repos\` must be an ` +
+          `array of [[project.repos]] codes.`
+        );
+        return;
+      }
+      for (const code of entry.repos) {
+        if (!repoCodes.has(code)) {
+          errors.push(
+            `${featuresTomlPath}: [[features]] #${i + 1}: \`repos\` entry ` +
+            `${JSON.stringify(code)} matches no [[project.repos]].code in ` +
+            `${path.basename(projectTomlPath)} — declared codes are ` +
+            `${[...repoCodes].sort().join(', ') || '(none)'}.`
+          );
+        }
+      }
+    });
+  }
+
+  if (projectUserTomlPath === null) {
+    warnings.push(
+      '`active_feature` resolution skipped — supply --project-user-toml to ' +
+      'check [user].active_feature against the registry.'
+    );
+  } else {
+    let udata = {};
+    try {
+      udata = parseSimpleToml(fs.readFileSync(projectUserTomlPath, 'utf-8'));
+    } catch (err) {
+      errors.push(`${projectUserTomlPath}: unreadable — ${err.message}`);
+    }
+    const active = udata.user ? udata.user.active_feature : undefined;
+    if (active === undefined || active === null) {
+      warnings.push(
+        `${projectUserTomlPath}: no [user].active_feature set — legal; ` +
+        `feature-aware skills will halt and route to \`select-feature\`.`
+      );
+    } else if (!declaredIds.has(active)) {
+      errors.push(
+        `${projectUserTomlPath}: [user].active_feature = ${JSON.stringify(active)} ` +
+        `resolves to no \`id\` in ${path.basename(featuresTomlPath)} — a stale ` +
+        `pointer sends every write to a feature that does not exist.`
+      );
+    }
+  }
+
+  return [errors, warnings];
+}
+
 function checkSod(projectTomlPath, artifactPath = null) {
   const errors = [];
   const warnings = [];
@@ -1009,6 +1403,78 @@ function checkSod(projectTomlPath, artifactPath = null) {
 }
 
 // Simple TOML parser for basic structures
+// Remove a trailing `# comment`, ignoring any `#` that sits inside a quoted
+// string. Without this, `code = "x"  # note` parses as the literal
+// `"x"  # note` — the value silently carries the comment.
+function stripInlineComment(line) {
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === "'" && !inDouble) inSingle = !inSingle;
+    else if (c === '"' && !inSingle) inDouble = !inDouble;
+    else if (c === '#' && !inSingle && !inDouble) return line.slice(0, i);
+  }
+  return line;
+}
+
+// Net `[` depth of a fragment, ignoring brackets inside quoted strings. Used to
+// decide whether an array value continues onto the next line.
+function bracketDepth(fragment) {
+  let depth = 0;
+  let inSingle = false;
+  let inDouble = false;
+  for (const c of fragment) {
+    if (c === "'" && !inDouble) inSingle = !inSingle;
+    else if (c === '"' && !inSingle) inDouble = !inDouble;
+    else if (!inSingle && !inDouble) {
+      if (c === '[') depth++;
+      else if (c === ']') depth--;
+    }
+  }
+  return depth;
+}
+
+// Split on top-level commas only, so nested arrays and quoted commas survive.
+function splitTopLevelCommas(inner) {
+  const parts = [];
+  let current = '';
+  let depth = 0;
+  let inSingle = false;
+  let inDouble = false;
+  for (const c of inner) {
+    if (c === "'" && !inDouble) { inSingle = !inSingle; current += c; continue; }
+    if (c === '"' && !inSingle) { inDouble = !inDouble; current += c; continue; }
+    if (!inSingle && !inDouble) {
+      if (c === '[') depth++;
+      else if (c === ']') depth--;
+      else if (c === ',' && depth === 0) { parts.push(current); current = ''; continue; }
+    }
+    current += c;
+  }
+  if (current.trim()) parts.push(current);
+  return parts;
+}
+
+function parseTomlValue(raw) {
+  const value = raw.trim();
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  if (value.startsWith('[') && value.endsWith(']')) {
+    const inner = value.slice(1, -1).trim();
+    if (!inner) return [];
+    return splitTopLevelCommas(inner).map(parseTomlValue);
+  }
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    return value.slice(1, -1);
+  }
+  if (value.length >= 2 && value.startsWith("'") && value.endsWith("'")) {
+    return value.slice(1, -1);
+  }
+  if (value !== '' && !isNaN(value)) return parseFloat(value);
+  return value;
+}
+
 function parseSimpleToml(text) {
   const lines = text.split('\n');
   const result = {};
@@ -1023,9 +1489,11 @@ function parseSimpleToml(text) {
       continue;
     }
 
-    // Section header
-    if (trimmed.startsWith('[') || trimmed.endsWith(']')) {
-      if (!trimmed.startsWith('[') || !trimmed.endsWith(']')) {
+    // Section header. Only a line *starting* with `[` qualifies: an inline
+    // array (`repos = ["api-billing"]`) also ends with `]` and has to reach the
+    // key/value branch below.
+    if (trimmed.startsWith('[')) {
+      if (!trimmed.endsWith(']')) {
         throw new Error(`line ${lineNo + 1}: malformed section header '${trimmed}'`);
       }
 
@@ -1089,20 +1557,52 @@ function parseSimpleToml(text) {
         throw new Error(`line ${lineNo + 1}: malformed key '${key}'`);
       }
 
-      // Parse value
-      if (value === 'true') {
-        value = true;
-      } else if (value === 'false') {
-        value = false;
-      } else if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.slice(1, -1);
-      } else if (value.startsWith("'") && value.endsWith("'")) {
-        value = value.slice(1, -1);
-      } else if (!isNaN(value)) {
-        value = parseFloat(value);
+      // Multi-line basic string (""" ... """). Checked before comment stripping,
+      // because the delimiter itself would confuse the quote tracking.
+      if (value.startsWith('"""')) {
+        const afterOpen = value.slice(3);
+        const closeOnSameLine = afterOpen.indexOf('"""');
+        if (closeOnSameLine >= 0) {
+          currentSection[key] = afterOpen.slice(0, closeOnSameLine);
+          continue;
+        }
+        const segments = [];
+        if (afterOpen !== '') segments.push(afterOpen);
+        let closed = false;
+        while (++lineNo < lines.length) {
+          const idx = lines[lineNo].indexOf('"""');
+          if (idx >= 0) {
+            segments.push(lines[lineNo].slice(0, idx));
+            closed = true;
+            break;
+          }
+          segments.push(lines[lineNo]);
+        }
+        if (!closed) {
+          throw new Error(`line ${lineNo}: unterminated multi-line string for key '${key}'`);
+        }
+        currentSection[key] = segments.join('\n');
+        continue;
       }
 
-      currentSection[key] = value;
+      let valueText = stripInlineComment(value).trim();
+
+      // Array spanning multiple lines — keep consuming until the brackets close.
+      if (valueText.startsWith('[') && bracketDepth(valueText) > 0) {
+        const segments = [valueText];
+        let depth = bracketDepth(valueText);
+        while (depth > 0 && ++lineNo < lines.length) {
+          const cleaned = stripInlineComment(lines[lineNo]).trim();
+          segments.push(cleaned);
+          depth += bracketDepth(cleaned);
+        }
+        if (depth > 0) {
+          throw new Error(`line ${lineNo}: unterminated array for key '${key}'`);
+        }
+        valueText = segments.join(' ');
+      }
+
+      currentSection[key] = parseTomlValue(valueText);
       continue;
     }
 
@@ -1229,6 +1729,31 @@ function main() {
   const frameworkTomlIdx = args.indexOf('--framework-toml');
   const frameworkTomlPath = frameworkTomlIdx >= 0 ? args[frameworkTomlIdx + 1] : null;
 
+  const featuresTomlIdx = args.indexOf('--features-toml');
+  const featuresTomlPath = featuresTomlIdx >= 0 ? args[featuresTomlIdx + 1] : null;
+
+  const projectUserTomlIdx = args.indexOf('--project-user-toml');
+  const projectUserTomlPath = projectUserTomlIdx >= 0 ? args[projectUserTomlIdx + 1] : null;
+
+  // The fixture modes below are mutually exclusive early returns, so their
+  // order is precedence, not presentation — which is why it does not follow the
+  // check letters. `--features-toml` must be tested before `--project-toml`: N2
+  // accepts a project.toml as a *companion* (rule 16 resolves `repos` against
+  // `[[project.repos]]`), so testing `--project-toml` first would capture the
+  // paired invocation as Check I and N2 would never run. Reordering these
+  // breaks two tests in test-validate.js.
+  if (featuresTomlPath) {
+    console.log(`validate.js — feature-registry check against ${featuresTomlPath}`);
+    const [n2Err, n2Warn] = checkFeaturesRegistry(
+      featuresTomlPath, projectTomlPath, projectUserTomlPath
+    );
+    printCheck('Check N2 — feature registry (features.toml)', n2Err, n2Warn);
+    console.log('\n=== Summary ===');
+    console.log(`  errors:   ${n2Err.length}`);
+    console.log(`  warnings: ${n2Warn.length}`);
+    return n2Err.length > 0 ? 1 : 0;
+  }
+
   if (frameworkTomlPath) {
     console.log(`validate.js — framework-layer guardrail check against ${frameworkTomlPath}`);
     const [kErr, kWarn] = checkToolsLayer(frameworkTomlPath);
@@ -1269,6 +1794,8 @@ function main() {
   const [hErr, hWarn] = checkH();
   const [jErr, jWarn] = checkJ();
   const [lErr, lWarn] = checkL();
+  const [mErr, mWarn] = checkM();
+  const [n1Err, n1Warn] = checkN1();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1281,13 +1808,15 @@ function main() {
     'Check H — RE skill output-structure binding',
     'Check J — write-discipline binding (create-* skills)',
     'Check L — RE close-out gate binding',
+    'Check M — {paths.<key>} token resolution',
+    'Check N1 — feature-segment / retired-placeholder guardrail',
     'Check F — build-registry.js output',
   ];
 
   const bundles = [
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
     [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
-    [lErr, lWarn], [fErr, fWarn],
+    [lErr, lWarn], [mErr, mWarn], [n1Err, n1Warn], [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {
@@ -1343,6 +1872,8 @@ function main() {
       toMarkdown(titles[6], hErr, hWarn),
       toMarkdown(titles[7], jErr, jWarn),
       toMarkdown(titles[8], lErr, lWarn),
+      toMarkdown(titles[9], mErr, mWarn),
+      toMarkdown(titles[10], n1Err, n1Warn),
       '## Check F — build-registry.js output',
       '',
     ];

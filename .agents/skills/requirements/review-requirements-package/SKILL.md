@@ -41,24 +41,32 @@ See `references/INPUTS-OUTPUTS.md` for the full table.
 Before running the review sequence, resolve the path to the assembled
 requirements artifact under the project's current stage configuration.
 
+All three modes below nest the artifact under a `<feature-id>/` directory, and
+that segment is conditional on `features.toml` existing — resolve it by
+`references/ai-principles/feature-precondition.md`, which drops the segment
+(keeping the filename prefix) for a project that has not opted in. "Legacy"
+names the non-SoD layout only; it is orthogonal to feature-ID opt-in, so an
+opted-in project in legacy mode still carries the segment.
+
 - **Legacy mode.** If `[stages.requirements]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
-  `{project.paths.requirements_package}/{feature-id}-requirements.md`. No
-  scoping needed.
+  `{project.paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`.
+  No scoping needed.
 - **SoD directory mode** (`[stages.requirements].dir = "..."`). The artifact
   lives under `<host-repo>/<artifact_subdir>/requirements/`:
-  - **Single-repo:** under `<repo-code>/<feature-id>-requirements.md`. The
-    user identifies the feature; if the `<repo-code>` is ambiguous, prompt.
-  - **Cross-cutting:** under `_cross-cutting/<feature-id>-requirements.md`.
+  - **Single-repo:** under `<repo-code>/<feature-id>/<feature-id>-requirements.md`.
+    The user identifies the feature; if the `<repo-code>` is ambiguous, prompt.
+  - **Cross-cutting:** under
+    `_cross-cutting/<feature-id>/<feature-id>-requirements.md`.
     The artifact's YAML frontmatter carries `affects_repos` (validated as
     part of review-completeness).
 - **SoD colocate mode** (uncommon for requirements): single-repo only;
-  artifact lives under `<source-repo-path>/<artifact_subdir>/requirements/<feature-id>-requirements.md`.
+  artifact lives under `<source-repo-path>/<artifact_subdir>/requirements/<feature-id>/<feature-id>-requirements.md`.
 
 This step is **read-only** — no permission check required (the review skill
 does not write to the upstream artifact). When the review skill writes its
 own findings, it writes to the same host repo as the upstream artifact under
-`docs/<feature>/requirements-package/review/...` (relative to the host).
+`docs/<feature-id>/requirements-package/review/...` (relative to the host).
 
 If executed non-interactively without an explicit `feature-id` (and `scope`
 when ambiguous), **fail fast** with a clear error rather than blocking on a
@@ -66,6 +74,10 @@ prompt.
 
 See `_docs/sod-multi-repo-proposal.md` § 5 and `config/SCHEMAS.md` § 5 for
 the full SoD layout geometry.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-requirements-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved artifact path before Review 1.
 
 ## Workflow
 
@@ -95,11 +107,11 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Adversarial findings file | `docs/<feature>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Edge-case findings file | `docs/<feature>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Final readiness verdict | `docs/<feature>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
-| Updated `change-tracker.md` rows | `docs/<feature>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
+| Per-review findings | `docs/<feature-id>/requirements-package/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `docs/<feature-id>/requirements-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `docs/<feature-id>/requirements-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Final readiness verdict | `docs/<feature-id>/requirements-package/review/readiness-verdict.md` | Markdown — APPROVED / CONDITIONAL / BLOCKED |
+| Updated `change-tracker.md` rows | `docs/<feature-id>/requirements-package/requirements/change-tracker.md` | Markdown table — `Trigger = Review finding` rows for any fix |
 
 ## Next skill
 

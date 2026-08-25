@@ -48,12 +48,16 @@ must be fixed in the working tree, not in a follow-up commit.
 | Input | Source | Required |
 |---|---|---|
 | Working-tree diff | `git diff` (uncommitted changes) | Yes |
-| Implementation package (if available) | `{project.paths.implementation_package}/` | If present |
+| Implementation package (if available) | `{project.paths.implementation_package}/{feature-id}/` | If present |
 | Requirements / design references | upstream packages | If present (for traceability) |
 | Coding standards | `_assets/standards/` | If present |
 | project.toml | `{project-root}/project.toml` | Yes |
 
 See `references/INPUTS-OUTPUTS.md` for full inputs/outputs tables.
+
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: create-pr`) rather than guessing which feature the diff belongs to — do not fall back to creating one, because a diff waiting to be PR'd belongs to a feature that already exists. If it resolves, echo the feature ID and include it in the generated PR description's traceability block.
 
 ## Workflow
 

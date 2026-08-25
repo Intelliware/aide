@@ -38,7 +38,7 @@ Do not fail because an upstream phase was skipped. Explain the confidence trade-
 | 9 | `requirements/non-functional-requirements` | `09-nfrs.md` |
 | 10 | `requirements/assumptions-constraints-out-of-scope` | `10-assumptions-constraints-scope.md` |
 | 11 | `requirements/acceptance-criteria` | `11-acceptance-criteria.md` |
-| 12 | (assembly) | `requirements-package.md` (alias to `{paths.requirements_path}/{feature-id}-requirements.md`) |
+| 12 | (assembly) | `requirements-package.md` (alias to `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`) |
 
 Block ordering matches `templates/compositions/greenfield-requirements-package.yaml`. Skip blocks marked N/A in the relevance gate; write them as N/A entries in the completeness tracker, not empty files.
 

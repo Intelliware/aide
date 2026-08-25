@@ -62,6 +62,10 @@ See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
 
 After every drafted artifact and before any file write, summarize back to the user what you understood and what you produced; wait for their explicit acknowledgement (or correction) before proceeding. This applies regardless of which step you are on. Halt the step if the user disagrees.
 
+## Precondition — active feature
+
+Follow `references/ai-principles/feature-precondition.md` Mode A, before the write-discipline preconditions below. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-implementation-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
+
 ## Preconditions (MUST run before any step)
 
 Before executing Step 0 — and before any codebase analysis, increment decomposition, or authoring work — the AI MUST:
@@ -95,7 +99,7 @@ An implementation package at the path resolved for the planning stage. Resolutio
 
 - **Colocate mode** (`colocate_with_source = true`): `<source-repo-path>/<artifact_subdir>/implementation/<feature-id>/`
 - **Directory mode** (`dir = "..."`): `<host-repo>/<artifact_subdir>/implementation/<repo-code>/<feature-id>/`
-- **Legacy mode** (no SoD fields): `{project.paths.implementation_package}/`
+- **Legacy mode** (no SoD fields): `{project.paths.implementation_package}/{feature-id}/`
 
 In each case the package contains:
 

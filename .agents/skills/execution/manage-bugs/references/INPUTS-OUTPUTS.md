@@ -4,8 +4,8 @@
 
 | Input | Source | Required | Purpose |
 |---|---|---|---|
-| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/bugs-and-issues-log.md` | Yes (auto-created on first call) | The log this skill manages |
-| Implementation package directory | `{project.paths.implementation_package}/` | Yes | Resolves the log path |
+| `bugs-and-issues-log.md` | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` | Yes (auto-created on first call) | The log this skill manages |
+| Implementation package directory | `{project.paths.implementation_package}/{feature-id}/` | Yes | Resolves the log path |
 | Mode | inferred from user intent | Yes | One of: `LOG`, `REVIEW`, `TRIAGE`, `CLOSE` |
 | Calling increment ID | passed by `execute-increments` if invoked from there | Conditional | Stamps "increment-id" field on logged bugs |
 | project.toml | `{project-root}/project.toml` | Yes | Resolves paths |
