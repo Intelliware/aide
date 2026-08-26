@@ -1,0 +1,114 @@
+# Preset manifest — preset.toml example
+#
+# This file describes a preset bundle. It lives at <preset-dir>/preset.toml
+# alongside a customizations/ subdirectory containing the preset's override files.
+#
+# See config/SCHEMAS.md § 2.8 for the full schema.
+#
+# Directory structure:
+#   <preset-root>/
+#   ├── preset.toml              # This manifest
+#   └── customizations/
+#       ├── create-requirements-package.toml
+#       ├── review-implementation-package.toml
+#       └── ...
+
+# -----------------------------------------------------------------------------
+# [preset] — Preset identity and metadata
+# -----------------------------------------------------------------------------
+
+[preset]
+name = "enterprise-compliance"                 # Unique identifier (kebab-case, required)
+description = "SOX/SOC2 compliance gates for regulated environments"
+version = "1.0.0"                              # Semver version
+requires_aide_version = ">=2.3.0"              # Minimum A.I.D.E. version
+
+# Parent presets (optional) — applied first, then this preset overrides
+extends = []
+
+# Mutually exclusive presets — loader rejects enabling both
+conflicts_with = ["minimal-docs", "fast-iteration"]
+
+# Free-form tags for discoverability
+tags = ["compliance", "enterprise", "regulated"]
+
+# -----------------------------------------------------------------------------
+# [[preset.files]] — Manifest of customization files
+# -----------------------------------------------------------------------------
+#
+# This array documents what the preset contains. The loader actually globs
+# <preset-dir>/customizations/*.toml and infers skill names from filenames,
+# so this manifest is primarily for `manage-presets show` to describe the
+# preset without parsing every file.
+
+[[preset.files]]
+path = "customizations/create-requirements-package.toml"
+skill = "create-requirements-package"
+summary = "Adds compliance-callout block and requires regulatory-impact section"
+
+[[preset.files]]
+path = "customizations/review-requirements-package.toml"
+skill = "review-requirements-package"
+summary = "Adds compliance review lens with regulatory-mapping check"
+
+[[preset.files]]
+path = "customizations/create-design-package.toml"
+skill = "create-design-package"
+summary = "Requires audit-trail section and data-classification block"
+
+[[preset.files]]
+path = "customizations/review-design-package.toml"
+skill = "review-design-package"
+summary = "Adds security architecture review lens"
+
+[[preset.files]]
+path = "customizations/review-implementation-package.toml"
+skill = "review-implementation-package"
+summary = "Requires compliance sign-off gate before GO verdict"
+
+[[preset.files]]
+path = "customizations/execute-increments.toml"
+skill = "execute-increments"
+summary = "Adds compliance-verification hook after each increment"
+
+# -----------------------------------------------------------------------------
+# Example: Preset with hooks
+# -----------------------------------------------------------------------------
+#
+# Presets can include hooks that fire when skills are invoked. Hooks are
+# declared in the customization files, not in preset.toml itself.
+#
+# For example, customizations/execute-increments.toml might contain:
+#
+#   [[hooks]]
+#   code = "compliance-check-post-increment"
+#   event = "after"
+#   skill = "verify-source"
+#   priority = 200
+#
+# When the preset is enabled, this hook fires after every execute-increments run.
+
+# -----------------------------------------------------------------------------
+# Example: Preset that extends another preset
+# -----------------------------------------------------------------------------
+#
+# A preset can extend one or more parent presets. Parents are applied first,
+# then this preset's files override any conflicting values.
+#
+#   [preset]
+#   name = "enterprise-compliance-strict"
+#   extends = ["enterprise-compliance"]       # Inherits all parent customizations
+#   conflicts_with = ["minimal-docs"]
+#
+# The extension chain must be acyclic — A extends B extends A is rejected.
+
+# -----------------------------------------------------------------------------
+# Best practices
+# -----------------------------------------------------------------------------
+#
+# 1. Keep presets focused — one concern per preset (compliance, performance, etc.)
+# 2. Use conflicts_with to prevent incompatible combinations
+# 3. Document each file's purpose in the summary field
+# 4. Version presets so consumers can track changes
+# 5. Use extends sparingly — deep inheritance chains are hard to debug
+# 6. Test preset combinations before publishing

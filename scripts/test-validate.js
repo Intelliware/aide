@@ -466,6 +466,102 @@ test('Check L — every verify step declares both modes and both tiers', () => {
   }
 });
 
+// --- Check O — hook-runtime binding (all skills) ---
+// Unlike Check J's enumerated 3-skill allowlist, Check O is unscoped — any
+// skill can be a hook target (config/SCHEMAS.md § 2.5.1, rule 18) — so every
+// SKILL.md in the live tree must cite hook-runtime.md. No fixture-mode flag
+// exists for O, so the negative case writes an ephemeral skill folder
+// directly into the live `.agents/skills/` tree and removes it afterwards,
+// following the same pattern as the Check M fixture below.
+
+const HOOK_RUNTIME_REF = 'references/orientation/hook-runtime.md';
+const HOOK_PRECONDITION_HEADING_RE = /^##\s+Precondition\s+—\s+hooks\b/m;
+const CHECK_O_FIXTURE_DIR = path.join(REPO_ROOT, '.agents', 'skills', 'meta', '_check-o-test-fixture');
+const CHECK_O_FIXTURE = path.join(CHECK_O_FIXTURE_DIR, 'SKILL.md');
+
+function allSkillFiles() {
+  const root = path.join(REPO_ROOT, '.agents', 'skills');
+  const results = [];
+  function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name === 'SKILL.md') results.push(full);
+    }
+  }
+  if (fs.existsSync(root)) walk(root);
+  return results.sort();
+}
+
+test('Check O — a default run reports Check O', () => {
+  const proc = runValidate();
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assertIn(
+    'Check O — hook-runtime binding (all skills)', proc.stdout,
+    `default run should report Check O.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check O — hook-runtime.md exists on disk', () => {
+  const abs = path.join(REPO_ROOT, HOOK_RUNTIME_REF);
+  assert(fs.existsSync(abs), `missing ${HOOK_RUNTIME_REF}`);
+});
+
+test('Check O — every SKILL.md cites hook-runtime.md', () => {
+  const skills = allSkillFiles();
+  assert(skills.length > 0, 'expected at least one SKILL.md under .agents/skills');
+  for (const skill of skills) {
+    const rel = path.relative(REPO_ROOT, skill);
+    const text = fs.readFileSync(skill, 'utf-8');
+    assertIn(HOOK_RUNTIME_REF, text, `${rel} does not cite ${HOOK_RUNTIME_REF}`);
+    assertRegex(text, HOOK_PRECONDITION_HEADING_RE, `${rel} missing '## Precondition — hooks' heading`);
+  }
+});
+
+test('Check O — reject a SKILL.md missing the hook precondition', () => {
+  fs.mkdirSync(CHECK_O_FIXTURE_DIR, { recursive: true });
+  fs.writeFileSync(
+    CHECK_O_FIXTURE,
+    [
+      '---',
+      'name: _check-o-test-fixture',
+      'description: "Ephemeral fixture for test-validate.js Check O test. Deleted immediately after the assertion."',
+      '---',
+      '',
+      '# Check O Test Fixture',
+      '',
+      '## Overview',
+      '',
+      "Ephemeral fixture skill used only to test Check O's negative case. Not a real skill.",
+      '',
+      '## Workflow',
+      '',
+      '1. No-op.',
+      '',
+      '## Next skill',
+      '',
+      '(none)',
+      '',
+    ].join('\n'),
+    'utf-8'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_O_FIXTURE);
+    fs.rmdirSync(CHECK_O_FIXTURE_DIR);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(
+    proc.returncode, 0,
+    `validator should reject a SKILL.md missing the hook precondition.\noutput:\n${out}`
+  );
+  const rel = path.relative(REPO_ROOT, CHECK_O_FIXTURE);
+  assertIn(`${rel}: missing top-level`, out, `output missing heading error.\noutput:\n${out}`);
+  assertIn(`${rel}: does not reference`, out, `output missing reference error.\noutput:\n${out}`);
+});
+
 // --- Check M — {paths.<key>} / {project.paths.<key>} token resolution ---
 // No fixture-mode flag exists for M (unlike I/K), so these write an ephemeral
 // composition directly into the live templates/compositions/ tree — the same

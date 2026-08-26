@@ -459,6 +459,71 @@ without having to know which layer they came from.
 This is the layer where `_suppress: true` is most useful — see
 `customizations/example-skill.toml.example` for the canonical demonstration.
 
+### 2.5.1 Hooks — `[[hooks]]` array-of-tables
+
+Hooks enable skill chaining at skill boundaries — running one skill automatically
+before or after another. They are declared in `customizations/<skill>.toml`
+(Layer 5) under a `[[hooks]]` array-of-tables.
+
+**Schema:**
+
+```toml
+# In customizations/<skill>.toml
+
+[[hooks]]
+code = "kb-check"                # Stable merge key (required, unique per skill)
+event = "before"                 # "before" or "after" (required)
+skill = "navigate-knowledge-base"  # Skill to invoke (required, must exist in registry)
+priority = 100                   # 1-999, lower = runs first (default: 500)
+optional = true                  # Prompt user before running if true (default: false)
+prompt = "Check KB first?"       # User-facing prompt (required when optional=true)
+condition = "project.paths.knowledge_base_path != ''"  # Skip when condition evaluates falsy
+
+[[hooks]]
+code = "suppress-default-hook"
+_suppress = true                 # Remove hook from lower layer
+```
+
+**Field reference:**
+
+| Field | Type | Required | Default | Purpose |
+|---|---|---|---|---|
+| `code` | string | yes | — | Stable identifier for merge-by-key. Unique within the skill after layer merge. |
+| `event` | enum | yes | — | `before` (fires before Step 0) or `after` (fires after final step, before `## Next skill`). |
+| `skill` | string | yes | — | Skill name to invoke. Must resolve to a registered skill. |
+| `priority` | int | no | 500 | Execution order: lower runs first. Valid range: 1–999. |
+| `optional` | bool | no | `false` | When `true`, the user is prompted before the hook runs. |
+| `prompt` | string | conditional | — | User-facing prompt text. Required when `optional = true`. |
+| `condition` | string | no | — | An expression evaluated against the merged config. Hook is skipped when the expression evaluates falsy (empty string, `false`, `0`, missing path). |
+| `_suppress` | bool | no | — | When `true`, removes a hook inherited from a lower layer. Entry must contain only `code` and `_suppress`. |
+
+**Hook events (v1):**
+
+| Event | When it fires | Context available |
+|---|---|---|
+| `before` | Before the skill's Step 0 | Merged config, skill inputs |
+| `after` | After the skill's final step, before `## Next skill` handoff | Merged config, skill outputs |
+
+**Execution sequence:**
+
+1. Skill invoked
+2. **Before-hooks** (sorted by `priority` ascending)
+3. Steps 0..N
+4. Gates from `workflow-graph.yaml` (if any)
+5. **After-hooks** (sorted by `priority` ascending)
+6. `## Next skill` handoff
+
+**Announcement contract:** Before firing any hook, the skill announces:
+`Running <event>-hook: <skill> (code: <code>)`. Skipped hooks (due to `condition`
+evaluating falsy or user declining an `optional` hook) are also announced:
+`Skipped <event>-hook: <skill> (code: <code>) — <reason>`.
+
+**Circular dependency:** A skill **cannot** hook itself, and hook chains must be
+acyclic. The loader rejects `A → B → A` patterns at config-merge time.
+
+See `references/orientation/hook-runtime.md` for the full execution procedure
+that skill implementations must follow.
+
 ### 2.6 The `[tools.<name>]` table — add-on tool resolution
 
 Integration tooling (JIRA, Confluence, document conversion, …) ships as
@@ -674,6 +739,129 @@ confident verdict about the wrong artifacts, which is as damaging as a misplaced
 write and harder to notice — so the echo applies to read-side skills too, before
 their first read rather than their first write.
 
+### 2.10 Preset manifest — `preset.toml`
+
+A **preset** is a reusable bundle of customization files installable as a unit.
+Presets ship in add-on repos or local `presets/` directories and are registered
+into a project via `presets.toml` (see § 2.9).
+
+Each preset directory carries a `preset.toml` manifest describing its contents:
+
+```
+# In add-on repo or local presets/ directory:
+<preset-root>/
+├── preset.toml              # Manifest (this schema)
+└── customizations/
+    ├── create-requirements-package.toml
+    └── review-implementation-package.toml
+```
+
+**Location:** `<preset-dir>/preset.toml`.
+
+**Schema:**
+
+```toml
+[preset]
+name = "enterprise-compliance"
+description = "SOX/SOC2 compliance gates for regulated environments"
+version = "1.0.0"
+requires_aide_version = ">=2.0.0"
+extends = []                         # Parent presets (applied first)
+conflicts_with = ["minimal-docs"]    # Mutually exclusive presets
+tags = ["compliance", "enterprise"]
+
+[[preset.files]]
+path = "customizations/create-requirements-package.toml"
+skill = "create-requirements-package"
+summary = "Adds compliance-callout block"
+
+[[preset.files]]
+path = "customizations/review-implementation-package.toml"
+skill = "review-implementation-package"
+summary = "Requires compliance sign-off gate"
+```
+
+**`[preset]` table:**
+
+| Field | Type | Required | Default | Purpose |
+|---|---|---|---|---|
+| `name` | string | yes | — | Unique identifier (kebab-case). Used as merge key in `presets.toml`. |
+| `description` | string | no | — | One-line summary of what the preset does. |
+| `version` | string | no | — | Semver version of this preset. |
+| `requires_aide_version` | string | no | — | Version constraint (e.g. `>=2.0.0`). Loader warns on mismatch. |
+| `extends` | array<string> | no | `[]` | Parent preset names. Parents are applied first, then this preset's files override. |
+| `conflicts_with` | array<string> | no | `[]` | Mutually exclusive preset names. Loader rejects enabling both. |
+| `tags` | array<string> | no | `[]` | Free-form tags for discoverability. |
+
+**`[[preset.files]]` array-of-tables:**
+
+| Field | Type | Required | Purpose |
+|---|---|---|---|
+| `path` | string | yes | Relative path from the preset directory to the customization file. |
+| `skill` | string | yes | Skill name this file customizes. Must match a registered skill. |
+| `summary` | string | no | One-line summary of what this file changes. |
+
+The `[[preset.files]]` array is documentation — the loader actually globs
+`<preset-dir>/customizations/*.toml` and infers skill names from filenames.
+The manifest provides upfront discoverability so `manage-presets show` can
+describe a preset without parsing every file.
+
+### 2.11 Preset registry — `presets.toml`
+
+The **preset registry** tracks which presets are installed and their enable
+state. It lives at `{project-root}/presets.toml` (committed) with an optional
+`{project-root}/presets.user.toml` overlay (personal, gitignored).
+
+**Location:** `{project-root}/presets.toml`.
+
+**Schema:**
+
+```toml
+# Installed presets, applied in order (earlier = lower precedence)
+[[presets]]
+name = "enterprise-compliance"
+source = "{workspace}/aide-enterprise-addon/presets/enterprise-compliance"
+enabled = true
+
+[[presets]]
+name = "team-conventions"
+source = "{project-root}/presets/team-conventions"
+enabled = false    # Disabled but remembered
+```
+
+**`[[presets]]` array-of-tables (merged by `name`):**
+
+| Field | Type | Required | Default | Purpose |
+|---|---|---|---|---|
+| `name` | string | yes | — | Merge key. Must match `[preset].name` from the target's `preset.toml`. |
+| `source` | path | yes | — | Path to the preset directory (the directory containing `preset.toml`). Path tokens allowed. |
+| `enabled` | bool | no | `true` | When `false`, the preset is remembered but not applied. |
+
+**Merge order (updated for presets):**
+
+```
+framework.toml
+  → framework.user.toml
+    → project.toml
+      → project.user.toml
+        → [PRESETS: in order from presets.toml, enabled only]
+          → customizations/<skill>.toml (project-local team)
+            → customizations/<skill>.user.toml (project-local personal)
+```
+
+Presets are inserted between Layer 4 (`project.user.toml`) and Layer 5
+(`customizations/<skill>.toml`). Within presets, earlier entries in the
+`[[presets]]` array have lower precedence than later entries. Project-local
+Layer 5 customizations always override preset values.
+
+**Personal override (`presets.user.toml`):** A personal registry at
+`{project-root}/presets.user.toml` can enable/disable presets for the
+local user without editing the team-committed file. Same schema; entries
+merge by `name` with personal winning.
+
+**Discovering presets:** Use `manage-presets discover` to scan workspace
+folders for `preset.toml` manifests that are not yet registered.
+
 ---
 
 ## 3. KB Schemas
@@ -844,6 +1032,24 @@ and none of the following fires.
     is an error, including when `features.toml` is present but empty.
 16. Every `[[features]].repos` entry (when present) resolves to a known
     `[[project.repos]].code`.
+
+**Config — hooks (per § 2.5.1):**
+
+17. `[[hooks]].code` must be unique within the skill after all layers are merged.
+18. `[[hooks]].skill` must resolve to a registered skill in the catalog.
+19. `[[hooks]].event` must be one of `before` or `after`.
+20. `[[hooks]].priority`, when specified, must be an integer in [1, 999].
+21. `[[hooks]].prompt` is required when `optional = true`.
+22. `[[hooks]].condition`, when specified, must be a syntactically valid expression (dot-path, comparison operator, value).
+23. No circular hook dependencies: if skill A hooks skill B, skill B cannot hook skill A (directly or transitively).
+
+**Config — presets (per § 2.10 and § 2.11):**
+
+24. `[[presets]].name` must match the `[preset].name` in the referenced `preset.toml`.
+25. `[[presets]].source` must be a resolvable path containing a valid `preset.toml`.
+26. `[preset].conflicts_with` entries must not include any preset that is also enabled in `presets.toml`.
+27. `[preset].extends` entries must resolve to registered presets and form an acyclic graph.
+28. `[[preset.files]].skill` must match a registered skill name.
 
 **KB:**
 

@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.4.0` |
+| Current artifact version | `2.6.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,84 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.6.0` — 2026-08-11
+
+Adds two new customization capabilities: Hook System and Preset Bundles.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-11 | Addition | config | `config/SCHEMAS.md` | Hook system schema (§ 2.5.1) with `[[hooks]]` array-of-tables, validation rules 17-23, and preset schemas (§ 2.10 for preset.toml, § 2.11 for presets.toml) with validation rules 24-28. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 2 | 2026-08-11 | Addition | skills | `.agents/skills/meta/manage-presets/` | New skill for preset installation, enable/disable, discovery, and inspection. Four-step workflow: discover, install, enable-disable, show. Added to `anytime` in workflow-graph.yaml. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 3 | 2026-08-11 | Addition | config | `config/customizations/hooks.toml.example` | Comprehensive hook authoring examples demonstrating before/after hooks, priority ordering, optional prompts, conditions, and suppression. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 4 | 2026-08-11 | Addition | config | `config/presets.toml.example`, `config/preset.toml.example` | Example files for preset registry (presets.toml) and preset manifest (preset.toml). | branch `feature/hooks-and-presets` | ☐ Pending |
+| 5 | 2026-08-11 | Addition | references | `references/orientation/hook-runtime.md` | Hook execution procedure for skills: lifecycle, condition evaluation, optional handling, announcements, error handling, and implementation checklist. | branch `feature/hooks-and-presets` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/03-pick-operation.md` | Added `add-hook` and `suppress-hook` operations to the operation menu with hook-specific elicitation flow. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 2 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/04-author-override.md` | Added hook authoring templates for `add-hook` and `suppress-hook` operations. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 3 | 2026-08-11 | Source Update | skills | `.agents/skills/meta/customize-framework/steps/05-verify-merge.md` | Updated merge table to include preset layers and show preset origins in the layer column. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 4 | 2026-08-11 | Source Update | config | `config/customizations/README.md` | Added documentation for hooks and presets, updated precedence diagram to show presets between Layers 4 and 5. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 5 | 2026-08-11 | Source Update | skills | `.agents/skills/_registry/workflow-graph.yaml` | Added `manage-presets` to the `anytime` skills list. | branch `feature/hooks-and-presets` | ☐ Pending |
+| 6 | 2026-08-25 | Correction | skills, config, references | `.agents/skills/meta/framework-navigator/SKILL.md`, `config/SCHEMAS.md`, `references/orientation/hook-runtime.md`, `.agents/skills/meta/manage-presets/{SKILL.md,references/EXAMPLE.md,steps/02-install.md}`, `AGENTS.md`, `config/customizations/README.md` | Renumbered the preset schema sections `§ 2.8`/`§ 2.9` → `§ 2.10`/`§ 2.11` and hook/preset validation rules `13-19`/`20-24` → `17-23`/`24-28` — both collided with `2.5.0`'s feature-registry sections and rules of the same numbers, which landed on `main` while this branch was in flight and are cross-referenced from `scripts/validate.py`/`.js` and several skill docs, so those kept their numbers and this branch's renumbered instead. | merge of `feature/hooks-and-presets` into `main` | ☐ Pending |
+| 7 | 2026-08-26 | Correction | Multiple | `AGENTS.md`, all 52 `.agents/skills/**/SKILL.md`, `scripts/validate.py`, `scripts/validate.js`, `scripts/test_validate.py`, `scripts/test-validate.js` | Code review found `references/orientation/hook-runtime.md` opened by claiming to be a contract "every A.I.D.E. skill must follow," but no `SKILL.md` referenced it — any hooks a user configured via `/customize-framework add-hook` would silently never fire. Added a binding obligation to `AGENTS.md` and a new `## Precondition — hooks` section to every SKILL.md (unscoped, unlike the 3-skill write-discipline pattern it mirrors, since `[[hooks]].skill` resolves to any registered skill per `config/SCHEMAS.md` § 2.5.1 rule 18) and a new Check O in both validators enforcing the binding. | branch `feature/hooks-and-presets` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.5.0` (was drafted on top of `2.2.0`; `2.3.0` through `2.5.0`
+landed on `main` first and this entry's version and preset section/rule numbers were
+renumbered accordingly at merge time — see Changed row 6). Additive — no migration
+required. Both hooks and presets are fully opt-in. Projects without `[[hooks]]`
+declarations or `presets.toml` see no change in behavior. The merge order is extended
+to insert presets between Layer 4 (`project.user.toml`) and Layer 5
+(`customizations/<skill>.toml`), but this only affects projects that register presets.
+
+---
+
+### `2.5.0` — 2026-08-25
+
+Adds `generate-re-skill`, a skill that builds a complete reverse-engineering skill —
+`SKILL.md`, references, compositions, and block templates — for a technology stack the
+eleven built-in RE domain types don't cover (GraphQL servers, serverless functions, ML
+pipelines, CLI tools, etc.). `analyze-repository` gains two new stages that route to it:
+Stage 0 registers the repo in `project.toml` if it isn't already, and Stage 2b hands off
+to `generate-re-skill` when no domain type matches with reasonable confidence. Two
+unrelated fixes shipped in the same PR: a line-count fix that keeps
+`analyze-repository/SKILL.md` under the 200-line self-documenting-skill cap after Stage
+0/2b were added, and a `last_verified_against_commit` freshness field added to the
+mainframe block templates.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-25 | Addition | skills | `.agents/skills/reverse-engineering/generate-re-skill/` | New skill: six-stage workflow (analyze stack, research stack, define templates, generate skill, review flow, execute skill) that produces a complete `reverse-engineer-<type>` skill for a stack not covered by the eleven built-in domain types. | branch `feature/re-skill-generator` | ☐ Pending |
+| 2 | 2026-08-25 | Addition | references | `references/elicitation-patterns/stack-discovery.md` | New elicitation pattern for gathering the stack characteristics `generate-re-skill` needs before drafting templates. | branch `feature/re-skill-generator` | ☐ Pending |
+| 3 | 2026-08-25 | Addition | skills | `.agents/skills/reverse-engineering/analyze-repository/references/repo-registration.md`, `references/unsupported-stack-routing.md` | Procedural bodies for the new Stage 0 (`project.toml` registration check) and Stage 2b (unsupported-stack routing to `generate-re-skill`), kept in `references/` rather than inline so `SKILL.md` stays under the 200-line cap. | branch `feature/re-skill-generator` | ☐ Pending |
+| 4 | 2026-08-25 | Addition | docs | `_docs/skills-test-results-2026-08-19.md` | Test-plan run log covering the new skill. | branch `feature/re-skill-generator` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-08-25 | Source Update | skills | `.agents/skills/reverse-engineering/analyze-repository/SKILL.md` | Added Stage 0 (repository registration check) and Stage 2b (unsupported-stack detection, routing to `generate-re-skill` below ~70% confidence) as short pointers into the new reference files. | branch `feature/re-skill-generator` | ☐ Pending |
+| 2 | 2026-08-25 | Source Update | skills | `.agents/skills/reverse-engineering/README.md`, `.agents/skills/_registry/workflow-graph.yaml`, `.agents/skills/_registry/skills.csv`, `.agents/skills/_registry/skills.json` | Registered `generate-re-skill` in the `anytime` workflow list and the skill registry; README now documents it alongside the eleven domain skills. | branch `feature/re-skill-generator` | ☐ Pending |
+| 3 | 2026-08-25 | Correction | skills | `reverse-engineer-{cobol-program,copybook-library,jcl-job}/SKILL.md` and their block templates under `templates/blocks/reverse-eng/` | Added a `last_verified_against_commit` freshness field — none of the mainframe block templates declared a source-commit field despite their content going stale as the source repo changes. Bundled into this PR per operator instruction; not caused by this branch's own work. | branch `feature/re-skill-generator` | ☐ Pending |
+| 4 | 2026-08-25 | Correction | skills | `.agents/skills/reverse-engineering/analyze-repository/SKILL.md` | Fixed the file exceeding the 200-line self-documenting-skill cap (216 lines after Stage 0/2b were added inline) — the only `SKILL.md` in the registry over the limit. Moved both stages' procedural bodies to `references/`, back to 166 lines. | branch `feature/re-skill-generator` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.4.0` (new skill, new elicitation pattern — both
+backwards-compatible). Additive: `analyze-repository`'s existing eleven-way dispatch is
+unchanged for any repo that already matches a domain type — Stage 0 and Stage 2b are
+only reached when a repo doesn't already resolve as before. Landed via PR 2047.
+
+---
 
 ### `2.4.0` — 2026-08-16
 

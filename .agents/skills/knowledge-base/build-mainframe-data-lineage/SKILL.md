@@ -79,6 +79,10 @@ the `kb-mainframe-data-lineage.yaml` composition. The artefact is
 | `lineage-overview.md` | Human-readable orientation: what's in the artefact, how to navigate |
 | `lineage-summary.md` | Top-level index keyed by canonical field name |
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Execute one step at a time. Read the step file only when starting that step.

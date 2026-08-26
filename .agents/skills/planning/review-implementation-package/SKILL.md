@@ -57,6 +57,10 @@ See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before Review 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-implementation-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved package path before Review 1.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Run the review checks **strictly in order**. Do not run them in parallel.

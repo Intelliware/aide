@@ -219,6 +219,7 @@ flows:
 anytime:
   - framework-navigator
   - customize-framework
+  - manage-presets
   - shard-document
   - track-change
   # Feature registry / active-feature selection. Independently invocable, and

@@ -38,6 +38,10 @@ The review sequence is strict — ten sub-reviews in fixed order, no parallel ex
 
 See `references/INPUTS-OUTPUTS.md` for the full table.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Run sub-reviews strictly in order. Do not parallelize. Present findings and verdict after each. Stop on any FAIL until resolved.

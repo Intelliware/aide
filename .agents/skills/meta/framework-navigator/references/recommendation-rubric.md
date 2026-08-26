@@ -67,10 +67,15 @@ doesn't pick the wrong domain skill.
 ### 5. Anti-loop (weight 0.05, applied as a hard cap)
 
 `framework-navigator` always scores 0 — never recommend itself.
-`customize-framework` and `start-project` are gated behind explicit triggers:
-they only surface when the utterance actually mentions configuration,
-overrides, suppression (for `customize-framework`), or "new project",
-"bootstrap", "initialize" (for `start-project`).
+`customize-framework`, `manage-presets`, and `start-project` are gated behind
+explicit triggers: they only surface when the utterance matches their domain:
+
+- `customize-framework` — "configuration", "overrides", "suppression",
+  "customize", "change default", "add a hook", "before-hook", "after-hook",
+  "chain skills".
+- `manage-presets` — "preset", "install preset", "enable preset", "disable
+  preset", "show presets", "discover presets", "preset bundle".
+- `start-project` — "new project", "bootstrap", "initialize", "start project".
 
 ## Decision rules
 

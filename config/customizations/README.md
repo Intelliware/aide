@@ -35,12 +35,18 @@ names.
 ## Precedence
 
 Within Layer 5, personal beats team; both are higher than every project
-or framework layer:
+or framework layer. **Presets** (reusable customization bundles) sit
+between Layers 4 and 5:
 
 ```
 framework.toml → framework.user.toml → project.toml → project.user.toml
-  → customizations/<skill>.toml → customizations/<skill>.user.toml
+  → [PRESETS: in order from presets.toml, enabled only]
+    → customizations/<skill>.toml → customizations/<skill>.user.toml
 ```
+
+Project-local customizations in this directory **always override** preset
+values. This ensures teams can adopt presets while retaining fine-grained
+control over specific behaviors.
 
 Merge semantics (scalar override, table recursive-merge, array-of-tables
 merge by `code`/`id`, array-of-scalars replace) are the same at every
@@ -77,3 +83,35 @@ You should rarely need to hand-edit Layer 5 files; the skill is the
 intended authoring surface. The `.example` files in this directory are
 **read-only references** for the skill to anchor on and for
 hand-authors who prefer to write TOML directly.
+
+## Hooks
+
+Customization files can include `[[hooks]]` to chain skills automatically.
+Hooks fire before or after the customized skill runs. See
+`config/SCHEMAS.md` § 2.5.1 for the schema and
+`references/orientation/hook-runtime.md` for the execution contract.
+
+Example:
+```toml
+# In customizations/create-requirements-package.toml
+
+[[hooks]]
+code = "kb-context-load"
+event = "before"
+skill = "navigate-knowledge-base"
+condition = "project.paths.knowledge_base_path != ''"
+```
+
+Use `customize-framework` with operation `add-hook` or `suppress-hook`
+to manage hooks interactively.
+
+## Presets
+
+Presets are reusable bundles of customization files. They ship in add-on
+repos or local `presets/` directories and are registered in
+`{project-root}/presets.toml`. See `config/SCHEMAS.md` § 2.10–2.11.
+
+Use `manage-presets` to discover, install, enable/disable, and inspect
+presets. Customizations in this directory always override preset values,
+so you can adopt a preset as a baseline and override specific behaviors
+locally.

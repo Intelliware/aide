@@ -27,6 +27,8 @@ The navigator does **not** perform documentation, planning, design, or coding wo
 
 - The user has already named a specific skill — invoke that skill directly.
 - The user wants the framework configured (overrides, suppression, customization) — route to **`customize-framework`**.
+- The user wants to add hooks (before/after skill chaining) — route to **`customize-framework`** with operation `add-hook`.
+- The user wants to install, enable, or inspect presets — route to **`manage-presets`**.
 - The user wants to bootstrap a brand-new project — route to **`start-project`** (the navigator can recommend it but should not perform initialization).
 - The user is asking a non-framework question (general coding help, language reference) — answer normally, do not invoke this skill.
 
@@ -39,6 +41,10 @@ See `references/INPUTS-OUTPUTS.md`. Primary inputs:
 - On-disk stage artifacts (requirements / design / implementation / KB)
 - The skill catalog (`skills/_registry/skills.csv` + `skills.json`)
 - The flow graph (`skills/_registry/workflow-graph.yaml`)
+
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
 
 ## Workflow
 
@@ -79,6 +85,8 @@ Common targets and the trigger phrase the navigator emits to the user:
 - `create-requirements-package` — "Create the requirements package for `<feature>`."
 - `document-quick-change` — "Document a quick change for `<scope>`."
 - `customize-framework` — "Customize the framework for this project."
+- `customize-framework` (hooks) — "Add a before-hook to run `<skill>` before `<target-skill>`."
+- `manage-presets` — "Show me available presets." / "Install the `<preset-name>` preset." / "Disable the `<preset-name>` preset."
 - `select-feature` — "Select (or start) the feature I'm working on." (surfaced as a prerequisite, not a standalone recommendation, when `features.toml` exists but no feature is active — see `references/ai-principles/feature-precondition.md` Mode C)
 
 ## Common mistakes

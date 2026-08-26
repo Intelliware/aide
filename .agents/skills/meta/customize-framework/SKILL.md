@@ -36,6 +36,10 @@ See `references/INPUTS-OUTPUTS.md`. Required:
 - The override operation (override / suppress / append / replace-array)
 - The new value(s)
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Sequenced phases. Run one step at a time. Each phase is a discrete elicitation; do not collapse into a single mega-prompt.

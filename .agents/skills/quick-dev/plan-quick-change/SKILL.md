@@ -33,6 +33,10 @@ See `references/INPUTS-OUTPUTS.md`.
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: plan-quick-change`) rather than guessing which feature's spec to load — do not fall back to creating one, because the spec this skill plans against is written by `document-quick-change` first. If it resolves, confirm the spec at `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Read the quick-dev spec** — load `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md`, the path `quick-dev-spec.yaml` declares and `document-quick-change` writes. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.

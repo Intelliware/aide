@@ -25,6 +25,8 @@ into one of the five merge operations the merger understands per
 | `append` | target is an array | For arrays-of-tables with `code`/`id`, an entry with a new key is appended; for plain arrays, see `replace-array`. |
 | `replace-array` | target is an array of scalars | The whole list is replaced. Plain arrays don't append. |
 | `suppress` | target is an entry inside an array-of-tables merged by `code`/`id` | Drops the matching base entry from the merged result. |
+| `add-hook` | target is a skill's `[[hooks]]` array | Adds a new hook entry with the specified event, skill, priority, and optional condition. |
+| `suppress-hook` | target is an existing hook entry | Removes a hook inherited from a lower layer using `_suppress: true`. |
 
 ## Sub-steps
 
@@ -42,6 +44,19 @@ into one of the five merge operations the merger understands per
    - `replace-array` on an array-of-tables loses by-key merge —
      warn the user and confirm.
 5. Carry the operation forward as a step input for step 04.
+
+### Hook-specific flow (when operation = `add-hook` or `suppress-hook`)
+
+6. For `add-hook`:
+   - Elicit hook fields: `code` (unique identifier), `event` (`before`/`after`),
+     `skill` (must exist in catalog), `priority` (1-999, default 500).
+   - Optionally elicit: `optional` (bool), `prompt` (required if optional),
+     `condition` (expression).
+   - Validate the target skill exists (per `config/SCHEMAS.md` rule 14).
+   - Validate no circular dependency would be created (rule 19).
+7. For `suppress-hook`:
+   - Elicit the `code` of the hook to suppress.
+   - Verify the hook exists in a lower layer.
 
 ## Hard gates
 

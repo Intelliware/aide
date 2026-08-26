@@ -324,6 +324,81 @@ class TestRECloseOutGate(unittest.TestCase):
                 self.assertIn("UNVERIFIED", text)
 
 
+class TestHookRuntimeBinding(unittest.TestCase):
+    """Check O — every SKILL.md binds to the hook-runtime execution contract.
+
+    Unlike Check J's enumerated 3-skill allowlist, Check O is unscoped — any
+    skill can be a hook target (config/SCHEMAS.md § 2.5.1, rule 18) — so every
+    SKILL.md in the live tree must cite hook-runtime.md. No fixture-mode flag
+    exists for O, so the negative case writes an ephemeral skill folder
+    directly into the live `.agents/skills/` tree and removes it in `finally`,
+    following the same pattern as TestPathsTokenResolution's Check M tests.
+    """
+
+    REF = "references/orientation/hook-runtime.md"
+    HEADING_RE = re.compile(r"^##\s+Precondition\s+—\s+hooks\b", re.MULTILINE)
+    FIXTURE_DIR = REPO_ROOT / ".agents" / "skills" / "meta" / "_check-o-test-fixture"
+    FIXTURE_PATH = FIXTURE_DIR / "SKILL.md"
+
+    def test_default_run_reports_check_o(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check O — hook-runtime binding (all skills)", proc.stdout)
+
+    def test_hook_runtime_reference_exists(self) -> None:
+        self.assertTrue((REPO_ROOT / self.REF).is_file(), f"missing {self.REF}")
+
+    def test_every_skill_cites_hook_runtime(self) -> None:
+        skill_files = sorted((REPO_ROOT / ".agents" / "skills").rglob("SKILL.md"))
+        self.assertTrue(skill_files, "expected at least one SKILL.md under .agents/skills")
+        for skill in skill_files:
+            text = skill.read_text(encoding="utf-8")
+            with self.subTest(skill=skill.relative_to(REPO_ROOT)):
+                self.assertIn(self.REF, text)
+                self.assertRegex(text, self.HEADING_RE)
+
+    def test_missing_heading_and_reference_reported(self) -> None:
+        self.FIXTURE_DIR.mkdir(parents=True, exist_ok=True)
+        self.FIXTURE_PATH.write_text(
+            textwrap.dedent(
+                """\
+                ---
+                name: _check-o-test-fixture
+                description: "Ephemeral fixture for test_validate.py Check O test. Deleted immediately after the assertion."
+                ---
+
+                # Check O Test Fixture
+
+                ## Overview
+
+                Ephemeral fixture skill used only to test Check O's negative case. Not a real skill.
+
+                ## Workflow
+
+                1. No-op.
+
+                ## Next skill
+
+                (none)
+                """
+            ),
+            encoding="utf-8",
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_PATH.unlink()
+            self.FIXTURE_DIR.rmdir()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"validator should reject a SKILL.md missing the hook precondition.\noutput:\n{out}",
+        )
+        rel = str(self.FIXTURE_PATH.relative_to(REPO_ROOT))
+        self.assertIn(f"{rel}: missing top-level", out)
+        self.assertIn(f"{rel}: does not reference", out)
+
+
 class TestSoDEdgeCases(unittest.TestCase):
     """Malformed inputs and missing files should fail loudly, not crash silently."""
 
