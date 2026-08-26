@@ -41,6 +41,10 @@ JCL repos have two legitimate audiences (batch developers / ops who need step-le
 
 Part B is a strict subset of Part A.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 ### Stage 1: Discovery and Inventory

@@ -29,6 +29,10 @@ Promoted from RE-internal in the legacy framework. The same skill is also folded
 
 See `references/INPUTS-OUTPUTS.md`.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Gather inventory** — read `extraction-status.md` (RE), the requirements file-relevance recommendation, the design template, or the user's list of artifacts.

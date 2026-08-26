@@ -74,6 +74,10 @@ After every drafted artifact and before any file write, summarize back to the us
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0 (once per session, alongside `steps/00-scope-target-repo.md`). If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: execute-increments`) rather than guessing which feature's increments to run — do not fall back to creating one, because increments to run come from an implementation package that already exists. If it resolves, echo the feature ID before loading the first increment.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 For each increment, execute the steps in order. **Read each step file only

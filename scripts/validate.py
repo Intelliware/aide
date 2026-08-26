@@ -23,6 +23,12 @@ task #8 -> task #9):
      `## Preconditions` section that cites
      `references/ai-principles/write-discipline.md`. Prevents silent
      decay of the write-on-acknowledge contract.
+  O. Hook-runtime binding — every SKILL.md, without exception, MUST contain a
+     `## Precondition — hooks` section that cites
+     `references/orientation/hook-runtime.md`. Any skill can be a hook target
+     (config/SCHEMAS.md § 2.5.1, rule 18), so this binding is unscoped —
+     unlike J, there is no enumerated skill allowlist. Prevents configured
+     hooks from silently never firing.
   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
      reference under `.agents/skills/` and `templates/compositions/` must
      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
@@ -53,6 +59,8 @@ Hard errors fail the run (exit 1):
     any retired feature placeholder in an artifact path (N1).
   - Any feature-registry rule violation when running in --features-toml
     mode (N2).
+  - A SKILL.md missing the `## Precondition — hooks` heading or the
+    hook-runtime.md citation (O).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 """
@@ -670,6 +678,56 @@ def check_j() -> tuple[list[str], list[str]]:
             f".agents/skills/**/{missing}/SKILL.md: bound write-discipline "
             f"skill not found on disk (renamed or removed?)"
         )
+    return errors, warnings
+
+
+HOOK_RUNTIME_REF = "references/orientation/hook-runtime.md"
+HOOK_PRECONDITION_HEADING_RE = re.compile(r"^##\s+Precondition\s+—\s+hooks\b", re.MULTILINE | re.IGNORECASE)
+
+
+def check_o() -> tuple[list[str], list[str]]:
+    """O — hook-runtime binding, all skills.
+
+    `[[hooks]].skill` in `customizations/<skill>.toml` resolves to any
+    registered skill (config/SCHEMAS.md § 2.5.1, rule 18) — there is no
+    category allowlist the way write-discipline has for create-* skills. So
+    every SKILL.md, without exception, MUST:
+
+      1. Contain a top-level `## Precondition — hooks` section heading.
+      2. Reference `references/orientation/hook-runtime.md` somewhere in the
+         file (typically inside that section).
+
+    The two checks are deliberately separate so a partial regression (heading
+    present, reference removed; or reference present, heading removed) is
+    still surfaced. Unlike check_j, there is no enumerated skill list — every
+    SKILL.md found under SKILLS_ROOT is in scope.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not SKILLS_ROOT.is_dir():
+        return errors, warnings
+    if not (REPO_ROOT / HOOK_RUNTIME_REF).is_file():
+        errors.append(
+            f"{HOOK_RUNTIME_REF}: target file missing — every SKILL.md cites "
+            f"this path; fix the path or restore the file."
+        )
+    skill_files = sorted(SKILLS_ROOT.rglob("SKILL.md"))
+    if not skill_files:
+        return errors, warnings
+    for skill_md in skill_files:
+        rel = skill_md.relative_to(REPO_ROOT)
+        text = skill_md.read_text(encoding="utf-8")
+        if not HOOK_PRECONDITION_HEADING_RE.search(text):
+            errors.append(
+                f"{rel}: missing top-level `## Precondition — hooks` section — "
+                f"every skill MUST bind to the hook-runtime contract (any skill "
+                f"can be a hook target per config/SCHEMAS.md § 2.5.1)."
+            )
+        if HOOK_RUNTIME_REF not in text:
+            errors.append(
+                f"{rel}: does not reference `{HOOK_RUNTIME_REF}` — "
+                f"bound skills MUST cite the hook execution contract."
+            )
     return errors, warnings
 
 
@@ -1500,6 +1558,7 @@ def main() -> int:
     l_err, l_warn = check_l()
     m_err, m_warn = check_m()
     n1_err, n1_warn = check_n1()
+    o_err, o_warn = check_o()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -1514,12 +1573,14 @@ def main() -> int:
         "Check L — RE close-out gate binding",
         "Check M — {paths.<key>} token resolution",
         "Check N1 — feature-segment / retired-placeholder guardrail",
+        "Check O — hook-runtime binding (all skills)",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
-        (l_err, l_warn), (m_err, m_warn), (n1_err, n1_warn), (f_err, f_warn),
+        (l_err, l_warn), (m_err, m_warn), (n1_err, n1_warn), (o_err, o_warn),
+        (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -1551,6 +1612,7 @@ def main() -> int:
                  "L — RE close-out gate binding",
                  "M — {paths.<key>} token resolution",
                  "N1 — feature-segment / retired-placeholder guardrail",
+                 "O — hook-runtime binding (all skills)",
                  "F — build-registry sanity"],
                 bundles,
             )

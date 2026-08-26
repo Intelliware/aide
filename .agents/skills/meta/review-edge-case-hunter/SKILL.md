@@ -37,6 +37,10 @@ Anytime-runnable. Also invoked by every `review-*-package` skill as the `review-
 
 See `references/INPUTS-OUTPUTS.md` for the full table.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Detect target** — resolve `--target`, classify `target_artifact`, infer `--stage` if absent. See `steps/01-detect-target.md`. (Identical to the corresponding step in `review-adversarial`.)

@@ -59,6 +59,10 @@ See `references/INPUTS-OUTPUTS.md` for full inputs/outputs tables.
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: create-pr`) rather than guessing which feature the diff belongs to — do not fall back to creating one, because a diff waiting to be PR'd belongs to a feature that already exists. If it resolves, echo the feature ID and include it in the generated PR description's traceability block.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Execute one step at a time. Wait for explicit user approval before

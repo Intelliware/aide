@@ -66,6 +66,10 @@ the bug schema.
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before determining the mode. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: manage-bugs`, `caller_mode: select-only`) rather than guessing which feature's log to operate on. Create is suppressed because the implementation-package directory is a required input and the log is written inside it — a feature with no package has no log to operate on, so minting one here would produce a feature with nothing in it. "Independently invocable" means independent of an increment *session*, not of the package. If it resolves, echo the feature ID and the resolved log path before the first read or write. Applies to all four modes, including REVIEW.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow — four operating modes
 
 This skill is invoked in exactly **one** of four modes per call. Determine

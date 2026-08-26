@@ -43,6 +43,10 @@ See `references/INPUTS-OUTPUTS.md`. Key inputs:
 - `preset_name` — the preset to operate on (required for all except `discover`)
 - `source` — path to preset directory (required for `install` when not discovered)
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 The skill routes to one of four step files based on the operation:

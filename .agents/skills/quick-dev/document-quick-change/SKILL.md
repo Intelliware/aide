@@ -35,6 +35,10 @@ See `references/INPUTS-OUTPUTS.md`.
 
 Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op — determine the feature folder as step 1 describes below. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: document-quick-change`, passing the user's description if one exists this turn) rather than inventing a feature ID or slug. If it resolves, the resolved feature ID **is** the feature folder for step 1 — do not separately infer a kebab-case name.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Resolve feature folder** — the folder is the registry's feature ID, already resolved by the precondition above; read it rather than inferring one. Create `docs/<feature-id>/quick-dev-package/` if needed, resolving the feature directory through the precondition's *Resolving the working-tree directory* order — which halts to ask when a pre-opt-in directory exists under the feature's bare slug. **Not opted in** (no `features.toml`): reuse an existing feature folder under `docs/` if one exists, otherwise infer a kebab-case name from the user's description and confirm it.

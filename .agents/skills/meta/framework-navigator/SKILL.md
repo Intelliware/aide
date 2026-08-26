@@ -42,6 +42,10 @@ See `references/INPUTS-OUTPUTS.md`. Primary inputs:
 - The skill catalog (`skills/_registry/skills.csv` + `skills.json`)
 - The flow graph (`skills/_registry/workflow-graph.yaml`)
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Detect mode** — goal vs. catalog. See `steps/01-detect-mode.md`.

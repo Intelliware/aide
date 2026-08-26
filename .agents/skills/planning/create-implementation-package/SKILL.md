@@ -77,6 +77,10 @@ Before executing Step 0 — and before any codebase analysis, increment decompos
 
 This is a hard precondition, not a style note. The `review-implementation-package` skill treats missing per-increment files (the failure mode the contract prevents) as a finding.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Execute one step at a time. Read each step file only when starting that step. The preconditions above MUST already be satisfied before Step 0 starts.

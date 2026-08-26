@@ -23,6 +23,12 @@
  *      `## Preconditions` section that cites
  *      `references/ai-principles/write-discipline.md`. Prevents silent
  *      decay of the write-on-acknowledge contract.
+ *   O. Hook-runtime binding — every SKILL.md, without exception, MUST contain
+ *      a `## Precondition — hooks` section that cites
+ *      `references/orientation/hook-runtime.md`. Any skill can be a hook
+ *      target (config/SCHEMAS.md § 2.5.1, rule 18), so this binding is
+ *      unscoped — unlike J, there is no enumerated skill allowlist. Prevents
+ *      configured hooks from silently never firing.
  *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
  *      reference under `.agents/skills/` and `templates/compositions/` must
  *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
@@ -53,6 +59,8 @@
  *     any retired feature placeholder in an artifact path (N1).
  *   - Any feature-registry rule violation when running in --features-toml
  *     mode (N2).
+ *   - A SKILL.md missing the `## Precondition — hooks` heading or the
+ *     hook-runtime.md citation (O).
  *
  * Everything else is a soft warning (does not fail). Stdlib-only.
  */
@@ -839,6 +847,41 @@ function checkJ() {
   }
   for (const missing of WRITE_DISCIPLINE_SKILLS.filter(n => !found.has(n)).sort()) {
     warnings.push(`.agents/skills/**/${missing}/SKILL.md: bound write-discipline skill not found on disk (renamed or removed?)`);
+  }
+
+  return [errors, warnings];
+}
+
+const HOOK_RUNTIME_REF = 'references/orientation/hook-runtime.md';
+const HOOK_PRECONDITION_HEADING_RE = /^##\s+Precondition\s+—\s+hooks\b/im;
+
+// O — hook-runtime binding, all skills. Unlike checkJ, [[hooks]].skill
+// resolves to any registered skill (config/SCHEMAS.md § 2.5.1, rule 18) —
+// there is no category allowlist — so every SKILL.md is in scope, not an
+// enumerated subset.
+function checkO() {
+  const errors = [];
+  const warnings = [];
+
+  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
+    return [errors, warnings];
+  }
+
+  const refAbs = path.join(REPO_ROOT, HOOK_RUNTIME_REF);
+  if (!fs.existsSync(refAbs) || !fs.statSync(refAbs).isFile()) {
+    errors.push(`${HOOK_RUNTIME_REF}: target file missing — every SKILL.md cites this path; fix the path or restore the file.`);
+  }
+
+  const skillFiles = discoverFiles(SKILLS_ROOT, (name) => name === 'SKILL.md');
+  for (const skillMd of skillFiles) {
+    const rel = path.relative(REPO_ROOT, skillMd);
+    const text = fs.readFileSync(skillMd, 'utf-8');
+    if (!HOOK_PRECONDITION_HEADING_RE.test(text)) {
+      errors.push(`${rel}: missing top-level \`## Precondition — hooks\` section — every skill MUST bind to the hook-runtime contract (any skill can be a hook target per config/SCHEMAS.md § 2.5.1).`);
+    }
+    if (!text.includes(HOOK_RUNTIME_REF)) {
+      errors.push(`${rel}: does not reference \`${HOOK_RUNTIME_REF}\` — bound skills MUST cite the hook execution contract.`);
+    }
   }
 
   return [errors, warnings];
@@ -1796,6 +1839,7 @@ function main() {
   const [lErr, lWarn] = checkL();
   const [mErr, mWarn] = checkM();
   const [n1Err, n1Warn] = checkN1();
+  const [oErr, oWarn] = checkO();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1810,13 +1854,15 @@ function main() {
     'Check L — RE close-out gate binding',
     'Check M — {paths.<key>} token resolution',
     'Check N1 — feature-segment / retired-placeholder guardrail',
+    'Check O — hook-runtime binding (all skills)',
     'Check F — build-registry.js output',
   ];
 
   const bundles = [
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
     [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
-    [lErr, lWarn], [mErr, mWarn], [n1Err, n1Warn], [fErr, fWarn],
+    [lErr, lWarn], [mErr, mWarn], [n1Err, n1Warn], [oErr, oWarn],
+    [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {

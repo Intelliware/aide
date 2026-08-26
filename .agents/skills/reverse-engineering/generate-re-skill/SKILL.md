@@ -44,6 +44,10 @@ The generated skill follows the standard RE documentation model:
 
 Not all domain types have a Part B (e.g., internal-only tooling). The skill generation process determines which parts apply based on the stack's consumer profile.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 ### Stage 1: Preliminary Stack Analysis

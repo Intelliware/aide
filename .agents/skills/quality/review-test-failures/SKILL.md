@@ -87,6 +87,10 @@ do not fall back to creating one, because a run with failures to triage already 
 quality package. If it resolves, echo the feature ID and the resolved
 `automation-and-cicd` path before reading any evidence.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Execute one step at a time. Read each step file only when starting

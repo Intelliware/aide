@@ -64,6 +64,10 @@ Part B is the single source of truth that downstream skills query via
 - `audit-quality-coverage` queries Part B during Step 3 (live drift check) to verify the markers / tags / spec-names that the quality package claims exist.
 - `review-test-failures` queries Part B during Step 3 (classify and remediate) to look up locator definitions, fixture sources, and known patterns for the failing artefact.
 - `create-quality-package` queries Part B during Step 2b (test-case-increment plan) to source reuse hints when planning scaffolding.
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 ### Stage 1: Discovery and Inventory
 - Inventory the runner / build tool, test framework, language pins

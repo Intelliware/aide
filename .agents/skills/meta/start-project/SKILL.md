@@ -34,6 +34,10 @@ See `references/INPUTS-OUTPUTS.md`. Required:
 - For multi-repo projects: one entry per repo with `code`, `name`, `path`, `role`
 - A `knowledge_base_path` (the KB lives in its own repo, almost always sibling)
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Sequenced phases. Run one step at a time. Read each `steps/<n>.md` only when about to execute it.

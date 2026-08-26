@@ -22,6 +22,14 @@ The contract enforces:
 
 Violating any of the above is a defect, not a style preference. The `review-*` skills treat missing per-section files as a finding.
 
+## Operational contract for hook execution (MUST honour, all skills)
+
+Unlike the write-discipline contract above, this obligation is **not** limited to `create-*` skills. Any skill can be configured as a hook host or hook target — `[[hooks]].skill` in `customizations/<skill>.toml` resolves to any registered skill, with no category restriction (see `config/SCHEMAS.md` § 2.5.1). So every A.I.D.E. skill MUST read and apply `<AIDE root>/references/orientation/hook-runtime.md` at its own skill boundaries: before Step 0, and after its final step, before the `## Next skill` handoff.
+
+This is conditional, not unconditional like write-discipline's prompts: if the merged config has no `[[hooks]]` entries scoped to the running skill, the check is a no-op. But the check itself — consulting the merged config for hooks at both boundaries — MUST always happen, because that is the only way a hook configured by a user via `/customize-framework add-hook` (or shipped in a preset) actually fires.
+
+Proceeding past Step 0, or emitting `## Next skill`, without checking for configured hooks is a defect — it silently defeats any hooks the user or a preset configured, regardless of what `customizations/<skill>.toml` contains.
+
 ## Vocabulary
 
 - **Stage** — SDLC-level grouping of work.
@@ -65,7 +73,7 @@ The five-layer config model (`framework.toml` → `framework.user.toml` → `pro
 
 ### Hooks (skill chaining)
 
-Run one skill automatically before or after another. Hooks are declared in `customizations/<skill>.toml` as `[[hooks]]` entries:
+Run one skill automatically before or after another. Every skill's execution side is bound to the hook contract — see "Operational contract for hook execution" above; this subsection covers authoring hooks, not consuming them. Hooks are declared in `customizations/<skill>.toml` as `[[hooks]]` entries:
 
 ```toml
 [[hooks]]

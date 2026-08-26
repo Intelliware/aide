@@ -30,6 +30,10 @@ Users rarely categorize their repos as "API" or "UI framework" — they say "doc
 - Optional: existing documentation that may exist at the path
 - Optional: hint from user about repo's intended consumer (end users vs. other developers)
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 ### Stage 0: Repository Registration Check

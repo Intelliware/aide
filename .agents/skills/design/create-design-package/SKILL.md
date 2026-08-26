@@ -52,6 +52,10 @@ Before executing Step 0 — and before any discovery, design assembly, or handof
 
 This is a hard precondition, not a style note. The `review-design-package` skill treats missing per-block files (the failure mode the contract prevents) as a finding.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 Sequenced phases. Run one step at a time. Do not pre-load every reference. The preconditions above MUST already be satisfied before Step 0 starts.

@@ -54,6 +54,10 @@ See `references/INPUTS-OUTPUTS.md`.
 
 Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: execute-quick-change`, `caller_mode: select-only`) rather than guessing which feature's plan to execute. Create is suppressed because a plan cannot exist for a feature that was just minted — `plan-quick-change`, which produces that plan, is Mode B for the same reason. If it resolves, echo the feature ID before opening the TDD loop.
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 1. **Load solution constraints** — before any increment starts, read the spec's §12.2a Solution Constraints and treat them as facts the implementation must honor on every iteration, including any Solution Pivot. If the spec is inline (trivial) and a constraints section was not written, ask the user once before opening the TDD loop.

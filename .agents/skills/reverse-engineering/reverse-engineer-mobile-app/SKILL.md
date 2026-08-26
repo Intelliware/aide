@@ -38,6 +38,10 @@ Mobile apps span three distinct platforms with different lifecycle, navigation, 
 | Part A | Mobile developers, maintainers | Full internals: architecture, screens, navigation, state, API integration, platform specifics | Stays in app repo |
 | Part B | Other teams, integrators | App purpose, features, APIs consumed, deep linking, deployment, team ownership | Knowledge base |
 
+## Precondition — hooks
+
+Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.
+
 ## Workflow
 
 ### Stage 1: Discovery and Inventory
