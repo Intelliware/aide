@@ -32,7 +32,7 @@ Resolve these before starting.
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------|
 | `AIDE_SOURCE_PROVIDER` | `azure-devops` for option B; not applicable to option A | Source provider used when downloading. Supported values are `azure-devops` and `github`. |
 | `AIDE_SOURCE_DIR` | `../AIDE` | Points to the location of the AIDE framework. Populated when the user chooses option A. |
-| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE`; GitHub: `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. If the Azure DevOps HTTPS clone fails and the user accepts the SSH fallback, replace this value with the verified SSH clone URL used successfully. |
+| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE`; GitHub: `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. If the Azure DevOps HTTPS clone fails and the user accepts the SSH fallback, replace this value with the verified SSH clone URL used successfully. |
 | `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to check out. Populated when the user chooses option B. |
 | `AIDE_REF_TYPE`   | `branch`                                    | Type of `AIDE_REF`: `branch`, `tag`, or `commit`.                                 |
 | `AIDE_TARGET_DIR` | `./AIDE`                                    | Destination directory inside the user's current workspace.                        |
@@ -181,7 +181,7 @@ Do **not** immediately conclude that the repo "cannot be found." For private Azu
    For the default Azure DevOps HTTPS URL, use this exact SSH fallback:
 
    ```
-   git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
+   git@ssh.dev.azure.com:v3/IntelliwareDev/AI_Knowledge_Repo/AIDE
    ```
 
    For a custom Azure DevOps Services HTTPS URL, derive an SSH URL only when the URL unambiguously has the form `https://dev.azure.com/<organization>/<project>/_git/<repository>`: map it to `git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>`, preserving existing percent-encoding in path components. For Azure DevOps Server, enterprise mirrors, legacy `visualstudio.com` URLs, or any URL that cannot be mapped unambiguously, do not guess; ask the user for the repository's SSH clone URL and validate locally that it belongs to the selected Azure DevOps provider family.
@@ -487,7 +487,7 @@ Compose `${AIDE_TARGET_DIR}/.aide-install.json` in memory. The example below sho
   "source_method": "git-clone",
   "source_provider": "azure-devops",
   "source_dir": null,
-  "source_url": "https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE",
+  "source_url": "https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE",
   "ref": "main",
   "ref_type": "branch",
   "ref_verified": true,
@@ -592,7 +592,7 @@ aide_install:
   defaults:
     source_provider: azure-devops
     source_dir: ../AIDE
-    source_url: https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE
+    source_url: https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE
     ref: main
     ref_type: branch
     target_dir: ./AIDE
@@ -678,8 +678,8 @@ aide_install:
       infer_type_from_ref_text: false
   source_providers:
     azure-devops:
-      source_url: https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE
-      ssh_fallback_url: git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
+      source_url: https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE
+      ssh_fallback_url: git@ssh.dev.azure.com:v3/IntelliwareDev/AI_Knowledge_Repo/AIDE
     github:
       source_url: https://github.com/TD-Universe/TD-EM-AIDE
   preconditions:
@@ -933,8 +933,8 @@ aide_install:
           B: continue_standard_authentication_recovery
         recommended: A
       default_repository:
-        https_url: https://dev.azure.com/IntelliwareDev/TD%20AI%20Enabled%20Delivery/_git/AIDE
-        ssh_url: git@ssh.dev.azure.com:v3/IntelliwareDev/TD%20AI%20Enabled%20Delivery/AIDE
+        https_url: https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE
+        ssh_url: git@ssh.dev.azure.com:v3/IntelliwareDev/AI_Knowledge_Repo/AIDE
       custom_azure_devops_services_url:
         derive_only_when_https_shape_is_unambiguous: "https://dev.azure.com/<organization>/<project>/_git/<repository>"
         ssh_shape: "git@ssh.dev.azure.com:v3/<organization>/<project>/<repository>"
