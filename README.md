@@ -55,7 +55,7 @@ Paste both blocks into the agent chat in that order. The same rules block applie
 
 #### One-line prompt — paste this into any agent chat (after the rules block above):
 
-> *"Install AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` per its `INSTRUCTIONS.md`."*
+> *"Install AIDE from `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` per its `INSTRUCTIONS.md`."*
 
 The agent will fetch the repo, copy the mandatory subset (`AGENTS.md`, `.agents/`, `config/`, `templates/`, `references/`) into `./AIDE/`, skip framework-maintenance folders, create discovery shims at your workspace root so any agentskills.io host sees the skills, and verify the result.
 
@@ -63,7 +63,7 @@ The agent will fetch the repo, copy the mandatory subset (`AGENTS.md`, `.agents/
 
 | Variable          | Default                                     | What it controls                                                                            |
 |-------------------|---------------------------------------------|---------------------------------------------------------------------------------------------|
-| `AIDE_SOURCE_URL` | `https://github.com/TD-Universe/TD-EM-AIDE` | Where to fetch from. Use a fork, an internal mirror, or a local clone (`file:///abs/path`). |
+| `AIDE_SOURCE_URL` | `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` | Where to fetch from. Use a fork, an internal mirror, or a local clone (`file:///abs/path`). |
 | `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to install.                                                      |
 | `AIDE_TARGET_DIR` | `./AIDE`                                    | Where in your workspace the framework lands.                                                |
 
@@ -71,7 +71,7 @@ The agent will fetch the repo, copy the mandatory subset (`AGENTS.md`, `.agents/
 
 > *"Install AIDE from `https://github.com/my-org/aide-fork` using `AIDE_REF=R1.5.2` per its `INSTRUCTIONS.md`."*
 
-> *"Install AIDE from `file:///c:/Users/me/repos/TD-EM-AIDE` into `AIDE_TARGET_DIR=./vendor/aide` per its `INSTRUCTIONS.md`."*
+> *"Install AIDE from `file:///c:/Users/me/repos/AIDE` into `AIDE_TARGET_DIR=./vendor/aide` per its `INSTRUCTIONS.md`."*
 
 See [`INSTRUCTIONS.md`](INSTRUCTIONS.md) for the full runbook, the deny-list of files that are never copied, discovery-shim behaviour, troubleshooting, and the machine-readable YAML manifest.
 
@@ -81,13 +81,13 @@ The install runbook is fully idempotent — re-running it *is* the update path. 
 
 **One-line prompt — paste this into any agent chat to update** (rules block above still applies — paste it first):
 
-> *"Update AIDE in this workspace from `https://github.com/TD-Universe/TD-EM-AIDE` by re-running its `INSTRUCTIONS.md`."*
+> *"Update AIDE in this workspace from `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` by re-running its `INSTRUCTIONS.md`."*
 
 The word **update** in the prompt tells the agent to skip the "overwrite or abort?" confirmation (see `INSTRUCTIONS.md` Step 2 — "update-intent exception") and just refresh in place.
 
 The same `AIDE_SOURCE_URL`, `AIDE_REF`, and `AIDE_TARGET_DIR` overrides apply. Use `AIDE_REF` to pin a specific release rather than tracking `main`. Release tags are named `R<semver>` — for example `R2.2.0`, not `v2.2.0`:
 
-> *"Update AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` using `AIDE_REF=R2.2.0` by re-running its `INSTRUCTIONS.md`."*
+> *"Update AIDE from `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` using `AIDE_REF=R2.2.0` by re-running its `INSTRUCTIONS.md`."*
 
 ### Step 2 — Open it in your IDE
 

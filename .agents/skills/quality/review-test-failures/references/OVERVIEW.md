@@ -54,8 +54,8 @@ test run produces failures the user is unsure about — *triage before
 fixing*.
 ## Position in the merged quality stage
 This is the second of the two **operational quality skills**
-(the other is `audit-quality-coverage`) lifted and generalised from
-DCC's set. Both are read-only, anytime-invocable, and consume the
+(the other is `audit-quality-coverage`) lifted and generalised from an
+earlier team-internal set. Both are read-only, anytime-invocable, and consume the
 artifacts produced by `create-quality-package` plus the knowledge
 base. Neither runs as a gate; either can be invoked from inside any
 flow (greenfield, brownfield, quick-dev) when a coverage or failure

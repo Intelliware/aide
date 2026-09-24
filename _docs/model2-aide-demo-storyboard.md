@@ -10,7 +10,7 @@
 > - **§4** — internal production notes (NOT in the deck or the talk).
 > - **§5** — assets to supply.
 >
-> No presenter or stakeholder names appear on any slide. Electric Mind branding; the audience is a TD (regulated-bank) stakeholder — lean into governance/traceability.
+> No presenter or stakeholder names appear on any slide. Electric Mind branding; the audience is a regulated-bank stakeholder — lean into governance/traceability.
 
 ---
 

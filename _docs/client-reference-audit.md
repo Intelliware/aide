@@ -9,6 +9,52 @@
 
 ---
 
+## Remediation status — 2026-09-24
+
+| Item | Status |
+|---|---|
+| `_archive/DCC-QE-Skills/` deleted (97 files) | ✅ Done |
+| `README.md` — 5 slug references | ✅ Done — now point at the Azure DevOps remote |
+| `.env.example` — SharePoint host | ✅ Done — `SHAREPOINT (on-premises)` / `<SHAREPOINT_HOST>` |
+| `testability-classification.md` — client vocabulary | ✅ Done |
+| `reuse-analysis.md` — toolkit attribution | ✅ Done |
+| `audit-quality-coverage/references/OVERVIEW.md` | ✅ Done |
+| `review-test-failures/references/OVERVIEW.md` | ✅ Done |
+| `_docs/model2-aide-demo-storyboard.md` — audience attribution | ✅ Done |
+| `_docs/qe-analysis-3-methods.md` — repo names, vocabulary, root path | ✅ Done — 16 replacements |
+| `INSTRUCTIONS.md` — 4 slug references | ⏸️ **Deferred** — see the branch-conflict warning below |
+| Bare `DCC` / `DCC-QE` as a method label | ⏸️ **Open decision** — see below |
+| Dangling references to the deleted folder | ⏸️ **Open** — 3 paths, see below |
+
+`scripts/validate.py` passes with 0 errors after these changes (5 pre-existing line-count warnings, unrelated).
+
+**On the `README.md` replacement:** the report originally recommended a neutral `<org>/<repo>` placeholder. Instead these now name the real Azure DevOps remote, `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE`. `IntelliwareDev` is our own organisation, so it is not client-identifying, and it is the repository's actual source — which makes the install prompts correct as well as de-branded. A placeholder is still the right choice for the *GitHub provider* default in `INSTRUCTIONS.md`, where no real GitHub mirror should be assumed.
+
+### Open decision — bare `DCC` / `DCC-QE`
+
+`DCC-QE` is used throughout as the *label* for the now-deleted toolkit, separate from the `BB-DCC-QE` repo name that has already been replaced. If `DCC` is a client business-unit abbreviation, these are client-identifying and should go too. Remaining locations:
+
+| File | Count | Notes |
+|---|---|---|
+| `_docs/qe-analysis-3-methods.md` | 34 | The merge-analysis document; `DCC-QE` is one of the three compared methods |
+| `_archive/qe-stage-pre-merge/README.md` | 7 | Archive note explaining what was ported |
+| `CHANGELOG.md` | 1 | Line 555 — a historical release entry |
+| `_docs/qe-3-method.drawio` | 1 | Diagram node label |
+
+Active framework files have already been cleared of `DCC`, so nothing client-identifying ships today. Renaming the label in `CHANGELOG.md` means editing a historical record, which is a judgement call worth making deliberately.
+
+### Open — dangling references to the deleted folder
+
+Three paths now point at `_archive/DCC-QE-Skills/`, which no longer exists:
+
+- `_archive/qe-stage-pre-merge/README.md:18`
+- `_docs/qe-analysis-3-methods.md:11`
+- `_docs/qe-analysis-3-methods.md:85`
+
+These want a note that the material was removed, rather than a path fix.
+
+---
+
 ## Summary
 
 | Measure | Result |

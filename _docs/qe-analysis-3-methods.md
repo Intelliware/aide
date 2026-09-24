@@ -8,7 +8,7 @@
 | Set | Where it lives | What it is | Skill count |
 |---|---|---|---|
 | **Branch / in-tree** | `.agents/skills/qe/` | A new "QE stage" that produces a **QE Package** (test-cases as `TC-XXX` increments), parallel to the implementation package. Backs the fail-fast POC. | 3 skills (`create-`, `review-`, `execute-qe-increments`) |
-| **DCC-QE** | `_archive/DCC-QE-Skills/.agents/skills/qe/` | A team-internal toolkit tuned to **BB-DCC-QE** (Playwright + Cucumber + Java). Phased authoring workflow with KNOWLEDGE.md as cached repo intelligence, plus a Jira-integrated Atlassian CLI tool. | 5 skills + `setup-atlassian-cli` meta + ~85-file Node CLI |
+| **DCC-QE** | `_archive/DCC-QE-Skills/.agents/skills/qe/` | A team-internal toolkit tuned to **<qe-repo>** (Playwright + Cucumber + Java). Phased authoring workflow with KNOWLEDGE.md as cached repo intelligence, plus a Jira-integrated Atlassian CLI tool. | 5 skills + `setup-atlassian-cli` meta + ~85-file Node CLI |
 | **EM-QE** | `_archive/EM-QE-Skills/.agents/skills/quality/` | A new **"quality" stage** (not "qe") that produces a **Quality Package** — QA strategy + test design + quality engineering — folded into AIDE's standard composition/block/template machinery, with a 6-step review gate. | 2 skills + 9 template blocks + 1 composition + workflow-graph wiring |
 
 All three target the same general slot in the SDLC (post-planning,
@@ -16,7 +16,7 @@ pre/around-execution), but they answer different questions:
 
 - **Branch QE** answers *"how do we turn test cases into executable increments
   the way we do features?"*
-- **DCC-QE** answers *"how does the BB-DCC-QE team author and run tests every
+- **DCC-QE** answers *"how does the <qe-repo> team author and run tests every
   day?"*
 - **EM-QE** answers *"what is the canonical Quality artefact, how does it gate
   execution, and how does it slot into the standard AIDE machinery?"*
@@ -86,14 +86,14 @@ EM set and it doesn't use the templates/compositions machinery.
 
 **Capabilities**
 
-- `qe-code-scanner`: deep-scans the BB-DCC-QE repo and writes
+- `qe-code-scanner`: deep-scans the <qe-repo> repo and writes
   `docs/KNOWLEDGE.md` (24 numbered sections — utilities, step defs, page
   classes, locators, environments, BrowserStack modes, etc.). A *cached
   intelligence* model.
 - `qe-development`: 7-phase authoring workflow (Phase 0/0c/0b/1–6) with
   approval checkpoints, lateral-thinking reuse checklist, FR/AC
   traceability, INC-aware entry path that resolves against a sibling
-  `TDBC-knowledge-base/features/...` repo.
+  `<kb-repo>/features/...` repo.
 - `qe-execution`: builds and runs the exact Maven command, handles local +
   BrowserStack CDP + BrowserStack SDK modes, validates env against
   `environments.json`.
@@ -127,15 +127,15 @@ EM set and it doesn't use the templates/compositions machinery.
 
 **Weaknesses**
 
-- **Highly tool-specific.** BB-DCC-QE, Playwright, Cucumber, Java, Maven,
+- **Highly tool-specific.** <qe-repo>, Playwright, Cucumber, Java, Maven,
   BrowserStack CDP/SDK, `objectRepo.properties`,
-  `TDBC-knowledge-base/features/...`, AssertJ, Awaitility, CucumberDebugger
+  `<kb-repo>/features/...`, AssertJ, Awaitility, CucumberDebugger
   — all hardcoded into the skill text, not elicited.
-- **Hardcoded paths**: `BB-DCC-QE/docs/KNOWLEDGE.md`,
-  `BB-DCC-QE/features/<JIRA-ID>/`,
-  `TDBC-knowledge-base/features/<feature>/implementation-package/...`.
+- **Hardcoded paths**: `<qe-repo>/docs/KNOWLEDGE.md`,
+  `<qe-repo>/features/<JIRA-ID>/`,
+  `<kb-repo>/features/<feature>/implementation-package/...`.
   Cannot move to another project without rewriting the skills.
-- **Layer vocabulary (L1/L2/L3/L4) is TD-specific** — depends on a
+- **Layer vocabulary (L1/L2/L3/L4) is client-specific** — depends on a
   test-pyramid table format peculiar to one team's implementation package.
 - **`qe-code-scanner` overlaps with AIDE's KB skills**
   (`build-knowledge-base`, `update-knowledge-base`,
@@ -233,8 +233,8 @@ doing-side.
 
 | Aspect | Branch QE | DCC-QE | EM-QE |
 |---|---|---|---|
-| Stack / tooling assumptions hardcoded? | **Mostly no** — examples nudge toward Java/Cucumber/Kafka but elicitation drives | **Heavily yes** — Playwright + Cucumber + Java + Maven + BrowserStack + AssertJ + Awaitility + BB-DCC-QE paths everywhere | **No** — pure illustrative placeholders |
-| Paths hardcoded? | No (uses `{paths.qe_package}`) | Yes (`BB-DCC-QE/...`, `TDBC-knowledge-base/...`) | No (uses `{paths.quality_path}`, SoD-aware) |
+| Stack / tooling assumptions hardcoded? | **Mostly no** — examples nudge toward Java/Cucumber/Kafka but elicitation drives | **Heavily yes** — Playwright + Cucumber + Java + Maven + BrowserStack + AssertJ + Awaitility + <qe-repo> paths everywhere | **No** — pure illustrative placeholders |
+| Paths hardcoded? | No (uses `{paths.qe_package}`) | Yes (`<qe-repo>/...`, `<kb-repo>/...`) | No (uses `{paths.quality_path}`, SoD-aware) |
 | Vocabulary aligned with framework? | Yes (`increment`, `stage`, `package`) | No (uses "phase" everywhere, banned) | Yes |
 | Customizable via four-layer config? | Partial (no composition/blocks) | No (skills must be rewritten) | Yes (composition, blocks, project.toml elicitation, customizations dir) |
 | Team-portable as-is? | Yes | No (refactor required) | Yes |
@@ -322,7 +322,7 @@ Per AIDE's four-layer config:
 1. **`project.toml`** declares the test stack (`testing_strategy`, framework
    name, runner, env list, naming conventions, tag vocabulary).
 2. **`config/customizations/create-quality-package.toml`** lets a team pin
-   defaults — e.g. BB-DCC-QE team pins Playwright/Cucumber/Java/Maven;
+   defaults — e.g. <qe-repo> team pins Playwright/Cucumber/Java/Maven;
    another team pins Vitest/Playwright/TypeScript.
 3. **`templates/blocks/quality/*.md`** ships generic; teams can add
    team-specific blocks (e.g. `quality/browserstack-execution.md`) under
@@ -351,7 +351,7 @@ Per AIDE's four-layer config:
    that run TC-XXX execution get the block; teams that fold tests directly
    into INC-XXX execution don't.
 4. **Generalise DCC's `qe-coverage-check` → `audit-quality-coverage`**. Cut
-   the BB-DCC-QE-specific paths, use `project.toml` repo list, use KB
+   the <qe-repo>-specific paths, use `project.toml` repo list, use KB
    lookup for tag verification, keep the gap+drift report format.
 5. **Generalise DCC's `qe-defect-review` → `review-test-failures`**. Cut
    Allure/Maven/Playwright specifics. Move the failure-category table into
@@ -508,7 +508,7 @@ failure-triage) are available when a quick-dev change needs them.
 ## (e) Target file tree
 
 End-state of the merged stage. New / moved / amended paths are marked.
-Paths are repo-relative (root = `TD-EM-AIDE/`).
+Paths are repo-relative (root = `AIDE/`).
 
 ```
 .agents/skills/
