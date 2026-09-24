@@ -4,7 +4,7 @@
 >
 > **One-line user prompt to any agent:**
 >
-> > *"Install AIDE from `https://github.com/TD-Universe/TD-EM-AIDE` by following the instructions in its `INSTRUCTIONS.md` file."*
+> > *"Install AIDE from `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` by following the instructions in its `INSTRUCTIONS.md` file."*
 
 ---
 
@@ -14,7 +14,7 @@ Resolve these before starting. Use the defaults unless the user specifies otherw
 
 | Variable          | Default                                     | Purpose                                                                           |
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------|
-| `AIDE_SOURCE_URL` | `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL (or local `file://` path) to fetch from. Forks and mirrors are supported. |
+| `AIDE_SOURCE_URL` | `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE` | Git URL (or local `file://` path) to fetch from. Forks and mirrors are supported. |
 | `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to check out.                                          |
 | `AIDE_TARGET_DIR` | `./AIDE`                                    | Destination directory inside the user's current workspace.                        |
 
@@ -335,7 +335,7 @@ Write `${AIDE_TARGET_DIR}/.aide-install.json`. The example below shows the schem
 
 ```json
 {
-  "source_url": "https://github.com/TD-Universe/TD-EM-AIDE",
+  "source_url": "https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE",
   "ref": "main",
   "commit_sha": "0000000000000000000000000000000000000000",
   "installed_at": "2026-06-01T00:00:00Z",
@@ -394,7 +394,7 @@ Agents that prefer structured input may parse this block directly instead of the
 ```yaml
 aide_install:
   defaults:
-    source_url: https://github.com/TD-Universe/TD-EM-AIDE
+    source_url: https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE
     ref: main
     target_dir: ./AIDE
   copy:

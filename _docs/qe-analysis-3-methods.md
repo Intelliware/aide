@@ -8,7 +8,7 @@
 | Set | Where it lives | What it is | Skill count |
 |---|---|---|---|
 | **Branch / in-tree** | `.agents/skills/qe/` | A new "QE stage" that produces a **QE Package** (test-cases as `TC-XXX` increments), parallel to the implementation package. Backs the fail-fast POC. | 3 skills (`create-`, `review-`, `execute-qe-increments`) |
-| **DCC-QE** | `_archive/DCC-QE-Skills/.agents/skills/qe/` | A team-internal toolkit tuned to **<qe-repo>** (Playwright + Cucumber + Java). Phased authoring workflow with KNOWLEDGE.md as cached repo intelligence, plus a Jira-integrated Atlassian CLI tool. | 5 skills + `setup-atlassian-cli` meta + ~85-file Node CLI |
+| **Internal-QE** | removed from the repo (see git history) | A team-internal toolkit tuned to **<qe-repo>** (Playwright + Cucumber + Java). Phased authoring workflow with KNOWLEDGE.md as cached repo intelligence, plus a Jira-integrated Atlassian CLI tool. | 5 skills + `setup-atlassian-cli` meta + ~85-file Node CLI |
 | **EM-QE** | `_archive/EM-QE-Skills/.agents/skills/quality/` | A new **"quality" stage** (not "qe") that produces a **Quality Package** — QA strategy + test design + quality engineering — folded into AIDE's standard composition/block/template machinery, with a 6-step review gate. | 2 skills + 9 template blocks + 1 composition + workflow-graph wiring |
 
 All three target the same general slot in the SDLC (post-planning,
@@ -16,7 +16,7 @@ pre/around-execution), but they answer different questions:
 
 - **Branch QE** answers *"how do we turn test cases into executable increments
   the way we do features?"*
-- **DCC-QE** answers *"how does the <qe-repo> team author and run tests every
+- **Internal-QE** answers *"how does the <qe-repo> team author and run tests every
   day?"*
 - **EM-QE** answers *"what is the canonical Quality artefact, how does it gate
   execution, and how does it slot into the standard AIDE machinery?"*
@@ -82,7 +82,7 @@ EM set and it doesn't use the templates/compositions machinery.
 
 ---
 
-### 2. DCC-QE — `_archive/DCC-QE-Skills/` (5 skills + meta + CLI)
+### 2. Internal-QE — removed from the repo (5 skills + meta + CLI)
 
 **Capabilities**
 
@@ -217,7 +217,7 @@ reusable patterns** to lift into generic skills.
   bug log).
 - **No coverage-audit / drift-detection skill.** No equivalent of
   `qe-coverage-check`.
-- **No testability gate.** Doesn't have DCC-QE's Phase 0c "is this even
+- **No testability gate.** Doesn't have Internal-QE's Phase 0c "is this even
   automatable?" guard.
 - **Blocks/composition are aimed at a single feature package** — fine for
   greenfield/brownfield SDLC, less obvious how a long-lived test-automation
@@ -231,7 +231,7 @@ doing-side.
 
 ## (b) How generic each is
 
-| Aspect | Branch QE | DCC-QE | EM-QE |
+| Aspect | Branch QE | Internal-QE | EM-QE |
 |---|---|---|---|
 | Stack / tooling assumptions hardcoded? | **Mostly no** — examples nudge toward Java/Cucumber/Kafka but elicitation drives | **Heavily yes** — Playwright + Cucumber + Java + Maven + BrowserStack + AssertJ + Awaitility + <qe-repo> paths everywhere | **No** — pure illustrative placeholders |
 | Paths hardcoded? | No (uses `{paths.qe_package}`) | Yes (`<qe-repo>/...`, `<kb-repo>/...`) | No (uses `{paths.quality_path}`, SoD-aware) |
@@ -246,7 +246,7 @@ doing-side.
   — i.e. customisable through configuration without editing skill bodies.
 - **Branch QE** is *textually* generic but doesn't expose the customisation
   surface (no blocks, no composition).
-- **DCC-QE** is *not* generic. It's a team-specific implementation that
+- **Internal-QE** is *not* generic. It's a team-specific implementation that
   happens to follow the agentskills.io shape. **However, the patterns it
   encodes (reuse analysis, KNOWLEDGE.md, testability gate, defect triage,
   coverage check) are themselves generic ideas** — they just need to be
@@ -264,7 +264,7 @@ proposed end-state, then the migration approach.
 Use **EM-QE's stage name, frontmatter, composition/block discipline, and
 review gate** as the architectural skeleton. Layer in **Branch QE's
 per-test-case increment execution loop** as the doing-side. Layer in
-**DCC-QE's operational patterns** as generic, configurable skills.
+**Internal-QE's operational patterns** as generic, configurable skills.
 
 ```
 stage: quality
@@ -273,8 +273,8 @@ skills:
   create-quality-package      ← EM (Quality Strategy + Test Design + QE plan)
   review-quality-package      ← EM (6-step gate, GO/CONDITIONAL GO/NO-GO)
   execute-quality-increments  ← Branch (TC-XXX execution loop, generalised)
-  audit-quality-coverage      ← DCC-generic (gap + drift report against impl pkg)
-  review-test-failures        ← DCC-generic (one-at-a-time defect triage)
+  audit-quality-coverage      ← Internal-QE-generic (gap + drift report against impl pkg)
+  review-test-failures        ← Internal-QE-generic (one-at-a-time defect triage)
 ```
 
 Plus **one cross-cutting decision**:
@@ -289,7 +289,7 @@ Plus **one cross-cutting decision**:
 
 ### What each skill takes from where
 
-| Target skill | EM contribution | Branch contribution | DCC contribution (generalised) |
+| Target skill | EM contribution | Branch contribution | Internal-QE contribution (generalised) |
 |---|---|---|---|
 | **create-quality-package** | Full skeleton: 3 disciplines, blocks, composition, SoD, traceability matrix, release gates, four-layer customisability | Test-category elicitation (E2E/integration/contract/chaos/etc.), topology/embedding/harness wizard steps as **optional deep-dive sub-steps**, scaffolding-vs-test-case split | **Testability check** as Step 0 (generalised from L1–L4 layers to "does this scope have any automatable surface?"); reuse-analysis sub-step grounded against the KB |
 | **review-quality-package** | 6-step strict-order review with verdicts | Add a 7th review: increment-shape conformance on test-case files (only if execute-quality-increments is in use) | — |
@@ -304,15 +304,15 @@ Plus **one cross-cutting decision**:
   `navigate-knowledge-base` as a dependency of the new quality skills.
 - **`setup-atlassian-cli` + the Node `atl` CLI** → relocated to `tools/`.
   Either rewrap as a standalone tool that any skill can shell out to, or
-  keep as DCC-team-internal until it's promoted. **Do not** make it a hard
+  keep as team-internal until it's promoted. **Do not** make it a hard
   dependency of any merged skill — the quality skills must work without
   Jira. Allow it as an *optional* enrichment when configured in
   `project.toml`.
-- **DCC's per-Jira `features/<JIRA-ID>/` directory layout** → replaced by
+- **Internal-QE's per-Jira `features/<JIRA-ID>/` directory layout** → replaced by
   AIDE's package-output paths resolved through `project.toml` + SoD rules.
 - **All Java/Maven/Playwright/BrowserStack specifics** → demoted to
   template-block placeholders or removed.
-- **"Phase" vocabulary throughout DCC** → renamed to "step" to comply with
+- **"Phase" vocabulary throughout Internal-QE** → renamed to "step" to comply with
   framework rules.
 
 ### Customisation hooks (this is how teams adapt the generic set)
@@ -328,7 +328,7 @@ Per AIDE's four-layer config:
    team-specific blocks (e.g. `quality/browserstack-execution.md`) under
    `templates/blocks/quality/_user/` and include them via a project-scoped
    composition.
-4. **DCC's KNOWLEDGE.md sections** become a generic block template
+4. **Internal-QE's KNOWLEDGE.md sections** become a generic block template
    `templates/blocks/quality/test-suite-intelligence.md` that the test-suite
    KB component populates.
 
@@ -350,18 +350,18 @@ Per AIDE's four-layer config:
    produce. Make it optional via a decision-gate in the composition: teams
    that run TC-XXX execution get the block; teams that fold tests directly
    into INC-XXX execution don't.
-4. **Generalise DCC's `qe-coverage-check` → `audit-quality-coverage`**. Cut
+4. **Generalise Internal-QE's `qe-coverage-check` → `audit-quality-coverage`**. Cut
    the <qe-repo>-specific paths, use `project.toml` repo list, use KB
    lookup for tag verification, keep the gap+drift report format.
-5. **Generalise DCC's `qe-defect-review` → `review-test-failures`**. Cut
+5. **Generalise Internal-QE's `qe-defect-review` → `review-test-failures`**. Cut
    Allure/Maven/Playwright specifics. Move the failure-category table into
    a customisable template block.
-6. **Generalise DCC's Phase 0c testability check** into Step 0 of
+6. **Generalise Internal-QE's Phase 0c testability check** into Step 0 of
    `create-quality-package` (sits before scope elicitation; classifies the
    scope as automatable / not / unclear and offers a clean exit). Replace
    the L1–L4 vocab with a generic question about the increment's exposed
    surface.
-7. **Generalise DCC's Phase 3 reuse checklist** into a reusable reference at
+7. **Generalise Internal-QE's Phase 3 reuse checklist** into a reusable reference at
    `references/reuse-analysis.md` consumed by both `create-quality-package`
    (planning new cases) and `execute-quality-increments` (writing
    artifacts).
@@ -378,10 +378,10 @@ Per AIDE's four-layer config:
 ### Net result
 
 - **One stage** (`quality`) with **5 skills**: 3 from EM/Branch fusion + 2
-  lifted-and-generalised from DCC.
+  lifted-and-generalised from Internal-QE.
 - **All skills generic and customisable** via the four-layer config — no
   team-specific paths, tools, or vocabulary in skill bodies.
-- **DCC's operational wisdom preserved** (reuse, testability gate, coverage
+- **Internal-QE's operational wisdom preserved** (reuse, testability gate, coverage
   audit, defect triage) but expressed in generic form.
 - **No duplication with AIDE's KB skills**.
 - **The fail-fast POC pattern survives** (TC-XXX execution loop is an
@@ -408,7 +408,7 @@ survive any pivot.
 | Set | Quick-dev story |
 |---|---|
 | **Branch QE** | Not addressed. The "When NOT to use" of `create-qe-package` says "trivial change → `quick-dev/document-quick-change`" but no further integration. Quick-dev would have no concept of a QE package and the `execute-qe-increments` loop wouldn't fire. |
-| **DCC-QE** | Not addressed. The whole flow assumes a JIRA ticket or an INC ID from a full implementation package; there's no quick-dev entry path. A quick-dev change would either bypass DCC's QE skills entirely (the developer hand-writes the test) or shoehorn into `qe-development` with a "plain instructions" Phase 0 fallback. |
+| **Internal-QE** | Not addressed. The whole flow assumes a JIRA ticket or an INC ID from a full implementation package; there's no quick-dev entry path. A quick-dev change would either bypass Internal-QE's QE skills entirely (the developer hand-writes the test) or shoehorn into `qe-development` with a "plain instructions" Phase 0 fallback. |
 | **EM-QE** | **Explicitly addressed.** `quality-in-the-lifecycle.md` and the `quality/README.md` both state: *"For the lightweight quick-dev flow this stage is bypassed (like the requirements and design review gates are). Quality folds inline into the quick-dev spec and the 3-dimension verification in `execute-quick-change`."* The same model as `review-requirements-package` / `review-design-package` — generic skills don't run, but their *concerns* are folded into the quick-dev spec section §12.2a (Solution Constraints) and into the executor's verification dimensions. |
 
 EM-QE has the right answer. The merged 5-skill quality stage should adopt
@@ -444,7 +444,7 @@ sections, but as in-block prompts:
 1. **In the AC block** — "How will this AC be proven? (existing test
    updated / new test added / manual smoke / N/A — config only)". This is
    the quick-dev equivalent of the test-design block and surfaces exactly
-   the kind of testability question DCC-QE's Phase 0c asks at heavier
+   the kind of testability question Internal-QE's Phase 0c asks at heavier
    weight.
 2. **In §12.2a Solution Constraints** — explicitly include
    "test/quality constraints" as a constraint type (e.g. "must keep p95
@@ -515,7 +515,7 @@ Paths are repo-relative (root = `AIDE/`).
 ├── quality/                                                ← NEW stage folder (replaces .agents/skills/qe/)
 │   ├── README.md                                           ← NEW (lifted from EM-QE + Quick-dev section)
 │   │
-│   ├── create-quality-package/                             ← from EM-QE, extended with Branch + DCC patterns
+│   ├── create-quality-package/                             ← from EM-QE, extended with Branch + Internal-QE patterns
 │   │   ├── SKILL.md
 │   │   ├── references/
 │   │   │   ├── OVERVIEW.md
@@ -523,11 +523,11 @@ Paths are repo-relative (root = `AIDE/`).
 │   │   │   ├── EXAMPLE.md
 │   │   │   ├── quality-disciplines.md                      ← from EM-QE (unchanged)
 │   │   │   ├── quality-in-the-lifecycle.md                 ← from EM-QE + quick-dev row
-│   │   │   ├── reuse-analysis.md                           ← NEW (generalised DCC Phase 3 checklist)
-│   │   │   └── testability-classification.md               ← NEW (generalised DCC Phase 0c)
+│   │   │   ├── reuse-analysis.md                           ← NEW (generalised Internal-QE Phase 3 checklist)
+│   │   │   └── testability-classification.md               ← NEW (generalised Internal-QE Phase 0c)
 │   │   └── steps/
 │   │       ├── 00-scope-target-repo.md                     ← from EM-QE (SoD)
-│   │       ├── 00b-testability-check.md                    ← NEW (generalised DCC Phase 0c)
+│   │       ├── 00b-testability-check.md                    ← NEW (generalised Internal-QE Phase 0c)
 │   │       ├── 01-quality-strategy.md                      ← from EM-QE
 │   │       ├── 02-test-design.md                           ← from EM-QE + Branch test-category elicitation
 │   │       ├── 02b-test-case-increments.md                 ← NEW (optional, gated; from Branch step 9 + qe-increment-shape)
@@ -554,7 +554,7 @@ Paths are repo-relative (root = `AIDE/`).
 │   │       ├── 04-user-review.md
 │   │       └── 05-status-update.md
 │   │
-│   ├── audit-quality-coverage/                             ← NEW (generalised DCC qe-coverage-check)
+│   ├── audit-quality-coverage/                             ← NEW (generalised Internal-QE qe-coverage-check)
 │   │   ├── SKILL.md
 │   │   ├── references/
 │   │   │   ├── OVERVIEW.md
@@ -568,7 +568,7 @@ Paths are repo-relative (root = `AIDE/`).
 │   │       ├── 04-produce-report.md
 │   │       └── 05-next-actions.md
 │   │
-│   └── review-test-failures/                               ← NEW (generalised DCC qe-defect-review)
+│   └── review-test-failures/                               ← NEW (generalised Internal-QE qe-defect-review)
 │       ├── SKILL.md
 │       ├── references/
 │       │   ├── OVERVIEW.md
@@ -707,7 +707,7 @@ as you go.
 - [ ] `templates/compositions/greenfield-quality-package.yaml` (add `test-case-increment` block + decision-gate keyed on `project.elicitation.uses_test_case_increments`)
 - [ ] `.agents/skills/quality/create-quality-package/SKILL.md` (announce the optional sub-step in the workflow list)
 
-### Step 4 — Generalise DCC `qe-coverage-check` → `audit-quality-coverage`
+### Step 4 — Generalise Internal-QE `qe-coverage-check` → `audit-quality-coverage`
 
 **Create:**
 - [ ] `.agents/skills/quality/audit-quality-coverage/SKILL.md`
@@ -721,7 +721,7 @@ as you go.
 - [ ] `.agents/skills/quality/audit-quality-coverage/steps/04-produce-report.md`
 - [ ] `.agents/skills/quality/audit-quality-coverage/steps/05-next-actions.md`
 
-### Step 5 — Generalise DCC `qe-defect-review` → `review-test-failures`
+### Step 5 — Generalise Internal-QE `qe-defect-review` → `review-test-failures`
 
 **Create:**
 - [ ] `.agents/skills/quality/review-test-failures/SKILL.md`
@@ -748,7 +748,7 @@ as you go.
 ### Step 7 — Reuse-analysis reference
 
 **Create:**
-- [ ] `.agents/skills/quality/create-quality-package/references/reuse-analysis.md` (generalised DCC Phase 3 lateral-thinking checklist)
+- [ ] `.agents/skills/quality/create-quality-package/references/reuse-analysis.md` (generalised Internal-QE Phase 3 lateral-thinking checklist)
 
 **Amend:**
 - [ ] `.agents/skills/quality/create-quality-package/steps/02-test-design.md` (reference reuse-analysis.md when authoring new cases)
@@ -759,12 +759,12 @@ as you go.
 **Amend:**
 - [ ] `.agents/skills/quality/README.md` (add "Test-suite intelligence via KB" section; point at `reverse-engineer-*` + `build-knowledge-base` + `navigate-knowledge-base`)
 
-**No new files; no skill rename. DCC's `qe-code-scanner` is not ported.**
+**No new files; no skill rename. Internal-QE's `qe-code-scanner` is not ported.**
 
 ### Step 9 — Atlassian CLI: do NOT promote to a skill
 
 **Decision options (pick one):**
-- [ ] **Option A (recommended):** drop from scope entirely; DCC team keeps it in their own repo.
+- [ ] **Option A (recommended):** drop from scope entirely; Internal-QE team keeps it in their own repo.
 - [ ] **Option B:** move to `tools/atlassian-cli/` as an optional companion; add `tools/atlassian-cli/README.md` explaining it's optional and not framework-required.
 - [ ] **Option C:** add a thin `jira-fetch` meta skill (mirror of `verify-source` shape) under `.agents/skills/meta/` that any skill may optionally invoke; gated on `project.toml` declaring Jira credentials.
 
@@ -828,7 +828,7 @@ as you go.
 |---|---|---|
 | **A** | Steps 1, 10 (workflow-graph piece only) | Adopt EM-QE wholesale; wire upstream/downstream; wire workflow graph. Pause for review — the framework will be functional with just 2 quality skills. |
 | **B** | Steps 2, 3 | Port `execute-quality-increments` and the optional `test-case-increment` block + composition gate. Now the fail-fast POC flow works end-to-end. |
-| **C** | Steps 4, 5 | Generalise DCC's two operational skills (`audit-quality-coverage`, `review-test-failures`). Now the full 5-skill set exists. |
+| **C** | Steps 4, 5 | Generalise Internal-QE's two operational skills (`audit-quality-coverage`, `review-test-failures`). Now the full 5-skill set exists. |
 | **D** | Steps 6, 7, 8 | Add the testability gate, the reuse-analysis reference, and the KB-as-test-suite-intelligence docs. Polish. |
 | **E** | Step 9 (decision), Step 10 (remaining quick-dev amendments), config + customisation surface, registry rebuild, validation, archive | Finalise, validate, archive the old `qe` folder. Final review. |
 

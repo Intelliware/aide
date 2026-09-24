@@ -21,7 +21,7 @@
         <mxCell id="src-em" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E2F0D9;strokeColor=#548235;fontSize=12;arcSize=20;fontStyle=1" value="EM-QE quality stage&#xa;Quality Package&#xa;QA analysis + software testing + quality engineering&#xa;&#xa;Adopted as architectural skeleton" vertex="1">
           <mxGeometry height="120" width="300" x="430" y="150" as="geometry" />
         </mxCell>
-        <mxCell id="src-dcc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBF7;strokeColor=#2E75B6;fontSize=12;arcSize=20;fontStyle=1" value="DCC-QE operational patterns&#xa;testability guard&#xa;reuse analysis&#xa;coverage audit&#xa;failure triage&#xa;&#xa;Generalised; hardcoded stack removed" vertex="1">
+        <mxCell id="src-dcc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DDEBF7;strokeColor=#2E75B6;fontSize=12;arcSize=20;fontStyle=1" value="Internal-QE operational patterns&#xa;testability guard&#xa;reuse analysis&#xa;coverage audit&#xa;failure triage&#xa;&#xa;Generalised; hardcoded stack removed" vertex="1">
           <mxGeometry height="120" width="300" x="780" y="150" as="geometry" />
         </mxCell>
         <mxCell id="merged-stage" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B183;strokeColor=#C55A11;fontSize=14;arcSize=20;fontStyle=1" value="Unified live stage&#xa;.agents/skills/quality&#xa;&#xa;5 generic, customisable skills&#xa;No hard external-tool dependency&#xa;KB used for test-suite intelligence" vertex="1">
