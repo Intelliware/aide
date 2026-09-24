@@ -67,7 +67,8 @@ declaring a feature "tested".
 ## Position in the merged quality stage
 
 This is one of two **operational quality skills** (the other is
-`review-test-failures`) lifted and generalised from DCC's set. Both
+`review-test-failures`) lifted and generalised from an earlier
+team-internal set. Both
 are read-mostly, anytime-invocable, and consume the artifacts produced
 by `create-quality-package` plus the knowledge base. Neither runs as
 a gate; either can be invoked from inside any flow (greenfield,

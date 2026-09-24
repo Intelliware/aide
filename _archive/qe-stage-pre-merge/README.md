@@ -15,8 +15,8 @@ Three earlier, parallel sources of QE skills had been prototyped:
    (`create-quality-package`, `review-quality-package`) using a three-discipline
    framing (software testing / QA analysis / quality engineering) and the
    "Quality Package" terminology that was ultimately adopted.
-3. **DCC-QE** at `_archive/DCC-QE-Skills/.agents/skills/qe/` — a team-internal
-   toolkit tuned to BB-DCC-QE (Playwright + Cucumber + Java), with two
+3. **Internal-QE**, since removed from the repo — a team-internal
+   toolkit tuned to <qe-repo> (Playwright + Cucumber + Java), with two
    operational skills (`qe-coverage-check`, `qe-defect-review`) plus a
    reverse-engineering-style `qe-code-scanner` and a setup-atlassian-cli
    meta skill.
@@ -28,20 +28,20 @@ The three sets were merged into a single **`quality/`** stage under
 
 | Skill | Origin |
 |---|---|
-| `create-quality-package` | EM-QE base, with DCC's testability-check (Step 00b) and the reuse-analysis reference added |
+| `create-quality-package` | EM-QE base, with Internal-QE's testability-check (Step 00b) and the reuse-analysis reference added |
 | `review-quality-package` | EM-QE, lifted essentially as-is |
 | `execute-quality-increments` | Branch in-tree set's `execute-qe-increments`, generalised |
-| `audit-quality-coverage` | DCC-QE's `qe-coverage-check`, generalised |
-| `review-test-failures` | DCC-QE's `qe-defect-review`, generalised |
+| `audit-quality-coverage` | Internal-QE's `qe-coverage-check`, generalised |
+| `review-test-failures` | Internal-QE's `qe-defect-review`, generalised |
 
-DCC-QE's `qe-code-scanner` was **deliberately not ported** — its capability
+Internal-QE's `qe-code-scanner` was **deliberately not ported** — its capability
 is delivered by the existing reverse-engineering + knowledge-base skills
 (`reverse-engineer-test-suite` + `navigate-knowledge-base --profile=test-suite`),
 which keep the test-suite intelligence current in a more general and durable
 form. See `.agents/skills/quality/README.md` → "Test-suite intelligence via
 the knowledge base" for the rationale.
 
-The Atlassian CLI from DCC-QE was **left as an optional companion tool** at
+The Atlassian CLI from Internal-QE was **left as an optional companion tool** at
 `tools/packages/atlassian-cli/`, with explicit "not framework-required"
 status documented in `tools/README.md` and `tools/packages/atlassian-cli/README.md`.
 

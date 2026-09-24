@@ -155,8 +155,8 @@ review red flag — it usually means the reuse check was not run.
 
 ## 5. Provenance
 
-This planning-time reuse reference generalises the DCC-QE lateral-thinking
-checklist (originally authored as "Phase 3" in that team-internal toolkit,
+This planning-time reuse reference generalises an earlier lateral-thinking
+checklist (originally authored as "Phase 3" in a team-internal toolkit,
 restated stack-agnostically here and split from the execution-side gate per
 the merge analysis). See `_docs/qe-analysis-3-methods.md` § (c) Step 7 for
 the rationale.

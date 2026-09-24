@@ -145,8 +145,8 @@ design test case` or `record manual procedure` produce cases) and Step
 ## 7. Provenance
 
 This classifier generalises the testability-check pattern originally
-prototyped in the DCC-QE skill set ("Phase 0c") where it was expressed
-in TD-team-specific L1–L4 layer vocabulary. Here it is restated
+prototyped in an earlier team-internal QE skill set ("Phase 0c") where it
+was expressed in client-specific L1–L4 layer vocabulary. Here it is restated
 stack-agnostically: the five-question classifier replaces the layer
 table; the six outcomes replace the layer-by-layer routing; the
 `unclear` outcome's escalation rule is preserved verbatim.

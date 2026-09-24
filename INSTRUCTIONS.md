@@ -32,7 +32,7 @@ Resolve these before starting.
 |-------------------|---------------------------------------------|-----------------------------------------------------------------------------------|
 | `AIDE_SOURCE_PROVIDER` | `azure-devops` for option B; not applicable to option A | Source provider used when downloading. Supported values are `azure-devops` and `github`. |
 | `AIDE_SOURCE_DIR` | `../AIDE` | Points to the location of the AIDE framework. Populated when the user chooses option A. |
-| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE`; GitHub: `https://github.com/TD-Universe/TD-EM-AIDE` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. If the Azure DevOps HTTPS clone fails and the user accepts the SSH fallback, replace this value with the verified SSH clone URL used successfully. |
+| `AIDE_SOURCE_URL` | Azure DevOps: `https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE`; GitHub: `https://github.com/<owner>/<repo>` | Git URL selected from `AIDE_SOURCE_PROVIDER`. Forks and mirrors within the selected provider family are supported. Populated when the user chooses download option B. If the Azure DevOps HTTPS clone fails and the user accepts the SSH fallback, replace this value with the verified SSH clone URL used successfully. |
 | `AIDE_REF`        | `main`                                      | Branch, tag, or commit SHA to check out. Populated when the user chooses option B. |
 | `AIDE_REF_TYPE`   | `branch`                                    | Type of `AIDE_REF`: `branch`, `tag`, or `commit`.                                 |
 | `AIDE_TARGET_DIR` | `./AIDE`                                    | Destination directory inside the user's current workspace.                        |
@@ -681,7 +681,7 @@ aide_install:
       source_url: https://dev.azure.com/IntelliwareDev/AI_Knowledge_Repo/_git/AIDE
       ssh_fallback_url: git@ssh.dev.azure.com:v3/IntelliwareDev/AI_Knowledge_Repo/AIDE
     github:
-      source_url: https://github.com/TD-Universe/TD-EM-AIDE
+      source_url: https://github.com/<owner>/<repo>
   preconditions:
     workspace_root_identified: true
     source_identity:
