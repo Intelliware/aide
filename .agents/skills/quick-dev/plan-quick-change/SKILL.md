@@ -45,7 +45,7 @@ Before Step 0, and after this skill's final step (before the `## Next skill` han
 4. **Decompose into increments** — group ACs into 1–3 increments. Each increment must produce a working system state, be independently verifiable, and trace to one or more ACs. Cross-check that the proposed approach for each increment honors every §12.2a Solution Constraint — an increment whose plan would have to violate a constraint to ship is not a legal increment.
 5. **Populate the reduced increment shape** — Identity (INC-XXX, name, AC mapping), Goal, Plan (file paths + steps), AI Gate (test commands + expected results), Human Gate (review steps), Success Criteria. See `steps/03-populate-shape.md`.
 6. **Clarity gate** — no markers, all sections, file paths specified, AC mappings present, no speculative increments. If it fails, return to step 1 or 2.
-7. **Write and confirm** — write to `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`. Get explicit user approval before handoff.
+7. **Write and confirm** — write to `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-plan.md`. Get explicit user approval before handoff.
 
 ## Output
 

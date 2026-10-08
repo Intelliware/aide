@@ -15,7 +15,7 @@
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
 | `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` (small/medium) OR inline (trivial) | markdown — populated four-block composition | `plan-quick-change` |
-| `docs/<feature-id>/CHANGE-TRACKER.md` (created if missing) | markdown — initialized | `track-change` |
+| `{paths.requirements_package}/<feature-id>/CHANGE-TRACKER.md` (created if missing) | markdown — initialized | `track-change` |
 | Glossary additions (when new terms appear) | markdown table inside the spec | downstream skills, glossary linter |
 
 ## Side effects

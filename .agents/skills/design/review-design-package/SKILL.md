@@ -28,7 +28,7 @@ The review sequence is strict — five reviews in fixed order (architecture, sec
 
 | Name | Required? |
 |---|---|
-| Assembled design package (`solution-package.md` alias or `{paths.design_package}/{feature-id}/{feature-id}-design.md`) | yes |
+| Assembled design package (`{paths.design_package}/{feature-id}/{feature-id}-design.md`) | yes |
 | Design `change-tracker.md` | yes |
 | Architecture baseline (when present) | conditional |
 | Approved requirements package + readiness verdict | yes |
@@ -50,8 +50,8 @@ opted-in project in legacy mode still carries the segment.
 
 - **Legacy mode.** If `[stages.design]` has neither `dir` nor
   `colocate_with_source`, the artifact lives at
-  `{project.paths.design_package}/{feature-id}/{feature-id}-design.md` (or its
-  `solution-package.md` alias). No scoping needed.
+  `{project.paths.design_package}/{feature-id}/{feature-id}-design.md` (or, when
+  the project has not opted in, its `solution-package.md` alias). No scoping needed.
 - **SoD directory mode** (`[stages.design].dir = "..."`). The artifact lives
   under `<host-repo>/<artifact_subdir>/design/`:
   - **Single-repo:** under `<repo-code>/<feature-id>/<feature-id>-design.md`.
@@ -64,8 +64,9 @@ opted-in project in legacy mode still carries the segment.
 
 This step is **read-only** — no permission check required (the review skill
 does not write to the upstream artifact). When the review skill writes its
-own findings, it writes under the same host repo at
-`docs/<feature-id>/solutions-package/review/...`.
+own findings, it writes them into the same stage feature directory as the
+upstream artifact: `{paths.design_package}/<feature-id>/review/...` in legacy
+mode, the resolved SoD directory's `review/` otherwise.
 
 If executed non-interactively without an explicit `feature-id` (and `scope`
 when ambiguous), **fail fast** with a clear error rather than blocking on a
@@ -100,11 +101,11 @@ The detailed instructions, halt conditions, and verdict templates live in `refer
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature-id>/solutions-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Adversarial findings file | `docs/<feature-id>/solutions-package/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Edge-case findings file | `docs/<feature-id>/solutions-package/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
-| Final readiness verdict | `docs/<feature-id>/solutions-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
-| Updated `change-tracker.md` rows | `docs/<feature-id>/solutions-package/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+| Per-review findings | `{paths.design_package}/<feature-id>/review/<review-name>.md` | Markdown — findings + verdict |
+| Adversarial findings file | `{paths.design_package}/<feature-id>/review/adversarial-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Edge-case findings file | `{paths.design_package}/<feature-id>/review/edge-case-findings.md` | `aide-adversarial-findings@1` (Format 4) |
+| Final readiness verdict | `{paths.design_package}/<feature-id>/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `{paths.design_package}/<feature-id>/design/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 
 ## Next skill
 

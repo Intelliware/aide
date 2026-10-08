@@ -24,16 +24,16 @@ design package, and write into the same `review/` directory as the other sub-rev
 
 ```
 meta/review-adversarial \
-  --target=docs/<feature-id>/solutions-package/design-package.md \
+  --target={paths.design_package}/<feature-id>/<feature-id>-design.md \
   --stage=design \
-  --output-path=docs/<feature-id>/solutions-package/review/adversarial-findings.md
+  --output-path={paths.design_package}/<feature-id>/review/adversarial-findings.md
 ```
 
 ```
 meta/review-edge-case-hunter \
-  --target=docs/<feature-id>/solutions-package/design-package.md \
+  --target={paths.design_package}/<feature-id>/<feature-id>-design.md \
   --stage=design \
-  --output-path=docs/<feature-id>/solutions-package/review/edge-case-findings.md
+  --output-path={paths.design_package}/<feature-id>/review/edge-case-findings.md
 ```
 
 They carry more weight here than in most stages, because a design package is where

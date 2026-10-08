@@ -3,7 +3,7 @@
 | Name | Required? | Source | Purpose |
 |---|---|---|---|
 | Failure set | yes | Hand-off from `execute-quality-increments` / `execute-increments` / a CI run, or user-provided | The failures to triage (scenarios, error messages, stack traces) |
-| Quality package automation-and-cicd block | yes | `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` | Pinned evidence locations (report path, log path, screenshot path) — read here, never hard-coded in this skill |
+| Quality package automation-and-cicd block | yes | `{paths.quality_package}/<feature-id>/quality/automation-and-cicd.md` | Pinned evidence locations (report path, log path, screenshot path) — read here, never hard-coded in this skill |
 | Failure categories | yes | `references/failure-categories.md` (generic) + `templates/blocks/quality/failure-categories.md` (team-overridable block) | The classification taxonomy and remediation hints |
 | `project.toml` | yes | `{project-root}/project.toml` | Paths, repos, `[project.testing].qe_repo`, test-stack pins, team customisation overrides |
 | Per-test report data | recommended | path declared in automation-and-cicd (e.g. JUnit XML, Allure JSON, framework-native reporter output) | Per-test JSON / XML for deeper triage |
@@ -17,7 +17,7 @@
 | Per-failure classification + remediation | Chat (interactive) | Markdown block per failure | Always produced; one at a time, awaits user approval before advancing |
 | Final summary table | Chat | Markdown table | After all failures triaged |
 | Action items (routed) | Chat | Checklist mapping each finding → specific framework skill | Always produced when actions exist |
-| `change-tracker.md` row | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table | Single row recording the triage session (Trigger note: `Failure triage`). Includes total failures, per-category counts, and a link to the chat summary. |
+| `change-tracker.md` row | `{paths.quality_package}/<feature-id>/quality/change-tracker.md` | Markdown table | Single row recording the triage session (Trigger note: `Failure triage`). Includes total failures, per-category counts, and a link to the chat summary. |
 ## Side effects
 - **None on test code, application code, fixtures, logs, screenshots,
   the KB, the implementation package, or the assembled quality

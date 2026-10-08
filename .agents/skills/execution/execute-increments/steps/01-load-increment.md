@@ -36,9 +36,9 @@ loop.
    - Required external dependencies (services, sandbox APIs) are reachable.
 5. **Read context.**
    - Read the FRs the increment maps to from
-     `{project.paths.requirements_package}/`.
+     `{project.paths.requirements_package}/{feature-id}/`.
    - Read the relevant design sections from
-     `{project.paths.design_package}/`.
+     `{project.paths.design_package}/{feature-id}/`.
    - If the knowledge base is configured
      (`project.paths.knowledge_base_path`), read the components the
      increment touches.

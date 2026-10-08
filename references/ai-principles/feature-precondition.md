@@ -7,13 +7,15 @@ drifting. See `config/SCHEMAS.md` § 2.8 (the registry) and § 2.9 (the active-f
 pointer) for the underlying schema, and `_docs/feature-id-minimal-plan.md` § 7 for
 the design rationale.
 
-**Scope note.** Resolving the active feature determines **both** paths a stage
-writes to, and they are separate rules in this file. The **per-section working
-tree** is `docs/<feature-id>/` (*Resolving the working-tree directory*, below).
-The **assembled artifact** gains a `<feature-id>/` directory immediately above it
-(*Resolving the assembled artifact path*). Keep the two straight when reading the
-mode steps: step 4's echo names whichever of the two the calling skill is about to
-write, and for most `create-*` skills that is the assembled path.
+**Scope note.** On an opted-in project, resolving the active feature determines
+**one directory per stage** — the **stage feature directory** — and everything that
+stage produces for the feature lands inside it: the assembled artifact *and* the
+per-section working tree (block files, discovery and analysis notes, change and
+completeness trackers, review findings). For a legacy-mode stage it is
+`{paths.<stage>_package}/<feature-id>/`, so it follows `[project.paths]` into
+whatever directory — or repository — the project points that stage at. See
+*Resolving the stage feature directory*, below. Projects that have not opted in keep
+the pre-existing split layout (*Not opted in*, below).
 
 ## The two-line resolution rule
 
@@ -32,65 +34,81 @@ predates the default, or one that deliberately removed the file — and both mus
 behave exactly as they did before any of this existed. That guarantee is what makes
 the default safe to flip; it is not softened by flipping it.
 
-## Resolving the working-tree directory
+## Resolving the stage feature directory
 
-Both Mode A and Mode B need the per-section working-tree directory, and on an
-opted-in project that directory is `docs/<feature-id>/`. Resolve it in this order:
+Every stage writes one directory per feature, and on an opted-in project both the
+assembled artifact and the working tree live inside it. Resolve it by the stage's
+mode — the same resolution the stage's `00-scope-target-repo` step already performs
+for the assembled artifact:
 
-1. `docs/<feature-id>/` exists → use it. This is the steady state and the common
-   case; stop here.
-2. It does not exist → apply the reconciliation check below, then create
-   `docs/<feature-id>/`.
+| Stage mode | Stage feature directory |
+|---|---|
+| Legacy (no SoD fields on `[stages.<stage>]`) | `{paths.<stage>_package}/<feature-id>/` |
+| SoD directory mode, single-repo | `<host-repo>/<artifact_subdir>/<stage>/<repo-code>/<feature-id>/` |
+| SoD directory mode, cross-cutting | `<host-repo>/<artifact_subdir>/<stage>/_cross-cutting/<feature-id>/` |
+| SoD colocate mode | `<source-repo-path>/<artifact_subdir>/<stage>/<feature-id>/` |
 
-**Because the feature ID *is* the directory name, case 1 absorbs most of the
-mid-flight adoption problem by itself.** A project that opts in after improvising
-`docs/refunds/` keeps working the moment its feature is minted as `refunds`: the
-directory already matches, nothing is renamed, and there is nothing to reconcile.
-That is why `select-feature` proposes an existing `docs/` directory name as the slug
-rather than deriving one from the title — the proposal is what steers the common
-case into case 1, so treat it as load-bearing rather than a convenience.
+Which `[project.paths]` key a stage uses:
 
-**Reconciliation, for the case the proposal did not catch.** A registry hand-written
-without `select-feature`, or a slug the user deliberately overrode, can leave a
-feature whose ID does not match the directory holding its work. Creating
-`docs/refund-processing/` next to an existing `docs/refunds/` would split one
-feature across two trees — the precise failure this whole mechanism exists to
-prevent, reintroduced by the fix for it. So before creating, check whether `docs/`
-holds any directory that is **not** a registered feature ID (the registry lists
-every legitimate name, so this set is exact). If one plausibly holds this feature's
-work, **halt** and offer two options:
+| Stage / skill family | Key | Sub-directories inside the stage feature directory |
+|---|---|---|
+| Requirements (`create-` / `review-requirements-package`) | `requirements_package` | `discovery/`, `analysis/`, `requirements/`, `review/` |
+| Design (`create-` / `review-design-package`) | `design_package` | `discovery/`, `design/` (incl. `design/adr/` fallback), `review/` |
+| Quality (`create-` / `review-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) | `quality_package` | `quality/` (incl. `quality/plan/`), `review/` |
+| Implementation (`create-` / `review-implementation-package`, `execute-increments`, `manage-bugs`) | `implementation_package` | `plan/` — per-increment files sit at the directory root |
+| Quick-dev (`document-` / `plan-` / `execute-quick-change`) | `requirements_package` | none — spec, plan, `CHANGE-TRACKER.md`, orientation notes and review files sit together at the directory root |
 
-> `docs/refunds/` holds work that looks like this feature, but the active feature is
-> `refund-processing`, so I would create a second directory beside it. Either:
-> **(a) rename the directory** to `docs/refund-processing/` — one `git mv`, history
-> preserved; or
-> **(b) rename the feature** to `refunds` in `features.toml` and `active_feature`,
-> leaving the directory untouched.
+**Skills spell these paths in the legacy-mode form** (`{paths.design_package}/<feature-id>/design/…`).
+When the stage runs in SoD mode, substitute the directory resolved by its
+`00-scope-target-repo` step for the `{paths.<key>}/<feature-id>/` prefix; the rest of
+the path is unchanged. Because `[project.paths]` (or the SoD host repo) decides the
+prefix, a stage pointed at a sibling repository writes its working files there too —
+nothing feature-scoped is written to `{project-root}/docs/` on an opted-in project.
 
-Both answers end with the ID and the directory in agreement, so case 1 handles every
-subsequent run and no registry field records an exception. That symmetry is a
-consequence of the ID being the directory name: under the retired ordinal-prefixed
-format only (a) was really available, because "keep the old directory" meant binding
-an ID to a differently-named directory forever, and the binding had to be
-re-derived by stripping the prefix on every run.
+**Code is unaffected.** This rule governs framework documents only. Source and test
+code still go wherever the target repository's own layout says, resolved through
+`[[project.repos]]` / `[project.testing].qe_repo`; the feature ID never becomes a
+segment of a code path.
 
-Option (b) has one precondition: it is safe only while **no artifacts exist under
-the current ID**, on either the working-tree or the assembled side. If some do, the
-rename strands them, and (a) is the only correct answer. Check before offering it.
+Resolve the directory in this order:
 
-Never resolve this silently in either direction. Renaming a directory the user did
-not ask you to rename and starting a second tree beside theirs are both worse than
-one question. Listing a non-feature directory as a candidate is a normal outcome of
-`docs/` holding hand-written folders too — offer "none of these" and move on. This
-also honours `config/SCHEMAS.md` § 2.8's promise that artifacts already on disk in a
-flat layout "stay where they are and keep working": the framework offers the
-migration, it never performs it unasked.
+1. The stage feature directory exists → use it. This is the steady state; stop here.
+2. It does not exist → apply the legacy-tree check below, then create it.
+
+**Legacy-tree check.** Before 2.7.0, an opted-in project kept its working tree at
+`docs/<feature-id>/<legacy-package-dir>/` (the legacy names are in *Not opted in*,
+below), and a project that improvised its layout before opting in may hold the same
+work under a differently-named `docs/<name>/`. Creating a fresh stage feature
+directory beside either would split one feature across two trees — the precise
+failure this mechanism exists to prevent. So before creating, check `docs/` for:
+
+- `docs/<feature-id>/<legacy-package-dir>/` for this stage, and
+- any `docs/<name>/<legacy-package-dir>/` where `<name>` is **not** a registered
+  feature ID (the registry lists every legitimate name, so this set is exact) and
+  the contents plausibly belong to this feature.
+
+If one is found, **halt** and offer:
+
+> `docs/refunds/requirements-package/` holds requirements work that looks like this
+> feature (`refund-processing`). Feature work now lives in
+> `.framework-output/requirements/refund-processing/`. Either:
+> **(a) move it there** — one `git mv` per sub-directory, history preserved; or
+> **(b) stop here** so you can move or archive it yourself.
+
+Never resolve this silently. Moving a directory the user did not ask you to move and
+starting a second tree beside theirs are both worse than one question. Listing a
+non-feature directory as a candidate is a normal outcome of `docs/` holding
+hand-written folders too — offer "none of these" and continue. This honours
+`config/SCHEMAS.md` § 2.8's promise that artifacts already on disk "stay where they
+are and keep working": the framework offers the migration, it never performs it
+unasked, and it asks once per feature per stage, at the moment that stage is next
+worked.
 
 ## Resolving the assembled artifact path
 
-The assembled per-stage artifact gains a `<feature-id>/` directory immediately above
-it. Every feature-scoped composition's `default-output-path` is written in the
-**opted-in** form, carrying that segment:
+The assembled per-stage artifact sits at the root of the stage feature directory.
+Every feature-scoped composition's `default-output-path` is written in the
+**opted-in** form, carrying the `<feature-id>/` segment:
 
 ```
 {paths.requirements_package}/{feature-id}/{feature-id}-requirements.md
@@ -105,11 +123,6 @@ features.toml is absent    → drop the <feature-id>/ segment entirely, leaving 
                              flat path the project uses today. The filename keeps
                              its {feature-id}- prefix, exactly as before.
 ```
-
-Dropping one segment is the whole of the not-opted-in behaviour. A project that never
-runs `select-feature` therefore writes byte-for-byte where it writes today, which is
-`_docs/feature-id-minimal-plan.md` § 6's central promise and is not negotiable for the
-sake of a tidier path string.
 
 Three details that are easy to get wrong:
 
@@ -128,52 +141,80 @@ Three details that are easy to get wrong:
   (`config/SCHEMAS.md` § 5) and a role check must keep corresponding to a subtree.
   Cross-cutting features nest identically as `_cross-cutting/<feature-id>/`.
 
+**No alias files on an opted-in project.** The `docs/` alias files
+(`requirements-package/requirements-package.md`, `solutions-package/solution-package.md`)
+existed only to point from the working tree at an assembled artifact in another
+tree. With both in one directory there is nothing to point across, so opted-in
+skills write no alias, and every consumer — review skills included — reads the
+assembled artifact by its canonical path.
+
+## Not opted in
+
+Without `features.toml` nothing in this file applies, and the project keeps the
+layout it had before feature scoping existed, byte for byte —
+`_docs/feature-id-minimal-plan.md` § 6's central promise:
+
+- The assembled artifact drops the `<feature-id>/` segment (above).
+- The working tree stays under `docs/<name>/<legacy-package-dir>/`, where
+  `<name>` is reused from an existing `docs/` folder or inferred from the
+  request as a kebab slug and confirmed with the user. Skill text spells working-tree
+  paths in the opted-in form; map them back with this table:
+
+| Opted-in prefix | Not-opted-in prefix (`<legacy-package-dir>`) |
+|---|---|
+| `{paths.requirements_package}/<feature-id>/` (requirements) | `docs/<name>/requirements-package/` |
+| `{paths.design_package}/<feature-id>/` | `docs/<name>/solutions-package/` |
+| `{paths.quality_package}/<feature-id>/` | `docs/<name>/quality-package/` |
+| `{paths.requirements_package}/<feature-id>/` (quick-dev) | `docs/<name>/quick-dev-package/` |
+| `{paths.implementation_package}/<feature-id>/` | `{paths.implementation_package}/` (no working tree under `docs/`) |
+
+- The alias files are still written, because the two trees are still separate.
+
+The working tree cannot simply follow `[project.paths]` here: with the segment
+dropped, every feature's working files would land in the same stage directory and
+collide. Keeping them under a per-feature `docs/` folder is what made the flat
+layout work, so it stays.
+
 ## Worked example — one feature, both ways
 
-The two rules above are easier to trust side by side than in isolation. Below is a
-single feature, `alert-customer`, laid out under both configurations. This is the
-only place the opted-in tree is shown end to end: the skills' own
-`references/EXAMPLE.md` files all depict the **not-opted-in** column, because that
+Below is a single feature, `alert-customer`, laid out under both configurations.
+This is the only place the opted-in tree is shown end to end: the skills' own
+`references/EXAMPLE.md` files all depict the **not-opted-in** layout, because that
 is what a project gets until someone runs `select-feature`.
 
-Opted in — `features.toml` exists, `[user].active_feature = "alert-customer"`:
+Opted in — `features.toml` exists, `[user].active_feature = "alert-customer"`, all
+stages in legacy mode with the default `[project.paths]`:
 
 ```
-docs/alert-customer/                    ← working tree, per-section files
-  requirements-package/
-  design-package/
-  CHANGE-TRACKER.md
-.framework-output/requirements/alert-customer/alert-customer-requirements.md
-.framework-output/design/alert-customer/alert-customer-design.md
-.framework-output/implementation/alert-customer/INC-001.md
+.framework-output/requirements/alert-customer/
+  alert-customer-requirements.md        ← assembled artifact
+  discovery/  analysis/  requirements/  review/
+.framework-output/design/alert-customer/
+  alert-customer-design.md
+  discovery/  design/  review/
+.framework-output/implementation/alert-customer/
+  INC-001.md  increment-status.md  plan/
 ```
+
+Point `design_package` at `{project-root}/../design-docs/aide` and the whole design
+directory — assembled artifact and working tree alike — moves into that repository
+as `../design-docs/aide/alert-customer/`.
 
 Not opted in — no `features.toml`, the folder name inferred from the request:
 
 ```
 docs/alert-customer/                    ← working tree, per-section files
   requirements-package/
-  design-package/
-  CHANGE-TRACKER.md
+  solutions-package/
 .framework-output/requirements/alert-customer-requirements.md
 .framework-output/design/alert-customer-design.md
 .framework-output/implementation/INC-001.md
 ```
 
-**The two columns differ by exactly one directory level and nothing else.** No file
-is renamed and the working-tree directory is identical, because the inferred folder
-name and the registry ID are now the same kind of string — a kebab slug. That is the
-single largest practical consequence of dropping the ordinal prefix: under it, the
-opted-in column repeated an ordinal-prefixed ID in both the directory and the
-filename, so opting in changed the depth *and* the filename *and* the working-tree
-directory name, and this section's claim that the columns "differ by exactly one
-directory level, never by filename" was not actually true of its own example.
-
 Two consequences worth holding onto. Filename globs survive opt-in unconditionally,
 and only depth-sensitive ones break. And `INC-001.md` gains the segment but no
-prefix, so the not-opted-in column has nothing distinguishing it from a second
-feature's `INC-001.md` — that collision is what opting in exists to fix, and it is
-now the *only* thing opting in changes.
+prefix, so the not-opted-in layout has nothing distinguishing it from a second
+feature's `INC-001.md` — that collision is one of the things opting in exists to fix.
 
 ## Mode A — Write-side (select-and-create)
 
@@ -233,11 +274,11 @@ when missing is not minting a feature — it is a file inside a directory that m
    deliberately the **resolved** entry only: a malformed or duplicated `id` elsewhere in
    the registry does not affect where *this* run writes, so it is left to Check N2 rather
    than blocking unrelated work.
-4. If it resolved cleanly, **echo** the feature ID and the resolved output
+4. If it resolved cleanly, **echo** the feature ID and the resolved stage feature
    directory before the first write:
 
-   > Working feature: `alert-customer`. Artifacts will be written under
-   > `.framework-output/design/alert-customer/`.
+   > Working feature: `alert-customer`. All design artifacts — assembled package and
+   > working files — will be written under `.framework-output/design/alert-customer/`.
 
    Cheap, no round-trip in the common case, and it catches a stale pointer at the
    one moment it matters — before anything lands in the wrong place.

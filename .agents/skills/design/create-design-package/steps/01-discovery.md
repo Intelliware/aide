@@ -18,7 +18,7 @@ Read one reference at a time. Produce the artifact, present it, wait for acknowl
 
 ## Sub-steps (run in order)
 
-| # | Sub-step | Output (under `docs/<feature-id>/solutions-package/discovery/`) |
+| # | Sub-step | Output (under `{paths.design_package}/<feature-id>/discovery/`) |
 |---|---|---|
 | 0 | (workflow — no reference) | feature-folder resolution |
 | 1 | `references/solution-discovery-workflow.md` § architecture-discovery | `raw-architectural-observations.md` |

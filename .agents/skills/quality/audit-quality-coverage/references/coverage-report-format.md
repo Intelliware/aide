@@ -63,7 +63,7 @@ to a skill.
 
 ```
 Summary: <N> gaps requiring action across <M> categories.
-Audit recorded in: docs/<feature-id>/quality-package/quality/change-tracker.md (Trigger: Coverage audit)
+Audit recorded in: {paths.quality_package}/<feature-id>/quality/change-tracker.md (Trigger: Coverage audit)
 ```
 
 ## Variants

@@ -617,9 +617,15 @@ artifact tree, is untouched: `start-project` skips the file in its `rebaseline` 
 left behind by a change that only moves the *next* write. Those projects opt in
 through `select-feature` when their owner chooses to.
 
-Artifacts already on disk in a flat (non-feature-scoped) layout stay where they are
-and keep working. The framework offers a migration for one feature's working-tree
-directory at the moment that feature is next worked (see
+On an opted-in project each stage writes everything for a feature — the assembled
+artifact and its working files — into one **stage feature directory**,
+`{paths.<stage>_package}/<feature-id>/` in legacy mode, so `[project.paths]` (or the SoD
+host repo) decides where all of it lands; nothing feature-scoped is written to
+`{project-root}/docs/`. Projects that have not opted in keep the `docs/` working tree.
+
+Artifacts already on disk in a flat (non-feature-scoped) layout, or in the pre-2.7.0
+`docs/<feature-id>/` working tree, stay where they are and keep working. The
+framework offers a migration for one feature's stage at the moment it is next worked (see
 `references/ai-principles/feature-precondition.md`); it never sweeps a project, and
 it never moves anything unasked.
 
@@ -687,15 +693,15 @@ today.
 The corollary is a convention rather than a validated rule: a slug should not
 collide with a non-feature directory under `docs/`. Nothing here can enforce it,
 because a registry file says nothing about what else lives in the tree, and the
-consequence is not an error but a silent merge — the resolution rule in
+consequence is a misleading migration offer — the legacy-tree check in
 `references/ai-principles/feature-precondition.md` finds `docs/architecture/`
-matching a feature named `architecture` and adopts it as that feature's working
-tree. `select-feature` therefore *asks* at mint time — unconditionally, whenever
+matching a feature named `architecture` and treats it as that feature's earlier
+working tree. `select-feature` therefore *asks* at mint time — unconditionally, whenever
 a proposed `id` matches a `docs/` directory no registered feature owns — because
 that is the only moment both the proposed name and the directory listing are in
 view, and because a match is equally consistent with the directory being this
-feature's work (the desired outcome, nothing to move) or something unrelated (a
-silent merge). Nothing on disk distinguishes the two, so it cannot be inferred.
+feature's work (the desired outcome, offered for migration) or something unrelated (a
+wrong migration offer). Nothing on disk distinguishes the two, so it cannot be inferred.
 Since no validator can enforce the convention, that question is the only
 defence, and it must not be conditional on the user raising it first.
 

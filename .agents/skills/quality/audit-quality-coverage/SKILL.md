@@ -43,8 +43,8 @@ appears under the workflow graph's `anytime:` block.
 | Feature ID / scope | User-provided or auto-detected from INC ID or open quality package | Yes |
 | Implementation package | `{paths.implementation_package}/{feature-id}/` (all `INC-XXX.md` + `increment-status.md`) | Yes |
 | Quality package | `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` (or SoD-resolved path) | Yes (use the latest assembled version) |
-| Test-traceability matrix | `docs/<feature-id>/quality-package/quality/traceability.md` | Yes — primary source of "what's claimed to be covered" |
-| Test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |
+| Test-traceability matrix | `{paths.quality_package}/<feature-id>/quality/traceability.md` | Yes — primary source of "what's claimed to be covered" |
+| Test-case status tracker | `{paths.quality_package}/<feature-id>/quality/plan/test-case-status.md` | Recommended; **bootstrapped if absent** |
 | `project.toml` | `{project-root}/project.toml` | Yes |
 | Knowledge base | `{paths.knowledge_base_path}/` via `navigate-knowledge-base --profile=test-suite` (with `--profile-subkind=marker-vocabulary` and `--profile-subkind=feature-inventory` for the live drift check) | Optional but recommended — enables the live drift check |
 | Test suite codebase | `[project.testing].qe_repo` resolved through `[[project.repos]]`; fallback to in-scope code repo when unset | Optional — enables direct marker search when the KB is unavailable |
@@ -86,8 +86,8 @@ step.
 | Artifact | Destination | Format |
 |---|---|---|
 | Coverage report | Chat | Markdown — summary table + coverage-detail table + gaps table + recommended next actions |
-| Bootstrapped test-case status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` | Markdown table — **only when the tracker did not previously exist** |
-| Updated change-tracker row | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — single row recording the audit and its findings (Trigger note: `Coverage audit`) |
+| Bootstrapped test-case status tracker | `{paths.quality_package}/<feature-id>/quality/plan/test-case-status.md` | Markdown table — **only when the tracker did not previously exist** |
+| Updated change-tracker row | `{paths.quality_package}/<feature-id>/quality/change-tracker.md` | Markdown table — single row recording the audit and its findings (Trigger note: `Coverage audit`) |
 ## Next skill
 Selected per the gap type (the skill offers a choice; the user picks):
 - **Uncovered INC** → `create-quality-package` (extend the package) or

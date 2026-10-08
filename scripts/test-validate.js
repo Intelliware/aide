@@ -820,8 +820,8 @@ test('Check N1 — reject <feature-folder> under a {paths.*} token', () => {
   assertIn('retired placeholder', out, `output missing the retired-placeholder complaint.\noutput:\n${out}`);
 });
 
-test('Check N1 — accept docs/<feature-id>/, the one permitted spelling', () => {
-  writeN1Doc('Write the section to `docs/<feature-id>/requirements-package/`.');
+test('Check N1 — accept the stage feature directory', () => {
+  writeN1Doc('Write the section to `{paths.requirements_package}/<feature-id>/requirements/`.');
   let proc;
   try {
     proc = runValidate();
@@ -830,7 +830,40 @@ test('Check N1 — accept docs/<feature-id>/, the one permitted spelling', () =>
   }
   assertEqual(
     proc.returncode, 0,
-    `N1 should accept docs/<feature-id>/.\noutput:\n${proc.stdout + proc.stderr}`
+    `N1 should accept the stage feature directory.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+// N1d — docs/<feature-id>/ was the opted-in working tree until 2.7.0. It
+// resolved under {project-root} whatever [project.paths] said, so a feature's
+// working files and its assembled artifact landed in two different trees.
+test('Check N1d — reject a working tree rooted at docs/<feature-id>/', () => {
+  writeN1Doc('Write the section to `docs/<feature-id>/requirements-package/`.');
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1d should reject docs/<feature-id>/.\noutput:\n${out}`);
+  assertIn('roots a feature working tree', out, `output missing the N1d complaint.\noutput:\n${out}`);
+});
+
+test('Check N1d — fenced migration guidance is exempt', () => {
+  writeN1Doc(
+    'Move the directory:\n\n```\ndocs/<feature-id>/requirements-package/\n```\n\n' +
+    'into `{paths.requirements_package}/<feature-id>/`.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1d should exempt a fenced docs/<feature-id>/.\noutput:\n${proc.stdout + proc.stderr}`
   );
 });
 
@@ -857,7 +890,7 @@ test('Check N1 — <feature> stays legal in prose, scope IDs and documented sour
 test('Check N1 — a retired spelling inside a fenced block is exempt', () => {
   writeN1Doc(
     'Rename the directory:\n\n```\ndocs/<feature>/requirements-package/\n```\n\n' +
-    'becomes `docs/<feature-id>/requirements-package/`.'
+    'becomes `{paths.requirements_package}/<feature-id>/`.'
   );
   let proc;
   try {
@@ -921,7 +954,7 @@ test('Check N1c — accept the same path once the feature directory is present',
 // *immediate* parent to be `<feature-id>/` would reject three correct quick-dev
 // paths.
 test('Check N1c — the feature directory may be an ancestor, not only a parent', () => {
-  writeN1Doc('Write to `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`.');
+  writeN1Doc('Write to `{paths.design_package}/<feature-id>/design/<feature-id>-design-notes.md`.');
   let proc;
   try {
     proc = runValidate();

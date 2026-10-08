@@ -78,7 +78,7 @@ generating files.
 Ask:
 > Plan layout?
 >
-> **Flat:** every `TC-XXX.md` at the plan root.
+> **Flat:** every `TC-XXX.md` at the plan root, `{paths.quality_package}/<feature-id>/quality/plan/` (not opted in: `quality-package/quality/plan/` under the feature's `docs/` folder). All `plan/` paths in this step are relative to `{paths.quality_package}/<feature-id>/quality/`.
 > **Categorised:** test-case increments under `plan/<category>/TC-XXX.md`
 > (scaffolding stays at `plan/TC-XXX.md`).
 Record the choice in the test-case-increment block.

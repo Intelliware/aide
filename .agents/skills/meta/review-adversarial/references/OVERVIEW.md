@@ -40,7 +40,7 @@ The `--stage` hint adjusts the lens emphasis without changing the six categories
 | `quick-dev` | Heaviest weight on scope ambiguity (quick-dev change briefs are notorious for under-scoping) |
 | `meta` | Generic application of all six lenses |
 
-If `--stage` is absent, the skill detects it from artifact frontmatter (`stage:` field on packages) or path heuristics (`docs/<feature-id>/requirements-package/` → requirements, etc.).
+If `--stage` is absent, the skill detects it from artifact frontmatter (`stage:` field on packages) or path heuristics (`{paths.requirements_package}/<feature-id>/` → requirements, etc.).
 
 ## Severity scoring
 

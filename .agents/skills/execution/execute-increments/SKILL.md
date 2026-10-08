@@ -58,7 +58,7 @@ same turn. It never proceeds past a failed gate.
 | Input | Source | Required |
 |---|---|---|
 | Implementation package | resolved per stage mode (SoD: per-repo path; legacy: `{project.paths.implementation_package}/{feature-id}/`) | Yes (with GO from review) |
-| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/`) | **Recommended, not required.** When present, it must carry a `review-quality-package` GO before its release gates become binding exit criteria, and it supplies the test design the TDD loop writes. When absent, emit a one-time warning at increment start and proceed using the Acceptance Criteria from the Requirements Package as the test-design anchor. Running the quality stage first is a per-run user choice, not driven by `[project.testing].qe_repo` |
+| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/{feature-id}/`) | **Recommended, not required.** When present, it must carry a `review-quality-package` GO before its release gates become binding exit criteria, and it supplies the test design the TDD loop writes. When absent, emit a one-time warning at increment start and proceed using the Acceptance Criteria from the Requirements Package as the test-design anchor. Running the quality stage first is a per-run user choice, not driven by `[project.testing].qe_repo` |
 | Target codebase | filesystem | Yes |
 | Test runner / build tools | environment | Yes |
 | project.toml | `{project-root}/project.toml` | Yes |

@@ -47,6 +47,11 @@ default_flow = "brownfield"
 [project.paths]
 
 # Stage outputs. {project-root} is the directory containing this file.
+# Once the project opts into feature scoping (features.toml exists), each
+# stage writes everything for a feature — assembled package and working
+# files — under <stage path>/<feature-id>/, so pointing a stage at another
+# repository moves all of that stage's documents there. Code is unaffected:
+# it goes to the repos in [[project.repos]]. See config/SCHEMAS.md § 2.8.
 requirements_package    = "{project-root}/.framework-output/requirements"
 design_package          = "{project-root}/.framework-output/design"
 implementation_package  = "{project-root}/.framework-output/implementation"

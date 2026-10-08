@@ -14,9 +14,9 @@
 
 | Artifact path | Format | Downstream consumer |
 |---|---|---|
-| `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md` | markdown — 1–3 increments per reduced shape | `execute-quick-change` |
+| `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-plan.md` | markdown — 1–3 increments per reduced shape | `execute-quick-change` |
 | Inline orientation summary | conversation message | the user |
-| Optional: `docs/<feature-id>/quick-dev-package/codebase-orientation.md` | markdown — persisted orientation findings | session-resumption, audit |
+| Optional: `{paths.requirements_package}/<feature-id>/codebase-orientation.md` | markdown — persisted orientation findings | session-resumption, audit |
 
 ## Side effects
 
