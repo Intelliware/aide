@@ -2,11 +2,12 @@
 
 ## Trigger phrase
 
-> "Execute the quick change in `docs/notification-mark-as-read/quick-dev-package/`."
+> "Execute the quick change `notification-mark-as-read`."
 
 ## What the skill did
 
-1. Loaded the plan (`INC-001 — Add per-card mark-as-read action`) and the spec.
+1. Loaded the plan (`INC-001 — Add per-card mark-as-read action`) from
+   `.framework-output/implementation/notification-mark-as-read/` and the spec from `.framework-output/requirements/notification-mark-as-read/`.
 2. Loaded the spec's §12.2a Solution Constraints — "no new toast libraries; reuse `useToast`"; "no inline retry — go through `useRetry`".
 3. **Education + Game Plan + Go/No-Go** — restated the increment,
    listed the 5 TDD tasks (one per AC plus refactor), waited for user "go".

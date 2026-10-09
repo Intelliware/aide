@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.7.0` |
+| Current artifact version | `2.7.5` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,47 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.7.5` — 2026-10-09
+
+Quick-dev now follows the same per-stage layout as every other stage. Until now all
+quick-dev artifacts sat together under the requirements key — the plan and review
+findings included — and quick-dev had no separation-of-duties (SoD) resolution, so on a
+project with `[stages.requirements].dir` set the create/review requirements skills wrote
+to the SoD host repo while quick-dev wrote to `[project.paths]`. Each quick-dev artifact
+now goes to its own stage's configured directory, resolved from `project.toml` (and
+`features.toml` when present): the spec and change tracker to the requirements stage, the
+plan and orientation notes to the planning stage, review findings to the execution stage.
+Repo scope for SoD layouts is derived from the spec and config, never asked.
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-09 | Restructure | references | `references/ai-principles/feature-precondition.md` | Added *Quick-dev layout*: per-artifact stage mapping (`requirements` / `planning` / `execution`), SoD substitution and `write_role` check per stage, a derived (never prompted) repo-scope order — upstream path, the spec's affected repositories, the feature's `repos`, `[[project.repos]]` — and a legacy-tree check covering `docs/<name>/quick-dev-package/` and the 2.7.0 quick-dev directory. The section applies with or without `features.toml`; the quick-dev row of the stage-key table and the *Not opted in* table were updated to match. | branch `mm/quick-dev-fix` | ☐ Pending |
+| 2 | 2026-10-09 | Restructure | skills | `quick-dev/document-quick-change/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`, `references/EXAMPLE.md`) | The spec's directory is resolved at write time from `[stages.requirements]`, after the spec names the repositories it touches; `_cross-cutting/` specs carry `affects_repos`. Not opted in, the change's `<name>` replaces `<feature-id>` instead of writing to `docs/<name>/quick-dev-package/`. | branch `mm/quick-dev-fix` | ☐ Pending |
+| 3 | 2026-10-09 | Restructure | skills | `quick-dev/plan-quick-change/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`, `references/EXAMPLE.md`, `steps/01-orient.md`) | The plan and `codebase-orientation.md` move from `{paths.requirements_package}/<feature-id>/` to the planning-stage directory, `{paths.implementation_package}/<feature-id>/` in legacy mode. | branch `mm/quick-dev-fix` | ☐ Pending |
+| 4 | 2026-10-09 | Restructure | skills | `quick-dev/execute-quick-change/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`, `references/EXAMPLE.md`, `steps/03-adversarial-pr-review.md`) | Reads the plan from the planning-stage directory; review findings move to the execution-stage directory. `CHANGE-TRACKER.md` stays with the spec — one tracker per change. | branch `mm/quick-dev-fix` | ☐ Pending |
+| 5 | 2026-10-09 | Source Update | skills | `quick-dev/README.md` | States the per-stage layout. | branch `mm/quick-dev-fix` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-09 | Correction | skills | `meta/review-adversarial/steps/01-detect-target.md` | The `quick-change-brief` row matched `docs/*/quick-change/change-brief.md` — a directory and filename no skill writes — so a quick-dev spec was never detected. It now matches `*-quick-dev-spec.md` under the requirements output directory and the pre-2.7.5 `docs/*/quick-dev-package/` location. | branch `mm/quick-dev-fix` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.0` (branch `mm/feature-fix`). **Quick-dev changes layout on
+every project**, opted in or not: new quick-dev work is written to the stage directories
+above. Existing quick-dev files are not moved automatically — the legacy-tree check halts
+and offers a `git mv` per file the next time the change is worked. Other stages are
+unchanged. On SoD projects each quick-dev write is now subject to that stage's
+`write_role`, so a developer running quick-dev against a requirements stage with
+`write_role = "BA"` is refused, as `create-requirements-package` would be. No
+`project.toml` or `features.toml` edits are required.
+
+---
 
 ### `2.7.0` — 2026-10-08
 
