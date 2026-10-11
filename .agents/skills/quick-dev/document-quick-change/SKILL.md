@@ -33,7 +33,7 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, this is a no-op — determine the feature folder as step 1 describes below. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: document-quick-change`, passing the user's description if one exists this turn) rather than inventing a feature ID or slug. If it resolves, the resolved feature ID **is** the feature folder for step 1 — do not separately infer a kebab-case name.
+Follow `references/ai-principles/feature-precondition.md` Mode A, before step 1. If `features.toml` is absent, skip feature resolution: determine the feature folder as step 1 describes below, and map this skill's paths per that file's § *Not opted in*. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: document-quick-change`, passing the user's description if one exists this turn) rather than inventing a feature ID or slug. If it resolves, the resolved feature ID **is** the feature folder for step 1 — do not separately infer a kebab-case name.
 
 ## Precondition — hooks
 
