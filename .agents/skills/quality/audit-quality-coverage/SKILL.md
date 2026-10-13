@@ -56,7 +56,7 @@ acknowledgement before declaring the audit closed. If any input is
 missing or ambiguous, surface that to the user before producing the
 report rather than silently substituting defaults.
 ## Precondition — active feature
-Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: audit-quality-coverage`) rather than guessing which feature to audit — do not fall back to creating one. If it resolves, echo the feature ID before locating the packages.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 1. If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: audit-quality-coverage`) rather than guessing which feature to audit — do not fall back to creating one. If it resolves, echo the feature ID before locating the packages.
 ## Precondition — hooks
 
 Before Step 0, and after this skill's final step (before the `## Next skill` handoff), check the merged config for `[[hooks]]` entries scoped to this skill. If any exist, follow `<AIDE root>/references/orientation/hook-runtime.md` for the full execution procedure (partition by event, evaluate conditions, prompt for optional hooks, announce, invoke, handle errors). If none exist, this is a no-op.

@@ -20,8 +20,9 @@ the pre-existing split layout (*Not opted in*, below).
 ## The two-line resolution rule
 
 ```
-If features.toml is absent  → not opted in. Proceed exactly as before this
-                               precondition existed. Skip the rest of this file.
+If features.toml is absent  → not opted in. Skip feature resolution and the
+                               modes below, but map every path per *Not opted
+                               in* — skill text spells paths in the opted-in form.
 If it is present            → resolve [user].active_feature and follow the mode
                                below that matches this skill.
 ```
@@ -150,9 +151,12 @@ assembled artifact by its canonical path.
 
 ## Not opted in
 
-Without `features.toml` nothing in this file applies, and the project keeps the
-layout it had before feature scoping existed, byte for byte —
-`_docs/feature-id-minimal-plan.md` § 6's central promise:
+Without `features.toml` there is no active feature to resolve: no Mode A or Mode B,
+no `select-feature`, no echo. The project keeps the layout it had before feature
+scoping existed, byte for byte — `_docs/feature-id-minimal-plan.md` § 6's central
+promise. This section is the one part of the file that still applies, because skill
+text spells every path in the opted-in form and the table below is how a
+not-opted-in run turns those into the layout it actually has:
 
 - The assembled artifact drops the `<feature-id>/` segment (above).
 - The working tree stays under `docs/<name>/<legacy-package-dir>/`, where
@@ -174,6 +178,16 @@ The working tree cannot simply follow `[project.paths]` here: with the segment
 dropped, every feature's working files would land in the same stage directory and
 collide. Keeping them under a per-feature `docs/` folder is what made the flat
 layout work, so it stays.
+
+**The split is deliberate.** A project without `features.toml` was promised the
+layout it already had (`_docs/feature-id-minimal-plan.md` § 6), and moving its
+working tree would relocate files that existing runs, links and reviewers already
+point at. A not-opted-in run that leaves its working files under `docs/<name>/`
+while the assembled artifact goes to the configured `[project.paths]` directory —
+possibly another repository — is therefore behaving as specified, not reproducing
+the defect 2.7.0 fixed. One tree per stage is what opting in buys: add a
+`features.toml` (its presence is the only signal, so an empty file is enough;
+`start-project` writes one for new projects).
 
 ## Worked example — one feature, both ways
 

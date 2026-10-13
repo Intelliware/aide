@@ -31,7 +31,7 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: plan-quick-change`) rather than guessing which feature's spec to load — do not fall back to creating one, because the spec this skill plans against is written by `document-quick-change` first. If it resolves, confirm the spec at `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: plan-quick-change`) rather than guessing which feature's spec to load — do not fall back to creating one, because the spec this skill plans against is written by `document-quick-change` first. If it resolves, confirm the spec at `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
 
 ## Precondition — hooks
 
