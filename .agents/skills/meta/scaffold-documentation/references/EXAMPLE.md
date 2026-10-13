@@ -2,7 +2,7 @@
 
 ## Trigger phrase
 
-> "Scaffold a design package at `docs/checkout/design-package/`. We just finished requirements; the inventory is the 14 functional requirements and four major components."
+> "Scaffold a design package at `docs/checkout/solutions-package/`. We just finished requirements; the inventory is the 14 functional requirements and four major components."
 
 ## What the skill did
 
@@ -13,7 +13,7 @@
 3. Generated a proposal tree:
 
 ```
-docs/checkout/design-package/
+docs/checkout/solutions-package/
 ├── 01-overview.md
 ├── 02-context-c4-l1.md
 ├── 03-container-c4-l2.md

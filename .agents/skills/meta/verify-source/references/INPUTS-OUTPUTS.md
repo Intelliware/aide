@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| `package_path` | yes | user input | `docs/checkout/design-package/` |
+| `package_path` | yes | user input | `docs/checkout/solutions-package/` |
 | `package_type` | yes | user input or inferred | `design` / `requirements` / `re-api` / `kb-component` / `quick-dev-spec` / `implementation-increment` |
 | `scope` | yes | user input — `full` or section list | `full` or `["§4 functional requirements", "§12 ACs"]` |
 | `source_access` | yes | confirmed by user | "Yes — repo cloned at `../api-orders` on commit `abc123`" |

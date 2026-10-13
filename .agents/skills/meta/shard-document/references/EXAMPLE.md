@@ -2,21 +2,21 @@
 
 ## Trigger phrase
 
-> "Shard `docs/checkout/design-package/design.md` — it's 3 800 lines and our reviewers can't comment per-section."
+> "Shard `docs/checkout/solutions-package/design.md` — it's 3 800 lines and our reviewers can't comment per-section."
 
 ## What the skill did
 
 1. Confirmed source path exists and is markdown.
-2. Proposed default destination `docs/checkout/design-package/design/` and the user accepted with `[y]`.
-3. Ran `npx @kayvan/markdown-tree-parser explode docs/checkout/design-package/design.md docs/checkout/design-package/design/`.
+2. Proposed default destination `docs/checkout/solutions-package/design/` and the user accepted with `[y]`.
+3. Ran `npx @kayvan/markdown-tree-parser explode docs/checkout/solutions-package/design.md docs/checkout/solutions-package/design/`.
 4. Verified `index.md` and 14 section files were created.
 5. Reported completion.
-6. Presented the original-document decision tree. User picked `m` (move). Default archive path `docs/checkout/design-package/archive/design.md` was accepted.
+6. Presented the original-document decision tree. User picked `m` (move). Default archive path `docs/checkout/solutions-package/archive/design.md` was accepted.
 
 ## What it produced
 
 ```
-docs/checkout/design-package/
+docs/checkout/solutions-package/
 ├── archive/
 │   └── design.md                 # original, moved
 └── design/

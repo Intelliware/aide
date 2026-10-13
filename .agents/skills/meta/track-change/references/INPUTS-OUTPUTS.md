@@ -4,7 +4,7 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| `package_path` | yes | user input or inferred from current `docs/` directory | `docs/checkout/requirements-package/` |
+| `package_path` | yes | user input or inferred from the active feature's stage feature directory (not opted in: the feature's `docs/<name>/` folder) | `docs/checkout/requirements-package/` |
 | `change_type` | yes | user input — one of: Initial Extraction / Correction / Source Update / Restructure / Addition / Deprecation / Removal / Amendment | `Source Update` |
 | `parts_affected` | yes | user input — package-specific vocabulary | `Section 4 (Functional Requirements), Section 12 (Acceptance Criteria)` |
 | `section_or_file` | yes | user input | `requirements/04-functional-requirements.md` |

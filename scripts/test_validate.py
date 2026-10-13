@@ -675,6 +675,40 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
             f"N1d should exempt a fenced `docs/<feature-id>/`.\noutput:\n{out}",
         )
 
+    def test_n1d_reject_unknown_package_directory(self) -> None:
+        """N1d — `design-package/` is a package directory in neither layout.
+
+        The not-opted-in design tree is `solutions-package/`; a path naming
+        `design-package/` sends a reader to a directory no skill writes.
+        """
+        self._write_skill_doc("Verify the package at `docs/checkout/design-package/`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1d should reject `docs/checkout/design-package/`.\noutput:\n{out}",
+        )
+        self.assertIn("not a package directory in either layout", out)
+
+    def test_n1d_exempts_fenced_unknown_package_directory(self) -> None:
+        """A fenced example may still show the directory name it replaces."""
+        self._write_skill_doc(
+            "Rename it:\n\n```\ndocs/checkout/design-package/\n```\n\n"
+            "to `docs/checkout/solutions-package/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1d should exempt a fenced `docs/checkout/design-package/`.\noutput:\n{out}",
+        )
+
     def test_accept_feature_placeholder_outside_artifact_paths(self) -> None:
         """`<feature>` stays legal in prose, scope IDs, and documented source trees.
 
