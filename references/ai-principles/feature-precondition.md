@@ -179,6 +179,16 @@ dropped, every feature's working files would land in the same stage directory an
 collide. Keeping them under a per-feature `docs/` folder is what made the flat
 layout work, so it stays.
 
+**The split is deliberate.** A project without `features.toml` was promised the
+layout it already had (`_docs/feature-id-minimal-plan.md` § 6), and moving its
+working tree would relocate files that existing runs, links and reviewers already
+point at. A not-opted-in run that leaves its working files under `docs/<name>/`
+while the assembled artifact goes to the configured `[project.paths]` directory —
+possibly another repository — is therefore behaving as specified, not reproducing
+the defect 2.7.0 fixed. One tree per stage is what opting in buys: add a
+`features.toml` (its presence is the only signal, so an empty file is enough;
+`start-project` writes one for new projects).
+
 ## Worked example — one feature, both ways
 
 Below is a single feature, `alert-customer`, laid out under both configurations.
