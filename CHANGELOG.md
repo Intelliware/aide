@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.6.0` |
+| Current artifact version | `2.7.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,58 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.7.0` — 2026-10-08
+
+Feature-scoped projects now write **every** artifact for a feature into the stage's
+configured output directory. Until now an opted-in project (one with `features.toml`)
+split each feature across two trees: the assembled package went to
+`{paths.<stage>_package}/<feature-id>/`, which follows `[project.paths]` (and so can sit
+in another repository), while the per-section working tree — block files, discovery
+and analysis notes, change trackers, review findings, the quick-dev plan — was
+hard-coded to `docs/<feature-id>/` under `{project-root}`. Both now live together in
+one **stage feature directory**, `{paths.<stage>_package}/<feature-id>/` in legacy mode
+(the SoD equivalents are unchanged and nest the same way). Code placement is
+unaffected — source and test code still go to the repositories in `[[project.repos]]` /
+`[project.testing].qe_repo`. Also fixes five path defects found while auditing the
+layout.
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-08 | Restructure | references | `references/ai-principles/feature-precondition.md` | Replaced *Resolving the working-tree directory* with *Resolving the stage feature directory* (per-stage-mode table, `[project.paths]` key per skill family, sub-directory layout). Added a **legacy-tree check** that halts and offers to `git mv` a pre-2.7.0 `docs/<feature-id>/<package>/` (or an unregistered `docs/<name>/<package>/`) into the stage feature directory instead of starting a second tree. Added a *Not opted in* section that keeps the old `docs/` working tree byte-for-byte, with a prefix mapping table. Rewrote the worked example; the Mode A echo now names the single directory. | branch `mm/feature-fix` | ☐ Pending |
+| 2 | 2026-10-08 | Restructure | skills | 64 files under `.agents/skills/` (requirements, design, quality, planning, execution, quick-dev, meta) and `templates/blocks/quality/test-case-increment.md` | Remapped every opted-in working-tree path: `docs/<feature-id>/requirements-package/` → `{paths.requirements_package}/<feature-id>/`, `solutions-package/` → `{paths.design_package}/<feature-id>/`, `quality-package/` → `{paths.quality_package}/<feature-id>/`, `quick-dev-package/` → `{paths.requirements_package}/<feature-id>/`. Folder-resolution sub-steps now point at the new precondition section and spell out the not-opted-in fallback. | branch `mm/feature-fix` | ☐ Pending |
+| 3 | 2026-10-08 | Restructure | skills | `create-requirements-package`, `create-design-package`, `review-*-package`, `review-adversarial/steps/01-detect-target.md` | The `docs/` alias files (`requirements-package.md`, `solution-package.md`) are written only when the project has not opted in — with both trees merged there is nothing to alias. Review skills now target the canonical assembled artifact (`{paths.<stage>_package}/<feature-id>/<feature-id>-<stage>.md`) in every mode. | branch `mm/feature-fix` | ☐ Pending |
+| 4 | 2026-10-08 | Source Update | config | `config/SCHEMAS.md` § 2.8, `config/project.toml.example` | Documented the stage feature directory and that `[project.paths]` now governs working files too on opted-in projects; reworded the slug-collision rationale for the legacy-tree check. | branch `mm/feature-fix` | ☐ Pending |
+| 5 | 2026-10-08 | Source Update | skills | `.agents/skills/meta/select-feature/SKILL.md` | The mint-time `docs/` question now describes the migration offer rather than adopting `docs/<id>/` in place; the output-path echo states working files land in the same directory. | branch `mm/feature-fix` | ☐ Pending |
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-08 | Addition | validator | `scripts/validate.py`, `scripts/validate.js`, `scripts/test_validate.py`, `scripts/test-validate.js` | Check **N1d**: rejects any non-fenced `docs/<feature-id>/` path in skill or template markdown, so the retired working-tree location cannot ship again. Fenced blocks stay exempt for migration guidance. Replaced the test asserting `docs/<feature-id>/` as the permitted spelling with N1d accept/reject/fence tests in both suites. | branch `mm/feature-fix` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-08 | Correction | skills | `quick-dev/document-quick-change/references/INPUTS-OUTPUTS.md`, `quick-dev/execute-quick-change/` | Quick-dev kept two change trackers: `document-quick-change` created `docs/<feature-id>/CHANGE-TRACKER.md` while `execute-quick-change` appended to `docs/<feature-id>/quick-dev-package/CHANGE-TRACKER.md`. Both now use `{paths.requirements_package}/<feature-id>/CHANGE-TRACKER.md`. | branch `mm/feature-fix` | ☐ Pending |
+| 2 | 2026-10-08 | Correction | skills | `design/create-design-package/steps/02-design.md`, `design/review-design-package/references/review-workflow.md` | Design package name mismatch: the step assembled `design-package.md`, the SKILL wrote alias `solution-package.md`, and the reviewers targeted `design-package.md` — a file the skill might never write. Step and reviewers now use the canonical `{feature-id}-design.md`. | branch `mm/feature-fix` | ☐ Pending |
+| 3 | 2026-10-08 | Correction | skills | `planning/create-implementation-package/references/INPUTS-OUTPUTS.md`, `steps/codebase-analysis.md` | The architecture baseline was read from `{project.paths.design_package}/discovery/`, where nothing writes it; marked "if present", so brownfield codebase analysis silently ran without it. Now read from the design stage feature directory. | branch `mm/feature-fix` | ☐ Pending |
+| 4 | 2026-10-08 | Correction | skills | `create-implementation-package`, `review-implementation-package`, `execute-increments`, `create-pr`, `review-quality-package`, `audit-quality-coverage`, `execute-quality-increments` | Upstream package reads pointed at the stage root (`{project.paths.<stage>_package}/`) with no `{feature-id}/` segment — on an opted-in project that directory holds every feature. Added the segment. | branch `mm/feature-fix` | ☐ Pending |
+| 5 | 2026-10-08 | Correction | skills | `requirements/create-requirements-package/steps/04-writing.md`, `design/create-design-package/steps/02-design.md`, `quality/create-quality-package/steps/02b-test-case-increments.md` | Step-file output tables listed bare filenames (`01-executive-summary.md`, `01-solution-overview.md`, `plan/TC-XXX.md`) with no directory, so an agent working from the step file alone wrote them into the current working directory / project root. Each table now states its target directory explicitly. | branch `mm/feature-fix` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.6.0`. **Projects without `features.toml` see no change**:
+the `docs/` working tree, alias files and flat assembled paths are untouched.
+**Opted-in projects** start writing working files to the stage feature directory. Work
+already under `docs/<feature-id>/` is not moved automatically: the first time each
+stage runs for a feature, the legacy-tree check halts and offers the `git mv`. No
+`project.toml` or `features.toml` edits are required.
+
+---
 
 ### `2.6.0` — 2026-08-11
 

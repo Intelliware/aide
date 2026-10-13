@@ -598,7 +598,7 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         )
 
     def test_reject_retired_placeholder_under_docs(self) -> None:
-        """`docs/<feature>/` was retired in favour of `docs/<feature-id>/`."""
+        """`docs/<feature>/` was retired in favour of `<feature-id>`."""
         self._write_skill_doc("Write the section to `docs/<feature>/requirements-package/`.")
         try:
             proc = run_validate()
@@ -625,9 +625,11 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         )
         self.assertIn("retired placeholder", out)
 
-    def test_accept_feature_id_spelling(self) -> None:
-        """`docs/<feature-id>/` is the one permitted spelling."""
-        self._write_skill_doc("Write the section to `docs/<feature-id>/requirements-package/`.")
+    def test_accept_stage_feature_directory(self) -> None:
+        """`{paths.<stage>_package}/<feature-id>/` is where working files live."""
+        self._write_skill_doc(
+            "Write the section to `{paths.requirements_package}/<feature-id>/requirements/`."
+        )
         try:
             proc = run_validate()
         finally:
@@ -635,7 +637,76 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         out = proc.stdout + proc.stderr
         self.assertEqual(
             proc.returncode, 0,
-            f"N1 should accept `docs/<feature-id>/`.\noutput:\n{out}",
+            f"N1 should accept the stage feature directory.\noutput:\n{out}",
+        )
+
+    def test_n1d_reject_docs_feature_id_working_tree(self) -> None:
+        """N1d — `docs/<feature-id>/` was the opted-in working tree until 2.7.0.
+
+        It resolved under `{project-root}` whatever `[project.paths]` said, so
+        a feature's working files and its assembled artifact landed in two
+        different trees — possibly two different repositories.
+        """
+        self._write_skill_doc("Write the section to `docs/<feature-id>/requirements-package/`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1d should reject `docs/<feature-id>/`.\noutput:\n{out}",
+        )
+        self.assertIn("roots a feature working tree", out)
+
+    def test_n1d_exempts_fenced_migration_guidance(self) -> None:
+        """Migration guidance must be able to show the layout it retires."""
+        self._write_skill_doc(
+            "Move the directory:\n\n```\ndocs/<feature-id>/requirements-package/\n```\n\n"
+            "into `{paths.requirements_package}/<feature-id>/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1d should exempt a fenced `docs/<feature-id>/`.\noutput:\n{out}",
+        )
+
+    def test_n1d_reject_unknown_package_directory(self) -> None:
+        """N1d — `design-package/` is a package directory in neither layout.
+
+        The not-opted-in design tree is `solutions-package/`; a path naming
+        `design-package/` sends a reader to a directory no skill writes.
+        """
+        self._write_skill_doc("Verify the package at `docs/checkout/design-package/`.")
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1d should reject `docs/checkout/design-package/`.\noutput:\n{out}",
+        )
+        self.assertIn("not a package directory in either layout", out)
+
+    def test_n1d_exempts_fenced_unknown_package_directory(self) -> None:
+        """A fenced example may still show the directory name it replaces."""
+        self._write_skill_doc(
+            "Rename it:\n\n```\ndocs/checkout/design-package/\n```\n\n"
+            "to `docs/checkout/solutions-package/`."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1d should exempt a fenced `docs/checkout/design-package/`.\noutput:\n{out}",
         )
 
     def test_accept_feature_placeholder_outside_artifact_paths(self) -> None:
@@ -669,7 +740,7 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         """
         self._write_skill_doc(
             "Rename the directory:\n\n```\ndocs/<feature>/requirements-package/\n```\n\n"
-            "becomes `docs/<feature-id>/requirements-package/`."
+            "becomes `{paths.requirements_package}/<feature-id>/`."
         )
         try:
             proc = run_validate()
@@ -741,7 +812,7 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
         `<feature-id>/` would reject three correct quick-dev paths.
         """
         self._write_skill_doc(
-            "Write to `docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`."
+            "Write to `{paths.design_package}/<feature-id>/design/<feature-id>-design-notes.md`."
         )
         try:
             proc = run_validate()

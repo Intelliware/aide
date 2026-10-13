@@ -41,7 +41,7 @@ Once confirmed, record as a single Change Description: *"[Who] needs to be able 
 
 Present and ask: *"Is this an accurate description of what you want to build?"* Wait for confirmation. If they correct it, update and ask again.
 
-Write to `docs/<feature-id>/requirements-package/discovery/change-description.md`. The file write must succeed before sub-step 1 starts. Containing:
+Write to `{paths.requirements_package}/<feature-id>/discovery/change-description.md`. The file write must succeed before sub-step 1 starts. Containing:
 - The confirmed Change Description statement
 - The three elements separately: Who / What / Why
 

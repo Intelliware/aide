@@ -118,11 +118,11 @@ artifacts:
 ### 4a.3 Plan layout on disk
 | Concern | Path |
 |---|---|
-| Scaffolding increments (always plan-root) | `docs/<feature-id>/quality-package/quality/plan/TC-XXX.md` |
-| Test-case increments (flat) | `docs/<feature-id>/quality-package/quality/plan/TC-XXX.md` |
-| Test-case increments (categorised) | `docs/<feature-id>/quality-package/quality/plan/<category>/TC-XXX.md` |
-| Plan overview | `docs/<feature-id>/quality-package/quality/plan/qe-plan-overview.md` |
-| Status tracker | `docs/<feature-id>/quality-package/quality/plan/test-case-status.md` |
+| Scaffolding increments (always plan-root) | `{paths.quality_package}/<feature-id>/quality/plan/TC-XXX.md` |
+| Test-case increments (flat) | `{paths.quality_package}/<feature-id>/quality/plan/TC-XXX.md` |
+| Test-case increments (categorised) | `{paths.quality_package}/<feature-id>/quality/plan/<category>/TC-XXX.md` |
+| Plan overview | `{paths.quality_package}/<feature-id>/quality/plan/qe-plan-overview.md` |
+| Status tracker | `{paths.quality_package}/<feature-id>/quality/plan/test-case-status.md` |
 The plan layout (flat vs categorised) is the team's choice and is
 recorded in this block when the package is authored.
 The plan overview also records the test-artifact target repo code and

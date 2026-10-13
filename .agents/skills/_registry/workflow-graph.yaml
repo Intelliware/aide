@@ -160,7 +160,7 @@ flows:
       # place, so components/, graph.json and ARCHITECTURE.md exist to link from.
       # They also feed the first requirements package below: solution-context is
       # PROJECT-scoped (<KB>/shared/), create-requirements-package is
-      # FEATURE-scoped (docs/<feature-id>/). The two layers do not overlap.
+      # FEATURE-scoped ({paths.requirements_package}/<feature-id>/). The two layers do not overlap.
       #
       # In brownfield, generate-ai-rules can run this early because RE Part A
       # already carries the exact stack and build/test commands it derives from —

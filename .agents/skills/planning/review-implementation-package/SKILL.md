@@ -47,8 +47,8 @@ re-run for re-validation.
 | Input | Source | Required |
 |---|---|---|
 | Implementation package | `{project.paths.implementation_package}/{feature-id}/` (incl. all `INC-XXX.md`, `implementation-package.md`, `increment-status.md`, `bugs-and-issues-log.md`, `change-tracker.md`) | Yes |
-| Approved Requirements Package | `{project.paths.requirements_package}/` | Yes |
-| Approved Design Package | `{project.paths.design_package}/` | Yes |
+| Approved Requirements Package | `{project.paths.requirements_package}/{feature-id}/` | Yes |
+| Approved Design Package | `{project.paths.design_package}/{feature-id}/` | Yes |
 | Canonical Increment Shape spec | `templates/blocks/planning/*.md` (8 blocks) and `references/canonical-increment-shape-spec.md` | Yes |
 
 See `references/INPUTS-OUTPUTS.md` for the full inputs/outputs tables.

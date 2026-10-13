@@ -10,7 +10,7 @@ Project: `feat-2041-checkout-redesign`. Design package assembled. Requirements p
 
 ```
 review-edge-case-hunter \
-  --target=docs/refund-delay-alerts/design-package/design-package.md \
+  --target=docs/refund-delay-alerts/solutions-package/solution-package.md \
   --stage=design
 ```
 
@@ -26,7 +26,7 @@ _review/refund-delay-alerts-design-package/2026-04-29T14-15-00Z/review-edge-case
 ---
 schema: aide-adversarial-findings@1
 target_artifact: design-package
-target_path: docs/refund-delay-alerts/design-package/design-package.md
+target_path: docs/refund-delay-alerts/solutions-package/solution-package.md
 target_commit: a3f9c12
 produced_by: review-edge-case-hunter
 produced_at: 2026-04-29T14:15:00Z

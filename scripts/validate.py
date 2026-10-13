@@ -39,7 +39,11 @@ task #8 -> task #9):
      `<feature-name>`) names a per-feature directory under `docs/` or under a
      `{paths.*}` token (N1b); and every per-feature artifact path spelled out
      in skill or template markdown is enclosed by a `{feature-id}/` directory
-     (N1c). See `references/ai-principles/feature-precondition.md`.
+     (N1c); and no feature-scoped working-tree path is rooted at
+     `docs/<feature-id>/` instead of its stage feature directory, and no
+     `docs/` path names a package directory that exists in neither layout
+     (N1d). See
+     `references/ai-principles/feature-precondition.md`.
   N2. Feature registry validation against a features.toml fixture or a real
      project registry. Run with `--features-toml PATH` to evaluate rules
      13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
@@ -55,8 +59,9 @@ Hard errors fail the run (exit 1):
   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
     undeclared `[project.paths]` key (M).
   - A feature-scoped composition missing its `{feature-id}` segment, a
-    per-feature artifact path with no enclosing `{feature-id}/` directory, or
-    any retired feature placeholder in an artifact path (N1).
+    per-feature artifact path with no enclosing `{feature-id}/` directory,
+    any retired feature placeholder in an artifact path, or a working-tree
+    path rooted at `docs/<feature-id>/` (N1).
   - Any feature-registry rule violation when running in --features-toml
     mode (N2).
   - A SKILL.md missing the `## Precondition — hooks` heading or the
@@ -164,7 +169,7 @@ FEATURE_SEGMENT = "{feature-id}"
 # `<feature-id>-quality.md`, prose about the prefix itself, and `filename_pattern`
 # values. The directory need not be the immediate parent, because the working
 # tree nests a package subdirectory under it
-# (`docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`), so the
+# (`{paths.design_package}/<feature-id>/design/<feature-id>-design-notes.md`), so the
 # assertion is containment, not adjacency. Both spellings are accepted: `.md`
 # prose uses `<feature-id>`, composition YAML uses `{feature-id}`.
 FEATURE_ARTIFACT_IN_PATH_RE = re.compile(
@@ -184,6 +189,27 @@ _RETIRED_FEATURE_ALT = r"(<feature>|<feature-folder>|<feature-name>)"
 RETIRED_IN_DOCS_RE = re.compile(r"(?<![\w-])docs/" + _RETIRED_FEATURE_ALT)
 RETIRED_IN_TOKEN_RE = re.compile(
     r"\{(?:project\.)?paths\.[A-Za-z_][A-Za-z0-9_]*\}/" + _RETIRED_FEATURE_ALT
+)
+
+# Check N1d — the working-tree location retired in 2.7.0. On an opted-in project a
+# stage's working files live in its stage feature directory
+# (`{paths.<stage>_package}/<feature-id>/` in legacy mode), next to the assembled
+# artifact, so they follow `[project.paths]` into whatever repository a stage is
+# pointed at. `docs/<feature-id>/` resolved under `{project-root}` regardless of
+# that configuration, which split every feature across two trees. `<feature-id>`
+# only ever names a registered feature, so this spelling can only mean the
+# opted-in layout; the not-opted-in `docs/` tree is described without it.
+RETIRED_WORKING_TREE_RE = re.compile(r"(?<![\w-])docs/[{<]feature-id[}>]/")
+
+# Check N1d, second arm — a `docs/` package directory that exists in neither
+# layout. The not-opted-in tree uses `requirements-package/`, `solutions-package/`,
+# `quality-package/` and `quick-dev-package/`; implementation never had a `docs/`
+# tree. The first arm misses these because they are spelled with a glob or a
+# concrete slug rather than `<feature-id>`, and a reader copying one writes to a
+# directory no skill reads. Legitimate `docs/<name>/<legacy-package-dir>/` paths are
+# left alone: they are the not-opted-in layout the skills' examples depict.
+UNKNOWN_PACKAGE_DIR_RE = re.compile(
+    r"(?<![\w-])docs/(?:\*|[a-z0-9][a-z0-9-]*)/(design-package|implementation-package)/"
 )
 
 # Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
@@ -944,6 +970,15 @@ def check_n1() -> tuple[list[str], list[str]]:
          so that form would have caught 2 of the 20 real instances. Fenced
          blocks are exempt, as in N1b and M.
 
+    N1d. No working-tree path is rooted at `docs/<feature-id>/`. That was the
+         opted-in working tree until 2.7.0; it ignored `[project.paths]` and so
+         split a feature between `{project-root}/docs/` and the stage's
+         configured output directory. Working files now live in the stage
+         feature directory beside the assembled artifact. Nor does any `docs/`
+         path name `design-package/` or `implementation-package/`, which are
+         package directories in neither layout. Fenced blocks are exempt, as in
+         N1b, N1c and M, so migration guidance can quote the old layout.
+
     Hard errors, not warnings: this lands green in the same change that fixes
     every violation it would report, and a warning would only invite the
     spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
@@ -1002,6 +1037,27 @@ def check_n1() -> tuple[list[str], list[str]]:
                         f"placeholder `{hit.group(1)}` — the per-feature "
                         f"directory is spelled `<feature-id>`."
                     )
+            for hit in RETIRED_WORKING_TREE_RE.finditer(line):
+                if _in_code_fence(lines, i):
+                    continue
+                errors.append(
+                    f"{rel}:{i+1}: `{hit.group(0)}` roots a feature working "
+                    f"tree under `docs/` — retired in 2.7.0. Write it to the "
+                    f"stage feature directory, e.g. "
+                    f"`{{paths.requirements_package}}/<feature-id>/`. See "
+                    f"references/ai-principles/feature-precondition.md."
+                )
+            for hit in UNKNOWN_PACKAGE_DIR_RE.finditer(line):
+                if _in_code_fence(lines, i):
+                    continue
+                errors.append(
+                    f"{rel}:{i+1}: `{hit.group(0)}` names `{hit.group(1)}/`, "
+                    f"which is not a package directory in either layout. The "
+                    f"not-opted-in names are `requirements-package/`, "
+                    f"`solutions-package/`, `quality-package/` and "
+                    f"`quick-dev-package/`. See references/ai-principles/"
+                    f"feature-precondition.md § Not opted in."
+                )
             for hit in FEATURE_ARTIFACT_IN_PATH_RE.finditer(line):
                 prefix = hit.group(1)
                 if not prefix:

@@ -36,7 +36,7 @@ If the source is ambiguous, ask once:
 
 ### 1b. Read the quality package's evidence locations
 
-Read `docs/<feature-id>/quality-package/quality/automation-and-cicd.md`
+Read `{paths.quality_package}/<feature-id>/quality/automation-and-cicd.md`
 and capture the team's pinned evidence paths:
 
 | Concern | Where to look |

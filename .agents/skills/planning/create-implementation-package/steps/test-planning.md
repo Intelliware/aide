@@ -22,8 +22,8 @@ Test planning runs before increment decomposition because:
 | Input | Source | Required |
 |---|---|---|
 | Codebase analysis | output of Step 1 (brownfield) | Brownfield |
-| Solution Design Package | `{project.paths.design_package}/` | Yes |
-| Requirements Package | `{project.paths.requirements_package}/` | Yes — drives coverage targets |
+| Solution Design Package | `{project.paths.design_package}/{feature-id}/` | Yes |
+| Requirements Package | `{project.paths.requirements_package}/{feature-id}/` | Yes — drives coverage targets |
 | Existing test suite | filesystem (brownfield) | Brownfield |
 | Coding standards | `_assets/standards/` (testing standards if present) | If present |
 

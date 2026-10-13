@@ -7,8 +7,8 @@
 | Working-tree diff | `git diff` (uncommitted) | Yes | The artifact being packaged |
 | Test runner / build tools | environment | Yes | Re-verify after fix cycle |
 | Implementation package | `{project.paths.implementation_package}/{feature-id}/` | If present | Provides INC / FR traceability for commit messages and PR body |
-| Requirements package | `{project.paths.requirements_package}/` | If present | Cites FR IDs in PR body |
-| Design package | `{project.paths.design_package}/` | If present | Cites design sections in PR body |
+| Requirements package | `{project.paths.requirements_package}/{feature-id}/` | If present | Cites FR IDs in PR body |
+| Design package | `{project.paths.design_package}/{feature-id}/` | If present | Cites design sections in PR body |
 | Coding standards | `_assets/standards/` | If present | Drives the standards-compliance review lens |
 | project.toml | `{project-root}/project.toml` | Yes | Resolves paths and project name |
 | `gh` CLI | environment | Yes for PR creation; not for review-only mode | Creates the PR |

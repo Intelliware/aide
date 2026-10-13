@@ -31,9 +31,9 @@ Look at frontmatter and path together. Use the first match.
 
 | Signal | `target_artifact` |
 |---|---|
-| Frontmatter `artifact_type: requirements-package` OR path matches `docs/*/requirements-package/requirements-package.md` | `requirements-package` |
-| Frontmatter `artifact_type: design-package` OR path matches `docs/*/design-package/design-package.md` | `design-package` |
-| Frontmatter `artifact_type: implementation-package` OR path matches `docs/*/implementation-package/implementation-package.md` | `implementation-package` |
+| Frontmatter `artifact_type: requirements-package` OR path matches `docs/*/requirements-package/requirements-package.md` or `*-requirements.md` under the requirements output directory | `requirements-package` |
+| Frontmatter `artifact_type: design-package` OR path matches `docs/*/solutions-package/solution-package.md` or `*-design.md` under the design output directory | `design-package` |
+| Frontmatter `artifact_type: implementation-package` OR path matches `implementation-package.md` under the implementation output directory | `implementation-package` |
 | Path under `<source-repo>/docs/<domain>-internal/` or `<KB>/source-docs/<repo-slug>/<domain>-consumer/` OR frontmatter `artifact_type: re-part-a` / `re-part-b` | `reverse-engineering-doc` |
 | Path under `<KB>/components/` OR frontmatter has `component_id:` | `knowledge-base-component` |
 | Path equals `<KB>/ARCHITECTURE.md` OR `<KB>/CLAUDE.md` OR target is a `<KB>/` directory | `knowledge-base-instance` |

@@ -4,13 +4,13 @@
 
 | Input | Source | Required | Purpose |
 |---|---|---|---|
-| Solution Design Package | `{project.paths.design_package}/` | Yes | Architectural intent the increments realize |
-| Requirements Package | `{project.paths.requirements_package}/` | Yes | Functional Requirements to map onto increments |
+| Solution Design Package | `{project.paths.design_package}/{feature-id}/` | Yes | Architectural intent the increments realize |
+| Requirements Package | `{project.paths.requirements_package}/{feature-id}/` | Yes | Functional Requirements to map onto increments |
 | Canonical Increment Shape blocks | `templates/blocks/planning/*.md` (8 files) | Yes | Single-sourced section spec — never inline |
 | Composition spec | `templates/compositions/greenfield-implementation-package.yaml` | Yes | Composes the 8 blocks plus shared overview/glossary/change-log per increment |
 | project.toml | `{project-root}/project.toml` | Yes | Resolves output paths and FR identifier conventions |
 | Codebase access | filesystem | Conditional | Required when `project.default_flow = brownfield` (drives `steps/codebase-analysis.md`) |
-| Architecture baseline | `{project.paths.design_package}/discovery/architecture-baseline.md` | Conditional | Brownfield only; narrows codebase analysis scope |
+| Architecture baseline | `{project.paths.design_package}/{feature-id}/discovery/architecture-baseline.md` | Conditional | Brownfield only; narrows codebase analysis scope |
 | Coding standards | `_assets/standards/` | If present | Drives test-planning conventions and verification gate phrasing |
 
 ### Missing-input guards

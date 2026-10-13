@@ -29,11 +29,14 @@ If the scope cannot be auto-detected, ask once:
 > Which feature should I audit? (Provide a feature ID, an INC ID, or a
 > path to the assembled quality package.)
 
-Resolve `KB_FEATURE_ROOT` per the project's stage mode:
+Resolve `KB_FEATURE_ROOT` — the quality stage feature directory — per the
+project's stage mode (`references/ai-principles/feature-precondition.md`
+§ Resolving the stage feature directory):
 
-- **Legacy:** `docs/<feature-id>/`
-- **SoD directory mode:** `<host-repo>/<artifact_subdir>/quality/<repo-code-or-_cross-cutting>/`
-- **SoD colocate mode:** `<source-repo-path>/<artifact_subdir>/quality/`
+- **Legacy:** `{paths.quality_package}/<feature-id>/` (not opted in: the
+  feature's `docs/` folder, `quality-package/` underneath)
+- **SoD directory mode:** `<host-repo>/<artifact_subdir>/quality/<repo-code-or-_cross-cutting>/<feature-id>/`
+- **SoD colocate mode:** `<source-repo-path>/<artifact_subdir>/quality/<feature-id>/`
 
 Read `project.toml` to determine the mode. Hold the resolved path for
 the rest of the audit.
@@ -59,20 +62,20 @@ Resolve the quality artifact path per stage mode (see SKILL Step 0 of
 `review-quality-package` for the full SoD geometry). Required artifacts:
 
 - `{paths.quality_package}/{feature-id}/{feature-id}-quality.md` — the assembled package
-- `docs/<feature-id>/quality-package/quality/traceability.md` — the matrix
-- `docs/<feature-id>/quality-package/quality/test-design.md` — the test-design block
-- `docs/<feature-id>/quality-package/quality/automation-and-cicd.md` — the
+- `{paths.quality_package}/<feature-id>/quality/traceability.md` — the matrix
+- `{paths.quality_package}/<feature-id>/quality/test-design.md` — the test-design block
+- `{paths.quality_package}/<feature-id>/quality/automation-and-cicd.md` — the
   automation block (used in Step 3 for the marker scheme)
 
 If the quality package is missing, halt with:
 
-> No quality package found at `{paths.quality_package}/`. The coverage
+> No quality package found at `{paths.quality_package}/{feature-id}/`. The coverage
 > audit requires an assembled quality package. Route the user to
 > `create-quality-package`.
 
 ### 1d. Locate or bootstrap the test-case status tracker
 
-Check whether `docs/<feature-id>/quality-package/quality/plan/test-case-status.md`
+Check whether `{paths.quality_package}/<feature-id>/quality/plan/test-case-status.md`
 exists.
 
 **If found:** record its current state (TC IDs, statuses) for use in

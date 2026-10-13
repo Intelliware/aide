@@ -39,7 +39,9 @@
  *      `<feature-name>`) names a per-feature directory under `docs/` or under
  *      a `{paths.*}` token (N1b); and every per-feature artifact path spelled
  *      out in skill or template markdown is enclosed by a `{feature-id}/`
- *      directory (N1c). See `references/ai-principles/feature-precondition.md`.
+ *      directory (N1c); and no feature-scoped working-tree path is rooted at
+ *      `docs/<feature-id>/` instead of its stage feature directory (N1d). See
+ *      `references/ai-principles/feature-precondition.md`.
  *   N2. Feature registry validation against a features.toml fixture or a real
  *      project registry. Run with `--features-toml PATH` to evaluate rules
  *      13-16 from `config/SCHEMAS.md`; pair with `--project-toml` for `repos`
@@ -55,8 +57,9 @@
  *   - Any `{paths.<key>}` / `{project.paths.<key>}` reference naming an
  *     undeclared `[project.paths]` key (M).
  *   - A feature-scoped composition missing its `{feature-id}` segment, a
- *     per-feature artifact path with no enclosing `{feature-id}/` directory, or
- *     any retired feature placeholder in an artifact path (N1).
+ *     per-feature artifact path with no enclosing `{feature-id}/` directory,
+ *     any retired feature placeholder in an artifact path, or a working-tree
+ *     path rooted at `docs/<feature-id>/` (N1).
  *   - Any feature-registry rule violation when running in --features-toml
  *     mode (N2).
  *   - A SKILL.md missing the `## Precondition — hooks` heading or the
@@ -157,7 +160,7 @@ const FEATURE_SEGMENT = '{feature-id}';
 // `<feature-id>-quality.md`, prose about the prefix itself, and `filename_pattern`
 // values. The directory need not be the immediate parent, because the working
 // tree nests a package subdirectory under it
-// (`docs/<feature-id>/quick-dev-package/<feature-id>-quick-dev-plan.md`), so the
+// (`{paths.design_package}/<feature-id>/design/<feature-id>-design-notes.md`), so the
 // assertion is containment, not adjacency. Both spellings are accepted: `.md`
 // prose uses `<feature-id>`, composition YAML uses `{feature-id}`.
 const FEATURE_ARTIFACT_IN_PATH_RE =
@@ -178,6 +181,16 @@ const RETIRED_IN_TOKEN_RE = new RegExp(
   `\\{(?:project\\.)?paths\\.[A-Za-z_][A-Za-z0-9_]*\\}/${RETIRED_FEATURE_ALT}`,
   'g'
 );
+
+// Check N1d — the working-tree location retired in 2.7.0. On an opted-in project a
+// stage's working files live in its stage feature directory
+// (`{paths.<stage>_package}/<feature-id>/` in legacy mode), next to the assembled
+// artifact, so they follow `[project.paths]` into whatever repository a stage is
+// pointed at. `docs/<feature-id>/` resolved under `{project-root}` regardless of
+// that configuration, which split every feature across two trees. `<feature-id>`
+// only ever names a registered feature, so this spelling can only mean the
+// opted-in layout; the not-opted-in `docs/` tree is described without it.
+const RETIRED_WORKING_TREE_RE = /(?<![\w-])docs\/[{<]feature-id[}>]\//g;
 
 // Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
 // used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
@@ -1058,6 +1071,14 @@ function checkM() {
 //      so that form would have caught 2 of the 20 real instances. Fenced
 //      blocks are exempt, as in N1b and M.
 //
+//   N1d. No working-tree path is rooted at `docs/<feature-id>/`. That was the
+//      opted-in working tree until 2.7.0; it ignored `[project.paths]` and so
+//      split a feature between `{project-root}/docs/` and the stage's
+//      configured output directory. Working files now live in the stage
+//      feature directory beside the assembled artifact. Fenced blocks are
+//      exempt, as in N1b, N1c and M, so migration guidance can quote the old
+//      layout.
+//
 // Hard errors, not warnings: this lands green in the same change that fixes
 // every violation it would report, and a warning would only invite the
 // spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
@@ -1124,6 +1145,15 @@ function checkN1() {
             `\`${hit[1]}\` — the per-feature directory is spelled \`<feature-id>\`.`
           );
         }
+      }
+      for (const hit of lines[i].matchAll(RETIRED_WORKING_TREE_RE)) {
+        if (inCodeFence(lines, i)) continue;
+        errors.push(
+          `${rel}:${i + 1}: \`${hit[0]}\` roots a feature working tree under ` +
+          `\`docs/\` — retired in 2.7.0. Write it to the stage feature ` +
+          `directory, e.g. \`{paths.requirements_package}/<feature-id>/\`. ` +
+          `See references/ai-principles/feature-precondition.md.`
+        );
       }
       for (const hit of lines[i].matchAll(FEATURE_ARTIFACT_IN_PATH_RE)) {
         const prefix = hit[1];
