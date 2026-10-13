@@ -44,5 +44,5 @@ Snippet appended to `docs/checkout/requirements-package/CHANGE-TRACKER.md`:
 The skill suggested:
 
 > "The cross-impact note flags the design package. You may want to invoke
-> `verify-source` against `docs/checkout/design-package/` to confirm §6.4 is
+> `verify-source` against `docs/checkout/solutions-package/` to confirm §6.4 is
 > still consistent."

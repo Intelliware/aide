@@ -40,7 +40,9 @@ task #8 -> task #9):
      `{paths.*}` token (N1b); and every per-feature artifact path spelled out
      in skill or template markdown is enclosed by a `{feature-id}/` directory
      (N1c); and no feature-scoped working-tree path is rooted at
-     `docs/<feature-id>/` instead of its stage feature directory (N1d). See
+     `docs/<feature-id>/` instead of its stage feature directory, and no
+     `docs/` path names a package directory that exists in neither layout
+     (N1d). See
      `references/ai-principles/feature-precondition.md`.
   N2. Feature registry validation against a features.toml fixture or a real
      project registry. Run with `--features-toml PATH` to evaluate rules
@@ -198,6 +200,17 @@ RETIRED_IN_TOKEN_RE = re.compile(
 # only ever names a registered feature, so this spelling can only mean the
 # opted-in layout; the not-opted-in `docs/` tree is described without it.
 RETIRED_WORKING_TREE_RE = re.compile(r"(?<![\w-])docs/[{<]feature-id[}>]/")
+
+# Check N1d, second arm — a `docs/` package directory that exists in neither
+# layout. The not-opted-in tree uses `requirements-package/`, `solutions-package/`,
+# `quality-package/` and `quick-dev-package/`; implementation never had a `docs/`
+# tree. The first arm misses these because they are spelled with a glob or a
+# concrete slug rather than `<feature-id>`, and a reader copying one writes to a
+# directory no skill reads. Legitimate `docs/<name>/<legacy-package-dir>/` paths are
+# left alone: they are the not-opted-in layout the skills' examples depict.
+UNKNOWN_PACKAGE_DIR_RE = re.compile(
+    r"(?<![\w-])docs/(?:\*|[a-z0-9][a-z0-9-]*)/(design-package|implementation-package)/"
+)
 
 # Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
 # used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
@@ -961,9 +974,10 @@ def check_n1() -> tuple[list[str], list[str]]:
          opted-in working tree until 2.7.0; it ignored `[project.paths]` and so
          split a feature between `{project-root}/docs/` and the stage's
          configured output directory. Working files now live in the stage
-         feature directory beside the assembled artifact. Fenced blocks are
-         exempt, as in N1b, N1c and M, so migration guidance can quote the old
-         layout.
+         feature directory beside the assembled artifact. Nor does any `docs/`
+         path name `design-package/` or `implementation-package/`, which are
+         package directories in neither layout. Fenced blocks are exempt, as in
+         N1b, N1c and M, so migration guidance can quote the old layout.
 
     Hard errors, not warnings: this lands green in the same change that fixes
     every violation it would report, and a warning would only invite the
@@ -1032,6 +1046,17 @@ def check_n1() -> tuple[list[str], list[str]]:
                     f"stage feature directory, e.g. "
                     f"`{{paths.requirements_package}}/<feature-id>/`. See "
                     f"references/ai-principles/feature-precondition.md."
+                )
+            for hit in UNKNOWN_PACKAGE_DIR_RE.finditer(line):
+                if _in_code_fence(lines, i):
+                    continue
+                errors.append(
+                    f"{rel}:{i+1}: `{hit.group(0)}` names `{hit.group(1)}/`, "
+                    f"which is not a package directory in either layout. The "
+                    f"not-opted-in names are `requirements-package/`, "
+                    f"`solutions-package/`, `quality-package/` and "
+                    f"`quick-dev-package/`. See references/ai-principles/"
+                    f"feature-precondition.md § Not opted in."
                 )
             for hit in FEATURE_ARTIFACT_IN_PATH_RE.finditer(line):
                 prefix = hit.group(1)

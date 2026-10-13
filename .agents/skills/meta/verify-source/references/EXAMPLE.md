@@ -2,7 +2,7 @@
 
 ## Trigger phrase
 
-> "Verify the design package at `docs/checkout/design-package/` against the source. The payment-service team made breaking changes last week and I want to know if any of our claims are now wrong."
+> "Verify the design package at `docs/checkout/solutions-package/` against the source. The payment-service team made breaking changes last week and I want to know if any of our claims are now wrong."
 
 ## What the skill did
 
@@ -21,7 +21,7 @@
      also exposes `GET /refunds/:id` since `def456` (missing in design).
 4. Layered design-specific check (`design` package type): traceability —
    every requirement has at least one design section. **Pass.**
-5. Wrote `docs/checkout/design-package/verification-report-2026-04-25.md`.
+5. Wrote `docs/checkout/solutions-package/verification-report-2026-04-25.md`.
 6. Suggested `track-change` to log the verification activity.
 
 ## What it produced
