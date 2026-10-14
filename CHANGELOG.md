@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.7.0` |
+| Current artifact version | `2.7.1` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,25 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.7.1` — 2026-10-14
+
+The install runbook now says where to install A.I.D.E. when a project is split across
+several repos. Until now it defined the workspace root only as "the folder the install is
+run from", with no guidance on which folder that should be.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-14 | Addition | docs | `INSTRUCTIONS.md` (new § 0) | Added *Choose where to install (multi-repo projects)*: use the existing workspace repo if you can commit to it; otherwise create a sibling repo (e.g. `<project>-workspace`) with its own `.code-workspace` file, leaving the existing one untouched; never install into an application repo. The agent confirms the chosen folder with the user before starting. Existing section numbers are unchanged. | branch `kosta` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.0`. Documentation only: no change to install steps, file
+layout, skills or schemas.
+
+---
 
 ### `2.7.0` — 2026-10-08
 
