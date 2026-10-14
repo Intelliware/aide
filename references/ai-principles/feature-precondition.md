@@ -15,14 +15,16 @@ completeness trackers, review findings). For a legacy-mode stage it is
 `{paths.<stage>_package}/<feature-id>/`, so it follows `[project.paths]` into
 whatever directory — or repository — the project points that stage at. See
 *Resolving the stage feature directory*, below. Projects that have not opted in keep
-the pre-existing split layout (*Not opted in*, below).
+the pre-existing split layout (*Not opted in*, below) — except quick-dev, which
+follows `project.toml` in both cases (*Quick-dev layout*, below).
 
 ## The two-line resolution rule
 
 ```
 If features.toml is absent  → not opted in. Skip feature resolution and the
                                modes below, but map every path per *Not opted
-                               in* — skill text spells paths in the opted-in form.
+                               in* (quick-dev: *Quick-dev layout*) — skill text
+                               spells paths in the opted-in form.
 If it is present            → resolve [user].active_feature and follow the mode
                                below that matches this skill.
 ```
@@ -57,7 +59,7 @@ Which `[project.paths]` key a stage uses:
 | Design (`create-` / `review-design-package`) | `design_package` | `discovery/`, `design/` (incl. `design/adr/` fallback), `review/` |
 | Quality (`create-` / `review-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) | `quality_package` | `quality/` (incl. `quality/plan/`), `review/` |
 | Implementation (`create-` / `review-implementation-package`, `execute-increments`, `manage-bugs`) | `implementation_package` | `plan/` — per-increment files sit at the directory root |
-| Quick-dev (`document-` / `plan-` / `execute-quick-change`) | `requirements_package` | none — spec, plan, `CHANGE-TRACKER.md`, orientation notes and review files sit together at the directory root |
+| Quick-dev (`document-` / `plan-` / `execute-quick-change`) | per artifact — `requirements_package` for the spec and `CHANGE-TRACKER.md`, `implementation_package` for the plan, orientation notes and review files | none — see *Quick-dev layout*, below |
 
 **Skills spell these paths in the legacy-mode form** (`{paths.design_package}/<feature-id>/design/…`).
 When the stage runs in SoD mode, substitute the directory resolved by its
@@ -154,9 +156,9 @@ assembled artifact by its canonical path.
 Without `features.toml` there is no active feature to resolve: no Mode A or Mode B,
 no `select-feature`, no echo. The project keeps the layout it had before feature
 scoping existed, byte for byte — `_docs/feature-id-minimal-plan.md` § 6's central
-promise. This section is the one part of the file that still applies, because skill
-text spells every path in the opted-in form and the table below is how a
-not-opted-in run turns those into the layout it actually has:
+promise. This section and *Quick-dev layout* are the parts of the file that still
+apply, because skill text spells every path in the opted-in form and the table below
+is how a not-opted-in run turns those into the layout it actually has:
 
 - The assembled artifact drops the `<feature-id>/` segment (above).
 - The working tree stays under `docs/<name>/<legacy-package-dir>/`, where
@@ -169,10 +171,12 @@ not-opted-in run turns those into the layout it actually has:
 | `{paths.requirements_package}/<feature-id>/` (requirements) | `docs/<name>/requirements-package/` |
 | `{paths.design_package}/<feature-id>/` | `docs/<name>/solutions-package/` |
 | `{paths.quality_package}/<feature-id>/` | `docs/<name>/quality-package/` |
-| `{paths.requirements_package}/<feature-id>/` (quick-dev) | `docs/<name>/quick-dev-package/` |
 | `{paths.implementation_package}/<feature-id>/` | `{paths.implementation_package}/` (no working tree under `docs/`) |
 
 - The alias files are still written, because the two trees are still separate.
+- **Quick-dev is the exception.** It no longer uses `docs/<name>/quick-dev-package/`;
+  it follows `project.toml` with `<name>` in place of `<feature-id>`. See
+  *Quick-dev layout*, below.
 
 The working tree cannot simply follow `[project.paths]` here: with the segment
 dropped, every feature's working files would land in the same stage directory and
@@ -229,6 +233,69 @@ Two consequences worth holding onto. Filename globs survive opt-in unconditional
 and only depth-sensitive ones break. And `INC-001.md` gains the segment but no
 prefix, so the not-opted-in layout has nothing distinguishing it from a second
 feature's `INC-001.md` — that collision is one of the things opting in exists to fix.
+
+## Quick-dev layout
+
+Since 2.7.5, quick-dev follows the same per-stage layout as every other stage. Each
+artifact goes to the directory its stage is configured to use. Nothing is asked
+about *where* to write: `project.toml` (and `features.toml`, when present) already
+says.
+
+**This section applies whether or not the project has opted in.** On an opted-in
+project the directory segment is the resolved `<feature-id>`. Without
+`features.toml` it is the `<name>` slug — reused from an existing folder for this
+change, otherwise inferred from the request and confirmed with the user — and
+everything else below is identical. The segment is never dropped for quick-dev,
+because the spec, plan and tracker of two changes would otherwise collide in one
+stage directory.
+
+| Artifact | Written by | Stage (`[stages.<stage>]`) | Legacy-mode directory |
+|---|---|---|---|
+| `<id>-quick-dev-spec.md` | `document-quick-change` | `requirements` | `{paths.requirements_package}/<id>/` |
+| `CHANGE-TRACKER.md` | created by `document-quick-change`, appended by `execute-quick-change` | `requirements` | `{paths.requirements_package}/<id>/` |
+| `<id>-quick-dev-plan.md`, `codebase-orientation.md` | `plan-quick-change` | `planning` | `{paths.implementation_package}/<id>/` |
+| `review-YYYY-MM-DD.md` | `execute-quick-change` | `execution` | `{paths.implementation_package}/<id>/` |
+| Source and test code | `execute-quick-change` | — | the target repository's own layout (unchanged) |
+
+`<id>` is `<feature-id>` or `<name>`. The tracker stays with the spec — one tracker
+per change, not one per stage — because the change it records is the spec's.
+
+**SoD stages.** When a stage sets `dir` or `colocate_with_source`, substitute that
+stage's SoD directory (the geometry in *Resolving the stage feature directory*,
+above) for the legacy-mode prefix, then run its `write_role` check before the first
+write. Requirements, planning and execution are resolved independently, so a project
+whose requirements live in a BA repo and whose planning is colocated with source puts
+the spec in the BA repo and the plan in the source repo.
+
+**Repo scope is derived, not asked.** Directory mode needs `<repo-code>/` or
+`_cross-cutting/`; colocate mode needs the source repo. Quick-dev resolves it in
+this order and stops at the first that answers:
+
+1. **Upstream path signal** — `plan-` and `execute-quick-change` read it from where
+   the spec (or plan) already sits: `<repo-code>/`, `_cross-cutting/` plus the spec's
+   `affects_repos` frontmatter, or the colocated source repo.
+2. **The spec's affected components** — the repositories named in the spec's
+   FR "Where" references, mapped to `[[project.repos]].code`. One repo → that code;
+   two or more → `_cross-cutting/`, with `affects_repos` written into the spec's
+   frontmatter. When this diverges from the feature's `repos` field, offer to update
+   the field (`config/SCHEMAS.md` § 2.8).
+3. **The feature's `repos`** in `features.toml`, when opted in and the spec names no
+   repository.
+4. **`[[project.repos]]`** — the only entry, otherwise the `primary` entry.
+
+If none of these answers, **halt** and name the fix — add `repos` to the feature
+entry, or name the affected repository in the spec — rather than asking the user to
+choose. A quick change that spans more than one repository under a colocate-mode
+stage halts too: colocate mode has no `_cross-cutting/` home, and a cross-repository
+change has already tripped `plan-quick-change`'s escape hatch.
+
+**Legacy-tree check.** Before 2.7.5, quick-dev wrote everything to
+`docs/<name>/quick-dev-package/` (not opted in) or to
+`{paths.requirements_package}/<feature-id>/` (opted in, 2.7.0). Before creating a
+quick-dev directory, check for either holding this change's files. If found,
+**halt** and offer to move them, one `git mv` per file, to the directories in the
+table above, or to stop so the user can move them. As elsewhere, never move them
+unasked.
 
 ## Mode A — Write-side (select-and-create)
 

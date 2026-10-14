@@ -37,7 +37,7 @@ Look at frontmatter and path together. Use the first match.
 | Path under `<source-repo>/docs/<domain>-internal/` or `<KB>/source-docs/<repo-slug>/<domain>-consumer/` OR frontmatter `artifact_type: re-part-a` / `re-part-b` | `reverse-engineering-doc` |
 | Path under `<KB>/components/` OR frontmatter has `component_id:` | `knowledge-base-component` |
 | Path equals `<KB>/ARCHITECTURE.md` OR `<KB>/CLAUDE.md` OR target is a `<KB>/` directory | `knowledge-base-instance` |
-| Frontmatter `artifact_type: quick-change-brief` OR path matches `docs/*/quick-change/change-brief.md` | `quick-change-brief` |
+| Frontmatter `artifact_type: quick-change-brief` OR path matches `*-quick-dev-spec.md` under the requirements output directory, or the pre-2.7.5 `docs/*/quick-dev-package/*-quick-dev-spec.md` | `quick-change-brief` |
 | (none of the above) | `other` |
 
 ## 1.3 Infer `--stage` if absent

@@ -38,4 +38,5 @@ is itself a signal — invoke the escape hatch (`steps/02-escape-hatch.md`).
 
 A short orientation summary, presented inline. For audit and session-resumption
 purposes, optionally persist to
-`{paths.requirements_package}/<feature-id>/codebase-orientation.md`.
+`{paths.implementation_package}/<feature-id>/codebase-orientation.md` — beside the plan,
+in the planning-stage directory.
