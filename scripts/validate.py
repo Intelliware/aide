@@ -42,7 +42,8 @@ task #8 -> task #9):
      (N1c); and no feature-scoped working-tree path is rooted at
      `docs/<feature-id>/` instead of its stage feature directory, and no
      `docs/` path names a package directory that exists in neither layout
-     (N1d). See
+     (N1d); and no skill's active-feature precondition calls the
+     not-opted-in case a no-op (N1e). See
      `references/ai-principles/feature-precondition.md`.
   N2. Feature registry validation against a features.toml fixture or a real
      project registry. Run with `--features-toml PATH` to evaluate rules
@@ -211,6 +212,14 @@ RETIRED_WORKING_TREE_RE = re.compile(r"(?<![\w-])docs/[{<]feature-id[}>]/")
 UNKNOWN_PACKAGE_DIR_RE = re.compile(
     r"(?<![\w-])docs/(?:\*|[a-z0-9][a-z0-9-]*)/(design-package|implementation-package)/"
 )
+
+# Check N1e — a skill's feature precondition must not call the not-opted-in case a
+# no-op. Skill text spells paths in the opted-in form, and the table that maps them
+# back lives in feature-precondition.md § Not opted in; a skill told to skip that
+# file without `features.toml` never sees it and guesses where to write.
+FEATURE_PRECONDITION_HEADING_RE = re.compile(r"^##\s+Precondition\s+—\s+active feature\b", re.I)
+SECTION_HEADING_RE = re.compile(r"^#{1,2}\s")
+NO_OP_RE = re.compile(r"\bno-op\b", re.I)
 
 # Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
 # used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
@@ -979,6 +988,13 @@ def check_n1() -> tuple[list[str], list[str]]:
          package directories in neither layout. Fenced blocks are exempt, as in
          N1b, N1c and M, so migration guidance can quote the old layout.
 
+    N1e. No `## Precondition — active feature` section calls the
+         not-opted-in case a "no-op". Without `features.toml` a skill still
+         has to map its opted-in paths through § *Not opted in*; a no-op
+         told it to skip the file that holds the mapping. 2.7.x fixed 17
+         skills that said so; this keeps an 18th from copying the old line.
+         Fenced blocks are exempt, as elsewhere in N1.
+
     Hard errors, not warnings: this lands green in the same change that fixes
     every violation it would report, and a warning would only invite the
     spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
@@ -1027,7 +1043,17 @@ def check_n1() -> tuple[list[str], list[str]]:
         except (UnicodeDecodeError, OSError):
             continue
         lines = text.splitlines()
+        in_feature_precondition = False
         for i, line in enumerate(lines):
+            if SECTION_HEADING_RE.match(line) and not _in_code_fence(lines, i):
+                in_feature_precondition = bool(FEATURE_PRECONDITION_HEADING_RE.match(line))
+            elif in_feature_precondition and NO_OP_RE.search(line) and not _in_code_fence(lines, i):
+                errors.append(
+                    f"{rel}:{i+1}: the active-feature precondition calls the "
+                    f"not-opted-in case a no-op. Without `features.toml`, skip "
+                    f"feature resolution but still map paths per "
+                    f"references/ai-principles/feature-precondition.md § Not opted in."
+                )
             for regex in (RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE):
                 for hit in regex.finditer(line):
                     if _in_code_fence(lines, i):
