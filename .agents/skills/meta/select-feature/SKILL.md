@@ -138,22 +138,22 @@ Before Step 0, and after this skill's final step (before the `## Next skill` han
    > owns. Is that directory this feature's work, or something else?
 
    Never infer this from the title, and never skip the question because the
-   match looks obvious: the `id` *is* the directory name, so resolution adopts a
-   match as the working tree without asking, and nothing validates the answer.
+   match looks obvious: the precondition's legacy-tree check treats a match as
+   this feature's pre-2.7.0 working tree, and nothing validates the answer.
 
-   - **"This feature's work"** → use it; the work continues in place.
-     > Using `architecture`, then — `docs/architecture/` already matches, so
-     > nothing has to move.
+   - **"This feature's work"** → use it; each stage offers the move once.
+     > Using `architecture`, then — each stage will offer to move its part of
+     > `docs/architecture/` into its feature directory the first time it runs.
    - **"Something else"** → the name is unavailable; ask for another.
-     > Then `architecture` can't be the id: this feature would adopt
-     > `docs/architecture/` as its working tree and merge the two. Pick a name
+     > Then `architecture` can't be the id: the stages would mistake
+     > `docs/architecture/` for this feature's earlier work. Pick a name
      > that isn't already a directory.
    - **Overriding a proposed match** → name the cost, because declining is what
      actually produces two trees for one feature.
-     > That leaves `docs/refunds/` where it is and starts a second directory
-     > beside it, so this feature's artifacts live apart from it.
+     > That leaves `docs/refunds/` where it is; no stage will recognise it as
+     > this feature's earlier work, so it stays apart from this feature.
 5. **Echo the resolved output paths.** Print, for each stage the project
-   uses, where that stage's artifacts will land once the feature is active
+   uses, where all of that stage's artifacts, working files included, will land
    (e.g. `.framework-output/requirements/alert-customer/`). This is
    the cheapest possible guard against writing to the wrong place — the user
    sees it before any work starts.

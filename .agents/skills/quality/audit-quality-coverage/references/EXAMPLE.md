@@ -13,8 +13,8 @@
 ### Step 1 — Locate package and tracker
 
 - Resolved `KB_FEATURE_ROOT` →
-  `docs/outgoing-wires-mvp2/` (legacy mode; SoD would resolve under
-  `<host-repo>/<artifact_subdir>/`).
+  `docs/outgoing-wires-mvp2/quality-package/` (legacy mode, not opted in;
+  opted in it would be `.framework-output/quality/outgoing-wires-mvp2/`).
 - Implementation package: 6 INCs found.
 - Quality package: assembled, version 0.3-quality.2.
 - Test-case status tracker: present (team uses the TC-XXX flow), 14

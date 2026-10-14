@@ -26,8 +26,8 @@ After every sub-step: update the assumption-log and decision-log with new entrie
 ## Did discovery run?
 
 Before starting, check for these files:
-- `docs/<feature-id>/requirements-package/discovery/current-capability-baseline.md`
-- `docs/<feature-id>/requirements-package/discovery/requirements-elicitation.md`
+- `{paths.requirements_package}/<feature-id>/discovery/current-capability-baseline.md`
+- `{paths.requirements_package}/<feature-id>/discovery/requirements-elicitation.md`
 - `process-map.md` and `user-journey-map.md` from discovery
 
 If all present, discovery ran. Skip sub-step 0 (change-description already exists at `discovery/change-description.md`). Start at sub-step 1.

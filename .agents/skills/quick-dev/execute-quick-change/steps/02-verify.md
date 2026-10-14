@@ -102,7 +102,7 @@ this protocol exists to prevent.
 ## Verification log
 
 Append a one-line verification entry to the increment's section in
-`docs/<feature-id>/quick-dev-package/CHANGE-TRACKER.md` so the audit shows the
+`{paths.requirements_package}/<feature-id>/CHANGE-TRACKER.md` so the audit shows the
 increment was verified in three dimensions, not just unit-tested. If a
 Solution Pivot Gate fired during the increment, append a second line
 recording the root cause, the approved alternative, and the user who

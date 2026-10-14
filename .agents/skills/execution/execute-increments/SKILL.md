@@ -58,7 +58,7 @@ same turn. It never proceeds past a failed gate.
 | Input | Source | Required |
 |---|---|---|
 | Implementation package | resolved per stage mode (SoD: per-repo path; legacy: `{project.paths.implementation_package}/{feature-id}/`) | Yes (with GO from review) |
-| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/`) | **Recommended, not required.** When present, it must carry a `review-quality-package` GO before its release gates become binding exit criteria, and it supplies the test design the TDD loop writes. When absent, emit a one-time warning at increment start and proceed using the Acceptance Criteria from the Requirements Package as the test-design anchor. Running the quality stage first is a per-run user choice, not driven by `[project.testing].qe_repo` |
+| Quality package | resolved per stage mode (legacy: `{project.paths.quality_package}/{feature-id}/`) | **Recommended, not required.** When present, it must carry a `review-quality-package` GO before its release gates become binding exit criteria, and it supplies the test design the TDD loop writes. When absent, emit a one-time warning at increment start and proceed using the Acceptance Criteria from the Requirements Package as the test-design anchor. Running the quality stage first is a per-run user choice, not driven by `[project.testing].qe_repo` |
 | Target codebase | filesystem | Yes |
 | Test runner / build tools | environment | Yes |
 | project.toml | `{project-root}/project.toml` | Yes |
@@ -72,7 +72,7 @@ After every drafted artifact and before any file write, summarize back to the us
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0 (once per session, alongside `steps/00-scope-target-repo.md`). If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: execute-increments`) rather than guessing which feature's increments to run — do not fall back to creating one, because increments to run come from an implementation package that already exists. If it resolves, echo the feature ID before loading the first increment.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0 (once per session, alongside `steps/00-scope-target-repo.md`). If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: execute-increments`) rather than guessing which feature's increments to run — do not fall back to creating one, because increments to run come from an implementation package that already exists. If it resolves, echo the feature ID before loading the first increment.
 
 ## Precondition — hooks
 

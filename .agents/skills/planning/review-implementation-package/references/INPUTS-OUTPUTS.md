@@ -10,8 +10,8 @@
 | Increment status tracker | `{project.paths.implementation_package}/{feature-id}/increment-status.md` | Yes | Should be all `not-started` at review time |
 | Bugs log | `{project.paths.implementation_package}/{feature-id}/bugs-and-issues-log.md` | Yes | Should exist (initialized empty) |
 | Change tracker | `{project.paths.implementation_package}/{feature-id}/change-tracker.md` | Yes | Records review verdict |
-| Approved Requirements Package | `{project.paths.requirements_package}/` | Yes | FR coverage check; FR identifier verification |
-| Approved Design Package | `{project.paths.design_package}/` | Yes | Design coverage check |
+| Approved Requirements Package | `{project.paths.requirements_package}/{feature-id}/` | Yes | FR coverage check; FR identifier verification |
+| Approved Design Package | `{project.paths.design_package}/{feature-id}/` | Yes | Design coverage check |
 | Canonical Increment Shape spec | `templates/blocks/planning/*.md` + `references/canonical-increment-shape-spec.md` | Yes | The shape conformance ground truth |
 | project.toml | `{project-root}/project.toml` | Yes | Resolves all paths above |
 

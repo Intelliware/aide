@@ -30,7 +30,7 @@ If neither is available, skip with a clear note and recommend
 
 ### 3a. Determine the marker scheme
 
-Read `docs/<feature-id>/quality-package/quality/automation-and-cicd.md`
+Read `{paths.quality_package}/<feature-id>/quality/automation-and-cicd.md`
 for the team's marker / tag / scenario-naming convention. Typical
 schemes:
 

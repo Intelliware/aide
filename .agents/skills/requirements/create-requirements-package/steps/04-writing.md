@@ -23,6 +23,8 @@ Do not fail because an upstream phase was skipped. Explain the confidence trade-
 
 ## Sub-steps (run in order)
 
+Every output file below is written to `{paths.requirements_package}/<feature-id>/requirements/` — the requirements stage feature directory (`references/ai-principles/feature-precondition.md`). Not opted in: `requirements-package/requirements/` under the feature's `docs/` folder. Never write these files to the current working directory or the project root.
+
 | Step | Block (from the active composition) | Output file |
 |---|---|---|
 | 0a | (folder + tracker init) | `change-tracker.md` initialized at v0.1 |
@@ -38,7 +40,7 @@ Do not fail because an upstream phase was skipped. Explain the confidence trade-
 | 9 | `requirements/non-functional-requirements` | `09-nfrs.md` |
 | 10 | `requirements/assumptions-constraints-out-of-scope` | `10-assumptions-constraints-scope.md` |
 | 11 | `requirements/acceptance-criteria` | `11-acceptance-criteria.md` |
-| 12 | (assembly) | `requirements-package.md` (alias to `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`) |
+| 12 | (assembly) | `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md` (+ `requirements-package.md` alias, not opted in only) |
 
 Block ordering matches `templates/compositions/greenfield-requirements-package.yaml`. Skip blocks marked N/A in the relevance gate; write them as N/A entries in the completeness tracker, not empty files.
 

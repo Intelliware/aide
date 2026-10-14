@@ -30,9 +30,9 @@ the `OrderService` pattern, name test files `*.spec.ts`".
 
 | Input | Source | Required |
 |---|---|---|
-| Solution Design Package | `{project.paths.design_package}/` | Yes |
-| Architecture baseline | `{project.paths.design_package}/discovery/architecture-baseline.md` | If present |
-| Requirements Package | `{project.paths.requirements_package}/` | Yes |
+| Solution Design Package | `{project.paths.design_package}/{feature-id}/` | Yes |
+| Architecture baseline | `{project.paths.design_package}/{feature-id}/discovery/architecture-baseline.md` | If present |
+| Requirements Package | `{project.paths.requirements_package}/{feature-id}/` | Yes |
 | Codebase access | filesystem | Yes |
 | Coding standards | `_assets/standards/` (if present) | If present |
 

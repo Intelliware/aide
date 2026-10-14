@@ -16,13 +16,13 @@ what to do next.
 ### 5a. Update test-case-status.md
 
 Flip the increment's status from `in-progress` to `completed` in
-`docs/<feature-id>/quality-package/quality/plan/test-case-status.md`.
+`{paths.quality_package}/<feature-id>/quality/plan/test-case-status.md`.
 Record the completion date and any user-visible notes (e.g. accepted
 reuse decisions, CI-only execution).
 
 ### 5b. Update change-tracker
 
-Append a row to `docs/<feature-id>/quality-package/quality/change-tracker.md`
+Append a row to `{paths.quality_package}/<feature-id>/quality/change-tracker.md`
 for every increment completed, following the canonical format from
 `templates/blocks/shared/change-log.md`:
 

@@ -79,8 +79,9 @@ opted-in project in legacy mode still carries the segment.
   `<source-repo-path>/<artifact_subdir>/quality/<feature-id>/<feature-id>-quality.md`.
 
 This step is read-only — no permission check required. When the review skill
-writes its own findings, it writes under the same host repo at
-`docs/<feature-id>/quality-package/review/...`.
+writes its own findings, it writes them into the same stage feature directory as
+the upstream artifact: `{paths.quality_package}/<feature-id>/review/...` in legacy
+mode, the resolved SoD directory's `review/` otherwise.
 
 If executed non-interactively without an explicit `feature-id` (and `scope` when
 ambiguous), fail fast with a clear error rather than blocking on a prompt.
@@ -90,7 +91,7 @@ full SoD layout geometry.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-quality-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved artifact path before Review 1.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before Step 0. If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: review-quality-package`) rather than guessing which feature's package to review — do not fall back to creating one. If it resolves, echo the feature ID and the resolved artifact path before Review 1.
 
 ## Precondition — hooks
 
@@ -118,9 +119,9 @@ The detailed instructions, halt conditions, and verdict templates live in
 
 | Artifact | Path | Format |
 |---|---|---|
-| Per-review findings | `docs/<feature-id>/quality-package/review/<review-name>.md` | Markdown — findings + verdict |
-| Final readiness verdict | `docs/<feature-id>/quality-package/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
-| Updated `change-tracker.md` rows | `docs/<feature-id>/quality-package/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
+| Per-review findings | `{paths.quality_package}/<feature-id>/review/<review-name>.md` | Markdown — findings + verdict |
+| Final readiness verdict | `{paths.quality_package}/<feature-id>/review/readiness-verdict.md` | Markdown — GO / CONDITIONAL GO / NO-GO |
+| Updated `change-tracker.md` rows | `{paths.quality_package}/<feature-id>/quality/change-tracker.md` | Markdown table — `Trigger = Review finding` rows |
 
 ## Next skill
 

@@ -40,7 +40,7 @@ After every drafted artifact and before any file write, summarize back to the us
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode A, before the write-discipline preconditions below. If `features.toml` is absent, this is a no-op. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-requirements-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
+Follow `references/ai-principles/feature-precondition.md` Mode A, before the write-discipline preconditions below. If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` (`caller: create-requirements-package`) rather than inventing a feature ID from the request. If it resolves, echo the feature ID and the resolved output directory before Step 0.
 
 ## Preconditions (MUST run before any step)
 
@@ -75,11 +75,13 @@ Use elicitation prompts referenced from the active composition (`references/elic
 | Artifact | Path | Format |
 |---|---|---|
 | Assembled requirements package | path resolved per stage mode (SoD: `<host-repo>/<artifact_subdir>/requirements/<repo-code-or-_cross-cutting>/<feature-id>/<feature-id>-requirements.md`; legacy: `{paths.requirements_package}/{feature-id}/{feature-id}-requirements.md`) | Markdown (composed per `templates/compositions/greenfield-requirements-package.yaml`) |
-| Per-section files (when sharded) | `docs/<feature-id>/requirements-package/requirements/*.md` | Markdown (one block per file) |
-| Discovery artifacts (brownfield) | `docs/<feature-id>/requirements-package/discovery/*.md` | Markdown |
-| Analysis artifacts | `docs/<feature-id>/requirements-package/analysis/*.md` | Markdown |
-| Change tracker | `docs/<feature-id>/requirements-package/requirements/change-tracker.md` | Markdown table |
-| Completeness tracker | `docs/<feature-id>/requirements-package/requirements/completeness-tracker.md` | Markdown table |
+| Per-section files (when sharded) | `{paths.requirements_package}/<feature-id>/requirements/*.md` | Markdown (one block per file) |
+| Discovery artifacts (brownfield) | `{paths.requirements_package}/<feature-id>/discovery/*.md` | Markdown |
+| Analysis artifacts | `{paths.requirements_package}/<feature-id>/analysis/*.md` | Markdown |
+| Change tracker | `{paths.requirements_package}/<feature-id>/requirements/change-tracker.md` | Markdown table |
+| Completeness tracker | `{paths.requirements_package}/<feature-id>/requirements/completeness-tracker.md` | Markdown table |
+
+Not opted in (no `features.toml`): the assembled package drops the `<feature-id>/` segment and is also written as the `requirements-package.md` alias, and every working-tree path above moves from `{paths.requirements_package}/<feature-id>/` to `docs/<name>/requirements-package/` — see `references/ai-principles/feature-precondition.md` § *Not opted in*.
 
 ## Next skill
 review-requirements-package

@@ -4,10 +4,10 @@
 
 | Name | Required? | Source | Example |
 |---|---|---|---|
-| `source_path` | yes | user input | `/repo/docs/feature-x/design-package/design.md` |
-| `destination_folder` | no — defaults to `<source_dir>/<source_stem>/` | user input or default | `/repo/docs/feature-x/design-package/design/` |
+| `source_path` | yes | user input | `/repo/docs/feature-x/solutions-package/design.md` |
+| `destination_folder` | no — defaults to `<source_dir>/<source_stem>/` | user input or default | `/repo/docs/feature-x/solutions-package/design/` |
 | `original_disposition` | yes (after split) | user choice — one of `d` (delete), `m` (move/archive), `k` (keep) | `d` |
-| `archive_path` | only when `original_disposition = m` | user input or default sibling `archive/` | `/repo/docs/feature-x/design-package/archive/design.md` |
+| `archive_path` | only when `original_disposition = m` | user input or default sibling `archive/` | `/repo/docs/feature-x/solutions-package/archive/design.md` |
 
 ## Outputs
 
