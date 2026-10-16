@@ -29,6 +29,12 @@ task #8 -> task #9):
      (config/SCHEMAS.md § 2.5.1, rule 18), so this binding is unscoped —
      unlike J, there is no enumerated skill allowlist. Prevents configured
      hooks from silently never firing.
+  Q. KB navigator routing — a skill markdown file outside `knowledge-base/`
+     that reads KB component leaves (`{paths.knowledge_base_path}/components`)
+     or the Capability Index MUST name `navigate-knowledge-base` in the same
+     file. Stops stage skills re-implementing component selection by hand.
+     Soft warning — a phrase match, so it can misfire. Escape hatch:
+     `validate: allow-direct-kb-read`.
   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
      reference under `.agents/skills/` and `templates/compositions/` must
      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
@@ -753,6 +759,52 @@ def check_o() -> tuple[list[str], list[str]]:
             errors.append(
                 f"{rel}: does not reference `{HOOK_RUNTIME_REF}` — "
                 f"bound skills MUST cite the hook execution contract."
+            )
+    return errors, warnings
+
+
+KB_NAVIGATOR = "navigate-knowledge-base"
+KB_DIRECT_READ_RE = re.compile(
+    r"knowledge_base_path\}?/components\b|Capability Index"
+)
+KB_DIRECT_READ_ALLOW_PRAGMA = "validate: allow-direct-kb-read"
+# The KB stage's own skills build, maintain, and audit the KB — they work on
+# the whole tree or on files they already know, so selection does not apply.
+KB_ROUTING_EXEMPT_CATEGORY = "knowledge-base"
+
+
+def check_q() -> tuple[list[str], list[str]]:
+    """Q — KB navigator routing.
+
+    `navigate-knowledge-base` is the framework's one component selector
+    (AGENTS.md § Knowledge base). A stage skill that reads component leaves or
+    the Capability Index directly, without naming the navigator in the same
+    file, has re-implemented selection by hand and lost the graph walk, the
+    cap, and the `shared/` tiers. Scoped to `.agents/skills/` outside the
+    `knowledge-base/` category; a file can opt out with the
+    `validate: allow-direct-kb-read` pragma when the direct read is deliberate.
+    Findings are warnings, not errors: the match is a phrase heuristic, so a
+    legitimate direct read must not block a run.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not SKILLS_ROOT.is_dir():
+        return errors, warnings
+    for md in sorted(SKILLS_ROOT.rglob("*.md")):
+        rel_skill = md.relative_to(SKILLS_ROOT)
+        if rel_skill.parts[0] == KB_ROUTING_EXEMPT_CATEGORY:
+            continue
+        text = md.read_text(encoding="utf-8")
+        if KB_DIRECT_READ_ALLOW_PRAGMA in text or KB_NAVIGATOR in text:
+            continue
+        match = KB_DIRECT_READ_RE.search(text)
+        if match:
+            line = text.count("\n", 0, match.start()) + 1
+            warnings.append(
+                f"{md.relative_to(REPO_ROOT)}:{line}: reads the KB directly "
+                f"(`{match.group(0)}`) without naming `{KB_NAVIGATOR}` — route "
+                f"component selection through the navigator, or mark a "
+                f"deliberate direct read with `{KB_DIRECT_READ_ALLOW_PRAGMA}`."
             )
     return errors, warnings
 
@@ -1615,6 +1667,7 @@ def main() -> int:
     m_err, m_warn = check_m()
     n1_err, n1_warn = check_n1()
     o_err, o_warn = check_o()
+    q_err, q_warn = check_q()
     f_err, f_warn, f_out = check_f()
 
     titles = [
@@ -1630,13 +1683,14 @@ def main() -> int:
         "Check M — {paths.<key>} token resolution",
         "Check N1 — feature-segment / retired-placeholder guardrail",
         "Check O — hook-runtime binding (all skills)",
+        "Check Q — KB navigator routing",
         "Check F — build-registry.py output",
     ]
     bundles = [
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
         (l_err, l_warn), (m_err, m_warn), (n1_err, n1_warn), (o_err, o_warn),
-        (f_err, f_warn),
+        (q_err, q_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -1669,6 +1723,7 @@ def main() -> int:
                  "M — {paths.<key>} token resolution",
                  "N1 — feature-segment / retired-placeholder guardrail",
                  "O — hook-runtime binding (all skills)",
+                 "Q — KB navigator routing",
                  "F — build-registry sanity"],
                 bundles,
             )

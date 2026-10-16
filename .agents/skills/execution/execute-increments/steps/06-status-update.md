@@ -24,10 +24,12 @@ closing step.
    - FRs implemented
    - Components touched
    - Verification evidence summary (from AI Gate)
-3. **Identify affected knowledge-base components.** From the codebase paths
-   modified, look up which components in
-   `{project.paths.knowledge_base_path}/components/` are affected. Build
-   the affected-components list.
+3. **Identify affected knowledge-base components.** Invoke
+   `navigate-knowledge-base --from-paths` with every codebase path the
+   increment modified. The `seed`-tier entries are the affected-components
+   list — drop the graph neighbours; they were not changed. Report any
+   `unmatched` paths in the closure announcement: a new file outside every
+   component's `paths:` is what `update-knowledge-base` needs to extend.
 4. **Hand off to `update-knowledge-base`.** Pass:
    - The increment ID
    - The list of affected components

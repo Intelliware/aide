@@ -562,6 +562,68 @@ test('Check O — reject a SKILL.md missing the hook precondition', () => {
   assertIn(`${rel}: does not reference`, out, `output missing reference error.\noutput:\n${out}`);
 });
 
+// --- Check Q — KB navigator routing ---
+// Stage skills reach KB components through navigate-knowledge-base. No
+// fixture-mode flag exists for Q, so these write an ephemeral reference file
+// into a live skill's `references/` folder and remove it afterwards,
+// following the same pattern as the Check O fixture above.
+
+const CHECK_Q_STAGE_FIXTURE = path.join(
+  REPO_ROOT, '.agents', 'skills', 'execution', 'execute-increments', 'references', '_check-q-test-fixture.md'
+);
+const CHECK_Q_KB_FIXTURE = path.join(
+  REPO_ROOT, '.agents', 'skills', 'knowledge-base', 'update-knowledge-base', 'references', '_check-q-test-fixture.md'
+);
+const CHECK_Q_DIRECT_READ = 'Read each matching `{project.paths.knowledge_base_path}/components/<repo>/<id>.md`.\n';
+
+function runValidateWithCheckQFixture(file, body) {
+  fs.writeFileSync(file, '# Check Q fixture\n\n' + body, 'utf-8');
+  try {
+    return runValidate();
+  } finally {
+    fs.unlinkSync(file);
+  }
+}
+
+test('Check Q — a default run reports Check Q', () => {
+  const proc = runValidate();
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assertIn('Check Q — KB navigator routing', proc.stdout, `default run should report Check Q.\noutput:\n${proc.stdout + proc.stderr}`);
+});
+
+test('Check Q — warn on a direct component read', () => {
+  const proc = runValidateWithCheckQFixture(CHECK_Q_STAGE_FIXTURE, CHECK_Q_DIRECT_READ);
+  const out = proc.stdout + proc.stderr;
+  assertEqual(proc.returncode, 0, `Check Q is a warning; the run must still pass.\noutput:\n${out}`);
+  const rel = path.relative(REPO_ROOT, CHECK_Q_STAGE_FIXTURE);
+  assertIn(`WARN   ${rel}:3: reads the KB directly`, out, `output missing Check Q warning.\noutput:\n${out}`);
+});
+
+test('Check Q — warn on a direct Capability Index read', () => {
+  const proc = runValidateWithCheckQFixture(CHECK_Q_STAGE_FIXTURE, 'Match the change against the Capability Index.\n');
+  const out = proc.stdout + proc.stderr;
+  assertEqual(proc.returncode, 0, out);
+  assertIn('reads the KB directly (`Capability Index`)', out, `output missing Check Q warning.\noutput:\n${out}`);
+});
+
+test('Check Q — accept when the navigator is named', () => {
+  const proc = runValidateWithCheckQFixture(CHECK_Q_STAGE_FIXTURE, 'Invoke `navigate-knowledge-base`, then:\n' + CHECK_Q_DIRECT_READ);
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assert(!(proc.stdout + proc.stderr).includes('reads the KB directly'), 'navigator-named file should not warn');
+});
+
+test('Check Q — accept with the allow pragma', () => {
+  const proc = runValidateWithCheckQFixture(CHECK_Q_STAGE_FIXTURE, '<!-- validate: allow-direct-kb-read -->\n' + CHECK_Q_DIRECT_READ);
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assert(!(proc.stdout + proc.stderr).includes('reads the KB directly'), 'pragma should suppress the warning');
+});
+
+test('Check Q — knowledge-base category is exempt', () => {
+  const proc = runValidateWithCheckQFixture(CHECK_Q_KB_FIXTURE, CHECK_Q_DIRECT_READ);
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assert(!(proc.stdout + proc.stderr).includes('reads the KB directly'), 'knowledge-base category should be exempt');
+});
+
 // --- Check M — {paths.<key>} / {project.paths.<key>} token resolution ---
 // No fixture-mode flag exists for M (unlike I/K), so these write an ephemeral
 // composition directly into the live templates/compositions/ tree — the same

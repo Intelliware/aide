@@ -48,9 +48,13 @@ and tells the agent how to traverse the rest.
    ```
 
 3. **Selection rule.** "Never read the whole KB. Use
-   `navigate-knowledge-base` (or its inline equivalent: capability lookup
-   in ARCHITECTURE.md § 4 + one-hop graph expansion) to choose the
-   minimal component set. Default cap: 7 components."
+   `navigate-knowledge-base` to choose the minimal component set. Default
+   cap: 7 components. A framework skill always invokes the navigator — it
+   never re-implements the lookup. Only an agent without A.I.D.E. installed
+   follows the navigator's full procedure by hand: capability lookup in
+   ARCHITECTURE.md § 4, one-hop graph expansion in both directions
+   (`depends_on` and `consumed_by`), cross-cutting and `shared/` trigger
+   matches, then the cap."
 
 4. **Freshness rule.** "If `last_verified_against_commit` on a component
    does not match its repo's current HEAD AND the changed files overlap

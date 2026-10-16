@@ -399,6 +399,67 @@ class TestHookRuntimeBinding(unittest.TestCase):
         self.assertIn(f"{rel}: does not reference", out)
 
 
+class TestKBNavigatorRouting(unittest.TestCase):
+    """Check Q — stage skills reach KB components through navigate-knowledge-base.
+
+    No fixture-mode flag exists for Q, so these write an ephemeral reference
+    file into a live skill's `references/` folder and remove it in `finally`,
+    following the same pattern as the Check O and Check M tests.
+    """
+
+    STAGE_FIXTURE = (
+        REPO_ROOT / ".agents" / "skills" / "execution" / "execute-increments"
+        / "references" / "_check-q-test-fixture.md"
+    )
+    KB_FIXTURE = (
+        REPO_ROOT / ".agents" / "skills" / "knowledge-base" / "update-knowledge-base"
+        / "references" / "_check-q-test-fixture.md"
+    )
+    DIRECT_READ = "Read each matching `{project.paths.knowledge_base_path}/components/<repo>/<id>.md`.\n"
+
+    def _run_with(self, path: Path, body: str) -> subprocess.CompletedProcess:
+        path.write_text("# Check Q fixture\n\n" + body, encoding="utf-8")
+        try:
+            return run_validate()
+        finally:
+            path.unlink()
+
+    def test_default_run_reports_check_q(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check Q — KB navigator routing", proc.stdout)
+
+    def test_warn_on_direct_component_read(self) -> None:
+        proc = self._run_with(self.STAGE_FIXTURE, self.DIRECT_READ)
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, f"Check Q is a warning; the run must still pass.\noutput:\n{out}")
+        rel = str(self.STAGE_FIXTURE.relative_to(REPO_ROOT))
+        self.assertIn(f"WARN   {rel}:3: reads the KB directly", out)
+
+    def test_warn_on_capability_index_read(self) -> None:
+        proc = self._run_with(self.STAGE_FIXTURE, "Match the change against the Capability Index.\n")
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, msg=out)
+        self.assertIn("reads the KB directly (`Capability Index`)", out)
+
+    def test_accept_when_navigator_named(self) -> None:
+        body = "Invoke `navigate-knowledge-base`, then:\n" + self.DIRECT_READ
+        proc = self._run_with(self.STAGE_FIXTURE, body)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
+
+    def test_accept_with_pragma(self) -> None:
+        body = "<!-- validate: allow-direct-kb-read -->\n" + self.DIRECT_READ
+        proc = self._run_with(self.STAGE_FIXTURE, body)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
+
+    def test_knowledge_base_category_exempt(self) -> None:
+        proc = self._run_with(self.KB_FIXTURE, self.DIRECT_READ)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
+
+
 class TestSoDEdgeCases(unittest.TestCase):
     """Malformed inputs and missing files should fail loudly, not crash silently."""
 

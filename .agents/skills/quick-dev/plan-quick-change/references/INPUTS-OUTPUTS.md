@@ -8,6 +8,7 @@
 | codebase | yes | local filesystem — repos referenced in the spec's FR/Where | `../api`, `../web` |
 | canonical reduced increment shape | yes | `references/canonical-increment-shape.md` | reduced 7-section shape |
 | project paths and stage config | yes | `project.toml` `[project.paths]`, `[stages.requirements]`, `[stages.planning]`, `[[project.repos]]` | `requirements_package`, `implementation_package` |
+| knowledge base | no — when `project.paths.knowledge_base_path` is set | `navigate-knowledge-base` (`--from-paths` with the spec's "Where" files) | owning components and their one-hop callers |
 | coding standards | no — when present | framework standards or `customizations/` | language/framework standards relevant to the change |
 
 ## Outputs

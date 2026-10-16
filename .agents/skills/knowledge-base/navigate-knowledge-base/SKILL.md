@@ -41,6 +41,8 @@ read top-N, read frontmatter only, etc.).
   by an increment before opening source files.
 - A refactor / impact analysis needs the blast radius of a known component
   (uses `--seed-component-id` as input rather than free text).
+- A skill holds changed or named file paths (a diff, a bug's stack trace or
+  route) and needs the components that own them (uses `--from-paths`).
 
 ## When NOT to use
 
@@ -57,8 +59,9 @@ read top-N, read frontmatter only, etc.).
 
 | Input | Source | Required |
 |---|---|---|
-| Feature description (free text or trigger list) | Caller | Yes (or `--seed-component-id`) |
-| `--seed-component-id` | Caller | Yes (or feature description) |
+| Feature description (free text or trigger list) | Caller | Yes (or `--seed-component-id` / `--from-paths`) |
+| `--seed-component-id` | Caller | Yes (or feature description / `--from-paths`) |
+| `--from-paths` (repeatable; `<repo-code>:<path>` or repo-relative) | Caller | Yes (or feature description / `--seed-component-id`) — resolves file paths to the components whose `paths:` globs own them; matches enter the `seed` tier |
 | `knowledge_base_path` | `project.toml` `[project.paths]` | Yes |
 | `--max-components` (default 7) | Caller | No |
 | `--include-cross-cutting` (bool, default true) | Caller | No |
@@ -87,6 +90,15 @@ This skill is single-shot — no `steps/` folder. The flow is:
      bodies).
    - Keep components with score ≥ a threshold; tie-break by repo
      primary-status.
+
+   **Path resolution (`--from-paths`).** Instead of capability lookup, grep
+   every component's frontmatter `paths:` and `source_doc`, and match each
+   given path using the rules in `update-knowledge-base/steps/01-classify-diff.md`
+   (repo-prefixed globs scope to their repo; literal match wins over glob; a
+   file may hit several components). Every hit is a `seed`-tier entry. A
+   caller that wants only the owning components, not their neighbours, keeps
+   the `seed` entries and drops the rest. Paths matching no component are
+   returned as `unmatched` so the caller can surface them.
 3. **Graph expansion.** For each candidate component, read
    `<knowledge_base_path>/graph.json` and walk:
    - One hop along `depends_on` (outgoing).

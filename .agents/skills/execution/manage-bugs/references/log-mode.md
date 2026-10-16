@@ -20,7 +20,10 @@ mid-execution from `execute-increments`, but also stand-alone.
    - `impact-type` — required: `defect` / `missed-requirement` /
      `new-requirement` / `deferred-work`
    - `increment-id` — required; passed by caller, or `none` if pre-exec
-   - `affected-components` — recommended; KB component IDs
+   - `affected-components` — recommended; KB component IDs. When the bug
+     names files, routes, or a stack trace and a KB is configured, resolve
+     them with `navigate-knowledge-base --from-paths` and use the
+     `seed`-tier IDs — do not guess from directory names
    - `requirements-impacted` — recommended; FR IDs
    - `design-impacted` — recommended; design file paths
    - `suspected-root-cause` — optional but encouraged

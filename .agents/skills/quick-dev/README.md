@@ -9,7 +9,7 @@ Each artifact goes to its own stage's configured directory — the spec and chan
 
 ## Consumes
 - Change description from user
-- The knowledge base (for component context — `navigate-knowledge-base`)
+- The knowledge base (for component context — `plan-quick-change` orientation queries `navigate-knowledge-base`)
 
 ## Skills (NEW — authored in task #6 from `expedited-implementation-package` DNA)
 - `document-quick-change/` — combined spec
