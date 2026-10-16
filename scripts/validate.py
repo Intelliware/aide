@@ -69,6 +69,11 @@ Hard errors fail the run (exit 1):
   - A SKILL.md Inputs flag missing from its INPUTS-OUTPUTS.md Inputs table (P).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
+
+Python version: the default checks run on Python 3.9+. The fixture modes
+`--project-toml` (Check I) and `--features-toml` (Check N2) parse TOML with
+the stdlib `tomllib` and require Python 3.11+; on older interpreters they
+exit with an error naming the version found.
 """
 from __future__ import annotations
 
@@ -1612,6 +1617,15 @@ def main() -> int:
         ),
     )
     args = parser.parse_args()
+
+    if (args.features_toml or args.project_toml) and sys.version_info < (3, 11):
+        found = ".".join(str(n) for n in sys.version_info[:3])
+        print(
+            f"validate.py: --project-toml / --features-toml need Python 3.11+ "
+            f"(stdlib tomllib); found {found}.",
+            file=sys.stderr,
+        )
+        return 1
 
     # The fixture modes below are mutually exclusive early returns, so their
     # order is precedence, not presentation — which is why it does not follow

@@ -23,6 +23,11 @@ Coverage:
 Tests invoke `validate.py` via subprocess (E2E through the CLI surface)
 rather than importing internals — that matches how A.7 exercises the
 script, and keeps the test boundary at the documented contract.
+
+Requires Python 3.11+: the SoD and feature-registry tests drive
+`validate.py`'s `tomllib`-based fixture modes. The suite exits early with a
+clear message on older interpreters rather than reporting dozens of
+misleading failures.
 """
 from __future__ import annotations
 
@@ -33,6 +38,12 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+
+if sys.version_info < (3, 11):
+    sys.exit(
+        "test_validate.py requires Python 3.11+ (validate.py's fixture modes use "
+        f"tomllib); found {sys.version.split()[0]}."
+    )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VALIDATE = REPO_ROOT / "scripts" / "validate.py"
