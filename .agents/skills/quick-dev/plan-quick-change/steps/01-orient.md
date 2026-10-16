@@ -14,7 +14,7 @@ implied by the FRs.
 
 | Read | Purpose |
 |---|---|
-| KB components from `navigate-knowledge-base` (when `project.paths.knowledge_base_path` is set) | Confirms which components own the change and who calls them; a hit outside the spec's "Where" list is an early escape-hatch signal |
+| KB components from `navigate-knowledge-base` (when `project.paths.knowledge_base_path` is set) | Confirms which components own the change and who calls them; a hit outside the spec's "Where" list is worth raising with the user |
 | Each source file the spec lists | Identify patterns, naming, error handling, state management, imports |
 | The corresponding test files | Note framework, naming convention, mocking approach, file location |
 | Any `project-context.md` from a prior elaborate flow | Reuse instead of regenerating |
@@ -24,9 +24,16 @@ Query the KB before opening source files. Pass the spec's "Where" file paths as
 `--from-paths`, or the spec's change summary as the feature description when it
 names no files. Read only the frontmatter and § 3 Change-Impact Summary of the
 returned components — quick-dev needs ownership and blast radius, not a full
-component read. If more than two `one-hop` components turn out to need changes,
-that is cross-module work: apply the escape hatch. No KB configured → skip this
-row.
+component read.
+
+The KB lookup is context only: it never limits which files the plan may change,
+and it never triggers the escape hatch on its own. If more than two `one-hop`
+components look like they need changes, tell the user which ones and why, and ask
+whether to stay in quick-dev or switch to the full pipeline. Record the answer
+in the orientation summary. The escape hatch's own conditions
+(`steps/02-escape-hatch.md`) still apply, judged from the code you read. If the
+navigator errors or returns nothing, note it and orient from the spec's files
+alone. No KB configured → skip this row.
 
 ## What to capture
 

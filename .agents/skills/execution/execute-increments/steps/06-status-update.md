@@ -30,6 +30,9 @@ closing step.
    list — drop the graph neighbours; they were not changed. Report any
    `unmatched` paths in the closure announcement: a new file outside every
    component's `paths:` is what `update-knowledge-base` needs to extend.
+   If the navigator errors or the KB is not built, say so in the closure
+   announcement and skip the handoff in step 4. The increment's code is
+   already complete; a KB problem never reopens it.
 4. **Hand off to `update-knowledge-base`.** Pass:
    - The increment ID
    - The list of affected components

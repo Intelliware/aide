@@ -50,6 +50,11 @@ loop.
      stale (its `last_verified_against_commit` is behind and its `paths:`
      overlap the Plan's files), treat its body as suggestive and verify
      against source.
+
+     The KB lookup is context only: it never limits which files the Plan
+     may change. If the navigator errors (e.g. the KB is not built yet) or
+     returns nothing, note it in the step 7 announcement and continue with
+     the requirements and design — a KB problem is not a halt condition.
 6. **Mark increment in-progress.** Update `increment-status.md`:
    `not-started` → `in-progress` (record start date).
 7. **Announce.** Tell the user which increment is now in flight, with its
