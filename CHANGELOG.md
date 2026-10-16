@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.7.6` |
+| Current artifact version | `2.7.7` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,46 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.7.7` — 2026-10-16
+
+Projects without `features.toml` now reach the path mapping they depend on. Skills
+spell every path in the opted-in form, and the table that converts those paths for a
+not-opted-in project lives in `feature-precondition.md` § *Not opted in* — but 17
+skills, and the precondition's own Mode A step 1, told agents the precondition was a
+no-op without `features.toml`, so they never saw the table and guessed where to write.
+Every consumer now skips only feature resolution, and a validator arm keeps the old
+line from returning.
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-13 | Source Update | references | `references/ai-principles/feature-precondition.md` § *Not opted in* | States that keeping the split `docs/<name>/` working tree for not-opted-in projects is deliberate — the layout they were promised — and that adding `features.toml` is how a project gets one directory per stage. | branch `mm/no-op-fix` | ☐ Pending |
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-14 | Addition | validator | `scripts/validate.py`, `scripts/validate.js`, `scripts/test_validate.py`, `scripts/test-validate.js` | Check **N1e**: rejects "no-op" inside any `## Precondition — active feature` section, outside fenced blocks. The hooks precondition's "no-op" is unaffected. Reject and section-scope tests in both suites. | branch `jc/precondition-followups` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-13 | Correction | skills | 16 `SKILL.md` files across requirements, design, planning, execution, quality and quick-dev | The active-feature precondition said "if `features.toml` is absent, this is a no-op". It now says to skip feature resolution but still map paths per § *Not opted in*. `create-requirements-package`'s output table gains its not-opted-in paths. | branch `mm/no-op-fix` | ☐ Pending |
+| 2 | 2026-10-14 | Correction | skills | `execution/create-pr/SKILL.md` | The 17th consumer, missed by the fix above: same no-op wording, same opted-in-only `{project.paths.implementation_package}/{feature-id}/` read. Now matches the other 16. | branch `jc/precondition-followups` | ☐ Pending |
+| 3 | 2026-10-14 | Correction | references | `references/ai-principles/feature-precondition.md` Mode A step 1 | "If `features.toml` is absent, proceed as today. Stop here." stopped an agent following Mode A — and Mode B, which inherits it — before § *Not opted in*. Step 1 now skips steps 2–4 only and points to § *Not opted in* (or *Quick-dev layout*). | branch `jc/precondition-followups` | ☐ Pending |
+| 4 | 2026-10-14 | Correction | skills | `quality/review-test-failures/SKILL.md` | Rewrapped the one overlong line in the active-feature precondition to match the paragraph's 90-column wrap. | branch `jc/precondition-followups` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.6`. **Projects without `features.toml`** now have their
+opted-in path spellings mapped through § *Not opted in* by every feature-scoped skill,
+which is what 2.7.0 specified; no layout changes. Opted-in projects see no change. No
+`project.toml` or `features.toml` edits are required.
+
+---
 
 ### `2.7.6` — 2026-10-16
 

@@ -322,7 +322,9 @@ feature must already have reached planning. Its "independently invocable" note m
 independent of an increment *session*, not of the package. Creating `bugs-and-issues-log.md`
 when missing is not minting a feature — it is a file inside a directory that must exist.
 
-1. If `features.toml` is absent, proceed as today. Stop here.
+1. If `features.toml` is absent, skip steps 2–4: there is no feature to resolve or
+   echo. Paths still follow § *Not opted in* — or *Quick-dev layout* for the
+   quick-dev skills — before the first read or write.
 2. Resolve `[user].active_feature` from `project.user.toml`.
 3. The pointer must resolve to **exactly one** well-formed entry. Three outcomes:
 

@@ -40,7 +40,9 @@
  *      a `{paths.*}` token (N1b); and every per-feature artifact path spelled
  *      out in skill or template markdown is enclosed by a `{feature-id}/`
  *      directory (N1c); and no feature-scoped working-tree path is rooted at
- *      `docs/<feature-id>/` instead of its stage feature directory (N1d). See
+ *      `docs/<feature-id>/` instead of its stage feature directory (N1d); and
+ *      no skill's active-feature precondition calls the not-opted-in case a
+ *      no-op (N1e). See
  *      `references/ai-principles/feature-precondition.md`.
  *   N2. Feature registry validation against a features.toml fixture or a real
  *      project registry. Run with `--features-toml PATH` to evaluate rules
@@ -191,6 +193,14 @@ const RETIRED_IN_TOKEN_RE = new RegExp(
 // only ever names a registered feature, so this spelling can only mean the
 // opted-in layout; the not-opted-in `docs/` tree is described without it.
 const RETIRED_WORKING_TREE_RE = /(?<![\w-])docs\/[{<]feature-id[}>]\//g;
+
+// Check N1e — a skill's feature precondition must not call the not-opted-in case a
+// no-op. Skill text spells paths in the opted-in form, and the table that maps them
+// back lives in feature-precondition.md § Not opted in; a skill told to skip that
+// file without `features.toml` never sees it and guesses where to write.
+const FEATURE_PRECONDITION_HEADING_RE = /^##\s+Precondition\s+—\s+active feature\b/i;
+const SECTION_HEADING_RE = /^#{1,2}\s/;
+const NO_OP_RE = /\bno-op\b/i;
 
 // Check N2 — feature-ID format (config/SCHEMAS.md § 2.8): a lowercase kebab slug,
 // used verbatim as a directory name. No ordinal prefix: nothing consumed the number,
@@ -1079,6 +1089,13 @@ function checkM() {
 //      exempt, as in N1b, N1c and M, so migration guidance can quote the old
 //      layout.
 //
+//   N1e. No `## Precondition — active feature` section calls the
+//      not-opted-in case a "no-op". Without `features.toml` a skill still
+//      has to map its opted-in paths through § *Not opted in*; a no-op
+//      told it to skip the file that holds the mapping. 2.7.x fixed 17
+//      skills that said so; this keeps an 18th from copying the old line.
+//      Fenced blocks are exempt, as elsewhere in N1.
+//
 // Hard errors, not warnings: this lands green in the same change that fixes
 // every violation it would report, and a warning would only invite the
 // spellings back. See `_docs/feature-id-minimal-plan.md` § 8 and
@@ -1136,7 +1153,18 @@ function checkN1() {
       continue;
     }
     const lines = text.split('\n');
+    let inFeaturePrecondition = false;
     for (let i = 0; i < lines.length; i++) {
+      if (SECTION_HEADING_RE.test(lines[i]) && !inCodeFence(lines, i)) {
+        inFeaturePrecondition = FEATURE_PRECONDITION_HEADING_RE.test(lines[i]);
+      } else if (inFeaturePrecondition && NO_OP_RE.test(lines[i]) && !inCodeFence(lines, i)) {
+        errors.push(
+          `${rel}:${i + 1}: the active-feature precondition calls the ` +
+          `not-opted-in case a no-op. Without \`features.toml\`, skip ` +
+          `feature resolution but still map paths per ` +
+          `references/ai-principles/feature-precondition.md § Not opted in.`
+        );
+      }
       for (const regex of [RETIRED_IN_DOCS_RE, RETIRED_IN_TOKEN_RE]) {
         for (const hit of lines[i].matchAll(regex)) {
           if (inCodeFence(lines, i)) continue;
