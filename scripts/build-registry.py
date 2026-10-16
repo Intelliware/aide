@@ -47,7 +47,11 @@ Flags
   --dry-run    Parse + validate + print summary; do not write files.
   --verbose    Print one line per skill as it is processed.
 
-This script depends only on the Python 3 standard library.
+This script depends only on the Python 3 standard library. Reading
+`framework.toml` `[registry].extra_skill_roots` and add-on `aide-addon.toml`
+names uses `tomllib` and requires Python 3.11+; on older interpreters both
+are skipped with a warning, so add-on skills will be missing from the
+registry.
 """
 from __future__ import annotations
 
@@ -133,6 +137,14 @@ def _unquote(value: str) -> str:
     return value
 
 
+def _warn_no_tomllib(path: Path) -> None:
+    found = ".".join(str(n) for n in sys.version_info[:3])
+    print(
+        f"WARN: {path}: not read — tomllib needs Python 3.11+, found {found}.",
+        file=sys.stderr,
+    )
+
+
 def _addon_name(addon_root: Path) -> str:
     """Origin label for an extra root: aide-addon.toml [addon].name, else dir name."""
     manifest = addon_root / "aide-addon.toml"
@@ -143,6 +155,8 @@ def _addon_name(addon_root: Path) -> str:
             name = data.get("addon", {}).get("name")
             if name:
                 return str(name)
+        except ImportError:
+            _warn_no_tomllib(manifest)
         except Exception:
             pass  # fall through to dir name
     return addon_root.name
@@ -156,6 +170,9 @@ def _config_extra_roots() -> list[str]:
     try:
         import tomllib  # Python 3.11+
         data = tomllib.loads(framework_toml.read_text(encoding="utf-8"))
+    except ImportError:
+        _warn_no_tomllib(framework_toml)
+        return []
     except Exception:
         return []
     roots = data.get("registry", {}).get("extra_skill_roots", [])

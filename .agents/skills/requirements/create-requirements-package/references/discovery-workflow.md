@@ -71,9 +71,9 @@ This file is the anchor for every subsequent step — every discovery activity, 
 When `project.paths.knowledge_base_path` is set, query the KB via `knowledge-base/navigate-knowledge-base` before reading source repos directly. The KB encodes synthesized truth at the component-id level; raw repos are the fallback when the KB is silent.
 
 For each affected area:
-1. Resolve the change description against the KB's Capability Index (in `ARCHITECTURE.md`) → list of `component_id`s.
-2. Read the matched components' `.md` files in `components/<repo>/<id>.md`.
-3. Cross-check `last_verified_against_commit` against `staleness_warning_days` (`framework.toml`); if stale, flag in `existing-artifact-review.md`.
+1. Invoke `navigate-knowledge-base` with the change description (default profile, default `--include-solution-context`). Do not hand-roll the Capability Index lookup — the navigator also walks the graph one hop, so the components that call the affected area (who the change ripples to) and the matching solution-context leaves (constraints, personas, ownership) come back with it.
+2. Read the returned entries in rank order: `primary` and `one-hop` component bodies in full; `cross-cutting` and `solution-context` leaves where the affected area raises that concern. If the navigator returns nothing, fall back to `ARCHITECTURE.md` § 1–4, then the source repos, and note the gap.
+3. Cross-check each component's `last_verified_against_commit` (the navigator returns it inline) against `staleness_warning_days` (`framework.toml`); if stale, flag in `existing-artifact-review.md`.
 
 ## Entry criteria
 

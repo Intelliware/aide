@@ -22,7 +22,7 @@ Examples:
 
 ## Knowledge base integration
 
-When the project has a knowledge base with existing C4 diagrams (`{paths.knowledge_base_path}/components/<repo>/*.md` and `{paths.knowledge_base_path}/ARCHITECTURE.md`), reuse them as the starting point. The architecture baseline produced by `steps/01-discovery.md` synthesizes the KB diagrams plus the technical-debt categorization into a baseline that the design then extends.
+When the project has a knowledge base with existing C4 diagrams, reuse them as the starting point: the system-level dependency graph in `{paths.knowledge_base_path}/ARCHITECTURE.md` § 5, plus the component docs `navigate-knowledge-base` returns for the feature (do not glob `components/<repo>/*.md`). The architecture baseline produced by `steps/01-discovery.md` synthesizes the KB diagrams plus the technical-debt categorization into a baseline that the design then extends.
 
 For each new/modified container or component:
 1. Cite the KB component_id in the design block (`See: knowledge-base/components/api-orders/order-checkout-flow.md`).

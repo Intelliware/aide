@@ -29,6 +29,18 @@
  *      target (config/SCHEMAS.md § 2.5.1, rule 18), so this binding is
  *      unscoped — unlike J, there is no enumerated skill allowlist. Prevents
  *      configured hooks from silently never firing.
+ *   P. Inputs flag parity — every `--flag` named in the first column of a
+ *      SKILL.md `## Inputs` table must also appear in that skill's
+ *      `references/INPUTS-OUTPUTS.md` `## Inputs` table. SKILL.md may list a
+ *      subset; the reference is the full contract. Prevents a flag added to
+ *      SKILL.md from never reaching the reference doc. Soft warning — it
+ *      parses markdown tables, so a formatting change can misfire.
+ *   Q. KB navigator routing — a skill markdown file outside `knowledge-base/`
+ *      that reads KB component leaves (`{paths.knowledge_base_path}/components`)
+ *      or the Capability Index MUST name `navigate-knowledge-base` in the same
+ *      file. Stops stage skills re-implementing component selection by hand.
+ *      Soft warning — a phrase match, so it can misfire. Escape hatch:
+ *      `validate: allow-direct-kb-read`.
  *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
  *      reference under `.agents/skills/` and `templates/compositions/` must
  *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
@@ -904,6 +916,95 @@ function checkO() {
     }
     if (!text.includes(HOOK_RUNTIME_REF)) {
       errors.push(`${rel}: does not reference \`${HOOK_RUNTIME_REF}\` — bound skills MUST cite the hook execution contract.`);
+    }
+  }
+
+  return [errors, warnings];
+}
+
+const INPUTS_SECTION_RE = /^## Inputs\b[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m;
+const INPUT_FLAG_RE = /`(--[a-z][a-z0-9-]*)/g;
+
+// Flags named in the first column of the `## Inputs` table, or null if the
+// file has no `## Inputs` section.
+function inputsFlags(text) {
+  const m = INPUTS_SECTION_RE.exec(text);
+  if (!m) return null;
+  const flags = new Set();
+  for (const line of m[1].split('\n')) {
+    if (!line.startsWith('|')) continue;
+    const cells = line.split('|');
+    if (cells.length > 1) {
+      for (const fm of cells[1].matchAll(INPUT_FLAG_RE)) flags.add(fm[1]);
+    }
+  }
+  return flags;
+}
+
+// P — Inputs flag parity. See validate.py:check_p for the full rationale.
+// SKILL.md may list a subset of inputs, but every `--flag` it names must also
+// appear in references/INPUTS-OUTPUTS.md's `## Inputs` table. Findings are
+// warnings, not errors: the check parses markdown tables, so a formatting
+// change can misfire.
+function checkP() {
+  const errors = [];
+  const warnings = [];
+
+  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
+    return [errors, warnings];
+  }
+
+  const skillFiles = discoverFiles(SKILLS_ROOT, (name) => name === 'SKILL.md');
+  for (const skillMd of skillFiles) {
+    const ioMd = path.join(path.dirname(skillMd), 'references', 'INPUTS-OUTPUTS.md');
+    if (!fs.existsSync(ioMd) || !fs.statSync(ioMd).isFile()) continue;
+    const skillFlags = inputsFlags(fs.readFileSync(skillMd, 'utf-8'));
+    const ioFlags = inputsFlags(fs.readFileSync(ioMd, 'utf-8'));
+    if (skillFlags === null || ioFlags === null) continue;
+    const rel = path.relative(REPO_ROOT, skillMd);
+    const ioRel = path.relative(REPO_ROOT, ioMd);
+    for (const flag of [...skillFlags].filter(f => !ioFlags.has(f)).sort()) {
+      warnings.push(`${rel}: Inputs flag \`${flag}\` is missing from ${ioRel} \`## Inputs\` — the reference must document every flag SKILL.md names.`);
+    }
+  }
+
+  return [errors, warnings];
+}
+
+const KB_NAVIGATOR = 'navigate-knowledge-base';
+const KB_DIRECT_READ_RE = /knowledge_base_path\}?\/components\b|Capability Index/;
+const KB_DIRECT_READ_ALLOW_PRAGMA = 'validate: allow-direct-kb-read';
+// The KB stage's own skills build, maintain, and audit the KB — they work on
+// the whole tree or on files they already know, so selection does not apply.
+const KB_ROUTING_EXEMPT_CATEGORY = 'knowledge-base';
+
+// Q — KB navigator routing. navigate-knowledge-base is the framework's one
+// component selector (AGENTS.md § Knowledge base). A stage skill that reads
+// component leaves or the Capability Index directly, without naming the
+// navigator in the same file, has re-implemented selection by hand and lost
+// the graph walk, the cap, and the shared/ tiers. Scoped to .agents/skills/
+// outside the knowledge-base/ category; a file can opt out with the
+// `validate: allow-direct-kb-read` pragma when the direct read is deliberate.
+// Findings are warnings, not errors: the match is a phrase heuristic, so a
+// legitimate direct read must not block a run.
+function checkQ() {
+  const errors = [];
+  const warnings = [];
+
+  if (!fs.existsSync(SKILLS_ROOT) || !fs.statSync(SKILLS_ROOT).isDirectory()) {
+    return [errors, warnings];
+  }
+
+  const mdFiles = discoverFiles(SKILLS_ROOT, (name) => name.endsWith('.md'));
+  for (const md of mdFiles) {
+    const relSkill = path.relative(SKILLS_ROOT, md);
+    if (relSkill.split(path.sep)[0] === KB_ROUTING_EXEMPT_CATEGORY) continue;
+    const text = fs.readFileSync(md, 'utf-8');
+    if (text.includes(KB_DIRECT_READ_ALLOW_PRAGMA) || text.includes(KB_NAVIGATOR)) continue;
+    const match = KB_DIRECT_READ_RE.exec(text);
+    if (match) {
+      const line = text.slice(0, match.index).split('\n').length;
+      warnings.push(`${path.relative(REPO_ROOT, md)}:${line}: reads the KB directly (\`${match[0]}\`) without naming \`${KB_NAVIGATOR}\` — route component selection through the navigator, or mark a deliberate direct read with \`${KB_DIRECT_READ_ALLOW_PRAGMA}\`.`);
     }
   }
 
@@ -1898,6 +1999,8 @@ function main() {
   const [mErr, mWarn] = checkM();
   const [n1Err, n1Warn] = checkN1();
   const [oErr, oWarn] = checkO();
+  const [pErr, pWarn] = checkP();
+  const [qErr, qWarn] = checkQ();
   const [fErr, fWarn, fOut] = checkF();
 
   const titles = [
@@ -1913,6 +2016,8 @@ function main() {
     'Check M — {paths.<key>} token resolution',
     'Check N1 — feature-segment / retired-placeholder guardrail',
     'Check O — hook-runtime binding (all skills)',
+    'Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)',
+    'Check Q — KB navigator routing',
     'Check F — build-registry.js output',
   ];
 
@@ -1920,7 +2025,7 @@ function main() {
     [aErr, aWarn], [bErr, bWarn], [cErr, cWarn], [dErr, dWarn],
     [eErr, eWarn], [gErr, gWarn], [hErr, hWarn], [jErr, jWarn],
     [lErr, lWarn], [mErr, mWarn], [n1Err, n1Warn], [oErr, oWarn],
-    [fErr, fWarn],
+    [pErr, pWarn], [qErr, qWarn], [fErr, fWarn],
   ];
 
   for (let i = 0; i < titles.length; i++) {
@@ -1978,6 +2083,9 @@ function main() {
       toMarkdown(titles[8], lErr, lWarn),
       toMarkdown(titles[9], mErr, mWarn),
       toMarkdown(titles[10], n1Err, n1Warn),
+      toMarkdown(titles[11], oErr, oWarn),
+      toMarkdown(titles[12], pErr, pWarn),
+      toMarkdown(titles[13], qErr, qWarn),
       '## Check F — build-registry.js output',
       '',
     ];

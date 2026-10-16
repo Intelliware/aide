@@ -23,6 +23,11 @@ Coverage:
 Tests invoke `validate.py` via subprocess (E2E through the CLI surface)
 rather than importing internals — that matches how A.7 exercises the
 script, and keeps the test boundary at the documented contract.
+
+Requires Python 3.11+: the SoD and feature-registry tests drive
+`validate.py`'s `tomllib`-based fixture modes. The suite exits early with a
+clear message on older interpreters rather than reporting dozens of
+misleading failures.
 """
 from __future__ import annotations
 
@@ -33,6 +38,12 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+
+if sys.version_info < (3, 11):
+    sys.exit(
+        "test_validate.py requires Python 3.11+ (validate.py's fixture modes use "
+        f"tomllib); found {sys.version.split()[0]}."
+    )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 VALIDATE = REPO_ROOT / "scripts" / "validate.py"
@@ -397,6 +408,150 @@ class TestHookRuntimeBinding(unittest.TestCase):
         rel = str(self.FIXTURE_PATH.relative_to(REPO_ROOT))
         self.assertIn(f"{rel}: missing top-level", out)
         self.assertIn(f"{rel}: does not reference", out)
+
+
+class TestInputsFlagParity(unittest.TestCase):
+    """Check P — every `--flag` in a SKILL.md `## Inputs` table also appears in
+    the skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table.
+
+    No fixture-mode flag exists for P, so the negative case writes an
+    ephemeral skill folder directly into the live `.agents/skills/` tree and
+    removes it in `finally`, following the same pattern as
+    TestHookRuntimeBinding's Check O test.
+    """
+
+    FIXTURE_DIR = REPO_ROOT / ".agents" / "skills" / "meta" / "_check-p-test-fixture"
+    FIXTURE_PATH = FIXTURE_DIR / "SKILL.md"
+    FIXTURE_IO = FIXTURE_DIR / "references" / "INPUTS-OUTPUTS.md"
+
+    def test_default_run_reports_check_p(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)", proc.stdout)
+
+    def test_flag_missing_from_reference_reported(self) -> None:
+        self.FIXTURE_IO.parent.mkdir(parents=True, exist_ok=True)
+        self.FIXTURE_PATH.write_text(
+            textwrap.dedent(
+                """\
+                ---
+                name: _check-p-test-fixture
+                description: "Ephemeral fixture for test_validate.py Check P test. Deleted immediately after the assertion."
+                ---
+
+                # Check P Test Fixture
+
+                ## Inputs
+
+                | Input | Source | Required |
+                |---|---|---|
+                | `--documented` | Caller | No |
+                | `--undocumented` | Caller | No |
+
+                ## Precondition — hooks
+
+                See `references/orientation/hook-runtime.md`.
+
+                ## Next skill
+
+                (none)
+                """
+            ),
+            encoding="utf-8",
+        )
+        self.FIXTURE_IO.write_text(
+            textwrap.dedent(
+                """\
+                # Check P Test Fixture — Inputs & Outputs
+
+                ## Inputs
+
+                | Input | Type | Required |
+                |---|---|---|
+                | `--documented` | bool | No |
+                | `--reference-only` | bool | No |
+                """
+            ),
+            encoding="utf-8",
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_IO.unlink()
+            self.FIXTURE_IO.parent.rmdir()
+            self.FIXTURE_PATH.unlink()
+            self.FIXTURE_DIR.rmdir()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"Check P is a warning; the run must still pass.\noutput:\n{out}",
+        )
+        rel = str(self.FIXTURE_PATH.relative_to(REPO_ROOT))
+        self.assertIn(f"WARN   {rel}: Inputs flag `--undocumented` is missing", out)
+        # SKILL.md may list a subset — a reference-only flag is not an error.
+        self.assertNotIn("`--reference-only`", out)
+        self.assertNotIn("`--documented` is missing", out)
+
+
+class TestKBNavigatorRouting(unittest.TestCase):
+    """Check Q — stage skills reach KB components through navigate-knowledge-base.
+
+    No fixture-mode flag exists for Q, so these write an ephemeral reference
+    file into a live skill's `references/` folder and remove it in `finally`,
+    following the same pattern as the Check O and Check M tests.
+    """
+
+    STAGE_FIXTURE = (
+        REPO_ROOT / ".agents" / "skills" / "execution" / "execute-increments"
+        / "references" / "_check-q-test-fixture.md"
+    )
+    KB_FIXTURE = (
+        REPO_ROOT / ".agents" / "skills" / "knowledge-base" / "update-knowledge-base"
+        / "references" / "_check-q-test-fixture.md"
+    )
+    DIRECT_READ = "Read each matching `{project.paths.knowledge_base_path}/components/<repo>/<id>.md`.\n"
+
+    def _run_with(self, path: Path, body: str) -> subprocess.CompletedProcess:
+        path.write_text("# Check Q fixture\n\n" + body, encoding="utf-8")
+        try:
+            return run_validate()
+        finally:
+            path.unlink()
+
+    def test_default_run_reports_check_q(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check Q — KB navigator routing", proc.stdout)
+
+    def test_warn_on_direct_component_read(self) -> None:
+        proc = self._run_with(self.STAGE_FIXTURE, self.DIRECT_READ)
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, f"Check Q is a warning; the run must still pass.\noutput:\n{out}")
+        rel = str(self.STAGE_FIXTURE.relative_to(REPO_ROOT))
+        self.assertIn(f"WARN   {rel}:3: reads the KB directly", out)
+
+    def test_warn_on_capability_index_read(self) -> None:
+        proc = self._run_with(self.STAGE_FIXTURE, "Match the change against the Capability Index.\n")
+        out = proc.stdout + proc.stderr
+        self.assertEqual(proc.returncode, 0, msg=out)
+        self.assertIn("reads the KB directly (`Capability Index`)", out)
+
+    def test_accept_when_navigator_named(self) -> None:
+        body = "Invoke `navigate-knowledge-base`, then:\n" + self.DIRECT_READ
+        proc = self._run_with(self.STAGE_FIXTURE, body)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
+
+    def test_accept_with_pragma(self) -> None:
+        body = "<!-- validate: allow-direct-kb-read -->\n" + self.DIRECT_READ
+        proc = self._run_with(self.STAGE_FIXTURE, body)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
+
+    def test_knowledge_base_category_exempt(self) -> None:
+        proc = self._run_with(self.KB_FIXTURE, self.DIRECT_READ)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertNotIn("reads the KB directly", proc.stdout + proc.stderr)
 
 
 class TestSoDEdgeCases(unittest.TestCase):

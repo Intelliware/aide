@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIDE Knowledge Base Navigation</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface-2: #f0efeb;
+    --text: #1d1d1b;
+    --muted: #5f5e58;
+    --border: #e2e0da;
+    --accent: #3b5bdb;
+    --accent-soft: #e7ecfd;
+    --warn: #a15c07;
+    --warn-soft: #fdf1df;
+    --ok: #2b7a4b;
+    --ok-soft: #e3f3ea;
+    --code-bg: #eeede8;
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614;
+      --surface: #1f1f1c;
+      --surface-2: #2a2a26;
+      --text: #ecebe6;
+      --muted: #a8a69e;
+      --border: #383732;
+      --accent: #8ea6ff;
+      --accent-soft: #252c47;
+      --warn: #f0b45c;
+      --warn-soft: #3a2c17;
+      --ok: #7fd1a0;
+      --ok-soft: #1c3226;
+      --code-bg: #2c2b27;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161614;
+    --surface: #1f1f1c;
+    --surface-2: #2a2a26;
+    --text: #ecebe6;
+    --muted: #a8a69e;
+    --border: #383732;
+    --accent: #8ea6ff;
+    --accent-soft: #252c47;
+    --warn: #f0b45c;
+    --warn-soft: #3a2c17;
+    --ok: #7fd1a0;
+    --ok-soft: #1c3226;
+    --code-bg: #2c2b27;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .86em;
+    background: var(--code-bg);
+    padding: .1em .35em;
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { line-height: 1.25; margin: 0 0 .5em; }
+  h1 { font-size: 2rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.35rem; margin-top: 2.2rem; }
+  h3 { font-size: 1.05rem; margin-top: 1.6rem; }
+  p { margin: 0 0 1em; }
+  ul, ol { padding-left: 1.3em; margin: 0 0 1em; }
+  li { margin-bottom: .35em; }
+
+  /* Layout */
+  .shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+  nav.side {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 24px 18px;
+  }
+  nav.side .brand { font-weight: 700; font-size: .95rem; margin-bottom: 18px; display: block; color: var(--text); }
+  nav.side .group { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 6px; }
+  nav.side a.link {
+    display: block; padding: 5px 10px; border-radius: 6px;
+    color: var(--text); font-size: .9rem;
+  }
+  nav.side a.link:hover { background: var(--surface-2); text-decoration: none; }
+  nav.side a.link.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  main { padding: 40px 48px 80px; max-width: 980px; width: 100%; }
+
+  .theme-toggle {
+    margin-top: 24px; font: inherit; font-size: .82rem; color: var(--muted);
+    background: transparent; border: 1px solid var(--border); border-radius: 6px;
+    padding: 5px 10px; cursor: pointer;
+  }
+
+  /* Views: with JS only one view is shown; without JS all are shown */
+  html.js .view { display: none; }
+  html.js .view.current { display: block; }
+  .view + .view { margin-top: 4rem; }
+  html.js .view + .view { margin-top: 0; }
+
+  .eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+  .lede { font-size: 1.1rem; color: var(--muted); max-width: 46em; }
+
+  .callout {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 1.2rem 0;
+  }
+  .callout.warn { background: var(--warn-soft); border-left-color: var(--warn); }
+  .callout.ok { background: var(--ok-soft); border-left-color: var(--ok); }
+  .callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 20px; box-shadow: var(--shadow);
+  }
+
+  /* Layers */
+  .layers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 1.2rem 0; }
+  .layer { position: relative; }
+  .layer .num {
+    display: inline-flex; width: 26px; height: 26px; border-radius: 50%;
+    align-items: center; justify-content: center; font-size: .8rem; font-weight: 700;
+    background: var(--accent); color: var(--surface); margin-bottom: 8px;
+  }
+  .layer h3 { margin: 0 0 4px; font-size: .98rem; }
+  .layer p { font-size: .88rem; color: var(--muted); margin: 0; }
+
+  /* Pipeline */
+  .pipeline { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin: 1.2rem 0; }
+  .pipeline .stage {
+    flex: 1 1 120px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; font-size: .85rem;
+  }
+  .pipeline .stage b { display: block; font-size: .9rem; }
+  .pipeline .stage span { color: var(--muted); }
+  .pipeline .arrow { align-self: center; color: var(--muted); }
+
+  /* Ladder */
+  .ladder { list-style: none; padding: 0; margin: 1rem 0; }
+  .ladder li {
+    display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: start;
+    padding: 10px 0; border-bottom: 1px solid var(--border); margin: 0;
+  }
+  .ladder li:last-child { border-bottom: 0; }
+  .ladder .rung {
+    font-weight: 700; font-size: .85rem; text-align: center; border-radius: 6px; padding: 2px 0;
+    background: var(--surface-2);
+  }
+  .ladder small { color: var(--muted); display: block; }
+
+  /* Skill grid */
+  .skill-group { margin-top: 1.6rem; }
+  .skill-group > .eyebrow { margin-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+  a.skill-card {
+    display: block; color: var(--text); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px;
+    box-shadow: var(--shadow); transition: border-color .15s, transform .15s;
+  }
+  a.skill-card:hover { border-color: var(--accent); text-decoration: none; transform: translateY(-1px); }
+  a.skill-card .name { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86rem; font-weight: 600; }
+  a.skill-card p { font-size: .86rem; color: var(--muted); margin: 6px 0 8px; }
+
+  .chip {
+    display: inline-block; font-size: .7rem; font-weight: 600; letter-spacing: .03em;
+    padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted);
+    margin-right: 4px; white-space: nowrap;
+  }
+  .chip.builder { background: var(--ok-soft); color: var(--ok); }
+  .chip.reader { background: var(--accent-soft); color: var(--accent); }
+  .chip.writer { background: var(--warn-soft); color: var(--warn); }
+  .chip.indirect { background: var(--surface-2); color: var(--muted); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 1rem 0 1.4rem; border: 1px solid var(--border); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; background: var(--surface); }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--surface-2); font-weight: 600; font-size: .8rem; }
+  tr:last-child td { border-bottom: 0; }
+
+  /* Detail view */
+  .back { display: inline-block; font-size: .88rem; margin-bottom: 18px; }
+  .kv { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 0; margin: 1.2rem 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .kv dt, .kv dd { margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: .9rem; }
+  .kv dt { background: var(--surface-2); font-weight: 600; color: var(--muted); font-size: .82rem; }
+  .kv dt:last-of-type, .kv dd:last-of-type { border-bottom: 0; }
+  .sources { font-size: .85rem; }
+  .sources li { margin-bottom: 2px; }
+  .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--border); font-size: .9rem; }
+  .pager a { max-width: 48%; }
+
+  /* Mobile */
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: minmax(0, 1fr); }
+    nav.side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); padding: 16px; }
+    nav.side .links { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav.side .group { width: 100%; margin: 10px 0 2px; }
+    nav.side a.link { padding: 4px 8px; font-size: .84rem; }
+    main { padding: 24px 16px 60px; }
+    h1 { font-size: 1.6rem; }
+    .layers { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .kv { grid-template-columns: minmax(0, 1fr); }
+    .kv dt { border-bottom: 0; padding-bottom: 2px; }
+    .pipeline .arrow { display: none; }
+  }
+  @media (max-width: 480px) {
+    .layers { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+<div class="shell">
+
+<nav class="side" aria-label="Skills">
+  <a class="brand" href="#overview">AIDE · KB navigation</a>
+  <div class="links">
+    <div class="group">Overview</div>
+    <a class="link" href="#overview">How skills use the KB</a>
+    <a class="link" href="#gaps">Gaps &amp; inconsistencies</a>
+
+    <div class="group">Knowledge-base stage</div>
+    <a class="link" href="#build-knowledge-base">build-knowledge-base</a>
+    <a class="link" href="#navigate-knowledge-base">navigate-knowledge-base</a>
+    <a class="link" href="#update-knowledge-base">update-knowledge-base</a>
+    <a class="link" href="#detect-knowledge-base-drift">detect-knowledge-base-drift</a>
+    <a class="link" href="#capture-solution-context">capture-solution-context &amp; co.</a>
+
+    <div class="group">Delivery stages</div>
+    <a class="link" href="#create-requirements-package">create-requirements-package</a>
+    <a class="link" href="#create-design-package">create-design-package</a>
+    <a class="link" href="#create-implementation-package">create-implementation-package</a>
+    <a class="link" href="#execute-increments">execute-increments</a>
+    <a class="link" href="#quick-dev">quick-dev</a>
+
+    <div class="group">Quality stage</div>
+    <a class="link" href="#quality-reuse">create / execute quality</a>
+    <a class="link" href="#review-test-failures">review-test-failures</a>
+    <a class="link" href="#audit-quality-coverage">audit-quality-coverage</a>
+
+    <div class="group">Meta</div>
+    <a class="link" href="#framework-navigator">framework-navigator</a>
+  </div>
+  <button class="theme-toggle" type="button" id="themeToggle">Toggle theme</button>
+</nav>
+
+<main>
+
+<!-- ============================ OVERVIEW ============================ -->
+<section class="view" id="overview">
+  <div class="eyebrow">A.I.D.E. · Knowledge base</div>
+  <h1>How AIDE skills use the knowledge base</h1>
+  <p class="lede">How the framework decides what kind of KB content it needs to answer a question, and how much of it to read.</p>
+
+  <div class="callout">
+    <p><strong>Short answer:</strong> the KB has no retrieval engine. There are no embeddings, no vector database and no navigation code. Every decision is written as markdown instructions that the agent follows using <code>read</code>, <code>grep</code> and <code>glob</code>. The logic sits in four layers.</p>
+  </div>
+
+  <div class="layers">
+    <div class="card layer">
+      <div class="num">1</div>
+      <h3>Structure for routing</h3>
+      <p><code>build-knowledge-base</code> produces a predictable shape: an index, routing metadata on every file, and a dependency graph.</p>
+    </div>
+    <div class="card layer">
+      <div class="num">2</div>
+      <h3>Pick the files</h3>
+      <p><code>navigate-knowledge-base</code> scores, expands and caps the list of files to load. It never reads component bodies.</p>
+    </div>
+    <div class="card layer">
+      <div class="num">3</div>
+      <h3>Choose read depth</h3>
+      <p>Each calling skill decides how deep to read each file: frontmatter, selected sections, or the full body.</p>
+    </div>
+    <div class="card layer">
+      <div class="num">4</div>
+      <h3>Trust &amp; freshness</h3>
+      <p>Commit stamps, drift gates and the update rule decide whether KB content can be trusted or has to be checked against source.</p>
+    </div>
+  </div>
+
+  <h2>Layer 1 — What the KB looks like</h2>
+  <p>Routing only works because the KB has a fixed shape. It has two halves.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Half</th><th>File</th><th>Role in routing</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3">Code-grounded<br><small>(generated, never edited by hand)</small></td>
+          <td><code>ARCHITECTURE.md</code></td>
+          <td>Root index. § 0 points to the human-grounded half, § 1 is the summary, § 2 the repo map, § 3 the component catalog, <strong>§ 4 the Capability Index</strong>, § 5 the dependency diagram, § 6 cross-cutting concerns.</td></tr>
+        <tr><td><code>components/&lt;repo&gt;/&lt;id&gt;.md</code></td>
+          <td>One file per logical component, sized as the unit of selection. <strong>Frontmatter is the routing metadata</strong>: <code>description</code> ("Use when …"), <code>triggers</code>, <code>paths</code>, <code>depends_on</code>, <code>data_entities</code>, <code>last_verified_against_commit</code>. The <strong>body is the knowledge</strong>: Overview, Key Responsibilities, Change-Impact Summary, Recent Activity.</td></tr>
+        <tr><td><code>graph.json</code></td>
+          <td>Nodes plus typed edges (<code>calls</code>, <code>consumes</code>, <code>depends-on</code>, <code>derives-from</code>) for working out how far a change reaches. <code>consumed_by</code> is computed when the file is read.</td></tr>
+        <tr><td rowspan="2">Human-grounded<br><small>(under <code>shared/</code>)</small></td>
+          <td><code>solution-context/</code>, <code>ai-rules/</code>, <code>operations/</code></td>
+          <td>Mission, personas, constraints, ownership, coding rules, deployment and SLOs. Each file has a "Use when …" description and <code>triggers:</code>, so the same matching finds them.</td></tr>
+        <tr><td><code>cross-cutting/&lt;concern&gt;.md</code></td>
+          <td>Auth, logging, errors, security, performance, versioning. Added to the list by keyword.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The <strong>Capability Index</strong> is the curated routing layer. The build skill groups components by their main verb phrase and merges synonyms (for example, "submit cart" becomes "place order"). Its job is to separate cases where one trigger word matches several things: "pay" matches both checkout and refunds.</p>
+  <p><code>NAVIGATE.md</code> (formerly <code>CLAUDE.md</code>) is the first file an agent reads. It sets the read order and three rules: <strong>never read the whole KB</strong> (load at most 7 components by default), <strong>treat stale components as hints</strong> and check them against source, and <strong>never edit the KB by hand</strong>.</p>
+
+  <h2>Layer 2 — Picking the files</h2>
+  <p><code>navigate-knowledge-base</code> takes a feature description, a seed component for impact analysis, or a list of file paths (<code>--from-paths</code>), and returns a ranked, capped list of file paths. Each path comes with a tier and a one-line reason. It reads <code>ARCHITECTURE.md</code>, greps frontmatter, walks <code>graph.json</code> one hop in both directions, adds cross-cutting and solution-context files, and stops there. <a href="#navigate-knowledge-base">See the full algorithm →</a></p>
+  <p>Callers choose <em>what type</em> of data comes back through flags:</p>
+  <ul>
+    <li><code>--profile=test-suite</code> returns test-suite components instead of application code.</li>
+    <li><code>--profile-subkind</code> narrows a test-suite query, for example to fixtures or shared utilities only.</li>
+    <li><code>--depth=two-hop</code> returns a wider set of affected components.</li>
+    <li><code>--include-solution-context</code> and <code>--include-cross-cutting</code> control whether <code>shared/</code> files are added.</li>
+  </ul>
+  <p>Since 2.8.0, every framework skill that selects components calls the navigator rather than doing its own lookup. Validator Check Q warns when a stage skill reads <code>components/</code> or the Capability Index without naming it.</p>
+
+  <h2>Layer 3 — Read depth</h2>
+  <p>The navigator decides <em>which</em> files. The calling skill decides <em>how much</em> of each to read. In practice there is a step-down ladder:</p>
+  <ol class="ladder">
+    <li><span class="rung">1</span><div><strong>A section of <code>ARCHITECTURE.md</code></strong><small>Questions about the whole system; capture-solution-context's questioning steps.</small></div></li>
+    <li><span class="rung">2</span><div><strong>Frontmatter only</strong><small>Always used for selection, and returned inline so the caller doesn't need a second read.</small></div></li>
+    <li><span class="rung">3</span><div><strong>Selected body sections / top N rows</strong><small>The quality stage's reuse check reads frontmatter plus top rows only; quick-dev orientation reads frontmatter plus § 3 Change-Impact Summary.</small></div></li>
+    <li><span class="rung">4</span><div><strong>Full component body</strong><small>Requirements and design discovery; execution reads the seed and primary components.</small></div></li>
+    <li><span class="rung">5</span><div><strong>Raw source code</strong><small>Only when the KB has nothing, is stale, or the detail needed is below the KB's level (planning's code conventions).</small></div></li>
+  </ol>
+
+  <h2>Layer 4 — Trust &amp; freshness</h2>
+  <p>The navigator <em>reports</em> each component's <code>last_verified_against_commit</code> but does not judge it. Callers that care run <code>detect-knowledge-base-drift --mode=gate</code> first, or a configured hook does it for them (<code>AGENTS.md</code> shows a <code>kb-check</code> hook that runs before <code>navigate-knowledge-base</code>). After work ships, <code>update-knowledge-base</code> brings the affected components back in sync.</p>
+  <div class="callout ok">
+    <p><strong>KB lookups are context only.</strong> They never limit which files a plan may change. If the navigator errors or returns nothing, execution and quick-dev note it and carry on from the requirements, design or spec.</p>
+  </div>
+
+  <h2>Where each stage connects</h2>
+  <div class="pipeline">
+    <div class="stage"><b>Requirements</b><span>Reads component bodies</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Design</b><span>Reads components and C4 diagrams</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Planning</b><span>Indirect, through the design</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Execution</b><span>Reads in-scope components, then updates the KB</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Quality</b><span>test-suite profile</span></div>
+  </div>
+
+  <h2>Skill details</h2>
+  <p>Select a skill to see when it touches the KB, what it asks for, how deep it reads, and what it writes back.</p>
+
+  <div class="skill-group">
+    <div class="eyebrow">Knowledge-base stage</div>
+    <div class="grid">
+      <a class="skill-card" href="#build-knowledge-base"><div class="name">build-knowledge-base</div><p>Creates the structure that makes routing possible.</p><span class="chip builder">Builder</span></a>
+      <a class="skill-card" href="#navigate-knowledge-base"><div class="name">navigate-knowledge-base</div><p>The selector every stage calls before grounding.</p><span class="chip reader">Selector</span></a>
+      <a class="skill-card" href="#update-knowledge-base"><div class="name">update-knowledge-base</div><p>Re-syncs only the components a shipped change touched.</p><span class="chip writer">Writer</span></a>
+      <a class="skill-card" href="#detect-knowledge-base-drift"><div class="name">detect-knowledge-base-drift</div><p>Layered freshness checks: fast gate or full sweep.</p><span class="chip reader">Trust</span></a>
+      <a class="skill-card" href="#capture-solution-context"><div class="name">capture-solution-context &amp; co.</div><p>Write the human-grounded <code>shared/</code> files.</p><span class="chip builder">Builder</span></a>
+    </div>
+  </div>
+
+  <div class="skill-group">
+    <div class="eyebrow">Delivery stages</div>
+    <div class="grid">
+      <a class="skill-card" href="#create-requirements-package"><div class="name">create-requirements-package</div><p>Brownfield discovery through the navigator, reading full bodies.</p><span class="chip reader">Reader</span></a>
+      <a class="skill-card" href="#create-design-package"><div class="name">create-design-package</div><p>Builds the architecture baseline from the KB first.</p><span class="chip reader">Reader</span></a>
+      <a class="skill-card" href="#create-implementation-package"><div class="name">create-implementation-package</div><p>Grounded in the KB indirectly, through the design package.</p><span class="chip indirect">Indirect</span></a>
+      <a class="skill-card" href="#execute-increments"><div class="name">execute-increments</div><p>Navigator lookup per increment; <code>--from-paths</code> at close.</p><span class="chip reader">Reader</span><span class="chip writer">Hands off to update</span></a>
+      <a class="skill-card" href="#quick-dev"><div class="name">quick-dev</div><p>Orientation lookup; catalog-only update after the user confirms.</p><span class="chip reader">Reader</span><span class="chip writer">Catalog-only update</span></a>
+    </div>
+  </div>
+
+  <div class="skill-group">
+    <div class="eyebrow">Quality stage</div>
+    <div class="grid">
+      <a class="skill-card" href="#quality-reuse"><div class="name">create / execute-quality-*</div><p>Reuse check against existing test utilities and fixtures.</p><span class="chip reader">test-suite profile</span></a>
+      <a class="skill-card" href="#review-test-failures"><div class="name">review-test-failures</div><p>One warm-up query, cached for every failure.</p><span class="chip reader">Reader</span></a>
+      <a class="skill-card" href="#audit-quality-coverage"><div class="name">audit-quality-coverage</div><p>Checks tags against the marker vocabulary.</p><span class="chip reader">test-suite profile</span></a>
+    </div>
+  </div>
+
+  <div class="skill-group">
+    <div class="eyebrow">Meta</div>
+    <div class="grid">
+      <a class="skill-card" href="#framework-navigator"><div class="name">framework-navigator</div><p>Checks only whether the KB exists.</p><span class="chip indirect">State check</span></a>
+      <a class="skill-card" href="#gaps"><div class="name">Gaps &amp; inconsistencies</div><p>Where the documented logic disagrees with itself.</p><span class="chip writer">Review</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ NAVIGATE ============================ -->
+<section class="view" id="navigate-knowledge-base">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Knowledge-base stage · Selector</div>
+  <h1><code>navigate-knowledge-base</code></h1>
+  <p class="lede">The selector the whole framework uses at load time. It decides <em>which</em> files to load, never <em>how much</em> of each. It writes nothing, has no side effects, and can be called as often as needed.</p>
+
+  <dl class="kv">
+    <dt>Input</dt><dd>One of: a free-text feature description or trigger list, <code>--seed-component-id</code> for impact analysis, or <code>--from-paths</code> to find the components that own a set of files.</dd>
+    <dt>Reads</dt><dd><code>NAVIGATE.md</code> (or <code>CLAUDE.md</code> in older KBs), <code>ARCHITECTURE.md</code> § 1–4, <code>graph.json</code>, and component <strong>frontmatter only</strong> via grep.</dd>
+    <dt>Returns</dt><dd>A ranked list. Each entry has <code>path</code>, <code>tier</code>, <code>why</code>, <code>score</code>, the parsed <code>frontmatter</code>, <code>repo</code> and <code>last_verified_against_commit</code>. With <code>--from-paths</code>, files no component owns come back as <code>unmatched</code>.</dd>
+    <dt>Never does</dt><dd>Read component bodies, check freshness, or write to the KB.</dd>
+  </dl>
+
+  <h2>The algorithm</h2>
+  <ol>
+    <li><strong>Find the navigation file.</strong> <code>NAVIGATE.md</code>, falling back to <code>CLAUDE.md</code>.</li>
+    <li><strong>Read <code>ARCHITECTURE.md</code> § 1–4.</strong> Always done; about 5–15 KB.</li>
+    <li><strong>Look up capabilities.</strong> Split the description into words, reduce them to base forms, and score candidates against the Capability Index and each component's <code>triggers</code> and <code>description</code>. With <code>--seed-component-id</code> this is skipped. With <code>--from-paths</code>, each path is matched against component <code>paths:</code> globs and <code>source_doc</code> instead (same rules as <code>update-knowledge-base</code> step 01), and every hit enters the seed tier.</li>
+    <li><strong>Expand along the graph.</strong> One hop along <code>depends_on</code> (what the component calls) and <code>consumed_by</code> (what calls it). Both directions matter, because changing A affects A's callers. <code>--depth=two-hop</code> repeats this once more.</li>
+    <li><strong>Add cross-cutting concerns.</strong> If the description mentions auth, logging, errors, security, performance or versioning, add <code>shared/cross-cutting/&lt;concern&gt;.md</code>.</li>
+    <li><strong>Add solution context.</strong> Grep <code>triggers:</code> in <code>shared/solution-context</code>, <code>ai-rules</code> and <code>operations</code>.</li>
+    <li><strong>Rank and cap.</strong> With <code>--include-stale=false</code>, stale components are dropped first. Components (seed, primary, one-hop and two-hop tiers) are capped at 7 by default; cross-cutting and <code>shared/</code> files don't count toward the cap.</li>
+    <li><strong>Return</strong> the list.</li>
+  </ol>
+
+  <h2>Scoring weights</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Signal</th><th>Weight</th></tr></thead>
+      <tbody>
+        <tr><td>Exact phrase match on a Capability Index row</td><td>1.0</td></tr>
+        <tr><td>Direct hit on <code>--seed-component-id</code></td><td>1.0 (seed tier)</td></tr>
+        <tr><td><code>--from-paths</code> literal path match</td><td>1.0 (seed tier)</td></tr>
+        <tr><td><code>--from-paths</code> glob match</td><td>0.9 (seed tier)</td></tr>
+        <tr><td>Capability row overlap of 2 or more words</td><td>0.7</td></tr>
+        <tr><td>A trigger appears verbatim in the description</td><td>0.6</td></tr>
+        <tr><td>One-hop graph neighbour of a primary match</td><td>0.5</td></tr>
+        <tr><td>A trigger partly overlaps the description</td><td>0.4</td></tr>
+        <tr><td>Cross-cutting keyword in the description</td><td>0.4</td></tr>
+        <tr><td>Overlap with the "Use when …" description</td><td>0.3</td></tr>
+        <tr><td>Two-hop graph neighbour (only with <code>--depth=two-hop</code>)</td><td>0.25</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>A file is included if its score is at least 0.3. Ranking uses <code>tier_rank × 1000 + score</code>. Scores rank entries within a tier. Tier order: seed &gt; primary &gt; one-hop &gt; two-hop &gt; cross-cutting &gt; solution-context &gt; ai-rules &gt; operations.</p>
+
+  <h2>Flags that change what kind of data comes back</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Flag</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td><code>--max-components</code> (default 7)</td><td>Hard cap on components. If it's lower than the number of primary matches, neighbours are dropped and only the top primaries are returned.</td></tr>
+        <tr><td><code>--from-paths</code></td><td>Starts from file paths instead of a description. Callers that want only the owning components keep the seed tier and drop the neighbours (as <code>execute-increments</code> step 06 does).</td></tr>
+        <tr><td><code>--include-stale=false</code></td><td>Drops components whose commit stamp is behind and whose <code>paths</code> overlap recent changes. Needs access to the source repos.</td></tr>
+        <tr><td><code>--depth=two-hop</code></td><td>Wider set of affected components. Only on explicit request, because it can grow past 20 components.</td></tr>
+        <tr><td><code>--profile=test-suite</code></td><td>Draws candidates only from <code>kind: test-suite</code> components and ranks them above application code. Graph expansion isn't filtered, so the application components under test still appear.</td></tr>
+        <tr><td><code>--profile-subkind</code></td><td>Narrows to <code>runner</code>, <code>shared-utilities</code>, <code>fixtures</code>, <code>marker-vocabulary</code>, <code>feature-inventory</code>, <code>environment-matrix</code>, <code>ci-surface</code> or <code>ownership</code>.</td></tr>
+        <tr><td><code>--include-cross-cutting</code> / <code>--include-solution-context</code></td><td>Turn the <code>shared/</code> tiers on or off. Both default to on.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Edge cases</h2>
+  <ul>
+    <li><strong>No matches:</strong> returns an empty list, and the caller decides whether to fall back to <code>ARCHITECTURE.md</code> or the raw repos.</li>
+    <li><strong>Empty test-suite profile:</strong> must say so explicitly. It must never quietly fall back to application components, which would give results that look right but are wrong.</li>
+    <li><strong>Missing <code>graph.json</code>:</strong> warns and returns primary matches only.</li>
+    <li><strong>KB not built</strong> (<code>ARCHITECTURE.md</code> missing): the navigator stops with an error. Callers in execution and quick-dev treat that as "no KB context" and continue.</li>
+    <li><strong>Broad questions</strong> ("what does this system do?"): skip the navigator and read <code>ARCHITECTURE.md</code> § 1–4 directly.</li>
+  </ul>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/knowledge-base/navigate-knowledge-base/SKILL.md</code></li>
+    <li><code>.agents/skills/knowledge-base/navigate-knowledge-base/references/OVERVIEW.md</code></li>
+    <li><code>.agents/skills/knowledge-base/navigate-knowledge-base/references/INPUTS-OUTPUTS.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ BUILD ============================ -->
+<section class="view" id="build-knowledge-base">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Knowledge-base stage · Builder</div>
+  <h1><code>build-knowledge-base</code></h1>
+  <p class="lede">Doesn't answer questions itself. It produces the structure that makes routing possible, using the reverse-engineering Part A/B output.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>When the KB is first set up, after reverse-engineering output exists.</dd>
+    <dt>Writes</dt><dd><code>components/</code>, <code>shared/cross-cutting/</code>, <code>graph.json</code>, <code>ARCHITECTURE.md</code>, <code>NAVIGATE.md</code> and one <code>NAVIGATE.md</code> per repo.</dd>
+    <dt>Routing decisions it makes</dt><dd>How big a component is, which triggers it gets, what type each graph edge is, and how capabilities are grouped.</dd>
+  </dl>
+
+  <h2>How each step affects routing</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>Effect on later lookups</th></tr></thead>
+      <tbody>
+        <tr><td>03 — Emit components</td><td>Defines the <strong>unit of selection</strong>: one file per feature or flow (not per endpoint or class), 5–30 per repo. Each gets a "Use when …" description, 5–10 <code>triggers</code>, <code>paths</code>, <code>depends_on</code> and a full commit SHA.</td></tr>
+        <tr><td>04 — Shared pass</td><td>Fills in <code>consumed_by</code> and writes the cross-cutting files.</td></tr>
+        <tr><td>05 — Emit graph</td><td>Works out each edge's type from the component types (UI → API is <code>calls</code>, anything → framework is <code>depends-on</code>, and so on). Ambiguous edges default to <code>depends-on</code> and are flagged for review.</td></tr>
+        <tr><td>06 — Emit ARCHITECTURE.md</td><td>Builds the <strong>Capability Index</strong> by grouping components by verb phrase and merging synonyms. Adds § 0 links to the human-grounded files, marked "pending" if those files don't exist yet.</td></tr>
+        <tr><td>07 — Emit NAVIGATE.md</td><td>Writes the read order and the selection, freshness and update rules that every later agent follows. Framework skills must call the navigator; only an agent without A.I.D.E. follows its full procedure by hand.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p>Because the Capability Index and <code>graph.json</code> are generated, editing them by hand is listed as a common mistake. Any change has to come from a rebuild or <code>update-knowledge-base</code>.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/knowledge-base/build-knowledge-base/steps/03-emit-components.md</code></li>
+    <li><code>.agents/skills/knowledge-base/build-knowledge-base/steps/05-emit-graph.md</code></li>
+    <li><code>.agents/skills/knowledge-base/build-knowledge-base/steps/06-emit-architecture-index.md</code></li>
+    <li><code>.agents/skills/knowledge-base/build-knowledge-base/steps/07-emit-navigate-md.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ UPDATE ============================ -->
+<section class="view" id="update-knowledge-base">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Knowledge-base stage · Writer</div>
+  <h1><code>update-knowledge-base</code></h1>
+  <p class="lede">The closing step of the execution flows. It brings the KB back in line with the shipped code, touching only the affected components. It never rebuilds the whole KB.</p>
+
+  <dl class="kv">
+    <dt>Called by</dt><dd><code>execute-increments</code> (step 06) and <code>execute-quick-change</code>, after the user confirms the change.</dd>
+    <dt>Scope rule</dt><dd>Affected components are those whose <code>paths:</code> globs match the files changed in the feature's diff. Both modes use the same rule.</dd>
+    <dt>Full mode</dt><dd>Re-derives frontmatter and bodies, adds a change-tracker row, writes an ADR if a decision threshold was crossed, regenerates the changed parts of <code>graph.json</code>, and updates the Capability Index if any triggers changed.</dd>
+    <dt><code>--scope=catalog-only</code></dt><dd>Used by quick-dev. Updates only <code>description</code>, <code>last_feature_id</code>, <code>last_verified_against_commit</code> and the change tracker. Doesn't re-derive bodies or write ADRs.</dd>
+  </dl>
+
+  <div class="callout warn">
+    <p>Catalog-only mode doesn't re-check components whose <code>paths:</code> didn't match the diff, even if their commit stamp is stale. Spotting those is <code>detect-knowledge-base-drift</code>'s job.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/knowledge-base/update-knowledge-base/SKILL.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ DRIFT ============================ -->
+<section class="view" id="detect-knowledge-base-drift">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Knowledge-base stage · Trust</div>
+  <h1><code>detect-knowledge-base-drift</code></h1>
+  <p class="lede">The freshness check the navigator doesn't do. Callers that need to trust what they read run it first.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Layer</th><th>Check</th><th><code>--mode=gate</code></th><th><code>--mode=full</code></th></tr></thead>
+      <tbody>
+        <tr><td>L1</td><td>Commit stamp vs. repo HEAD</td><td>✓</td><td>✓</td></tr>
+        <tr><td>L2</td><td>Structural diff</td><td>✓</td><td>✓</td></tr>
+        <tr><td>L3</td><td>The model checks whether the doc still matches the code</td><td>—</td><td>✓</td></tr>
+        <tr><td>L4</td><td>Full coverage sweep</td><td>—</td><td>✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Gate mode fails on any L1 or L2 hit of medium severity or higher, so it suits PR pipelines. Each finding comes with a recommended action: update a feature, run a coverage delta, or rebuild if more than half the KB has drifted.</p>
+  <p>A <code>kb-check</code> hook (example in <code>AGENTS.md</code>) can run it automatically before <code>navigate-knowledge-base</code>.</p>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/knowledge-base/detect-knowledge-base-drift/SKILL.md</code></li>
+    <li><code>AGENTS.md</code> § Hooks</li>
+  </ul>
+</section>
+
+<!-- ============================ SOLUTION CONTEXT ============================ -->
+<section class="view" id="capture-solution-context">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Knowledge-base stage · Builder</div>
+  <h1><code>capture-solution-context</code>, <code>generate-ai-rules</code>, <code>document-operations</code></h1>
+  <p class="lede">These skills write the human-grounded half of the KB under <code>shared/</code>. The navigator adds these files as lower-ranked tiers alongside component matches.</p>
+
+  <dl class="kv">
+    <dt>Writes</dt><dd><code>shared/solution-context/</code> (six files: overview, personas, goals, constraints, integrations, ownership), <code>shared/ai-rules/project-context.md</code>, <code>shared/operations/</code>.</dd>
+    <dt>Reads while writing</dt><dd>Only sections of <code>ARCHITECTURE.md</code>: § 1 for domain context, § 2 for repo ownership, § 4 for linking personas and KPIs to components.</dd>
+    <dt>How they become findable</dt><dd>Every file carries <code>description: Use when …</code>, <code>triggers:</code> and optionally <code>related_components</code>. The navigator matches on that wording.</dd>
+  </dl>
+
+  <div class="callout">
+    <p>These files <strong>don't count toward the component cap</strong>. They're small, and the skill avoids letting supporting context push out a component the question actually needs. They're meant for project-wide questions about architecture, compliance or ownership, not single-component changes.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/knowledge-base/capture-solution-context/SKILL.md</code></li>
+    <li><code>.agents/skills/knowledge-base/capture-solution-context/steps/02–06</code></li>
+  </ul>
+</section>
+
+<!-- ============================ REQUIREMENTS ============================ -->
+<section class="view" id="create-requirements-package">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Delivery stage · Reader</div>
+  <h1><code>create-requirements-package</code></h1>
+  <p class="lede">Brownfield discovery queries the KB before reading source repos. The repos are the fallback when the KB has nothing.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>Step 01 discovery, in brownfield or quick-dev flows, when <code>project.paths.knowledge_base_path</code> is set.</dd>
+    <dt>Query</dt><dd><code>navigate-knowledge-base</code> with the change description (default profile, solution context included).</dd>
+    <dt>Read depth</dt><dd><strong>Full component bodies</strong> for the primary and one-hop entries; cross-cutting and solution-context files where the change raises that concern.</dd>
+    <dt>Freshness</dt><dd>Compares <code>last_verified_against_commit</code> (returned by the navigator) against <code>staleness_warning_days</code>; stale components are flagged in <code>existing-artifact-review.md</code>.</dd>
+    <dt>Writes to KB</dt><dd>No.</dd>
+  </dl>
+
+  <h2>How it works</h2>
+  <ol>
+    <li>Call the navigator with the change description. It also returns the components that call the affected area, and any matching constraints, personas or ownership files.</li>
+    <li>Read the returned entries in rank order. If nothing comes back, fall back to <code>ARCHITECTURE.md</code> § 1–4, then the source repos, and note the gap.</li>
+    <li>Check staleness and flag anything out of date.</li>
+    <li>Use the KB-informed picture to ask targeted questions, so the BA/PO doesn't have to explain the system from scratch.</li>
+  </ol>
+
+  <div class="callout ok">
+    <p>Before 2.8.0 this step did its own Capability Index lookup and skipped the navigator's graph walk. It now calls the navigator, so the components that call the affected area are included.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/requirements/create-requirements-package/references/discovery-workflow.md</code> § Knowledge base integration</li>
+    <li><code>.agents/skills/requirements/create-requirements-package/steps/01-discovery.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ DESIGN ============================ -->
+<section class="view" id="create-design-package">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Delivery stage · Reader</div>
+  <h1><code>create-design-package</code></h1>
+  <p class="lede">Solution discovery queries the KB before reading source repos, and turns what it finds into the architecture baseline that the following stages depend on.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>Step 01 discovery (brownfield), when <code>project.paths.knowledge_base_path</code> is set.</dd>
+    <dt>Query</dt><dd><code>navigate-knowledge-base</code> with the default profile.</dd>
+    <dt>Read depth</dt><dd>Component bodies, plus the existing C4 diagrams (<code>ARCHITECTURE.md</code> § 5 and the components the navigator returns), reused as the starting point for new diagrams.</dd>
+    <dt>Produces</dt><dd><code>architecture-baseline.md</code> and the design's component map. These carry the KB's content forward to planning.</dd>
+    <dt>Writes to KB</dt><dd>No.</dd>
+  </dl>
+
+  <div class="callout ok">
+    <p>The design package is how the KB reaches planning. The baseline and component map are a checked, feature-specific slice of the KB. <a href="#create-implementation-package">See planning →</a></p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/design/create-design-package/steps/01-discovery.md</code></li>
+    <li><code>.agents/skills/design/create-design-package/references/c4-diagrams.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ PLANNING ============================ -->
+<section class="view" id="create-implementation-package">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Delivery stage · Indirect</div>
+  <h1><code>create-implementation-package</code></h1>
+  <p class="lede">Doesn't call the KB. It's grounded in the KB <em>indirectly</em>, through the approved Solution Design Package, and adds code-level detail by reading source.</p>
+
+  <dl class="kv">
+    <dt>Inputs</dt><dd>Solution Design Package (required; the skill stops if it isn't approved), <code>architecture-baseline.md</code> (if present), Requirements Package (required), codebase access, coding standards.</dd>
+    <dt>Scoping</dt><dd>The analysis scope comes from <strong>the design's component map and data flows</strong>, not from a KB query.</dd>
+    <dt>Read depth</dt><dd>Raw source code inside that scope, for conventions the KB doesn't record: DI, error handling, test naming, file locations.</dd>
+    <dt>Writes to KB</dt><dd>No.</dd>
+  </dl>
+
+  <h2>The chain</h2>
+  <div class="pipeline">
+    <div class="stage"><b>KB</b><span>Components, graph</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Design discovery</b><span>Architecture baseline and component map</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Planning step 1</b><span>Scope taken from the design</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><b>Source code</b><span>Code-level conventions</span></div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Remaining gap:</strong> planning never checks the KB itself. If the KB changes between design and planning, or design discovery missed a component, planning won't notice. The design's component map also isn't formally linked to KB <code>component_id</code>s. This may be acceptable by design, since a reviewed design is a better input than querying the KB again from scratch.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/planning/create-implementation-package/steps/codebase-analysis.md</code></li>
+    <li><code>.agents/skills/planning/create-implementation-package/references/INPUTS-OUTPUTS.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ EXECUTE ============================ -->
+<section class="view" id="execute-increments">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Delivery stage · Reader, then hands off to update</div>
+  <h1><code>execute-increments</code></h1>
+  <p class="lede">Looks up the components an increment touches before opening code, and after the increment ships, works back from the changed files to the components that need updating.</p>
+
+  <dl class="kv">
+    <dt>Read (step 01)</dt><dd>Calls <code>navigate-knowledge-base</code>, alongside reading the FRs and design sections.</dd>
+    <dt>Query</dt><dd>The KB component IDs the design cites for the increment, as <code>--seed-component-id</code>; otherwise the increment's Goal and Plan as the description.</dd>
+    <dt>Read depth</dt><dd>Seed and primary component bodies; one-hop entries for the integration points the Plan names. Stale components are treated as hints and checked against source.</dd>
+    <dt>Write (step 06)</dt><dd>Calls the navigator with <code>--from-paths</code> for every file the increment changed, keeps the seed tier as the affected components, reports unowned files, and hands off to <code>update-knowledge-base</code>.</dd>
+  </dl>
+
+  <div class="callout ok">
+    <p><strong>Context only.</strong> The lookup never limits which files the Plan may change. If the navigator errors (for example, the KB isn't built yet) or returns nothing, step 01 notes it and continues, and step 06 skips the KB handoff. A KB problem is never a halt condition.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/execution/execute-increments/steps/01-load-increment.md</code></li>
+    <li><code>.agents/skills/execution/execute-increments/steps/06-status-update.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ QUICK-DEV ============================ -->
+<section class="view" id="quick-dev">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Delivery stage · Reader, then catalog-only update</div>
+  <h1>quick-dev (<code>plan-quick-change</code>, <code>execute-quick-change</code>)</h1>
+  <p class="lede">Looks up ownership and impact while planning, and refreshes only the catalog when the change is done.</p>
+
+  <dl class="kv">
+    <dt>Read</dt><dd><code>plan-quick-change</code> orientation calls <code>navigate-knowledge-base</code> before opening source files: <code>--from-paths</code> with the spec's "Where" files, or the change summary when the spec names no files.</dd>
+    <dt>Read depth</dt><dd>Frontmatter and § 3 Change-Impact Summary only. Quick-dev needs ownership and blast radius, not a full component read.</dd>
+    <dt>Scope signal</dt><dd>If more than two one-hop components look like they need changes, the agent names them and <strong>asks the user</strong> whether to stay in quick-dev. The KB never triggers the escape hatch on its own.</dd>
+    <dt>Write</dt><dd><code>update-knowledge-base --scope=catalog-only</code>, run <strong>only after the Completion Confirmation Gate</strong> clears.</dd>
+    <dt>Trade-off</dt><dd>The catalog reflects the change without a full re-derivation, so component bodies may lag until a full update or a drift sweep.</dd>
+  </dl>
+
+  <div class="callout">
+    <p>The gate is strict: a passing test suite or an open PR isn't confirmation. If the user stays silent or confirms only part of the change, the KB update is held back.</p>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/quick-dev/README.md</code></li>
+    <li><code>.agents/skills/quick-dev/plan-quick-change/steps/01-orient.md</code></li>
+    <li><code>.agents/skills/quick-dev/execute-quick-change/SKILL.md</code></li>
+    <li><code>.agents/skills/quick-dev/execute-quick-change/steps/04-confirmation-gate.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ QUALITY REUSE ============================ -->
+<section class="view" id="quality-reuse">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Quality stage · Reader (test-suite profile)</div>
+  <h1><code>create-quality-package</code> / <code>execute-quality-increments</code></h1>
+  <p class="lede">The most precisely specified KB consumer: it sets the data type, the subkinds and the read depth.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>The reuse check (step 2a): before creating any new test helper, fixture or utility.</dd>
+    <dt>Query</dt><dd><code>--profile=test-suite --profile-subkind=shared-utilities --profile-subkind=fixtures</code>, queried with the increment's scope (TC ID, scenario, component under test).</dd>
+    <dt>Read depth</dt><dd><strong>Frontmatter plus the top N body rows</strong>. "Do not load the whole component."</dd>
+    <dt>Prerequisite</dt><dd><code>reverse-engineer-test-suite</code> output must already be in the KB.</dd>
+  </dl>
+
+  <h2>If nothing is found</h2>
+  <p>If the profile returns no primary matches, the skill says so explicitly, recommends running <code>/reverse-engineer-test-suite</code> followed by a build or update, and <strong>asks the user</strong> whether to fall back to grepping the codebase or pause. It never substitutes application components.</p>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/quality/execute-quality-increments/steps/02a-reuse-cross-check.md</code></li>
+    <li><code>.agents/skills/quality/execute-quality-increments/references/reuse-analysis.md</code></li>
+    <li><code>.agents/skills/quality/create-quality-package/references/reuse-analysis.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ REVIEW TEST FAILURES ============================ -->
+<section class="view" id="review-test-failures">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Quality stage · Reader</div>
+  <h1><code>review-test-failures</code></h1>
+  <p class="lede">Queries once up front and reuses the result for every failure it walks through.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>Step 1e, an optional warm-up, only if a KB is configured.</dd>
+    <dt>Query</dt><dd>The failing scope: feature ID and component names from the failure list. <code>--profile=test-suite --profile-subkind=shared-utilities</code> for locator and fixture lookup.</dd>
+    <dt>Use</dt><dd>The ranked list is cached and used in step 2 to cross-reference each failure ("KB context: …").</dd>
+  </dl>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/quality/review-test-failures/steps/01-gather-failure-data.md</code></li>
+    <li><code>.agents/skills/quality/review-test-failures/SKILL.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ AUDIT QUALITY COVERAGE ============================ -->
+<section class="view" id="audit-quality-coverage">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Quality stage · Reader (test-suite profile)</div>
+  <h1><code>audit-quality-coverage</code></h1>
+  <p class="lede">Uses the KB to check test tags for drift against the suite's recorded vocabulary.</p>
+
+  <dl class="kv">
+    <dt>When</dt><dd>Step 03, the tag check.</dd>
+    <dt>Query</dt><dd><code>--profile=test-suite</code> with <code>--profile-subkind=marker-vocabulary</code> and <code>--profile-subkind=feature-inventory</code>, scoped to the audit.</dd>
+    <dt>Read depth</dt><dd>Only the vocabulary and inventory files, which is a narrowly targeted read.</dd>
+  </dl>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/quality/audit-quality-coverage/steps/03-kb-tag-verification.md</code></li>
+    <li><code>.agents/skills/quality/audit-quality-coverage/SKILL.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ FRAMEWORK NAVIGATOR ============================ -->
+<section class="view" id="framework-navigator">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Meta · State check</div>
+  <h1><code>framework-navigator</code></h1>
+  <p class="lede">Doesn't read KB content. It checks whether a KB exists, so it can send the user to the right next skill.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Observed state</th><th>Recommendation</th></tr></thead>
+      <tbody>
+        <tr><td>KB folder present, but no <code>ARCHITECTURE.md</code></td><td>Scaffolded but not built: run <code>build-knowledge-base</code>.</td></tr>
+        <tr><td>Brownfield with an empty KB</td><td><code>analyze-repository</code>, then the domain reverse-engineering skill, then <code>build-knowledge-base</code>.</td></tr>
+        <tr><td><code>ARCHITECTURE.md</code> + <code>components/</code> + <code>graph.json</code> present</td><td>KB is built (<code>kb_built = true</code>). Stage skills can proceed; mention <code>navigate-knowledge-base</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Sources</h2>
+  <ul class="sources">
+    <li><code>.agents/skills/meta/framework-navigator/steps/02-state-probe.md</code></li>
+    <li><code>.agents/skills/meta/framework-navigator/references/state-probe.md</code></li>
+  </ul>
+</section>
+
+<!-- ============================ GAPS ============================ -->
+<section class="view" id="gaps">
+  <a class="back" href="#overview">← Back to overview</a>
+  <div class="eyebrow">Review</div>
+  <h1>Gaps &amp; inconsistencies</h1>
+  <p class="lede">Places where the documented logic is less precise, or less consistent, than it looks.</p>
+
+  <h3>1. The scoring is advisory, not run as code</h3>
+  <p>The weights, the 0.3 threshold and the tier formula are written for the model to follow. Nothing calculates them exactly, so results are roughly consistent from run to run, not identical.</p>
+
+  <h3>2. Planning only reaches the KB through the design</h3>
+  <p><a href="#create-implementation-package">Planning</a> is scoped by the design's component map and never checks the KB itself, so changes to the KB after design aren't picked up. This may be fine as designed.</p>
+
+  <h3>3. Read depth isn't fully standardised</h3>
+  <p>The quality skills, quick-dev, requirements and execution now say how deep to read. Design still leaves it to the model, and there's no shared vocabulary (<code>frontmatter</code> / <code>sections</code> / <code>full</code>) across skills.</p>
+
+  <div class="callout ok">
+    <p><strong>Resolved in 2.8.0:</strong></p>
+    <ul>
+      <li><strong>The navigator's docs agreed with each other only in part.</strong> <code>SKILL.md</code> now owns the tier order and cap rule; <code>INPUTS-OUTPUTS.md</code> documents every flag and tier. Validator Check P warns if a flag in <code>SKILL.md</code> is missing from the reference.</li>
+      <li><strong>Not every caller went through the navigator.</strong> Requirements discovery, <code>execute-increments</code>, <code>manage-bugs</code>, quick-dev orientation and design C4 reuse now all call it. Validator Check Q warns on direct reads.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="pager" id="pager" hidden>
+  <a id="prevLink" href="#overview"></a>
+  <a id="nextLink" href="#overview" style="text-align:right"></a>
+</div>
+
+</main>
+</div>
+
+<script>
+(function () {
+  var views = Array.prototype.slice.call(document.querySelectorAll('.view'));
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav.side a.link'));
+  var order = links.map(function (a) { return a.getAttribute('href').slice(1); });
+  var pager = document.getElementById('pager');
+  var prev = document.getElementById('prevLink');
+  var next = document.getElementById('nextLink');
+
+  function titleFor(id) {
+    var link = links.filter(function (a) { return a.getAttribute('href') === '#' + id; })[0];
+    return link ? link.textContent : id;
+  }
+
+  function show() {
+    var id = (location.hash || '#overview').slice(1);
+    if (!document.getElementById(id) || !document.getElementById(id).classList.contains('view')) id = 'overview';
+    views.forEach(function (v) { v.classList.toggle('current', v.id === id); });
+    links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + id); });
+
+    var i = order.indexOf(id);
+    if (id === 'overview' || i < 0) {
+      pager.hidden = true;
+    } else {
+      pager.hidden = false;
+      var p = order[i - 1], n = order[i + 1];
+      prev.style.visibility = p ? 'visible' : 'hidden';
+      next.style.visibility = n ? 'visible' : 'hidden';
+      if (p) { prev.href = '#' + p; prev.textContent = '← ' + titleFor(p); }
+      if (n) { next.href = '#' + n; next.textContent = titleFor(n) + ' →'; }
+    }
+    window.scrollTo(0, 0);
+  }
+
+  window.addEventListener('hashchange', show);
+  show();
+
+  var root = document.documentElement;
+  try {
+    var saved = localStorage.getItem('kb-nav-theme');
+    if (saved) root.setAttribute('data-theme', saved);
+  } catch (e) {}
+  document.getElementById('themeToggle').addEventListener('click', function () {
+    var isDark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var nextTheme = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', nextTheme);
+    try { localStorage.setItem('kb-nav-theme', nextTheme); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
