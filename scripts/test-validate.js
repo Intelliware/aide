@@ -562,6 +562,90 @@ test('Check O — reject a SKILL.md missing the hook precondition', () => {
   assertIn(`${rel}: does not reference`, out, `output missing reference error.\noutput:\n${out}`);
 });
 
+// --- Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md) ---
+// Every `--flag` in a SKILL.md `## Inputs` table must also appear in the
+// skill's references/INPUTS-OUTPUTS.md `## Inputs` table. Same ephemeral
+// live-tree fixture pattern as the Check O test above.
+
+const CHECK_P_FIXTURE_DIR = path.join(REPO_ROOT, '.agents', 'skills', 'meta', '_check-p-test-fixture');
+const CHECK_P_FIXTURE = path.join(CHECK_P_FIXTURE_DIR, 'SKILL.md');
+const CHECK_P_FIXTURE_IO = path.join(CHECK_P_FIXTURE_DIR, 'references', 'INPUTS-OUTPUTS.md');
+
+test('Check P — a default run reports Check P', () => {
+  const proc = runValidate();
+  assertEqual(proc.returncode, 0, proc.stdout + proc.stderr);
+  assertIn(
+    'Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)', proc.stdout,
+    `default run should report Check P.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
+test('Check P — reject a SKILL.md flag missing from INPUTS-OUTPUTS.md', () => {
+  fs.mkdirSync(path.dirname(CHECK_P_FIXTURE_IO), { recursive: true });
+  fs.writeFileSync(
+    CHECK_P_FIXTURE,
+    [
+      '---',
+      'name: _check-p-test-fixture',
+      'description: "Ephemeral fixture for test-validate.js Check P test. Deleted immediately after the assertion."',
+      '---',
+      '',
+      '# Check P Test Fixture',
+      '',
+      '## Inputs',
+      '',
+      '| Input | Source | Required |',
+      '|---|---|---|',
+      '| `--documented` | Caller | No |',
+      '| `--undocumented` | Caller | No |',
+      '',
+      '## Precondition — hooks',
+      '',
+      'See `references/orientation/hook-runtime.md`.',
+      '',
+      '## Next skill',
+      '',
+      '(none)',
+      '',
+    ].join('\n'),
+    'utf-8'
+  );
+  fs.writeFileSync(
+    CHECK_P_FIXTURE_IO,
+    [
+      '# Check P Test Fixture — Inputs & Outputs',
+      '',
+      '## Inputs',
+      '',
+      '| Input | Type | Required |',
+      '|---|---|---|',
+      '| `--documented` | bool | No |',
+      '| `--reference-only` | bool | No |',
+      '',
+    ].join('\n'),
+    'utf-8'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_P_FIXTURE_IO);
+    fs.rmdirSync(path.dirname(CHECK_P_FIXTURE_IO));
+    fs.unlinkSync(CHECK_P_FIXTURE);
+    fs.rmdirSync(CHECK_P_FIXTURE_DIR);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(
+    proc.returncode, 0,
+    `validator should reject a SKILL.md flag missing from INPUTS-OUTPUTS.md.\noutput:\n${out}`
+  );
+  const rel = path.relative(REPO_ROOT, CHECK_P_FIXTURE);
+  assertIn(`${rel}: Inputs flag \`--undocumented\` is missing`, out, `output missing parity error.\noutput:\n${out}`);
+  // SKILL.md may list a subset — a reference-only flag is not an error.
+  assert(!out.includes('`--reference-only`'), `reference-only flag should not be reported.\noutput:\n${out}`);
+  assert(!out.includes('`--documented` is missing'), `documented flag should not be reported.\noutput:\n${out}`);
+});
+
 // --- Check M — {paths.<key>} / {project.paths.<key>} token resolution ---
 // No fixture-mode flag exists for M (unlike I/K), so these write an ephemeral
 // composition directly into the live templates/compositions/ tree — the same

@@ -97,7 +97,7 @@ matches. Append `shared/cross-cutting/auth.md` (tier=cross-cutting, score
 
 ### 5. Cap and rank
 
-Pre-cap candidate list (10 entries):
+Pre-cap candidate list (11 entries):
 
 | Tier | Component | Score |
 |---|---|---|
@@ -113,27 +113,14 @@ Pre-cap candidate list (10 entries):
 | one-hop | account-password-reset-flow | 0.5 |
 | cross-cutting | shared/cross-cutting/auth.md | 0.4 |
 
-Ranking (tier_rank * 1000 + score):
-
-1. order-checkout-flow (3000 + 1.0)
-2. notifications-email-dispatcher (3000 + 0.7)
-3. web-portal-checkout-page (3000 + 0.6)
-4. cross-cutting auth.md (1500 + 0.4 = 1500.4)
-5. billing-payment-authorization (2000 + 0.5)
-
-Wait — cross-cutting tier-rank is 1.5, primary is 3, one-hop is 2. Re-sort:
-
-1. order-checkout-flow (3000.0 + 1.0)
-2. notifications-email-dispatcher (3000 + 0.7)
-3. web-portal-checkout-page (3000 + 0.6)
-4. billing-payment-authorization (2000 + 0.5)
-5. auth-session-issuer (2000 + 0.5)
-6. inventory-reservation (2000 + 0.5)
-7. tax-calculation (2000 + 0.5)
-
-Cap at 7. Cross-cutting auth.md is dropped; tax-calculation is dropped.
-Tie-breakers: alphabetical on component_id within score-bucket. Final
-top-7:
+Rank by tier (primary > one-hop > cross-cutting, per `SKILL.md` step 6),
+then by score within a tier. The cap of 7 applies to the 10 components only:
+the 3 primaries plus the first 4 one-hop neighbours are kept;
+`mobile-app-checkout-screen`, `template-renderer`, and
+`account-password-reset-flow` are dropped. The tied one-hop neighbours keep
+graph-walk order, so neighbours of the highest-scoring primary come first.
+`shared/cross-cutting/auth.md` does not compete for a slot and is returned
+after the components. Final list:
 
 | # | Path | Tier | Why |
 |---|---|---|---|
@@ -144,6 +131,7 @@ top-7:
 | 5 | components/auth/auth-session-issuer.md | one-hop | web-portal-checkout-page depends_on this (calls); guest flow likely needs anonymous-session handling. |
 | 6 | components/api-orders/inventory-reservation.md | one-hop | order-checkout-flow depends_on this (calls). |
 | 7 | components/api-orders/tax-calculation.md | one-hop | order-checkout-flow depends_on this (calls). |
+| 8 | shared/cross-cutting/auth.md | cross-cutting | Feature description mentions "account"; not counted toward the cap. |
 
 ## Output passed to caller
 
@@ -162,8 +150,8 @@ top-7:
 ]
 ```
 
-`create-requirements-package` then reads these 7 components and proceeds
-with requirement authoring.
+`create-requirements-package` then reads these 7 components plus the
+cross-cutting auth pointer and proceeds with requirement authoring.
 
 ## Counter-example — when the skill returns empty
 

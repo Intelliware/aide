@@ -399,6 +399,89 @@ class TestHookRuntimeBinding(unittest.TestCase):
         self.assertIn(f"{rel}: does not reference", out)
 
 
+class TestInputsFlagParity(unittest.TestCase):
+    """Check P — every `--flag` in a SKILL.md `## Inputs` table also appears in
+    the skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table.
+
+    No fixture-mode flag exists for P, so the negative case writes an
+    ephemeral skill folder directly into the live `.agents/skills/` tree and
+    removes it in `finally`, following the same pattern as
+    TestHookRuntimeBinding's Check O test.
+    """
+
+    FIXTURE_DIR = REPO_ROOT / ".agents" / "skills" / "meta" / "_check-p-test-fixture"
+    FIXTURE_PATH = FIXTURE_DIR / "SKILL.md"
+    FIXTURE_IO = FIXTURE_DIR / "references" / "INPUTS-OUTPUTS.md"
+
+    def test_default_run_reports_check_p(self) -> None:
+        proc = run_validate()
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)", proc.stdout)
+
+    def test_flag_missing_from_reference_reported(self) -> None:
+        self.FIXTURE_IO.parent.mkdir(parents=True, exist_ok=True)
+        self.FIXTURE_PATH.write_text(
+            textwrap.dedent(
+                """\
+                ---
+                name: _check-p-test-fixture
+                description: "Ephemeral fixture for test_validate.py Check P test. Deleted immediately after the assertion."
+                ---
+
+                # Check P Test Fixture
+
+                ## Inputs
+
+                | Input | Source | Required |
+                |---|---|---|
+                | `--documented` | Caller | No |
+                | `--undocumented` | Caller | No |
+
+                ## Precondition — hooks
+
+                See `references/orientation/hook-runtime.md`.
+
+                ## Next skill
+
+                (none)
+                """
+            ),
+            encoding="utf-8",
+        )
+        self.FIXTURE_IO.write_text(
+            textwrap.dedent(
+                """\
+                # Check P Test Fixture — Inputs & Outputs
+
+                ## Inputs
+
+                | Input | Type | Required |
+                |---|---|---|
+                | `--documented` | bool | No |
+                | `--reference-only` | bool | No |
+                """
+            ),
+            encoding="utf-8",
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.FIXTURE_IO.unlink()
+            self.FIXTURE_IO.parent.rmdir()
+            self.FIXTURE_PATH.unlink()
+            self.FIXTURE_DIR.rmdir()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"validator should reject a SKILL.md flag missing from INPUTS-OUTPUTS.md.\noutput:\n{out}",
+        )
+        rel = str(self.FIXTURE_PATH.relative_to(REPO_ROOT))
+        self.assertIn(f"{rel}: Inputs flag `--undocumented` is missing", out)
+        # SKILL.md may list a subset — a reference-only flag is not an error.
+        self.assertNotIn("`--reference-only`", out)
+        self.assertNotIn("`--documented` is missing", out)
+
+
 class TestSoDEdgeCases(unittest.TestCase):
     """Malformed inputs and missing files should fail loudly, not crash silently."""
 
