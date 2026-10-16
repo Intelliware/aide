@@ -23,7 +23,7 @@ AIDE installs into one folder, the **workspace root**. First work out which case
 
 1. **Use the existing workspace repo** (the one that holds the `.code-workspace` file or ties the other repos together) if you are allowed to commit to it. This is the default.
 2. **Otherwise, create a new sibling repo** (e.g. `<project>-workspace`, or a variant if that name is taken) and install there. Do the same if the workspace repo is closely reviewed (AIDE adds hundreds of files) or if AIDE's documents need different access rules. Give the new repo its own `.code-workspace` file that lists itself and the other repos (`../<repo>`); leave the existing one untouched.
-3. **Don't install into one of the application repos** (API, web, database, etc.); AIDE's documents cover the whole project, not one repo.
+3. **Installing into one of the application repos** (API, web, database, etc.) is possible but not recommended: AIDE's documents cover the whole project, so they'd sit in one repo's history and reviews. Only do this if the user chooses it.
 
 Run the install from the chosen folder. Before starting, confirm the folder with the user.
 

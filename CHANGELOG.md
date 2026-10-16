@@ -63,7 +63,7 @@ which folder that should be.
 
 | # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
 |---|---|---|---|---|---|---|---|
-| 1 | 2026-10-16 | Addition | docs | `INSTRUCTIONS.md` (new § 0) | Added *Choose where to install*. Single repo (including monorepos): the agent asks the user whether to install into the repo itself or into a separate workspace repo (e.g. `<project>-workspace`) with its own `.code-workspace` file. Multi-repo: use the existing workspace repo if you can commit to it; otherwise create a sibling repo with its own `.code-workspace` file, leaving the existing one untouched; don't install into one of the application repos. If the agent can't tell which case applies, it asks the user. The agent confirms the chosen folder with the user before starting. Existing section numbers are unchanged. | branch `kosta` | ☐ Pending |
+| 1 | 2026-10-16 | Addition | docs | `INSTRUCTIONS.md` (new § 0) | Added *Choose where to install*. Single repo (including monorepos): the agent asks the user whether to install into the repo itself or into a separate workspace repo (e.g. `<project>-workspace`) with its own `.code-workspace` file. Multi-repo: use the existing workspace repo if you can commit to it; otherwise create a sibling repo with its own `.code-workspace` file, leaving the existing one untouched; installing into one of the application repos is allowed if the user chooses it, but not recommended. If the agent can't tell which case applies, it asks the user. The agent confirms the chosen folder with the user before starting. Existing section numbers are unchanged. | branch `kosta` | ☐ Pending |
 
 #### Branch Dependency
 
