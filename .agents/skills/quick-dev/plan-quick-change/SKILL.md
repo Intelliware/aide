@@ -31,7 +31,7 @@ See `references/INPUTS-OUTPUTS.md`.
 
 ## Precondition — active feature
 
-Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, skip feature resolution, but still map this skill's paths per that file's § *Not opted in* before reading or writing — they are spelled in the opted-in form. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: plan-quick-change`) rather than guessing which feature's spec to load — do not fall back to creating one, because the spec this skill plans against is written by `document-quick-change` first. If it resolves, confirm the spec at `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` matches the active feature before reading it.
+Follow `references/ai-principles/feature-precondition.md` Mode B, before step 1. If `features.toml` is absent, skip feature resolution; the change is identified by its `<name>`. Either way, read and write paths follow that file's *Quick-dev layout*, not the § *Not opted in* table. If present and `[user].active_feature` does not resolve, halt and invoke `select-feature` in select-only mode (`caller: plan-quick-change`) rather than guessing which feature's spec to load — do not fall back to creating one, because the spec this skill plans against is written by `document-quick-change` first. If it resolves, confirm the spec in the requirements-stage quick-dev directory (`{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md` in legacy mode) matches the active feature before reading it.
 
 ## Precondition — hooks
 
@@ -39,13 +39,13 @@ Before Step 0, and after this skill's final step (before the `## Next skill` han
 
 ## Workflow
 
-1. **Read the quick-dev spec** — load `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md`, the path `quick-dev-spec.yaml` declares and `document-quick-change` writes. Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.
+1. **Read the quick-dev spec** — load `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-spec.md`, the path `quick-dev-spec.yaml` declares and `document-quick-change` writes (the `[stages.requirements]` SoD directory when that stage sets one). Confirm no markers remain and the user has confirmed it. Read §12.2a Solution Constraints alongside the FRs and ACs — the planner must respect them when shaping the increments.
 2. **Codebase orientation** — read the affected files (the spec's "Where" / FR file references). Identify patterns, conventions, test infrastructure. See `steps/01-orient.md`.
 3. **Escape-hatch check** — if orientation reveals the change is too large, halt and recommend the full elaborate pipeline. See `steps/02-escape-hatch.md`.
 4. **Decompose into increments** — group ACs into 1–3 increments. Each increment must produce a working system state, be independently verifiable, and trace to one or more ACs. Cross-check that the proposed approach for each increment honors every §12.2a Solution Constraint — an increment whose plan would have to violate a constraint to ship is not a legal increment.
 5. **Populate the reduced increment shape** — Identity (INC-XXX, name, AC mapping), Goal, Plan (file paths + steps), AI Gate (test commands + expected results), Human Gate (review steps), Success Criteria. See `steps/03-populate-shape.md`.
 6. **Clarity gate** — no markers, all sections, file paths specified, AC mappings present, no speculative increments. If it fails, return to step 1 or 2.
-7. **Write and confirm** — write to `{paths.requirements_package}/<feature-id>/<feature-id>-quick-dev-plan.md`. Get explicit user approval before handoff.
+7. **Write and confirm** — resolve the planning-stage directory per the precondition's *Quick-dev layout* (`[stages.planning]`, repo scope taken from where the spec sits — never asked), run its `write_role` check, then write to `{paths.implementation_package}/<feature-id>/<feature-id>-quick-dev-plan.md`. Get explicit user approval before handoff.
 
 ## Output
 

@@ -6,9 +6,9 @@
 |---|---|---|---|
 | developer description | yes | conversation | "Add a 'mark as read' button to notification cards" |
 | existing artifacts | no — but always asked about | tickets, incident notes, screenshots, PRs, ADRs | Linear ticket NOT-142, Slack screenshot |
-| feature folder | yes | the registry's feature ID, via the active-feature precondition — not opted in: reuse an existing folder under `docs/`, else kebab-case from description | `docs/notification-mark-as-read/` |
+| feature folder | yes | the registry's feature ID, via the active-feature precondition — not opted in: reuse an existing folder for this change, else kebab-case `<name>` from description | `notification-mark-as-read` |
 | `templates/compositions/quick-dev-spec.yaml` | yes | framework | structural template for the spec |
-| project paths | yes | `project.toml` `[project.paths]` | `requirements_package` |
+| project paths and stage config | yes | `project.toml` `[project.paths]`, `[stages.requirements]`, `[[project.repos]]`; `features.toml` `repos` when opted in | `requirements_package` |
 
 ## Outputs
 
@@ -20,7 +20,7 @@
 
 ## Side effects
 
-- Creates the feature folder if it does not exist
+- Creates the requirements-stage quick-dev directory if it does not exist (`references/ai-principles/feature-precondition.md` § Quick-dev layout)
 - Initializes the change tracker if missing
 - Writes the spec to disk (unless trivial, in which case the spec stays inline in the conversation)
 

@@ -2,11 +2,11 @@
 
 ## Trigger phrase
 
-> "Plan the quick change for `docs/notification-mark-as-read/quick-dev-package/`."
+> "Plan the quick change `notification-mark-as-read`."
 
 ## What the skill did
 
-1. Loaded the agreed spec; confirmed no markers remain.
+1. Loaded the agreed spec from `.framework-output/requirements/notification-mark-as-read/`; confirmed no markers remain.
 2. Orientation: read `src/components/NotificationCard.tsx`,
    `src/components/__tests__/NotificationCard.test.tsx`,
    `src/api/endpoints.ts`. Identified the existing PATCH client utility,
@@ -19,7 +19,8 @@
 5. Populated the reduced increment shape.
 6. Clarity gate: passed. No markers, all sections, file paths specified,
    AC mappings (AC1–AC4) present, no speculative work.
-7. Wrote `notification-mark-as-read-quick-dev-plan.md`.
+7. Wrote `.framework-output/implementation/notification-mark-as-read/notification-mark-as-read-quick-dev-plan.md` —
+   the planning-stage directory, resolved from `project.toml`.
 8. User confirmed.
 
 ## What it produced
@@ -67,5 +68,4 @@ show the button; failures surface a toast and leave state unchanged.
 
 > "Plan ready and approved. Recommend invoking `execute-quick-change`:
 >
-> *'Execute the quick change in
-> `docs/notification-mark-as-read/quick-dev-package/`.'*"
+> *'Execute the quick change `notification-mark-as-read`.'*"

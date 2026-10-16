@@ -6,9 +6,9 @@
 
 ## What the skill did
 
-1. Inferred feature name `notification-mark-as-read`. No existing
-   `docs/notification-mark-as-read/`. Confirmed with user, created
-   `docs/notification-mark-as-read/quick-dev-package/`.
+1. No `features.toml`, so inferred the name `notification-mark-as-read`.
+   No existing quick-dev files for it (legacy-tree check clean). Confirmed
+   the name with the user.
 2. Read Linear ticket NOT-142 — captured UX notes (button label "Mark as
    read", behavior "removes button after success", placement "top-right of
    each card") and one open question ("what about already-read notifications?").
@@ -18,8 +18,10 @@
 5. Inserted one `[NEEDS CLARIFICATION]` marker for the existing-notifications
    question. User answered: hide the button on already-read notifications.
 6. Removed the marker, finalized the spec.
-7. Wrote `docs/notification-mark-as-read/quick-dev-package/notification-mark-as-read-quick-dev-spec.md`.
-8. Initialized `CHANGE-TRACKER.md`.
+7. Resolved the requirements-stage directory from `project.toml` (legacy
+   mode, default `[project.paths]`) — no question asked — and wrote
+   `.framework-output/requirements/notification-mark-as-read/notification-mark-as-read-quick-dev-spec.md`.
+8. Initialized `CHANGE-TRACKER.md` beside the spec.
 9. User confirmed the spec is accurate.
 
 ## What it produced
@@ -77,4 +79,4 @@ repeated review of identical notifications. Linear ticket NOT-142.
 
 > "Spec on disk and confirmed. Recommend invoking `plan-quick-change` next:
 >
-> *'Plan the quick change for `docs/notification-mark-as-read/quick-dev-package/`.'*"
+> *'Plan the quick change `notification-mark-as-read`.'*"
