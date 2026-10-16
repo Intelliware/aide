@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.7.5` |
+| Current artifact version | `2.7.6` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,26 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.7.6` — 2026-10-16
+
+The install runbook now says where to install A.I.D.E., both for single-repo projects
+(including monorepos) and for projects split across several repos. Until now it defined
+the workspace root only as "the folder the install is run from", with no guidance on
+which folder that should be.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Addition | docs | `INSTRUCTIONS.md` (new § 0) | Added *Choose where to install*. Single repo (including monorepos): the agent asks the user whether to install into the repo itself or into a separate workspace repo (e.g. `<project>-workspace`) with its own `.code-workspace` file. Multi-repo: use the existing workspace repo if you can commit to it; otherwise create a sibling repo with its own `.code-workspace` file, leaving the existing one untouched; installing into one of the application repos is allowed if the user chooses it, but not recommended. If the agent can't tell which case applies, it asks the user. The agent confirms the chosen folder with the user before starting. Existing section numbers are unchanged. | branch `kosta` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.5`. Documentation only: no change to install steps, file
+layout, skills or schemas.
+
+---
 
 ### `2.7.5` — 2026-10-09
 
