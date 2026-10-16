@@ -8,7 +8,7 @@
 |---|---|
 | Artifact | A.I.D.E. — release stream |
 | Artifact type | project-change-log |
-| Current artifact version | `2.7.5` |
+| Current artifact version | `2.8.0` |
 | Versioning convention | Semver (MAJOR.MINOR.PATCH) |
 | Stage / Skill of record | (project-level — managed by `create-pr` step 6 going forward) |
 
@@ -51,6 +51,45 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 ---
 
 ## Change Log
+
+### `2.8.0` — 2026-10-16
+
+`navigate-knowledge-base`'s two contract documents had drifted apart: the solution-context
+and profile flags landed in `SKILL.md` only, while `references/INPUTS-OUTPUTS.md` kept a
+pre-solution-context cap rule and tier order that contradicted it. `SKILL.md` now owns the
+tier order and the cap rule; the reference owns the per-flag detail and score weights and
+points back to `SKILL.md` for ranking. A new validator check stops the same drift recurring
+in any skill. The Python scripts now state their Python 3.11+ requirement (for `tomllib`)
+and fail with a clear message on older interpreters.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | **Check P — Inputs flag parity.** Every `--flag` in the first column of a `SKILL.md` `## Inputs` table must also appear in that skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table. `SKILL.md` may list a subset; the reference is the full contract. Hard error. Regression tests in `test_validate.py` and `test-validate.js`. | branch `mm/navigator-docs-sync` | ☐ Pending |
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Source Update | skills | `knowledge-base/navigate-knowledge-base/SKILL.md` | Step 6 ranking adds the `seed` tier; the cap applies to the seed, primary, one-hop and two-hop tiers only, so cross-cutting pointers no longer compete for slots. `--include-stale` added to Inputs and applied before the cap. Step 2 names the 0.3 inclusion threshold. Return format is a ranked list (the unused `--format` flag is dropped). | branch `mm/navigator-docs-sync` | ☐ Pending |
+| 2 | 2026-10-16 | Source Update | validator | `scripts/validate.py`, `scripts/build-registry.py`, `scripts/test_validate.py` | Docstrings state the Python 3.11+ requirement for `tomllib`. `validate.py --project-toml` / `--features-toml` and `test_validate.py` exit with a version message on older interpreters; `build-registry.py` warns instead of silently skipping `framework.toml` and add-on manifests. Default `validate.py` checks still run on 3.9+. | branch `mm/navigator-docs-sync` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Correction | skills | `knowledge-base/navigate-knowledge-base/references/INPUTS-OUTPUTS.md` | Said cross-cutting pointers count toward `--max-components` and ranked cross-cutting above two-hop, contradicting `SKILL.md`; omitted `--include-solution-context`, `--profile`, `--profile-subkind` and the `solution-context` / `ai-rules` / `operations` tiers. Now matches `SKILL.md` and defers tier order to it. | branch `mm/navigator-docs-sync` | ☐ Pending |
+| 2 | 2026-10-16 | Correction | skills | `knowledge-base/navigate-knowledge-base/references/EXAMPLE.md` | The cap-and-rank walkthrough miscounted candidates, left a mid-trace "re-sort" correction in place, and named a dropped component that its own table kept. Rewritten to the current rules; the cross-cutting pointer is returned after the capped components. | branch `mm/navigator-docs-sync` | ☐ Pending |
+
+#### Branch Dependency
+
+Minor release on top of `2.7.5`. No `project.toml` or KB changes are required. Callers of
+`navigate-knowledge-base` may now receive a cross-cutting pointer in addition to the full
+component cap, rather than in place of the last component. Running the Python validator
+suite needs Python 3.11+.
+
+---
 
 ### `2.7.5` — 2026-10-09
 
