@@ -97,11 +97,71 @@ these drifts recurring. The Python scripts now state their Python 3.11+ requirem
 
 #### Branch Dependency
 
-Minor release on top of `2.7.5`. No `project.toml` or KB changes are required. Callers of
+Minor release on top of `2.7.7`. No `project.toml` or KB changes are required. Callers of
 `navigate-knowledge-base` may now receive a cross-cutting pointer in addition to the full
 component cap, rather than in place of the last component. Existing KBs keep their
 `NAVIGATE.md` until rebuilt; the new selection rule applies to KBs built from this version.
 Running the Python validator suite needs Python 3.11+.
+
+---
+
+### `2.7.7` — 2026-10-16
+
+Projects without `features.toml` now reach the path mapping they depend on. Skills
+spell every path in the opted-in form, and the table that converts those paths for a
+not-opted-in project lives in `feature-precondition.md` § *Not opted in* — but 17
+skills, and the precondition's own Mode A step 1, told agents the precondition was a
+no-op without `features.toml`, so they never saw the table and guessed where to write.
+Every consumer now skips only feature resolution, and a validator arm keeps the old
+line from returning.
+
+#### Changed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-13 | Source Update | references | `references/ai-principles/feature-precondition.md` § *Not opted in* | States that keeping the split `docs/<name>/` working tree for not-opted-in projects is deliberate — the layout they were promised — and that adding `features.toml` is how a project gets one directory per stage. | branch `mm/no-op-fix` | ☐ Pending |
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-14 | Addition | validator | `scripts/validate.py`, `scripts/validate.js`, `scripts/test_validate.py`, `scripts/test-validate.js` | Check **N1e**: rejects "no-op" inside any `## Precondition — active feature` section, outside fenced blocks. The hooks precondition's "no-op" is unaffected. Reject and section-scope tests in both suites. | branch `jc/precondition-followups` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-13 | Correction | skills | 16 `SKILL.md` files across requirements, design, planning, execution, quality and quick-dev | The active-feature precondition said "if `features.toml` is absent, this is a no-op". It now says to skip feature resolution but still map paths per § *Not opted in*. `create-requirements-package`'s output table gains its not-opted-in paths. | branch `mm/no-op-fix` | ☐ Pending |
+| 2 | 2026-10-14 | Correction | skills | `execution/create-pr/SKILL.md` | The 17th consumer, missed by the fix above: same no-op wording, same opted-in-only `{project.paths.implementation_package}/{feature-id}/` read. Now matches the other 16. | branch `jc/precondition-followups` | ☐ Pending |
+| 3 | 2026-10-14 | Correction | references | `references/ai-principles/feature-precondition.md` Mode A step 1 | "If `features.toml` is absent, proceed as today. Stop here." stopped an agent following Mode A — and Mode B, which inherits it — before § *Not opted in*. Step 1 now skips steps 2–4 only and points to § *Not opted in* (or *Quick-dev layout*). | branch `jc/precondition-followups` | ☐ Pending |
+| 4 | 2026-10-14 | Correction | skills | `quality/review-test-failures/SKILL.md` | Rewrapped the one overlong line in the active-feature precondition to match the paragraph's 90-column wrap. | branch `jc/precondition-followups` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.6`. **Projects without `features.toml`** now have their
+opted-in path spellings mapped through § *Not opted in* by every feature-scoped skill,
+which is what 2.7.0 specified; no layout changes. Opted-in projects see no change. No
+`project.toml` or `features.toml` edits are required.
+
+---
+
+### `2.7.6` — 2026-10-16
+
+The install runbook now says where to install A.I.D.E., both for single-repo projects
+(including monorepos) and for projects split across several repos. Until now it defined
+the workspace root only as "the folder the install is run from", with no guidance on
+which folder that should be.
+
+#### Added
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Addition | docs | `INSTRUCTIONS.md` (new § 0) | Added *Choose where to install*. Single repo (including monorepos): the agent asks the user whether to install into the repo itself or into a separate workspace repo (e.g. `<project>-workspace`) with its own `.code-workspace` file. Multi-repo: use the existing workspace repo if you can commit to it; otherwise create a sibling repo with its own `.code-workspace` file, leaving the existing one untouched; installing into one of the application repos is allowed if the user chooses it, but not recommended. If the agent can't tell which case applies, it asks the user. The agent confirms the chosen folder with the user before starting. Existing section numbers are unchanged. | branch `kosta` | ☐ Pending |
+
+#### Branch Dependency
+
+Patch release on top of `2.7.5`. Documentation only: no change to install steps, file
+layout, skills or schemas.
 
 ---
 

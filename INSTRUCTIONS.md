@@ -10,6 +10,25 @@
 
 ---
 
+## 0. Choose where to install
+
+AIDE installs into one folder, the **workspace root**. First work out which case applies. If you can't tell, ask the user.
+
+**Single repo (including monorepos):** all the project's code is in one git repo. Ask the user which they prefer:
+
+- **Install into the repo itself.** Simplest; AIDE's files are committed alongside the code.
+- **Create a separate workspace repo** (e.g. `<project>-workspace`, or a variant if that name is taken) and install there. Give it a `.code-workspace` file that lists itself and the existing repo (`../<repo>`). Suits teams that want AIDE's files (hundreds of them) kept out of the code repo, reviewed separately, or under different access rules.
+
+**Multi-repo:** the code is spread across several git repos (e.g. a `.code-workspace` file lists several folders, or the parent folder holds several repos). Choose like this:
+
+1. **Use the existing workspace repo** (the one that holds the `.code-workspace` file or ties the other repos together) if you are allowed to commit to it. This is the default.
+2. **Otherwise, create a new sibling repo** (e.g. `<project>-workspace`, or a variant if that name is taken) and install there. Do the same if the workspace repo is closely reviewed (AIDE adds hundreds of files) or if AIDE's documents need different access rules. Give the new repo its own `.code-workspace` file that lists itself and the other repos (`../<repo>`); leave the existing one untouched.
+3. **Installing into one of the application repos** (API, web, database, etc.) is possible but not recommended: AIDE's documents cover the whole project, so they'd sit in one repo's history and reviews. Only do this if the user chooses it.
+
+Run the install from the chosen folder. Before starting, confirm the folder with the user.
+
+---
+
 ## 1. Inputs
 
 **Ask the user whether the AIDE framework is already available on the local machine, using the following options:**

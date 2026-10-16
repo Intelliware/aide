@@ -864,6 +864,43 @@ class TestFeatureSegmentGuardrail(unittest.TestCase):
             f"N1d should exempt a fenced `docs/checkout/design-package/`.\noutput:\n{out}",
         )
 
+    def test_n1e_reject_no_op_feature_precondition(self) -> None:
+        """N1e — a no-op precondition skips the not-opted-in path mapping."""
+        self._write_skill_doc(
+            "## Precondition — active feature\n\n"
+            "Follow `feature-precondition.md` Mode B. If `features.toml` is absent, "
+            "this is a no-op."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertNotEqual(
+            proc.returncode, 0,
+            f"N1e should reject a no-op feature precondition.\noutput:\n{out}",
+        )
+        self.assertIn("calls the not-opted-in case a no-op", out)
+
+    def test_n1e_scoped_to_the_feature_precondition_section(self) -> None:
+        """The hooks precondition's "no-op" is correct and must not trip N1e."""
+        self._write_skill_doc(
+            "## Precondition — active feature\n\n"
+            "If `features.toml` is absent, skip feature resolution, but still map "
+            "paths per § *Not opted in*.\n\n"
+            "## Precondition — hooks\n\n"
+            "If no hooks exist, this is a no-op."
+        )
+        try:
+            proc = run_validate()
+        finally:
+            self.SKILL_DOC.unlink()
+        out = proc.stdout + proc.stderr
+        self.assertEqual(
+            proc.returncode, 0,
+            f"N1e must only scan the active-feature precondition.\noutput:\n{out}",
+        )
+
     def test_accept_feature_placeholder_outside_artifact_paths(self) -> None:
         """`<feature>` stays legal in prose, scope IDs, and documented source trees.
 

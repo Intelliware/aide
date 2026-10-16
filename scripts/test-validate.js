@@ -1013,6 +1013,42 @@ test('Check N1d — fenced migration guidance is exempt', () => {
   );
 });
 
+// N1e — a no-op precondition skips the not-opted-in path mapping.
+test('Check N1e — reject a no-op active-feature precondition', () => {
+  writeN1Doc(
+    '## Precondition — active feature\n\n' +
+    'Follow `feature-precondition.md` Mode B. If `features.toml` is absent, this is a no-op.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  const out = proc.stdout + proc.stderr;
+  assertNotEqual(proc.returncode, 0, `N1e should reject a no-op precondition.\noutput:\n${out}`);
+  assertIn('calls the not-opted-in case a no-op', out, `output missing the N1e complaint.\noutput:\n${out}`);
+});
+
+test('Check N1e — the hooks precondition may still say no-op', () => {
+  writeN1Doc(
+    '## Precondition — active feature\n\n' +
+    'If `features.toml` is absent, skip feature resolution, but still map paths per § *Not opted in*.\n\n' +
+    '## Precondition — hooks\n\n' +
+    'If no hooks exist, this is a no-op.'
+  );
+  let proc;
+  try {
+    proc = runValidate();
+  } finally {
+    fs.unlinkSync(CHECK_N1_DOC);
+  }
+  assertEqual(
+    proc.returncode, 0,
+    `N1e must only scan the active-feature precondition.\noutput:\n${proc.stdout + proc.stderr}`
+  );
+});
+
 test('Check N1 — <feature> stays legal in prose, scope IDs and documented source trees', () => {
   writeN1Doc(
     'Ask "List the next behavior for <feature>." Scope IDs use `<feature>:<sub-scope>`. ' +
