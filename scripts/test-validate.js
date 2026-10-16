@@ -580,7 +580,7 @@ test('Check P — a default run reports Check P', () => {
   );
 });
 
-test('Check P — reject a SKILL.md flag missing from INPUTS-OUTPUTS.md', () => {
+test('Check P — warn on a SKILL.md flag missing from INPUTS-OUTPUTS.md', () => {
   fs.mkdirSync(path.dirname(CHECK_P_FIXTURE_IO), { recursive: true });
   fs.writeFileSync(
     CHECK_P_FIXTURE,
@@ -635,12 +635,12 @@ test('Check P — reject a SKILL.md flag missing from INPUTS-OUTPUTS.md', () => 
     fs.rmdirSync(CHECK_P_FIXTURE_DIR);
   }
   const out = proc.stdout + proc.stderr;
-  assertNotEqual(
+  assertEqual(
     proc.returncode, 0,
-    `validator should reject a SKILL.md flag missing from INPUTS-OUTPUTS.md.\noutput:\n${out}`
+    `Check P is a warning; the run must still pass.\noutput:\n${out}`
   );
   const rel = path.relative(REPO_ROOT, CHECK_P_FIXTURE);
-  assertIn(`${rel}: Inputs flag \`--undocumented\` is missing`, out, `output missing parity error.\noutput:\n${out}`);
+  assertIn(`WARN   ${rel}: Inputs flag \`--undocumented\` is missing`, out, `output missing parity warning.\noutput:\n${out}`);
   // SKILL.md may list a subset — a reference-only flag is not an error.
   assert(!out.includes('`--reference-only`'), `reference-only flag should not be reported.\noutput:\n${out}`);
   assert(!out.includes('`--documented` is missing'), `documented flag should not be reported.\noutput:\n${out}`);

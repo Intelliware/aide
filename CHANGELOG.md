@@ -66,7 +66,7 @@ and fail with a clear message on older interpreters.
 
 | # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
 |---|---|---|---|---|---|---|---|
-| 1 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | **Check P — Inputs flag parity.** Every `--flag` in the first column of a `SKILL.md` `## Inputs` table must also appear in that skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table. `SKILL.md` may list a subset; the reference is the full contract. Hard error. Regression tests in `test_validate.py` and `test-validate.js`. | branch `mm/navigator-docs-sync` | ☐ Pending |
+| 1 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` | **Check P — Inputs flag parity.** Every `--flag` in the first column of a `SKILL.md` `## Inputs` table must also appear in that skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table. `SKILL.md` may list a subset; the reference is the full contract. Warning, not error: it parses markdown tables, so a formatting change can misfire. Regression tests in `test_validate.py` and `test-validate.js`. | branch `mm/navigator-docs-sync` | ☐ Pending |
 
 #### Changed
 

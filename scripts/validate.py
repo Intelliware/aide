@@ -66,7 +66,6 @@ Hard errors fail the run (exit 1):
     mode (N2).
   - A SKILL.md missing the `## Precondition — hooks` heading or the
     hook-runtime.md citation (O).
-  - A SKILL.md Inputs flag missing from its INPUTS-OUTPUTS.md Inputs table (P).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
 
@@ -791,7 +790,8 @@ def check_p() -> tuple[list[str], list[str]]:
     MUST also appear in the reference's `## Inputs` table — otherwise the two
     drift, as navigate-knowledge-base's did when the solution-context and
     profile flags landed in SKILL.md only. Skills without both an Inputs
-    section in each file are out of scope.
+    section in each file are out of scope. Findings are warnings, not errors:
+    the check parses markdown tables, so a formatting change can misfire.
     """
     errors: list[str] = []
     warnings: list[str] = []
@@ -808,7 +808,7 @@ def check_p() -> tuple[list[str], list[str]]:
         rel = skill_md.relative_to(REPO_ROOT)
         io_rel = io_md.relative_to(REPO_ROOT)
         for flag in sorted(skill_flags - io_flags):
-            errors.append(
+            warnings.append(
                 f"{rel}: Inputs flag `{flag}` is missing from {io_rel} `## Inputs` — "
                 f"the reference must document every flag SKILL.md names."
             )

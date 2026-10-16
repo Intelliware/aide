@@ -482,12 +482,12 @@ class TestInputsFlagParity(unittest.TestCase):
             self.FIXTURE_PATH.unlink()
             self.FIXTURE_DIR.rmdir()
         out = proc.stdout + proc.stderr
-        self.assertNotEqual(
+        self.assertEqual(
             proc.returncode, 0,
-            f"validator should reject a SKILL.md flag missing from INPUTS-OUTPUTS.md.\noutput:\n{out}",
+            f"Check P is a warning; the run must still pass.\noutput:\n{out}",
         )
         rel = str(self.FIXTURE_PATH.relative_to(REPO_ROOT))
-        self.assertIn(f"{rel}: Inputs flag `--undocumented` is missing", out)
+        self.assertIn(f"WARN   {rel}: Inputs flag `--undocumented` is missing", out)
         # SKILL.md may list a subset — a reference-only flag is not an error.
         self.assertNotIn("`--reference-only`", out)
         self.assertNotIn("`--documented` is missing", out)

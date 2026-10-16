@@ -33,7 +33,8 @@
  *      SKILL.md `## Inputs` table must also appear in that skill's
  *      `references/INPUTS-OUTPUTS.md` `## Inputs` table. SKILL.md may list a
  *      subset; the reference is the full contract. Prevents a flag added to
- *      SKILL.md from never reaching the reference doc.
+ *      SKILL.md from never reaching the reference doc. Soft warning — it
+ *      parses markdown tables, so a formatting change can misfire.
  *   M. `{paths.<key>}` / `{project.paths.<key>}` token resolution — every such
  *      reference under `.agents/skills/` and `templates/compositions/` must
  *      name a key actually declared in `[project.paths]` (config/SCHEMAS.md
@@ -69,7 +70,6 @@
  *     mode (N2).
  *   - A SKILL.md missing the `## Precondition — hooks` heading or the
  *     hook-runtime.md citation (O).
- *   - A SKILL.md Inputs flag missing from its INPUTS-OUTPUTS.md Inputs table (P).
  *
  * Everything else is a soft warning (does not fail). Stdlib-only.
  */
@@ -927,7 +927,9 @@ function inputsFlags(text) {
 
 // P — Inputs flag parity. See validate.py:check_p for the full rationale.
 // SKILL.md may list a subset of inputs, but every `--flag` it names must also
-// appear in references/INPUTS-OUTPUTS.md's `## Inputs` table.
+// appear in references/INPUTS-OUTPUTS.md's `## Inputs` table. Findings are
+// warnings, not errors: the check parses markdown tables, so a formatting
+// change can misfire.
 function checkP() {
   const errors = [];
   const warnings = [];
@@ -946,7 +948,7 @@ function checkP() {
     const rel = path.relative(REPO_ROOT, skillMd);
     const ioRel = path.relative(REPO_ROOT, ioMd);
     for (const flag of [...skillFlags].filter(f => !ioFlags.has(f)).sort()) {
-      errors.push(`${rel}: Inputs flag \`${flag}\` is missing from ${ioRel} \`## Inputs\` — the reference must document every flag SKILL.md names.`);
+      warnings.push(`${rel}: Inputs flag \`${flag}\` is missing from ${ioRel} \`## Inputs\` — the reference must document every flag SKILL.md names.`);
     }
   }
 
