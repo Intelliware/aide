@@ -54,39 +54,54 @@ Standard change-log block taxonomy. Project-level changelog maps these to Keep-a
 
 ### `2.8.0` — 2026-10-16
 
-Every framework skill that selects knowledge-base components now does so through
-`navigate-knowledge-base`. Until now several skills described the selection themselves —
-requirements discovery did its own Capability Index lookup, `execute-increments` read "the
-components the increment touches" without saying how, and quick-dev never read the KB at
-all — so they lost the navigator's graph walk, cap, and `shared/` tiers. The navigator
-gains `--from-paths` so skills holding file paths (a diff, a bug's stack trace) resolve
-owning components the same way `update-knowledge-base` does. New validator Check Q warns
-when a stage skill reads KB components without naming the navigator.
+Knowledge-base component selection is consistent end to end. Every framework skill that
+selects KB components now does so through `navigate-knowledge-base`. Until now several
+skills described the selection themselves: requirements discovery did its own Capability
+Index lookup, `execute-increments` read "the components the increment touches" without
+saying how, and quick-dev never read the KB at all. They lost the navigator's graph walk,
+cap, and `shared/` tiers. The navigator gains `--from-paths`, so skills holding file paths
+(a diff, a bug's stack trace) resolve owning components the same way
+`update-knowledge-base` does. The navigator's own two contract documents had also drifted
+apart: `SKILL.md` now owns the tier order and cap rule, and `references/INPUTS-OUTPUTS.md`
+owns the per-flag detail and score weights. Two new validator checks, both warnings, catch
+these drifts recurring. The Python scripts now state their Python 3.11+ requirement (for
+`tomllib`) and fail with a clear message on older interpreters.
 
 #### Added
 
 | # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
 |---|---|---|---|---|---|---|---|
 | 1 | 2026-10-16 | Addition | skills | `knowledge-base/navigate-knowledge-base/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`) | `--from-paths` input: matches file paths against component `paths:` globs and `source_doc` using `update-knowledge-base` step 01's rules; hits enter the `seed` tier, unowned paths come back as `unmatched`. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 2 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` + both test suites | Check Q — KB navigator routing. A skill file outside `knowledge-base/` that reads `{paths.knowledge_base_path}/components` or the Capability Index without naming `navigate-knowledge-base` gets a warning. Soft by design (phrase heuristic); `validate: allow-direct-kb-read` suppresses it. The JS `--summary-md` report now also includes Check O's section. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 2 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` + both test suites | **Check P — Inputs flag parity.** Every `--flag` in the first column of a `SKILL.md` `## Inputs` table must also appear in that skill's `references/INPUTS-OUTPUTS.md` `## Inputs` table. `SKILL.md` may list a subset; the reference is the full contract. Warning, not error: it parses markdown tables, so a formatting change can misfire. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 3 | 2026-10-16 | Addition | validator | `scripts/validate.py`, `scripts/validate.js` + both test suites | **Check Q — KB navigator routing.** A skill file outside `knowledge-base/` that reads `{paths.knowledge_base_path}/components` or the Capability Index without naming `navigate-knowledge-base` gets a warning. Soft by design (phrase heuristic); `validate: allow-direct-kb-read` suppresses it. The JS `--summary-md` report now also includes the Check O, P, and Q sections. | branch `mm/kb-consistency-fixes` | ☐ Pending |
 
 #### Changed
 
 | # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
 |---|---|---|---|---|---|---|---|
-| 1 | 2026-10-16 | Source Update | skills | `requirements/create-requirements-package/references/discovery-workflow.md` | KB integration invokes the navigator instead of a hand-rolled Capability Index lookup, states which tiers to read, and falls back to `ARCHITECTURE.md` § 1–4 on an empty result. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 2 | 2026-10-16 | Source Update | skills | `execution/execute-increments/steps/01-load-increment.md`, `steps/06-status-update.md` | Step 01 invokes the navigator, seeded from the design's component IDs or the increment's Goal and Plan. Step 06 resolves affected components with `--from-paths` and reports unowned paths. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 3 | 2026-10-16 | Source Update | skills | `execution/manage-bugs/references/log-mode.md` | `affected-components` resolved via `--from-paths` when the bug names files or routes. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 4 | 2026-10-16 | Source Update | skills | `quick-dev/plan-quick-change/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`, `steps/01-orient.md`), `quick-dev/README.md` | Orientation queries the navigator (frontmatter + § 3 only) before reading source; more than two `one-hop` components needing change triggers the escape hatch. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 5 | 2026-10-16 | Source Update | skills | `design/create-design-package/references/c4-diagrams.md` | C4 reuse draws on `ARCHITECTURE.md` § 5 and the navigator's components instead of globbing `components/`. | branch `mm/kb-consistency-fixes` | ☐ Pending |
-| 6 | 2026-10-16 | Source Update | skills | `knowledge-base/build-knowledge-base/steps/07-emit-navigate-md.md` | The emitted `NAVIGATE.md` selection rule drops the "inline equivalent" allowance: framework skills always invoke the navigator; only an agent without A.I.D.E. follows its full procedure by hand. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 1 | 2026-10-16 | Source Update | skills | `knowledge-base/navigate-knowledge-base/SKILL.md` | Step 6 ranking adds the `seed` tier; the cap applies to the seed, primary, one-hop and two-hop tiers only, so cross-cutting pointers no longer compete for slots. `--include-stale` added to Inputs and applied before the cap. Step 2 names the 0.3 inclusion threshold. Return format is a ranked list (the unused `--format` flag is dropped). | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 2 | 2026-10-16 | Source Update | skills | `requirements/create-requirements-package/references/discovery-workflow.md` | KB integration invokes the navigator instead of a hand-rolled Capability Index lookup, states which tiers to read, and falls back to `ARCHITECTURE.md` § 1–4 on an empty result. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 3 | 2026-10-16 | Source Update | skills | `execution/execute-increments/steps/01-load-increment.md`, `steps/06-status-update.md` | Step 01 invokes the navigator, seeded from the design's component IDs or the increment's Goal and Plan. Step 06 resolves affected components with `--from-paths` and reports unowned paths. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 4 | 2026-10-16 | Source Update | skills | `execution/manage-bugs/references/log-mode.md` | `affected-components` resolved via `--from-paths` when the bug names files or routes. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 5 | 2026-10-16 | Source Update | skills | `quick-dev/plan-quick-change/` (`SKILL.md`, `references/INPUTS-OUTPUTS.md`, `steps/01-orient.md`), `quick-dev/README.md` | Orientation queries the navigator (frontmatter + § 3 only) before reading source; more than two `one-hop` components needing change triggers the escape hatch. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 6 | 2026-10-16 | Source Update | skills | `design/create-design-package/references/c4-diagrams.md` | C4 reuse draws on `ARCHITECTURE.md` § 5 and the navigator's components instead of globbing `components/`. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 7 | 2026-10-16 | Source Update | skills | `knowledge-base/build-knowledge-base/steps/07-emit-navigate-md.md` | The emitted `NAVIGATE.md` selection rule drops the "inline equivalent" allowance: framework skills always invoke the navigator; only an agent without A.I.D.E. follows its full procedure by hand. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 8 | 2026-10-16 | Source Update | validator | `scripts/validate.py`, `scripts/build-registry.py`, `scripts/test_validate.py` | Docstrings state the Python 3.11+ requirement for `tomllib`. `validate.py --project-toml` / `--features-toml` and `test_validate.py` exit with a version message on older interpreters; `build-registry.py` warns instead of silently skipping `framework.toml` and add-on manifests. Default `validate.py` checks still run on 3.9+. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+
+#### Fixed
+
+| # | Date | Change Type | Parts Affected | Section / File | Description | Source Version | Verified |
+|---|---|---|---|---|---|---|---|
+| 1 | 2026-10-16 | Correction | skills | `knowledge-base/navigate-knowledge-base/references/INPUTS-OUTPUTS.md` | Said cross-cutting pointers count toward `--max-components` and ranked cross-cutting above two-hop, contradicting `SKILL.md`; omitted `--include-solution-context`, `--profile`, `--profile-subkind` and the `solution-context` / `ai-rules` / `operations` tiers. Now matches `SKILL.md` and defers tier order to it. | branch `mm/kb-consistency-fixes` | ☐ Pending |
+| 2 | 2026-10-16 | Correction | skills | `knowledge-base/navigate-knowledge-base/references/EXAMPLE.md` | The cap-and-rank walkthrough miscounted candidates, left a mid-trace "re-sort" correction in place, and named a dropped component that its own table kept. Rewritten to the current rules; the cross-cutting pointer is returned after the capped components. | branch `mm/kb-consistency-fixes` | ☐ Pending |
 
 #### Branch Dependency
 
-Minor release on top of `2.7.5`. No `project.toml` edits required. Existing KBs keep their
+Minor release on top of `2.7.5`. No `project.toml` or KB changes are required. Callers of
+`navigate-knowledge-base` may now receive a cross-cutting pointer in addition to the full
+component cap, rather than in place of the last component. Existing KBs keep their
 `NAVIGATE.md` until rebuilt; the new selection rule applies to KBs built from this version.
-Overlaps `mm/navigator-docs-sync` on the navigator's `SKILL.md` / `INPUTS-OUTPUTS.md` and on
-both validators — whichever merges second resolves the conflict.
+Running the Python validator suite needs Python 3.11+.
 
 ---
 

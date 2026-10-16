@@ -74,6 +74,11 @@ Hard errors fail the run (exit 1):
     hook-runtime.md citation (O).
 
 Everything else is a soft warning (does not fail). Stdlib-only.
+
+Python version: the default checks run on Python 3.9+. The fixture modes
+`--project-toml` (Check I) and `--features-toml` (Check N2) parse TOML with
+the stdlib `tomllib` and require Python 3.11+; on older interpreters they
+exit with an error naming the version found.
 """
 from __future__ import annotations
 
@@ -759,6 +764,59 @@ def check_o() -> tuple[list[str], list[str]]:
             errors.append(
                 f"{rel}: does not reference `{HOOK_RUNTIME_REF}` — "
                 f"bound skills MUST cite the hook execution contract."
+            )
+    return errors, warnings
+
+
+INPUTS_SECTION_RE = re.compile(r"^## Inputs\b[^\n]*\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
+INPUT_FLAG_RE = re.compile(r"`(--[a-z][a-z0-9-]*)")
+
+
+def _inputs_flags(text: str) -> set[str] | None:
+    """Flags named in the first column of the `## Inputs` table, or None if
+    the file has no `## Inputs` section."""
+    m = INPUTS_SECTION_RE.search(text)
+    if not m:
+        return None
+    flags: set[str] = set()
+    for line in m.group(1).splitlines():
+        if line.startswith("|"):
+            cells = line.split("|")
+            if len(cells) > 1:
+                flags.update(INPUT_FLAG_RE.findall(cells[1]))
+    return flags
+
+
+def check_p() -> tuple[list[str], list[str]]:
+    """P — Inputs flag parity between SKILL.md and INPUTS-OUTPUTS.md.
+
+    SKILL.md carries the inputs an agent needs at invocation; the
+    `references/INPUTS-OUTPUTS.md` trio member is the full contract. SKILL.md
+    may list a subset, but every `--flag` it names in its `## Inputs` table
+    MUST also appear in the reference's `## Inputs` table — otherwise the two
+    drift, as navigate-knowledge-base's did when the solution-context and
+    profile flags landed in SKILL.md only. Skills without both an Inputs
+    section in each file are out of scope. Findings are warnings, not errors:
+    the check parses markdown tables, so a formatting change can misfire.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    if not SKILLS_ROOT.is_dir():
+        return errors, warnings
+    for skill_md in sorted(SKILLS_ROOT.rglob("SKILL.md")):
+        io_md = skill_md.parent / "references" / "INPUTS-OUTPUTS.md"
+        if not io_md.is_file():
+            continue
+        skill_flags = _inputs_flags(skill_md.read_text(encoding="utf-8"))
+        io_flags = _inputs_flags(io_md.read_text(encoding="utf-8"))
+        if skill_flags is None or io_flags is None:
+            continue
+        rel = skill_md.relative_to(REPO_ROOT)
+        io_rel = io_md.relative_to(REPO_ROOT)
+        for flag in sorted(skill_flags - io_flags):
+            warnings.append(
+                f"{rel}: Inputs flag `{flag}` is missing from {io_rel} `## Inputs` — "
+                f"the reference must document every flag SKILL.md names."
             )
     return errors, warnings
 
@@ -1612,6 +1670,15 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if (args.features_toml or args.project_toml) and sys.version_info < (3, 11):
+        found = ".".join(str(n) for n in sys.version_info[:3])
+        print(
+            f"validate.py: --project-toml / --features-toml need Python 3.11+ "
+            f"(stdlib tomllib); found {found}.",
+            file=sys.stderr,
+        )
+        return 1
+
     # The fixture modes below are mutually exclusive early returns, so their
     # order is precedence, not presentation — which is why it does not follow
     # the check letters. `--features-toml` must be tested before
@@ -1667,6 +1734,7 @@ def main() -> int:
     m_err, m_warn = check_m()
     n1_err, n1_warn = check_n1()
     o_err, o_warn = check_o()
+    p_err, p_warn = check_p()
     q_err, q_warn = check_q()
     f_err, f_warn, f_out = check_f()
 
@@ -1683,6 +1751,7 @@ def main() -> int:
         "Check M — {paths.<key>} token resolution",
         "Check N1 — feature-segment / retired-placeholder guardrail",
         "Check O — hook-runtime binding (all skills)",
+        "Check P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)",
         "Check Q — KB navigator routing",
         "Check F — build-registry.py output",
     ]
@@ -1690,7 +1759,7 @@ def main() -> int:
         (a_err, a_warn), (b_err, b_warn), (c_err, c_warn), (d_err, d_warn),
         (e_err, e_warn), (g_err, g_warn), (h_err, h_warn), (j_err, j_warn),
         (l_err, l_warn), (m_err, m_warn), (n1_err, n1_warn), (o_err, o_warn),
-        (q_err, q_warn), (f_err, f_warn),
+        (p_err, p_warn), (q_err, q_warn), (f_err, f_warn),
     ]
     for t, (e, w) in zip(titles, bundles):
         _print(t, e, w)
@@ -1723,6 +1792,7 @@ def main() -> int:
                  "M — {paths.<key>} token resolution",
                  "N1 — feature-segment / retired-placeholder guardrail",
                  "O — hook-runtime binding (all skills)",
+                 "P — Inputs flag parity (SKILL.md / INPUTS-OUTPUTS.md)",
                  "Q — KB navigator routing",
                  "F — build-registry sanity"],
                 bundles,

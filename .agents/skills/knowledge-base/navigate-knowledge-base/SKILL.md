@@ -67,6 +67,7 @@ read top-N, read frontmatter only, etc.).
 | `--include-cross-cutting` (bool, default true) | Caller | No |
 | `--include-solution-context` (bool, default true) | Caller | No — when true, surfaces matching `shared/{solution-context,ai-rules,operations}/` leaves as their own tiers, ranked below component matches and exempt from `--max-components` |
 | `--depth` (one-hop / two-hop, default one-hop) | Caller | No |
+| `--include-stale` (bool, default true) | Caller | No — when false, drops components whose `last_verified_against_commit` is behind their repo HEAD and whose `paths` overlap recent diffs; requires source-repo access |
 | `--profile` (`default` / `test-suite`, default `default`) | Caller | No — when `test-suite`, biases ranking toward `kind: test-suite` components produced by `reverse-engineer-test-suite`; consumed by the merged quality stage's skills (`create-quality-package`, `execute-quality-increments`, `audit-quality-coverage`, `review-test-failures`) |
 | `--profile-subkind` (one of `runner` / `shared-utilities` / `fixtures` / `marker-vocabulary` / `feature-inventory` / `environment-matrix` / `ci-surface` / `ownership`, repeatable) | Caller | No — restricts a `--profile=test-suite` query to the named subkind(s); used by e.g. `review-test-failures` to fetch `shared-utilities` only for locator lookup |
 
@@ -88,8 +89,11 @@ This skill is single-shot — no `steps/` folder. The flow is:
      string and by overlap with each contributing component's
      `triggers` (read just the frontmatter via grep to avoid loading
      bodies).
-   - Keep components with score ≥ a threshold; tie-break by repo
-     primary-status.
+   - Keep components with combined score ≥ 0.3 (signal weights:
+     `references/INPUTS-OUTPUTS.md` § Selection algorithm); tie-break by
+     repo primary-status.
+   - With `--seed-component-id`, skip this lookup; the seed component
+     enters as the `seed` tier and graph expansion starts from it.
 
    **Path resolution (`--from-paths`).** Instead of capability lookup, grep
    every component's frontmatter `paths:` and `source_doc`, and match each
@@ -121,18 +125,22 @@ This skill is single-shot — no `steps/` folder. The flow is:
    calling skill should load components first and reach for the human-grounded
    leaves when the feature is project-scoped — an architecture, compliance, or
    ownership question — rather than a single-component change.
-6. **Cap and rank.** Apply `--max-components` cap. Ranking:
-   primary-match > one-hop neighbour > two-hop neighbour > cross-cutting >
-   solution-context > ai-rules > operations. Within a tier, rank by
-   trigger-overlap score.
+6. **Cap and rank.** If `--include-stale=false`, drop stale components first.
+   Then apply the `--max-components` cap. Ranking:
+   seed > primary-match > one-hop neighbour > two-hop neighbour >
+   cross-cutting > solution-context > ai-rules > operations. Within a tier,
+   rank by score.
 
-   **The cap applies to components only.** Solution-context, ai-rules, and
-   operations entries are returned alongside the capped component list without
+   **The cap applies to components only** — the seed, primary, one-hop, and
+   two-hop tiers. Cross-cutting, solution-context, ai-rules, and operations
+   entries are returned alongside the capped component list without
    competing for slots — those leaves are small and cheap, and letting them
-   displace a component would trade the answer for its context.
-7. **Return.** Output is a JSON-or-markdown list of:
+   displace a component would trade the answer for its context. When the cap
+   is below the primary count, drop the neighbour tiers and return the top-N
+   primaries.
+7. **Return.** Output is a ranked list of:
    - `path` (relative to KB root, ready for read).
-   - `tier` (`primary` / `one-hop` / `two-hop` / `cross-cutting` /
+   - `tier` (`seed` / `primary` / `one-hop` / `two-hop` / `cross-cutting` /
      `solution-context` / `ai-rules` / `operations`).
    - `why` (one sentence — which trigger / capability / edge selected it).
 
